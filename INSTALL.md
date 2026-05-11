@@ -110,14 +110,24 @@ The updater preserves the existing installed metadata language when possible. To
 
 The skill list descriptions in Codex are static metadata files. Switch them in the installed project, then restart or reopen the Codex conversation:
 
-```powershell
-node scripts\set-ae-language.mjs --lang zh-CN
+Agent-assisted switch from the target project:
+
+```text
+Fetch and follow the AE skill language switch instructions from https://raw.githubusercontent.com/YaoGUanquan/codex-ai-agent-engine/main/INSTALL.md and switch this project to zh-CN.
 ```
 
-or:
+Switch to English:
 
-```bash
-node scripts/set-ae-language.mjs --lang bilingual
+```text
+Fetch and follow the AE skill language switch instructions from https://raw.githubusercontent.com/YaoGUanquan/codex-ai-agent-engine/main/INSTALL.md and switch this project to en.
+```
+
+For bilingual metadata, replace the final `zh-CN` or `en` with `bilingual`.
+
+```powershell
+node scripts\set-ae-language.mjs --lang zh-CN
+node scripts\set-ae-language.mjs --lang en
+node scripts\set-ae-language.mjs --lang bilingual
 ```
 
 ## Verify

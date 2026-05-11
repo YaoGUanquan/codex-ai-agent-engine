@@ -172,6 +172,22 @@ node scripts/ae-tools.mjs recovery
 
 The skill list descriptions shown by Codex come from static metadata. They cannot switch live inside an already-open Codex conversation, but you can rewrite the project-local metadata and then restart or reopen the project conversation.
 
+You can also ask a Codex agent in the target project to switch the language for you.
+
+Switch to Chinese:
+
+```text
+Fetch and follow the AE skill language switch instructions from https://raw.githubusercontent.com/YaoGUanquan/codex-ai-agent-engine/main/INSTALL.md and switch this project to zh-CN.
+```
+
+Switch to English:
+
+```text
+Fetch and follow the AE skill language switch instructions from https://raw.githubusercontent.com/YaoGUanquan/codex-ai-agent-engine/main/INSTALL.md and switch this project to en.
+```
+
+For bilingual metadata, replace the final `zh-CN` or `en` with `bilingual`.
+
 From an installed target project:
 
 ```bash
