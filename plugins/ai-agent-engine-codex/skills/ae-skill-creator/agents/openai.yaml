@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE 创建技能"
+  short_description: "按 Codex skill 规范创建或更新可复用技能"
+  default_prompt: "使用 $ae-skill-creator 帮我创建一个新的 Codex skill。"
+policy:
+  allow_implicit_invocation: true

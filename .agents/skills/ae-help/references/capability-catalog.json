@@ -1,0 +1,165 @@
+{
+  "source": {
+    "name": "AI Agent Engine",
+    "url": "https://gitee.com/jiangqiang1996/ai-agent-engine",
+    "observedCommit": "597b409eb3a53f78aa86861783e282ae6ffedcb5",
+    "license": "GPL-2.0-only"
+  },
+  "codexPort": {
+    "name": "ai-agent-engine-codex",
+    "goal": "在 Codex 中提供 AE 风格的软件工程工作流入口。",
+    "runtimeBoundary": "Codex 使用 skill 承载工作流；/ae-* 是兼容标签，不是 OpenCode 式自动 slash command。"
+  },
+  "skills": [
+    {
+      "name": "ae-help",
+      "entry": "/ae-help",
+      "target": "查看当前能力",
+      "purpose": "查看本地 AE for Codex 已安装的工作流入口和使用边界。",
+      "script": "node scripts/ae-tools.mjs help [query]"
+    },
+    {
+      "name": "ae-ideate",
+      "entry": "/ae-ideate",
+      "target": "想法生成",
+      "purpose": "围绕模糊目标生成候选方向、取舍、风险和下一步澄清问题。"
+    },
+    {
+      "name": "ae-brainstorm",
+      "entry": "/ae-brainstorm",
+      "target": "需求澄清",
+      "purpose": "澄清需求、范围、验收标准和开放问题，必要时沉淀需求文档。",
+      "artifactPath": "docs/ae/brainstorms"
+    },
+    {
+      "name": "ae-lfg",
+      "entry": "/ae-lfg",
+      "target": "默认全流程",
+      "purpose": "从需求澄清到计划、实现、审查、验证和交付证据的完整流程。",
+      "script": "node scripts/ae-tools.mjs recovery"
+    },
+    {
+      "name": "ae-plan",
+      "entry": "/ae-plan",
+      "target": "计划生成",
+      "purpose": "在编码前生成可执行的实现计划，包含单元、文件、测试、风险和回滚。",
+      "artifactPath": "docs/ae/plans"
+    },
+    {
+      "name": "ae-work",
+      "entry": "/ae-work",
+      "target": "计划执行",
+      "purpose": "在 Git/工作区安全检查后执行计划或窄范围任务，并保留验证证据。",
+      "script": "node scripts/ae-tools.mjs task-analyze --mode plan --plan <path>"
+    },
+    {
+      "name": "ae-refactor",
+      "entry": "/ae-refactor",
+      "target": "重构计划",
+      "purpose": "为行为保持型重构生成计划、风险、验证和回滚策略。"
+    },
+    {
+      "name": "ae-review",
+      "entry": "/ae-review",
+      "target": "代码或文档审查",
+      "purpose": "执行分层代码或文档审查，按严重度优先输出问题。",
+      "script": "node scripts/ae-tools.mjs gate --workflow work --checkpoint final"
+    },
+    {
+      "name": "ae-doc-humanize",
+      "entry": "/ae-doc-humanize",
+      "target": "文档人读化",
+      "purpose": "把结构化或生硬内容改写成人类可读文档，同时保持事实不变。"
+    },
+    {
+      "name": "ae-doc-structure",
+      "entry": "/ae-doc-structure",
+      "target": "文档结构化",
+      "purpose": "把散乱文本整理成结构化需求、计划、决策、检查清单或交付文档。"
+    },
+    {
+      "name": "ae-frontend-design",
+      "entry": "/ae-frontend-design",
+      "target": "前端初版",
+      "purpose": "按现有前端栈和设计约束交付可用的前端初版体验。"
+    },
+    {
+      "name": "ae-test-browser",
+      "entry": "/ae-test-browser",
+      "target": "浏览器验收",
+      "purpose": "使用真实浏览器执行 UI 流程、截图、控制台和网络验收。"
+    },
+    {
+      "name": "ae-sql",
+      "entry": "/ae-sql",
+      "target": "数据库操作",
+      "purpose": "生成、审查或执行 SQL。默认只读；写入和生产操作必须显式确认。"
+    },
+    {
+      "name": "ae-swagger-parser",
+      "entry": "/ae-swagger-parser",
+      "target": "Swagger/OpenAPI 摘要",
+      "purpose": "摘要或过滤 Swagger/OpenAPI JSON/YAML 规格，不调用业务接口。",
+      "script": "node scripts/ae-tools.mjs swagger <source> [method:GET] [path:/x] [tag:users] [keyword:login] [mode:detail]"
+    },
+    {
+      "name": "ae-handoff",
+      "entry": "/ae-handoff",
+      "target": "会话交接",
+      "purpose": "沉淀当前任务状态、文件、命令、结论、阻塞点和下一步。"
+    },
+    {
+      "name": "ae-prompt-optimize",
+      "entry": "/ae-prompt-optimize",
+      "target": "提示词优化",
+      "purpose": "把用户目标改写为更可执行、边界更清晰的 Codex 提示词。"
+    },
+    {
+      "name": "ae-save-experience",
+      "entry": "/ae-save-experience",
+      "target": "经验沉淀",
+      "purpose": "把本次问题、决策、命令、验证和注意事项沉淀为项目经验。"
+    },
+    {
+      "name": "ae-skill-creator",
+      "entry": "/ae-skill-creator",
+      "target": "创建技能",
+      "purpose": "创建或更新 Codex skill，遵循本地 skill-creator 规范。"
+    },
+    {
+      "name": "ae-agent-creator",
+      "entry": "/ae-agent-creator",
+      "target": "创建代理",
+      "purpose": "创建 Codex 可使用的代理提示、UI 元数据或委派模板；不声称 OpenCode 代理自动注册。"
+    },
+    {
+      "name": "ae-update",
+      "entry": "/ae-update",
+      "target": "更新 AE 插件",
+      "purpose": "从指定 Git 仓库更新项目本地 AE for Codex 安装，需要网络和 Git 操作确认。",
+      "script": "node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-agent-engine.git --branch main"
+    },
+    {
+      "name": "ae-language",
+      "entry": "/ae-language",
+      "target": "切换显示语言",
+      "purpose": "切换本地 AE skill 列表显示语言为中文、英文或双语。",
+      "script": "node scripts/set-ae-language.mjs --lang zh-CN|en|bilingual"
+    }
+  ],
+  "artifactPaths": {
+    "requirements": "docs/ae/brainstorms",
+    "ideas": "docs/ae/brainstorms",
+    "plans": "docs/ae/plans",
+    "reviews": "docs/ae/reviews",
+    "gates": "docs/ae/gates",
+    "handoffs": "docs/ae/handoffs",
+    "experience": "docs/ae/experience",
+    "solutions": "docs/ae/solutions"
+  },
+  "notes": [
+    "/ae-* 是兼容标签；Codex 中可靠触发方式是 skill 名称，例如“用 ae-work 执行这个计划”。",
+    "涉及 Git 写入、网络、依赖安装、数据库写入、生产环境或破坏性操作时，必须按 Codex 审批规则执行。",
+    "OpenCode 的自动 slash command、agent registry、session navigation 和全局规则注入不是 Codex 原生能力。"
+  ]
+}

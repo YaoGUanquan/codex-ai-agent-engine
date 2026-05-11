@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE 需求澄清"
+  short_description: "澄清需求并沉淀验收标准"
+  default_prompt: "使用 $ae-brainstorm 在计划前澄清这个功能想法。"
+policy:
+  allow_implicit_invocation: true

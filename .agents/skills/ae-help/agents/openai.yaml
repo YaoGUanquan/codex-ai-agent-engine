@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE 帮助"
+  short_description: "查看 Codex 中可用的 AE 工作流能力"
+  default_prompt: "使用 $ae-help 查看我应该使用哪个 AE 工作流入口。"
+policy:
+  allow_implicit_invocation: true

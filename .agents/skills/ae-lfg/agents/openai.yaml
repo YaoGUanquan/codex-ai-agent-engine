@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE 全流程"
+  short_description: "从需求到验证交付的完整 AE 流程"
+  default_prompt: "使用 $ae-lfg 将这个软件需求推进到计划、实现、审查和验证。"
+policy:
+  allow_implicit_invocation: true

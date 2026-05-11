@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE 计划执行"
+  short_description: "带 Git 安全检查和验证证据执行计划"
+  default_prompt: "使用 $ae-work 执行这个 AE 计划并提供验证证据。"
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE 创建代理"
+  short_description: "创建 Codex 可用的代理提示、审查 persona 或委派模板"
+  default_prompt: "使用 $ae-agent-creator 帮我设计一个可复用的代理提示。"
+policy:
+  allow_implicit_invocation: true

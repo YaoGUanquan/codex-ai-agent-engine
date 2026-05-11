@@ -1,0 +1,10 @@
+GPL-2.0-only
+
+This project is a Codex-native adaptation inspired by AI Agent Engine:
+https://gitee.com/jiangqiang1996/ai-agent-engine
+
+The upstream project is licensed under GPL-2.0. This repository keeps the same
+license expression for the adaptation. See NOTICE.md for attribution.
+
+For the full GPL-2.0 license text, see:
+https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt

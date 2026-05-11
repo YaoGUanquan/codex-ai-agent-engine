@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE 审查"
+  short_description: "分层审查代码和文档，优先输出问题"
+  default_prompt: "使用 $ae-review 审查我当前的变更并优先报告风险。"
+policy:
+  allow_implicit_invocation: true

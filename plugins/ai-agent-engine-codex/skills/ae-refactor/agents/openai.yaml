@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE 重构计划"
+  short_description: "为行为保持型重构生成分步计划、验证和回滚策略"
+  default_prompt: "使用 $ae-refactor 为这段代码生成一个安全的重构计划。"
+policy:
+  allow_implicit_invocation: true

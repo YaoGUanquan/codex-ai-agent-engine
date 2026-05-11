@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE 前端初版"
+  short_description: "按现有前端栈交付可用的首版界面体验"
+  default_prompt: "使用 $ae-frontend-design 为这个功能做一个可用的前端初版。"
+policy:
+  allow_implicit_invocation: true

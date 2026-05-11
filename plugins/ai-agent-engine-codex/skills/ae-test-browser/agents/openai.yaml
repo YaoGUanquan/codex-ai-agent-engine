@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE 浏览器验收"
+  short_description: "用真实浏览器检查 UI 流程、截图、控制台和网络"
+  default_prompt: "使用 $ae-test-browser 验收这个页面的主要流程。"
+policy:
+  allow_implicit_invocation: true
