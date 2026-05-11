@@ -62,6 +62,13 @@ const metadata = {
     promptEn: 'Use $ae-help to show which AE workflow entrypoint I should use.',
     promptZh: '使用 $ae-help 查看我应该使用哪个 AE 工作流入口。',
   },
+  'ae-init': {
+    display: { en: 'AE Init', zh: 'AE 初始化' },
+    en: 'Initialize project docs, archive rules, and AI memory',
+    zh: '初始化项目文档、归档规则和 AI 记忆库',
+    promptEn: 'Use $ae-init to initialize AGENTS.md, docs/ae, docs/00-process, and docs/08-ai-memory for this project.',
+    promptZh: '使用 $ae-init 初始化当前项目的 AGENTS.md、docs/ae、docs/00-process 和 docs/08-ai-memory。',
+  },
   'ae-ideate': {
     display: { en: 'AE Ideate', zh: 'AE 想法生成' },
     en: 'Generate comparable solution options, tradeoffs, and next steps',

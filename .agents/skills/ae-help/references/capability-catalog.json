@@ -19,6 +19,14 @@
       "script": "node scripts/ae-tools.mjs help [query]"
     },
     {
+      "name": "ae-init",
+      "entry": "/ae-init",
+      "target": "初始化项目",
+      "purpose": "初始化当前项目的 AGENTS.md、AE 工作流目录、过程文档、归档规则、UTF-8 中文处理规则和长期 AI 记忆库。",
+      "script": "node scripts/ae-tools.mjs init [--lang en|zh-CN|bilingual] [--dry-run] [--force]",
+      "artifactPath": "AGENTS.md, docs/ae, docs/00-process, docs/08-ai-memory"
+    },
+    {
       "name": "ae-ideate",
       "entry": "/ae-ideate",
       "target": "想法生成",
@@ -150,7 +158,7 @@
   "commands": [
     {
       "name": "init",
-      "purpose": "Initialize project-aware Codex guidance, AE workflow folders, work-style process docs, archive rules, UTF-8 Chinese handling rules, and durable AI memory docs.",
+      "purpose": "初始化当前项目的 Codex 项目说明、AE 工作流目录、过程文档、归档规则、UTF-8 中文处理规则和长期 AI 记忆库文档。",
       "script": "node scripts/ae-tools.mjs init [--lang en|zh-CN|bilingual] [--dry-run] [--force]"
     }
   ],
