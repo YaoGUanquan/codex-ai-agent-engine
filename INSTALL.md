@@ -19,7 +19,8 @@ Steps for the Codex agent:
 3. Clone this repository into the temporary directory.
 4. Run the project installer with `--target` pointing to the current project. Add `--lang zh-CN` or `--lang bilingual` if the user wants non-English skill list metadata.
 5. Remove the temporary directory.
-6. Tell the user to restart/reopen the Codex conversation for this project.
+6. Run `node scripts/ae-tools.mjs init` if the user wants the target project to get `AGENTS.md`, `docs/ae`, `docs/00-process`, `docs/08-ai-memory`, archive rules, and UTF-8 Chinese handling rules.
+7. Tell the user to restart/reopen the Codex conversation for this project.
 
 PowerShell implementation:
 
@@ -30,6 +31,7 @@ $tmp = Join-Path $env:TEMP ('ae-codex-install-' + [guid]::NewGuid().ToString('N'
 git clone --depth 1 $repo $tmp
 node (Join-Path $tmp 'scripts\install-project.mjs') --target $target
 Remove-Item -Recurse -Force $tmp
+node scripts\ae-tools.mjs init
 ```
 
 Chinese metadata variant:
@@ -47,6 +49,7 @@ tmp="$(mktemp -d)"
 git clone --depth 1 "$repo" "$tmp"
 node "$tmp/scripts/install-project.mjs" --target "$target"
 rm -rf "$tmp"
+node scripts/ae-tools.mjs init
 ```
 
 Chinese metadata variant:
@@ -56,6 +59,28 @@ node "$tmp/scripts/install-project.mjs" --target "$target" --lang zh-CN
 ```
 
 Supported metadata languages are `en`, `zh-CN`, and `bilingual`.
+
+## Initialize Project Docs and AI Memory
+
+After install, run this inside the target project:
+
+```bash
+node scripts/ae-tools.mjs init
+```
+
+This creates `AGENTS.md`, AE workflow artifact folders under `docs/ae`, process/archive folders under `docs/00-process`, and durable project memory files under `docs/08-ai-memory`. It also keeps `docs/ai-memory` as a compatibility pointer for earlier scaffolds.
+
+Generated text files are written as UTF-8. On Windows, PowerShell can render valid UTF-8 Chinese text as garbled output, so verify with explicit UTF-8 reads or Git diff before rewriting files.
+
+Useful variants:
+
+```bash
+node scripts/ae-tools.mjs init --lang zh-CN
+node scripts/ae-tools.mjs init --dry-run
+node scripts/ae-tools.mjs init --force
+```
+
+Existing files are skipped by default. `--force` only overwrites files that contain the AE init marker.
 
 ## Global Install
 
@@ -99,6 +124,7 @@ After install/update, run:
 
 ```bash
 node scripts/ae-tools.mjs help
+node scripts/ae-tools.mjs init --dry-run
 ```
 
 Expected result: a capability list containing `ae-help`, `ae-lfg`, `ae-brainstorm`, `ae-plan`, `ae-work`, `ae-review`, and `ae-swagger-parser`.
