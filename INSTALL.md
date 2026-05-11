@@ -18,8 +18,8 @@ Steps for the Codex agent:
 2. Create a temporary directory outside the target project.
 3. Clone this repository into the temporary directory.
 4. Run the project installer with `--target` pointing to the current project. Add `--lang zh-CN` or `--lang bilingual` if the user wants non-English skill list metadata.
-5. Remove the temporary directory.
-6. Run `node scripts/ae-tools.mjs init` if the user wants the target project to get `AGENTS.md`, `docs/ae`, `docs/00-process`, `docs/08-ai-memory`, archive rules, and UTF-8 Chinese handling rules.
+5. Run `node scripts/ae-tools.mjs init` from the target project if the user wants the target project to get `AGENTS.md`, `docs/ae`, `docs/00-process`, `docs/08-ai-memory`, archive rules, and UTF-8 Chinese handling rules.
+6. Remove the temporary directory.
 7. Tell the user to restart/reopen the Codex conversation for this project.
 
 PowerShell implementation:
@@ -30,8 +30,10 @@ $target = (Get-Location).Path
 $tmp = Join-Path $env:TEMP ('ae-codex-install-' + [guid]::NewGuid().ToString('N'))
 git clone --depth 1 $repo $tmp
 node (Join-Path $tmp 'scripts\install-project.mjs') --target $target
-Remove-Item -Recurse -Force $tmp
+Push-Location $target
 node scripts\ae-tools.mjs init
+Pop-Location
+Remove-Item -Recurse -Force $tmp
 ```
 
 Chinese metadata variant:
@@ -48,8 +50,8 @@ target="$PWD"
 tmp="$(mktemp -d)"
 git clone --depth 1 "$repo" "$tmp"
 node "$tmp/scripts/install-project.mjs" --target "$target"
+(cd "$target" && node scripts/ae-tools.mjs init)
 rm -rf "$tmp"
-node scripts/ae-tools.mjs init
 ```
 
 Chinese metadata variant:
