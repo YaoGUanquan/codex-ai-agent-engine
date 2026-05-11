@@ -40,6 +40,12 @@ The helper CLI is available through:
 node scripts/ae-tools.mjs help
 ```
 
+Initialize project-aware guidance, process docs, archive rules, and memory folders:
+
+```bash
+node scripts/ae-tools.mjs init
+```
+
 ## Project-Local Installation
 
 Recommended: install into a target Codex project only. This avoids changing global Codex state.
@@ -82,6 +88,14 @@ The installer writes only inside the target project:
 - `scripts/set-ae-language.mjs`
 
 Then restart or reopen the Codex conversation for that project.
+
+After installation, initialize the target project's AE docs, process/archive docs, UTF-8 encoding rules, and durable memory scaffold:
+
+```bash
+node scripts/ae-tools.mjs init
+```
+
+Use `--lang zh-CN` or `--lang bilingual` if you want Chinese or bilingual template text. Existing files are not overwritten unless `--force` is used and the file contains the AE init marker. Generated text files are written as UTF-8; on Windows, verify Chinese text with explicit UTF-8 reads before treating console garbling as file corruption.
 
 ## Skill List Language
 
@@ -197,6 +211,12 @@ Inspect OpenAPI:
 node scripts/ae-tools.mjs swagger openapi.json method:POST keyword:login mode:detail
 ```
 
+Initialize a project memory and archive scaffold:
+
+```bash
+node scripts/ae-tools.mjs init --lang zh-CN
+```
+
 ## Repository Layout
 
 ```text
@@ -205,6 +225,10 @@ plugins/ai-agent-engine-codex/   # Codex plugin package
 scripts/ae-tools.mjs             # Root helper wrapper
 scripts/install-project.mjs      # Project-local installer
 docs/codex-port-analysis.md      # Migration analysis from OpenCode to Codex
+docs/ae/                         # AE workflow artifacts after init
+docs/00-process/                 # Active process notes, templates, archive rules after init
+docs/08-ai-memory/               # Durable project AI memory after init
+docs/ai-memory/                  # Compatibility pointer after init
 ```
 
 ## Important Boundaries

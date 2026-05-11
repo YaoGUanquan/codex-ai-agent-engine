@@ -147,6 +147,13 @@
       "script": "node scripts/set-ae-language.mjs --lang zh-CN|en|bilingual"
     }
   ],
+  "commands": [
+    {
+      "name": "init",
+      "purpose": "Initialize project-aware Codex guidance, AE workflow folders, work-style process docs, archive rules, UTF-8 Chinese handling rules, and durable AI memory docs.",
+      "script": "node scripts/ae-tools.mjs init [--lang en|zh-CN|bilingual] [--dry-run] [--force]"
+    }
+  ],
   "artifactPaths": {
     "requirements": "docs/ae/brainstorms",
     "ideas": "docs/ae/brainstorms",
@@ -155,7 +162,11 @@
     "gates": "docs/ae/gates",
     "handoffs": "docs/ae/handoffs",
     "experience": "docs/ae/experience",
-    "solutions": "docs/ae/solutions"
+    "solutions": "docs/ae/solutions",
+    "workflowArchive": "docs/00-process/archive",
+    "topicArchive": "docs/99-archive",
+    "aiMemory": "docs/08-ai-memory",
+    "aiMemoryCompat": "docs/ai-memory"
   },
   "notes": [
     "/ae-* 是兼容标签；Codex 中可靠触发方式是 skill 名称，例如“用 ae-work 执行这个计划”。",

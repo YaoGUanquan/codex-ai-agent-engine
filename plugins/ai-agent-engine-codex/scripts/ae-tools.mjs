@@ -8,6 +8,7 @@ const __dirname = dirname(__filename)
 const pluginRoot = resolve(__dirname, '..')
 const catalogPath = join(pluginRoot, 'skills', 'ae-help', 'references', 'capability-catalog.json')
 const textDecoder = new TextDecoder('utf-8')
+const generatedMarker = '<!-- ae-codex:init managed -->'
 
 const excludedDirs = new Set([
   '.git', 'node_modules', 'dist', 'build', 'coverage', '.cache', '.next', '.nuxt', '__pycache__', '.ae',
@@ -37,6 +38,9 @@ function main() {
       case 'recovery':
         printJson(recovery(process.cwd()))
         break
+      case 'init':
+        printJson(initProject(process.cwd(), args))
+        break
       case 'task-analyze':
         printJson(taskAnalyze(process.cwd(), args))
         break
@@ -47,7 +51,7 @@ function main() {
         printSwagger(args)
         break
       default:
-        throw new Error(`Unknown command: ${command}\nAvailable: help, recovery, task-analyze, gate, swagger`)
+        throw new Error(`Unknown command: ${command}\nAvailable: help, init, recovery, task-analyze, gate, swagger`)
     }
   } catch (error) {
     console.error(formatError(error))
@@ -62,24 +66,30 @@ function printHelp(query) {
     if (!q) return true
     return [skill.name, skill.entry, skill.target, skill.purpose, skill.script, skill.artifactPath].filter(Boolean).join(' ').toLowerCase().includes(q)
   })
+  const commands = (catalog.commands || []).filter((command) => {
+    if (!q) return true
+    return [command.name, command.purpose, command.script].filter(Boolean).join(' ').toLowerCase().includes(q)
+  })
 
   const lines = []
   lines.push('# AI Agent Engine for Codex')
   lines.push('')
   lines.push(`来源参考: ${catalog.source.name} (${catalog.source.observedCommit.slice(0, 7)})`)
   lines.push(`运行边界: ${catalog.codexPort.runtimeBoundary}`)
-  lines.push('')
-  lines.push('## 入口')
-  lines.push('')
-  for (const skill of skills) {
-    const entry = skill.entry || `/${skill.name}`
-    const target = skill.target ? `${skill.target}: ` : ''
-    lines.push(`- ${target}${entry} (${skill.name})`)
-    lines.push(`  说明: ${skill.purpose}`)
-    if (skill.script) lines.push(`  脚本: ${skill.script}`)
-    if (skill.artifactPath) lines.push(`  产物路径: ${skill.artifactPath}`)
+  if (skills.length > 0) {
+    lines.push('')
+    lines.push('## 入口')
+    lines.push('')
+    for (const skill of skills) {
+      const entry = skill.entry || `/${skill.name}`
+      const target = skill.target ? `${skill.target}: ` : ''
+      lines.push(`- ${target}${entry} (${skill.name})`)
+      lines.push(`  说明: ${skill.purpose}`)
+      if (skill.script) lines.push(`  脚本: ${skill.script}`)
+      if (skill.artifactPath) lines.push(`  产物路径: ${skill.artifactPath}`)
+    }
   }
-  if (skills.length === 0) {
+  if (skills.length === 0 && commands.length === 0) {
     lines.push(`没有匹配的 AE 能力: ${query}`)
   }
   lines.push('')
@@ -87,12 +97,767 @@ function printHelp(query) {
   for (const [key, value] of Object.entries(catalog.artifactPaths)) {
     lines.push(`- ${key}: ${value}`)
   }
+  if (commands.length > 0) {
+    lines.push('')
+    lines.push('## CLI Commands')
+    for (const command of commands) {
+      lines.push(`- ${command.name}`)
+      lines.push(`  Purpose: ${command.purpose}`)
+      if (command.script) lines.push(`  Script: ${command.script}`)
+    }
+  }
   lines.push('')
   lines.push('## 说明')
   for (const item of catalog.notes || []) {
     lines.push(`- ${item}`)
   }
   console.log(lines.join('\n'))
+}
+
+function initProject(worktree, args) {
+  const opts = parseOptions(args)
+  const lang = opts.lang || 'en'
+  if (!['en', 'zh-CN', 'bilingual'].includes(lang)) {
+    throw new Error('init --lang must be en, zh-CN, or bilingual')
+  }
+  const dryRun = truthy(opts['dry-run'])
+  const force = truthy(opts.force)
+  const projectContext = detectProjectContext(worktree)
+  const templates = initTemplates(lang, projectContext)
+  const directories = [
+    'docs/ae',
+    'docs/ae/brainstorms',
+    'docs/ae/plans',
+    'docs/ae/reviews',
+    'docs/ae/gates',
+    'docs/ae/handoffs',
+    'docs/ae/experience',
+    'docs/ae/solutions',
+    'docs/ae/archive',
+    'docs/ai-memory',
+    'docs/00-process',
+    'docs/00-process/active',
+    'docs/00-process/archive',
+    'docs/00-process/templates',
+    'docs/01-history',
+    'docs/02-design',
+    'docs/03-analysis',
+    'docs/04-api',
+    'docs/05-reports',
+    'docs/06-sql',
+    'docs/06-sql/migrations',
+    'docs/06-sql/ddl',
+    'docs/06-sql/ad-hoc',
+    'docs/06-sql/archive',
+    'docs/07-test-data',
+    'docs/08-ai-memory',
+    'docs/99-archive',
+  ]
+  const files = [
+    ['AGENTS.md', templates.agents],
+    ['docs/ae/README.md', templates.aeReadme],
+    ['docs/00-process/README.md', templates.processReadme],
+    ['docs/00-process/templates/archive-rules.md', templates.archiveRules],
+    ['docs/00-process/templates/sync-execution-plan-template.md', templates.syncPlanTemplate],
+    ['docs/00-process/templates/encoding-rules.md', templates.encodingRules],
+    ['docs/08-ai-memory/00-index.md', templates.memoryIndex],
+    ['docs/08-ai-memory/01-project-context.md', templates.memoryProjectContext],
+    ['docs/08-ai-memory/02-architecture-boundaries.md', templates.memoryArchitecture],
+    ['docs/08-ai-memory/03-key-workflows.md', templates.memoryKeyWorkflows],
+    ['docs/08-ai-memory/04-known-pitfalls.md', templates.memoryKnownPitfalls],
+    ['docs/08-ai-memory/05-decision-log.md', templates.memoryDecisionLog],
+    ['docs/08-ai-memory/06-agent-maintenance-rules.md', templates.memoryMaintenanceRules],
+    ['docs/08-ai-memory/99-prompt-template.md', templates.memoryPromptTemplate],
+    ['docs/ai-memory/README.md', templates.memoryReadme],
+  ]
+
+  const createdDirectories = []
+  const createdFiles = []
+  const updatedFiles = []
+  const skippedFiles = []
+
+  for (const dir of directories) {
+    const full = safeResolve(worktree, dir)
+    if (!existsSync(full)) {
+      createdDirectories.push(dir)
+      if (!dryRun) mkdirSync(full, { recursive: true })
+    }
+  }
+
+  for (const [path, content] of files) {
+    const full = safeResolve(worktree, path)
+    if (!existsSync(full)) {
+      createdFiles.push(path)
+      if (!dryRun) {
+        mkdirSync(dirname(full), { recursive: true })
+        writeFileSync(full, content, 'utf8')
+      }
+      continue
+    }
+    if (force && isManagedFile(full)) {
+      updatedFiles.push(path)
+      if (!dryRun) writeFileSync(full, content, 'utf8')
+    } else {
+      skippedFiles.push(path)
+    }
+  }
+
+  return {
+    status: dryRun ? 'dry-run' : 'initialized',
+    worktree,
+    lang,
+    force,
+    created_directories: createdDirectories,
+    created_files: createdFiles,
+    updated_files: updatedFiles,
+    skipped_files: skippedFiles,
+    detected_context: projectContext,
+    notes: [
+      'Existing files are not overwritten unless --force is used and the file contains the AE init marker.',
+      'Store AE workflow artifacts under docs/ae, process/archive docs under docs/00-process, and durable AI memory under docs/08-ai-memory.',
+      'Read and write generated Markdown as UTF-8. On Windows, do not trust garbled console rendering until verified with explicit UTF-8 reads.',
+    ],
+  }
+}
+
+function initTemplates(lang, context) {
+  if (lang === 'zh-CN') return zhInitTemplates(context)
+  if (lang === 'bilingual') return bilingualInitTemplates(context)
+  return enInitTemplates(context)
+}
+
+function detectProjectContext(worktree) {
+  const packagePath = join(worktree, 'package.json')
+  const packageJson = existsSync(packagePath) ? readOptionalJson(packagePath) : null
+  const indicators = []
+  const importantPaths = []
+  const scripts = []
+  if (packageJson) {
+    indicators.push('Node.js package.json')
+    if (packageJson.type) indicators.push(`package type: ${packageJson.type}`)
+    for (const [name, command] of Object.entries(packageJson.scripts || {})) {
+      scripts.push(`${name}: ${command}`)
+    }
+  }
+  const pathSignals = [
+    ['pom.xml', 'Maven Java project'],
+    ['build.gradle', 'Gradle project'],
+    ['go.mod', 'Go module'],
+    ['pyproject.toml', 'Python pyproject'],
+    ['Cargo.toml', 'Rust Cargo project'],
+    ['README.md', 'README.md'],
+    ['README.zh-CN.md', 'README.zh-CN.md'],
+    ['.agents', 'project-local Codex agents'],
+    ['plugins', 'plugin directory'],
+    ['scripts', 'scripts directory'],
+    ['src', 'source directory'],
+    ['docs', 'docs directory'],
+  ]
+  for (const [path, label] of pathSignals) {
+    if (existsSync(join(worktree, path))) {
+      indicators.push(label)
+      importantPaths.push(path)
+    }
+  }
+  const repoName = basename(worktree)
+  return {
+    name: packageJson?.name || repoName,
+    description: packageJson?.description || null,
+    indicators: [...new Set(indicators)].slice(0, 20),
+    importantPaths: [...new Set(importantPaths)].slice(0, 20),
+    scripts: scripts.slice(0, 20),
+  }
+}
+
+function readOptionalJson(path) {
+  try {
+    return JSON.parse(readText(path))
+  } catch {
+    return null
+  }
+}
+
+function formatList(items, fallback = 'TBD') {
+  if (!items || items.length === 0) return `- ${fallback}`
+  return items.map((item) => `- ${item}`).join('\n')
+}
+
+function enInitTemplates(context) {
+  return {
+    agents: `${generatedMarker}
+# AGENTS.md
+
+## Project Profile
+
+- Project: ${context.name}
+${context.description ? `- Description: ${context.description}\n` : ''}- Detected signals:
+${formatList(context.indicators)}
+- Important paths:
+${formatList(context.importantPaths)}
+
+## Project Rules
+
+- Read existing documentation before changing behavior.
+- Keep changes scoped to the requested task.
+- Prefer the project's existing patterns over new abstractions.
+- Do not overwrite user work or revert unrelated changes.
+- Record AE workflow artifacts under \`docs/ae\`.
+- Record active process notes under \`docs/00-process/active\`.
+- Archive completed process notes under \`docs/00-process/archive/YYYY-MM/<task-name>\` or \`docs/99-archive/YYYY-MM/<topic>\`.
+- Record durable AI memory under \`docs/08-ai-memory\`.
+
+## Encoding Rules
+
+- Read and write text files as UTF-8, preferably UTF-8 without BOM.
+- When Chinese text appears garbled in PowerShell or terminal output, verify with explicit UTF-8 reads before changing content.
+- Do not rewrite a file only to fix console display unless the underlying bytes are confirmed wrong.
+
+## Validation
+
+- Run the narrowest relevant validation before delivery.
+- If validation cannot be run, state the reason and remaining risk.
+`,
+    aeReadme: `${generatedMarker}
+# AE Workflow Artifacts
+
+This directory stores process artifacts created while using AI Agent Engine for Codex.
+
+## Directory Map
+
+- \`brainstorms/\`: requirement clarification and acceptance notes.
+- \`plans/\`: implementation plans.
+- \`reviews/\`: code or document review reports.
+- \`gates/\`: validation and delivery gate evidence.
+- \`handoffs/\`: next-session handoff notes.
+- \`experience/\`: reusable implementation experience.
+- \`solutions/\`: solution comparisons and selected approaches.
+- \`archive/\`: completed or superseded process records.
+
+## Relationship to Project Docs
+
+- Use \`docs/ae\` for AE workflow artifacts and compatibility with AE skills.
+- Use \`docs/00-process\` for active execution notes and archive rules.
+- Use \`docs/08-ai-memory\` for durable cross-session project memory.
+`,
+    memoryReadme: `${generatedMarker}
+# AI Memory Compatibility Note
+
+The canonical durable AI memory location is \`docs/08-ai-memory\`.
+
+This directory is kept as a compatibility pointer for earlier AE init versions. Write new durable memory to \`docs/08-ai-memory\` unless this project explicitly chooses another path.
+`,
+    processReadme: `${generatedMarker}
+# Process Documents
+
+Use this area for task execution notes that need resume, verification, or later archive.
+
+## Directories
+
+- \`active/\`: in-progress execution plans and process notes.
+- \`templates/\`: reusable process templates and archive rules.
+- \`archive/YYYY-MM/<task-name>/\`: completed task archive.
+
+Create active process notes for code changes, SQL/data operations, interface integration, batch file moves, cross-module design, and AI memory updates. Simple read-only answers do not require a process note.
+`,
+    archiveRules: `${generatedMarker}
+# Archive Rules
+
+## Archive Triggers
+
+- The active process note status is \`done\`.
+- Relevant validation has run or the remaining risk is explicitly documented.
+- Any durable memory updates have been checked against \`docs/08-ai-memory/00-index.md\`.
+
+## Archive Locations
+
+- Process archive: \`docs/00-process/archive/YYYY-MM/<task-name>/\`
+- Topic archive: \`docs/99-archive/YYYY-MM/<topic-or-ticket>/\`
+- AE compatibility archive: \`docs/ae/archive/\` may point to the process archive when AE artifacts are involved.
+
+## Archive Contents
+
+- Active process note or plan.
+- Related analysis, design, API, SQL, report, test data, and validation records.
+- A short summary of key commands, SQL, and user-provided outputs when relevant.
+
+## After Archive
+
+- Update the active note with the archive path before moving it, or leave a small index if the project wants one.
+- Update \`docs/08-ai-memory\` only with stable reusable knowledge, not raw task logs.
+`,
+    syncPlanTemplate: `${generatedMarker}
+# Sync Execution Plan
+
+## Basic Info
+
+- Plan Name:
+- Topic/Issue:
+- Created At:
+- Owner:
+- Status: \`in_progress\` / \`blocked\` / \`done\`
+
+## Goal and Scope
+
+- Goal:
+- Scope:
+- Non-goals:
+
+## Steps
+
+| Step | Content | Owner | Validation Command/SQL | Result Summary | Status | User Confirmation |
+|---|---|---|---|---|---|---|
+| 1 |  | Agent/User |  |  | todo | pending |
+| 2 |  | Agent/User |  |  | todo | pending |
+
+## Command and SQL Feedback
+
+- Command outputs:
+- SQL outputs:
+- Exceptions and handling:
+
+## Resume State
+
+- Completed:
+- In progress:
+- Next step:
+- Required input:
+
+## Archive
+
+- Archive time:
+- Archive path: \`docs/00-process/archive/YYYY-MM/<plan-name>/\`
+- Archived files:
+`,
+    encodingRules: `${generatedMarker}
+# Encoding Rules
+
+## Required Encoding
+
+- Use UTF-8 for Markdown, JSON, YAML, SQL, scripts, and generated text files.
+- Prefer UTF-8 without BOM unless a target tool requires BOM.
+- Keep Chinese content in files only after verifying the underlying bytes are UTF-8.
+
+## Windows and PowerShell Notes
+
+- PowerShell console rendering can make valid UTF-8 Chinese text look garbled.
+- For verification, use explicit UTF-8 reads, for example:
+
+\`\`\`powershell
+$OutputEncoding = [System.Text.UTF8Encoding]::new()
+[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new()
+Get-Content -Path .\\AGENTS.md -Encoding utf8 -Raw
+\`\`\`
+
+- Do not trust a garbled terminal preview alone. Check file bytes, Git diff, or explicit UTF-8 output before editing.
+`,
+    memoryIndex: `${generatedMarker}
+# AI Memory Index
+
+## Purpose
+
+- This is the canonical durable AI memory for the project.
+- Store only stable, reusable, cross-session knowledge.
+- Do not store one-off debug logs, transient command output, or unconfirmed guesses.
+
+## Navigation
+
+- \`01-project-context.md\`: project purpose, stack, paths, and local constraints.
+- \`02-architecture-boundaries.md\`: module and responsibility boundaries.
+- \`03-key-workflows.md\`: recurring workflows.
+- \`04-known-pitfalls.md\`: known pitfalls and encoding issues.
+- \`05-decision-log.md\`: durable decisions.
+- \`06-agent-maintenance-rules.md\`: rules for reading and updating memory.
+- \`99-prompt-template.md\`: reusable prompt for initializing or maintaining memory.
+
+## Maintenance Rule
+
+Start by reading this index, then read only the relevant topic files. At task close, decide whether new stable knowledge should be added. If not, say no memory update was needed.
+`,
+    memoryProjectContext: `${generatedMarker}
+# Project Context
+
+## Project
+
+- Name: ${context.name}
+${context.description ? `- Description: ${context.description}\n` : ''}
+## Detected Signals
+
+${formatList(context.indicators)}
+
+## Important Paths
+
+${formatList(context.importantPaths)}
+
+## Useful Scripts
+
+${formatList(context.scripts)}
+`,
+    memoryArchitecture: `${generatedMarker}
+# Architecture Boundaries
+
+Record stable module boundaries, ownership, runtime boundaries, and integration points here.
+`,
+    memoryKeyWorkflows: `${generatedMarker}
+# Key Workflows
+
+Record stable workflows that should be reused across tasks.
+
+## Template
+
+- Workflow:
+- When to use:
+- Steps:
+- Validation:
+- Known risks:
+`,
+    memoryKnownPitfalls: `${generatedMarker}
+# Known Pitfalls
+
+## Encoding
+
+- Chinese text may look garbled in Windows/PowerShell output even when the file is valid UTF-8.
+- Verify with explicit UTF-8 reads before editing generated Markdown.
+`,
+    memoryDecisionLog: `${generatedMarker}
+# Decision Log
+
+Record durable decisions here.
+
+## Template
+
+- Date:
+- Decision:
+- Context:
+- Consequence:
+- Revisit when:
+`,
+    memoryMaintenanceRules: `${generatedMarker}
+# AI Memory Maintenance Rules
+
+## Read Rules
+
+- Read \`00-index.md\` first.
+- Then read only topic files related to the current task.
+- Avoid full memory scans unless the task is broad or ambiguous.
+
+## Update Rules
+
+- Write only stable, long-lived, reusable knowledge.
+- Prefer updating existing topic files over creating new ones.
+- Do not write one-off logs, raw command output, or unverified guesses.
+
+## Task Close Rule
+
+- At task close, decide whether new durable knowledge was created.
+- If yes, update the smallest relevant memory file and mention it in the final response.
+- If no, state that no AI memory update was needed.
+`,
+    memoryPromptTemplate: `${generatedMarker}
+# Prompt Template
+
+Use this when asking an agent to maintain project memory:
+
+\`\`\`text
+Read docs/08-ai-memory/00-index.md first, then only the relevant topic files. Complete the task with the smallest safe change. At the end, decide whether new stable project knowledge should be written back to docs/08-ai-memory. Do not record one-off logs or unconfirmed guesses.
+\`\`\`
+`,
+  }
+}
+
+function zhInitTemplates(context) {
+  return {
+    agents: `${generatedMarker}
+# AGENTS.md
+
+## 项目画像
+
+- 项目：${context.name}
+${context.description ? `- 描述：${context.description}\n` : ''}- 检测信号：
+${formatList(context.indicators, '待补充')}
+- 重要路径：
+${formatList(context.importantPaths, '待补充')}
+
+## 项目规则
+
+- 修改行为前先阅读已有文档。
+- 变更范围保持在当前任务内。
+- 优先沿用项目已有模式，不轻易新增抽象。
+- 不覆盖用户已有工作，不回退无关变更。
+- AE 工作流产物记录在 \`docs/ae\`。
+- 执行中的过程记录放在 \`docs/00-process/active\`。
+- 已完成的过程记录归档到 \`docs/00-process/archive/YYYY-MM/<task-name>\` 或 \`docs/99-archive/YYYY-MM/<topic>\`。
+- 长期 AI 记忆记录在 \`docs/08-ai-memory\`。
+
+## 中文与编码规则
+
+- 文档、JSON、YAML、SQL、脚本和生成文本统一使用 UTF-8，优先 UTF-8 无 BOM。
+- PowerShell 或终端输出中文乱码时，先用显式 UTF-8 读取验证，不要直接改写文件。
+- 不要仅因控制台显示乱码就重写文件，必须先确认文件字节本身确实错误。
+
+## 验证
+
+- 交付前运行最小且相关的验证命令。
+- 如果无法验证，说明原因和剩余风险。
+`,
+    aeReadme: `${generatedMarker}
+# AE 工作流产物
+
+这里存放使用 AI Agent Engine for Codex 时产生的过程文档。
+
+## 目录说明
+
+- \`brainstorms/\`：需求澄清和验收标准。
+- \`plans/\`：实现计划。
+- \`reviews/\`：代码或文档审查报告。
+- \`gates/\`：验证和交付门禁证据。
+- \`handoffs/\`：下次继续工作的交接说明。
+- \`experience/\`：可复用的实现经验。
+- \`solutions/\`：方案比较和选型记录。
+- \`archive/\`：已完成或已废弃的过程记录。
+
+## 与项目文档的关系
+
+- \`docs/ae\` 保留为 AE 技能兼容的工作流产物目录。
+- \`docs/00-process\` 记录执行中的方案、归档规则和可续跑状态。
+- \`docs/08-ai-memory\` 记录跨会话复用的长期项目记忆。
+`,
+    memoryReadme: `${generatedMarker}
+# AI 记忆兼容说明
+
+当前项目长期 AI 记忆的标准目录是 \`docs/08-ai-memory\`。
+
+本目录仅作为早期 AE init 版本的兼容入口。新的长期记忆应写入 \`docs/08-ai-memory\`，除非项目明确另行约定。
+`,
+    processReadme: `${generatedMarker}
+# 过程文档
+
+这里存放需要断点续跑、验证回传或后续归档的任务过程文档。
+
+## 目录说明
+
+- \`active/\`：执行中的同步方案和过程记录。
+- \`templates/\`：过程模板、归档规则和编码规则。
+- \`archive/YYYY-MM/<task-name>/\`：已完成任务归档。
+
+涉及代码修改、SQL/数据操作、接口联调、批量文件移动、跨模块设计、长期 AI 记忆更新时，应创建过程记录。简单只读问答不强制创建。
+`,
+    archiveRules: `${generatedMarker}
+# 文档归档规则
+
+## 归档触发条件
+
+- 执行中的过程记录状态为 \`done\`。
+- 相关验证已经执行，或剩余风险已明确记录。
+- 如产生长期知识，已对照 \`docs/08-ai-memory/00-index.md\` 完成最小必要更新。
+
+## 归档目录
+
+- 过程归档：\`docs/00-process/archive/YYYY-MM/<task-name>/\`
+- 专题归档：\`docs/99-archive/YYYY-MM/<topic-or-ticket>/\`
+- AE 兼容归档：如涉及 AE 产物，\`docs/ae/archive/\` 可保留指向过程归档的说明。
+
+## 归档内容
+
+- 执行中的过程记录或计划文件。
+- 关联分析、设计、API、SQL、报告、测试数据和验证记录。
+- 必要时记录关键命令、SQL 和用户回传输出的摘要。
+
+## 归档后动作
+
+- 移动前在过程记录中写明归档路径，或按项目需要保留简短索引。
+- 只把稳定、可复用、长期有效的结论写入 \`docs/08-ai-memory\`，不要把原始过程日志写入记忆库。
+`,
+    syncPlanTemplate: `${generatedMarker}
+# 同步执行方案
+
+## 基本信息
+
+- 计划名称：
+- 主题/问题编号：
+- 创建时间：
+- 负责人：
+- 当前状态：\`in_progress\` / \`blocked\` / \`done\`
+
+## 目标与范围
+
+- 目标：
+- 范围：
+- 非目标：
+
+## 执行步骤
+
+| 步骤 | 内容 | 执行人 | 验证命令/SQL | 结果摘要 | 状态 | 用户确认 |
+|---|---|---|---|---|---|---|
+| 1 |  | Agent/User |  |  | todo | pending |
+| 2 |  | Agent/User |  |  | todo | pending |
+
+## 命令与 SQL 回传记录
+
+- 命令执行输出：
+- SQL 执行输出：
+- 异常与处理：
+
+## 断点续跑信息
+
+- 已完成步骤：
+- 进行中步骤：
+- 下一步：
+- 继续执行所需输入：
+
+## 完成归档动作
+
+- 归档时间：
+- 归档路径：\`docs/00-process/archive/YYYY-MM/<plan-name>/\`
+- 归档文件清单：
+`,
+    encodingRules: `${generatedMarker}
+# 中文与编码规则
+
+## 统一编码
+
+- Markdown、JSON、YAML、SQL、脚本和生成文本统一使用 UTF-8。
+- 优先使用 UTF-8 无 BOM，除非目标工具明确要求 BOM。
+- 写入中文内容后，应通过显式 UTF-8 读取或 Git diff 验证。
+
+## Windows 与 PowerShell 注意事项
+
+- PowerShell 控制台可能把合法 UTF-8 中文显示成乱码。
+- 验证文件内容时可使用：
+
+\`\`\`powershell
+$OutputEncoding = [System.Text.UTF8Encoding]::new()
+[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new()
+Get-Content -Path .\\AGENTS.md -Encoding utf8 -Raw
+\`\`\`
+
+- 不要只凭乱码预览判断文件损坏；先检查显式 UTF-8 输出、Git diff 或文件字节。
+`,
+    memoryIndex: `${generatedMarker}
+# AI 记忆索引
+
+## 目的
+
+- 这里是当前项目的标准长期 AI 记忆库。
+- 只沉淀稳定、可复用、跨会话仍有价值的知识。
+- 不记录一次性调试日志、临时命令输出或未确认猜测。
+
+## 文件导航
+
+- \`01-project-context.md\`：项目定位、技术栈、路径和本地约束。
+- \`02-architecture-boundaries.md\`：模块边界、职责边界和集成点。
+- \`03-key-workflows.md\`：长期复用的关键流程。
+- \`04-known-pitfalls.md\`：历史坑点、易混淆边界和编码问题。
+- \`05-decision-log.md\`：长期有效的决策。
+- \`06-agent-maintenance-rules.md\`：AI 读取和更新记忆的规则。
+- \`99-prompt-template.md\`：初始化或维护记忆库的提示词模板。
+
+## 维护规则
+
+开始任务时先读本索引，再按主题读取相关文件。任务结束时判断是否产生新的稳定知识；没有则说明本次无需更新 AI 记忆库。
+`,
+    memoryProjectContext: `${generatedMarker}
+# 项目上下文
+
+## 项目
+
+- 名称：${context.name}
+${context.description ? `- 描述：${context.description}\n` : ''}
+## 检测信号
+
+${formatList(context.indicators, '待补充')}
+
+## 重要路径
+
+${formatList(context.importantPaths, '待补充')}
+
+## 可用脚本
+
+${formatList(context.scripts, '待补充')}
+`,
+    memoryArchitecture: `${generatedMarker}
+# 架构边界
+
+记录长期稳定的模块边界、职责边界、运行边界和集成点。
+`,
+    memoryKeyWorkflows: `${generatedMarker}
+# 关键工作流
+
+记录需要跨任务复用的稳定流程。
+
+## 模板
+
+- 工作流：
+- 使用场景：
+- 步骤：
+- 验证：
+- 已知风险：
+`,
+    memoryKnownPitfalls: `${generatedMarker}
+# 已知坑点
+
+## 中文与编码
+
+- Windows/PowerShell 输出可能把合法 UTF-8 中文显示成乱码。
+- 修改生成的 Markdown 前，先用显式 UTF-8 读取验证。
+`,
+    memoryDecisionLog: `${generatedMarker}
+# 决策记录
+
+这里记录长期有效的项目决策。
+
+## 模板
+
+- 日期：
+- 决策：
+- 背景：
+- 影响：
+- 何时重新评估：
+`,
+    memoryMaintenanceRules: `${generatedMarker}
+# AI 记忆维护规则
+
+## 读取规则
+
+- 优先读取 \`00-index.md\`。
+- 再按任务主题读取必要文件。
+- 避免默认全量扫描，除非任务本身很宽或上下文不清。
+
+## 更新规则
+
+- 只写入稳定、长期有效、可复用的信息。
+- 优先更新现有主题文件，主题明显独立时再新建文件。
+- 不写入一次性日志、原始命令输出或未确认猜测。
+
+## 任务结束规则
+
+- 每次任务完成后判断是否形成新的稳定知识。
+- 若有，更新最相关的最小记忆文件，并在最终说明中列出。
+- 若没有，明确说明本次无需更新 AI 记忆库。
+`,
+    memoryPromptTemplate: `${generatedMarker}
+# 提示词模板
+
+要求 agent 维护项目记忆时可使用：
+
+\`\`\`text
+先读取 docs/08-ai-memory/00-index.md，再只读取与当前任务相关的专题文件。用最小安全改动完成任务。结束时判断是否需要把新的稳定项目知识写回 docs/08-ai-memory。不要记录一次性日志、原始命令输出或未确认猜测。
+\`\`\`
+`,
+  }
+}
+
+function bilingualInitTemplates(context) {
+  const en = enInitTemplates(context)
+  const zh = zhInitTemplates(context)
+  return Object.fromEntries(Object.keys(en).map((key) => [key, `${zh[key]}\n\n---\n\n${en[key]}`]))
+}
+
+function isManagedFile(path) {
+  try {
+    return readText(path).includes(generatedMarker)
+  } catch {
+    return false
+  }
 }
 
 function recovery(worktree) {

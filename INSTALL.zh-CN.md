@@ -19,7 +19,8 @@ Codex 代理执行步骤：
 3. 将本仓库 clone 到临时目录。
 4. 运行项目级安装脚本，并把 `--target` 指向当前项目。如果用户希望技能列表显示中文或双语，追加 `--lang zh-CN` 或 `--lang bilingual`。
 5. 删除临时目录。
-6. 提醒用户重启或重新打开当前项目的 Codex 对话。
+6. 如果用户希望初始化当前项目的项目文档和长期记忆，继续执行 `node scripts/ae-tools.mjs init`。
+7. 提醒用户重启或重新打开当前项目的 Codex 对话。
 
 PowerShell 实现：
 
@@ -56,6 +57,24 @@ node "$tmp/scripts/install-project.mjs" --target "$target" --lang zh-CN
 ```
 
 支持的元数据语言：`en`、`zh-CN`、`bilingual`。
+
+## 初始化项目文档和长期记忆
+
+安装到目标项目后，建议再运行：
+
+```bash
+node scripts/ae-tools.mjs init
+```
+
+这个命令会生成 `AGENTS.md`、`docs/ae`、`docs/00-process`、`docs/08-ai-memory`，并保留 `docs/ai-memory` 作为兼容说明入口。
+
+如果需要先检查会创建什么内容，可以先运行：
+
+```bash
+node scripts/ae-tools.mjs init --dry-run --lang zh-CN
+```
+
+生成的中文文档统一按 UTF-8 读写；在 PowerShell 里如果看起来乱码，要先用显式 UTF-8 读取验证，不要直接按控制台显示改写文件。
 
 ## 全局安装
 
