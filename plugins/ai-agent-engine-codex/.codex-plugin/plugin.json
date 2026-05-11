@@ -1,6 +1,6 @@
 {
   "name": "ai-agent-engine-codex",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "面向 Codex 的 AE 风格工程工作流技能，覆盖想法生成、需求澄清、计划、执行、审查、验收、交接和经验沉淀。",
   "author": {
     "name": "AI Agent Engine for Codex maintainers",
@@ -23,7 +23,7 @@
   "interface": {
     "displayName": "AI Agent Engine for Codex",
     "shortDescription": "Codex 中的 AE 中文工程工作流入口",
-    "longDescription": "这是一个面向 Codex 的 AI Agent Engine 工作流适配包，参考 https://gitee.com/jiangqiang1996/ai-agent-engine 的能力模型，提供中文化的想法生成、需求澄清、全流程推进、计划生成、计划执行、重构计划、审查、文档整理、前端初版、浏览器验收、SQL、Swagger/OpenAPI 摘要、会话交接、提示词优化、经验沉淀、技能/代理创建和插件更新入口。/ae-* 名称作为兼容标签，Codex 中可靠触发方式是 skill 名称或明确请求。",
+    "longDescription": "这是一个面向 Codex 的 AI Agent Engine 工作流适配包，参考 https://gitee.com/jiangqiang1996/ai-agent-engine 的能力模型，提供中文化的项目初始化、想法生成、需求澄清、全流程推进、计划生成、计划执行、重构计划、审查、文档整理、前端初版、浏览器验收、SQL、Swagger/OpenAPI 摘要、会话交接、提示词优化、经验沉淀、技能/代理创建和插件更新入口。/ae-* 名称作为兼容标签，Codex 中可靠触发方式是 skill 名称或明确请求。",
     "developerName": "AI Agent Engine for Codex maintainers",
     "category": "Coding",
     "capabilities": [
@@ -36,6 +36,7 @@
     "termsOfServiceURL": "https://openai.com/policies/terms-of-use/",
     "defaultPrompt": [
       "使用 AE 全流程把这个需求推进到验证交付。",
+      "使用 AE 初始化为当前项目创建项目文档和 AI 记忆库。",
       "使用 AE 审查检查我当前的变更。",
       "使用 AE 计划为这个功能生成实现计划。"
     ],

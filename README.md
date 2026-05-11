@@ -1,45 +1,45 @@
 # AI Agent Engine for Codex
 
-AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style engineering workflows into a Codex workspace. It packages Codex skills and local helper scripts for requirement clarification, planning, implementation, review, validation, Swagger/OpenAPI inspection, handoff, and experience capture.
+AI Agent Engine for Codex 是一个面向 Codex 的项目级工程工作流插件。它把 AE 风格的需求澄清、计划、执行、审查、验证、Swagger/OpenAPI 摘要、交接和经验沉淀能力放到当前项目里，通过 Codex skills 和本地脚本运行。
 
-> Reference project: https://gitee.com/jiangqiang1996/ai-agent-engine<br>
-> This repository references the workflow design and capability model of the Gitee AI Agent Engine project above.<br>
-> It is not a direct OpenCode runtime port. It uses Codex skills, project-local plugin files, and local scripts.
+> 参考项目：https://gitee.com/jiangqiang1996/ai-agent-engine<br>
+> 本项目参考了上面这个 Gitee AI Agent Engine 项目的工作流设计和能力模型。<br>
+> 这不是 OpenCode runtime 的直接移植，而是 Codex 原生 skill、项目级插件文件和本地脚本的实现方式。
 
-中文文档: [README.zh-CN.md](README.zh-CN.md)
+English: [README.en.md](README.en.md)
 
-## When To Use It
+## 适用场景
 
-Use this plugin when you want a Codex project to keep repeatable engineering workflows close to the repository:
+当你希望一个 Codex 项目自带可复用工程流程时，可以使用本插件：
 
-- clarify fuzzy requirements before implementation;
-- turn requirements into executable plans;
-- run implementation with Git/worktree safety checks;
-- review code or documents with findings first;
-- keep validation evidence, handoffs, and reusable experience in project docs;
-- initialize project guidance, archive rules, and durable AI memory.
+- 在实现前澄清模糊需求；
+- 把需求拆成可执行计划；
+- 在 Git/worktree 安全检查后执行实现；
+- 以 findings 优先的方式审查代码或文档；
+- 把验证证据、交接说明和可复用经验保存在项目文档中；
+- 初始化项目说明、归档规则和长期 AI 记忆库。
 
-## Quick Start
+## 快速开始
 
-Install the plugin into a target Codex project:
+把插件安装到目标 Codex 项目：
 
 ```bash
 node scripts/install-project.mjs --target /path/to/your/codex-project
 ```
 
-Windows PowerShell:
+Windows PowerShell：
 
 ```powershell
 node scripts\install-project.mjs --target D:\codes\your-project
 ```
 
-Restart or reopen the Codex conversation for that target project, then initialize its AE docs, process archive, UTF-8 rules, and AI memory scaffold from the target project root:
+重启或重新打开目标项目的 Codex 对话，然后在目标项目根目录初始化 AE 文档、过程归档、UTF-8 规则和 AI 记忆库骨架：
 
 ```bash
 node scripts/ae-tools.mjs init
 ```
 
-Useful init variants:
+常用初始化变体：
 
 ```bash
 node scripts/ae-tools.mjs init --lang zh-CN
@@ -47,68 +47,69 @@ node scripts/ae-tools.mjs init --lang bilingual
 node scripts/ae-tools.mjs init --dry-run
 ```
 
-Verify the installed helper:
+验证辅助命令：
 
 ```bash
 node scripts/ae-tools.mjs help
 ```
 
-## Capabilities
+## 能力清单
 
-- `ae-help`: list installed AE capabilities and boundaries.
-- `ae-ideate`: generate solution directions, tradeoffs, risks, and next questions.
-- `ae-brainstorm`: clarify requirements and capture acceptance criteria.
-- `ae-lfg`: run the full flow from requirements to verified delivery.
-- `ae-plan`: create implementation plans without editing product code.
-- `ae-work`: execute plans after Git/worktree safety checks.
-- `ae-refactor`: plan behavior-preserving refactors.
-- `ae-review`: review code or documents with severity-ordered findings first.
-- `ae-doc-humanize`: rewrite structured or stiff notes into readable documents.
-- `ae-doc-structure`: turn messy notes into requirements, plans, handoffs, or checklists.
-- `ae-frontend-design`: build a usable first frontend version.
-- `ae-test-browser`: validate UI flows in a real browser.
-- `ae-sql`: generate, review, or execute SQL with explicit safety boundaries.
-- `ae-swagger-parser`: summarize or filter Swagger/OpenAPI specs.
-- `ae-handoff`: capture task state, evidence, blockers, and next steps.
-- `ae-prompt-optimize`: turn vague requests into executable Codex prompts.
-- `ae-save-experience`: capture reusable project experience.
-- `ae-skill-creator`: create or update Codex skills.
-- `ae-agent-creator`: create Codex-compatible agent prompts and delegation templates.
-- `ae-update`: update the project-local AE for Codex installation.
-- `ae-language`: switch project-local AE skill display language.
+- `ae-help`：查看当前 AE 能力和边界。
+- `ae-init`：初始化项目文档、归档规则、UTF-8 规则和长期 AI 记忆库。
+- `ae-ideate`：生成方案方向、取舍、风险和下一步问题。
+- `ae-brainstorm`：澄清需求并沉淀验收标准。
+- `ae-lfg`：从需求到已验证交付的完整流程。
+- `ae-plan`：创建实现计划，不修改业务代码。
+- `ae-work`：在 Git/worktree 安全检查后执行计划。
+- `ae-refactor`：规划行为保持型重构。
+- `ae-review`：按严重度优先审查代码或文档。
+- `ae-doc-humanize`：把结构化或生硬内容改写成更易读的文档。
+- `ae-doc-structure`：把散乱内容整理成需求、计划、交接或检查清单。
+- `ae-frontend-design`：交付可用的前端初版。
+- `ae-test-browser`：用真实浏览器验收 UI 流程。
+- `ae-sql`：生成、审查或执行 SQL，并保留安全边界。
+- `ae-swagger-parser`：摘要或过滤 Swagger/OpenAPI 规格。
+- `ae-handoff`：沉淀任务状态、证据、阻塞点和下一步。
+- `ae-prompt-optimize`：把模糊请求改写成可执行 Codex 提示词。
+- `ae-save-experience`：沉淀可复用项目经验。
+- `ae-skill-creator`：创建或更新 Codex skill。
+- `ae-agent-creator`：创建 Codex 可用的代理提示和委派模板。
+- `ae-update`：更新项目本地 AE for Codex 安装。
+- `ae-language`：切换项目本地 AE skill 显示语言。
 
-The helper CLI is available through:
+本地辅助命令入口：
 
 ```bash
 node scripts/ae-tools.mjs help
 ```
 
-## Project-Level Installation
+## 项目级安装
 
-Project-level installation is the recommended path. It writes only inside the target project and avoids changing global Codex configuration.
+推荐使用项目级安装。它只写入目标项目目录，不修改全局 Codex 配置。
 
-After this repository is published, you can ask a Codex agent inside the target project to install it:
+仓库发布后，可以在目标项目的 Codex 对话里让代理辅助安装：
 
 ```text
 Fetch and follow the project-level install instructions from https://raw.githubusercontent.com/YaoGUanquan/codex-ai-agent-engine/main/INSTALL.md
 ```
 
-From this repository, install directly with:
+在本仓库中直接安装：
 
 ```bash
 node scripts/install-project.mjs --target /path/to/your/codex-project
 ```
 
-Install Chinese or bilingual skill metadata:
+安装中文或双语技能元数据：
 
 ```bash
 node scripts/install-project.mjs --target /path/to/your/codex-project --lang zh-CN
 node scripts/install-project.mjs --target /path/to/your/codex-project --lang bilingual
 ```
 
-Supported metadata languages are `en`, `zh-CN`, and `bilingual`.
+支持的元数据语言：`en`、`zh-CN`、`bilingual`。
 
-The installer writes these paths inside the target project:
+安装脚本只会写入目标项目内的这些路径：
 
 - `plugins/ai-agent-engine-codex/`
 - `.agents/plugins/marketplace.json`
@@ -117,60 +118,61 @@ The installer writes these paths inside the target project:
 - `scripts/update-ae-codex.mjs`
 - `scripts/set-ae-language.mjs`
 
-## Initialize Project Docs And Memory
+## 初始化项目文档和记忆库
 
-After installation, run init from the target project root:
+安装完成后，在目标项目根目录执行：
 
 ```bash
 node scripts/ae-tools.mjs init
 ```
 
-This creates:
+这个命令会创建：
 
-- `AGENTS.md`: project-facing Codex guidance;
-- `docs/ae`: AE workflow artifacts such as plans, reviews, handoffs, and experience notes;
-- `docs/00-process`: active process notes, archive rules, and reusable process templates;
-- `docs/08-ai-memory`: durable project AI memory;
-- `docs/ai-memory`: compatibility pointer for earlier scaffolds.
+- `AGENTS.md`：面向 Codex 的项目说明；
+- `docs/ae`：计划、审查、交接、经验等 AE 工作流产物；
+- `docs/00-process`：执行中的过程笔记、归档规则和过程模板；
+- `docs/08-ai-memory`：标准长期项目 AI 记忆库；
+- `docs/ai-memory`：兼容旧骨架的说明入口。
 
-Existing files are skipped by default. `--force` only overwrites files that contain the AE init marker.
+默认不会覆盖已有文件。只有在使用 `--force` 且文件包含 AE init marker 时，才会覆盖受管文件。
 
-Generated text files are written as UTF-8. On Windows, PowerShell can render valid UTF-8 Chinese text as garbled output, so verify with explicit UTF-8 reads or Git diff before rewriting files.
+生成的文本文件统一按 UTF-8 写入。Windows 上 PowerShell 可能把合法 UTF-8 中文显示成乱码；改写文件前，先用显式 UTF-8 读取或 Git diff 验证。
 
-## Daily Usage
+## 日常使用
 
-Codex does not auto-register OpenCode-style slash commands. Use the skill name in the request:
+Codex 不会自动注册 OpenCode 风格的 slash command。更可靠的方式是在请求中直接写 skill 名称：
 
 ```text
-Use ae-help to show the current AE capabilities.
-Use ae-plan to create an implementation plan for adding permission-checked file upload.
-Use ae-work to execute docs/ae/plans/2026-05-11-001-file-upload-plan.md.
-Use ae-review mode:report-only to review my current changes.
+使用 ae-help 查看当前 AE 能力。
+使用 ae-init 初始化 AGENTS.md、docs/ae、docs/00-process 和 docs/08-ai-memory。
+使用 ae-plan 为“带权限校验的文件上传功能”创建实现计划。
+使用 ae-work 执行 docs/ae/plans/2026-05-11-001-file-upload-plan.md。
+使用 ae-review mode:report-only 审查当前变更。
 ```
 
-Inspect OpenAPI:
+解析 OpenAPI：
 
 ```bash
 node scripts/ae-tools.mjs swagger openapi.json method:POST keyword:login mode:detail
 ```
 
-Initialize a project memory and archive scaffold:
+初始化当前项目的文档和记忆骨架：
 
 ```bash
 node scripts/ae-tools.mjs init --lang zh-CN
 ```
 
-Recover likely continuation artifacts:
+恢复可能需要继续的过程产物：
 
 ```bash
 node scripts/ae-tools.mjs recovery
 ```
 
-## Skill List Language
+## 技能列表语言
 
-The skill list descriptions shown by Codex come from static metadata. They cannot switch live inside an already-open Codex conversation, but you can rewrite the project-local metadata and then restart or reopen the project conversation.
+Codex 技能列表里显示的说明来自静态元数据。它不能在已经打开的 Codex 对话中实时切换，但可以重写项目本地元数据，然后重启或重新打开项目对话。
 
-From an installed target project:
+在已安装的目标项目中运行：
 
 ```bash
 node scripts/set-ae-language.mjs --lang en
@@ -178,54 +180,54 @@ node scripts/set-ae-language.mjs --lang zh-CN
 node scripts/set-ae-language.mjs --lang bilingual
 ```
 
-From this repository, use an explicit target:
+在本仓库中给指定项目切换：
 
 ```bash
 node scripts/set-language.mjs --target /path/to/your/codex-project --lang zh-CN
 ```
 
-## Update
+## 更新
 
-From an installed target project:
+在已经安装过的目标项目中运行：
 
 ```bash
 node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-agent-engine.git --branch main
 ```
 
-The updater preserves the installed language metadata when possible. To override it:
+更新脚本会尽量保留当前项目已经设置的语言。也可以显式覆盖：
 
 ```bash
 node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-agent-engine.git --branch main --lang bilingual
 ```
 
-Or ask a Codex agent:
+也可以让 Codex 代理执行：
 
 ```text
 Fetch and follow the update instructions from https://raw.githubusercontent.com/YaoGUanquan/codex-ai-agent-engine/main/INSTALL.md
 ```
 
-## Manual Installation
+## 手动安装
 
-Use manual installation only when you do not want to run the installer.
+如果不想运行安装脚本，再使用手动安装。
 
-1. Copy `plugins/ai-agent-engine-codex/` into the target project under `plugins/`.
-2. Copy the root helper into the target project:
+1. 将 `plugins/ai-agent-engine-codex/` 复制到目标项目的 `plugins/` 目录下。
+2. 将根入口脚本复制到目标项目：
 
 ```bash
 mkdir -p scripts
 cp scripts/ae-tools.mjs /path/to/project/scripts/ae-tools.mjs
 ```
 
-Windows PowerShell:
+Windows PowerShell：
 
 ```powershell
 New-Item -ItemType Directory -Force -Path D:\codes\your-project\scripts | Out-Null
 Copy-Item scripts\ae-tools.mjs D:\codes\your-project\scripts\ae-tools.mjs
 ```
 
-3. Copy `scripts/set-language.mjs` as `/path/to/project/scripts/set-ae-language.mjs` if you want metadata language switching after manual install.
-4. Copy `plugins/ai-agent-engine-codex/skills/*` into `/path/to/project/.agents/skills/`.
-5. Add this project-level marketplace entry to `/path/to/project/.agents/plugins/marketplace.json`:
+3. 如果需要手动安装后继续切换技能列表语言，将 `scripts/set-language.mjs` 复制为目标项目的 `scripts/set-ae-language.mjs`。
+4. 将 `plugins/ai-agent-engine-codex/skills/*` 复制到目标项目的 `.agents/skills/`。
+5. 在目标项目 `.agents/plugins/marketplace.json` 中加入项目级插件记录：
 
 ```json
 {
@@ -242,32 +244,32 @@ Copy-Item scripts\ae-tools.mjs D:\codes\your-project\scripts\ae-tools.mjs
 }
 ```
 
-## Repository Layout
+## 仓库结构
 
 ```text
-.agents/                         # Project-local self-install for this repo
-plugins/ai-agent-engine-codex/   # Codex plugin package
-scripts/ae-tools.mjs             # Root helper wrapper
-scripts/install-project.mjs      # Project-level installer
-scripts/update-ae-codex.mjs      # Target-project updater
-docs/codex-port-analysis.md      # Migration analysis from OpenCode to Codex
-docs/ae/                         # AE workflow artifacts after init
-docs/00-process/                 # Active process notes, templates, and archive rules after init
-docs/08-ai-memory/               # Durable project AI memory after init
-docs/ai-memory/                  # Compatibility pointer after init
+.agents/                         # 当前仓库自用的项目级安装示例
+plugins/ai-agent-engine-codex/   # Codex 插件主体
+scripts/ae-tools.mjs             # 根辅助命令入口
+scripts/install-project.mjs      # 项目级安装脚本
+scripts/update-ae-codex.mjs      # 目标项目更新脚本
+docs/codex-port-analysis.md      # OpenCode 到 Codex 的迁移分析
+docs/ae/                         # init 后的 AE 工作流产物
+docs/00-process/                 # init 后的过程笔记、模板和归档规则
+docs/08-ai-memory/               # init 后的标准长期 AI 记忆库
+docs/ai-memory/                  # init 后的兼容说明入口
 ```
 
-## Important Boundaries
+## 重要边界
 
-- `/ae-*` names are compatibility labels, not auto-registered Codex slash commands.
-- Reliable trigger style is: `Use ae-work ...`, `Use ae-review ...`, `Use ae-plan ...`.
-- This MVP does not provide a real MCP server yet. `.mcp.json` is intentionally empty.
-- YAML OpenAPI parsing is deferred; JSON OpenAPI works without dependencies.
-- Git writes, destructive filesystem actions, network fetches, dependency installs, database writes, and browser setup must use Codex's explicit approval model.
+- `/ae-*` 是兼容标签，不是自动注册的 Codex slash command。
+- 可靠触发方式是直接说：`使用 ae-work ...`、`使用 ae-review ...`、`使用 ae-plan ...`。
+- 当前 MVP 还没有真实 MCP server，`.mcp.json` 有意保持为空。
+- OpenAPI YAML 解析暂缓，JSON OpenAPI 不需要依赖即可使用。
+- Git 写操作、破坏性文件操作、网络请求、依赖安装、数据库写入、浏览器环境 setup 都必须遵循 Codex 显式授权机制。
 
-## Development Checks
+## 开发检查
 
-From this repo:
+在本仓库运行：
 
 ```bash
 npm run check
@@ -276,13 +278,13 @@ node --check plugins/ai-agent-engine-codex/scripts/ae-tools.mjs
 node scripts/ae-tools.mjs help
 ```
 
-Validate skills with your local Codex skill validator if available.
+如果本机有 Codex skill validator，也建议验证 `plugins/ai-agent-engine-codex/skills/*` 和 `.agents/skills/*`。
 
-See [docs/release-checklist.md](docs/release-checklist.md) before publishing a GitHub release.
+发布前可参考 [docs/release-checklist.md](docs/release-checklist.md)。
 
-## Publishing To GitHub
+## 发布到 GitHub
 
-Create an empty GitHub repository, then from this directory:
+先在 GitHub 创建一个空仓库，然后在当前目录执行：
 
 ```bash
 node scripts/set-repository.mjs --repo https://github.com/YaoGUanquan/codex-ai-agent-engine
@@ -294,8 +296,8 @@ git remote add origin https://github.com/YaoGUanquan/codex-ai-agent-engine.git
 git push -u origin main
 ```
 
-## License And Attribution
+## 许可和致谢
 
-See [LICENSE](LICENSE) and [NOTICE.md](NOTICE.md).
+见 [LICENSE](LICENSE) 和 [NOTICE.md](NOTICE.md)。
 
-This project is inspired by AI Agent Engine and keeps `GPL-2.0-only` metadata for the adaptation.
+本项目参考 AI Agent Engine，并在插件元数据和仓库授权中保留 `GPL-2.0-only`。

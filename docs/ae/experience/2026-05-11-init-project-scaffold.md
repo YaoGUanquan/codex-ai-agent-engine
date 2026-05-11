@@ -20,6 +20,7 @@ The project needed an `init` command that can be run after project-level install
 - Write generated files as UTF-8 and include explicit rules warning agents not to trust garbled PowerShell rendering.
 - Preserve existing user files by default; only overwrite managed files when `--force` is used and the file contains the AE init marker.
 - Extend `recovery` to inspect `docs/00-process/active/*.md`, because initialized projects may store resumable execution notes there instead of only in `docs/ae`.
+- Expose init as an `ae-init` skill as well as a CLI command, so it appears in AE capability lists instead of only under helper CLI commands.
 
 ## Implementation Notes
 
@@ -28,6 +29,7 @@ The project needed an `init` command that can be run after project-level install
   - PowerShell: `Push-Location $target`, run `node scripts\ae-tools.mjs init`, then `Pop-Location`.
   - Unix shell: `(cd "$target" && node scripts/ae-tools.mjs init)`.
 - Recovery candidates should include process notes with type `process-note` and recommendation `resume_with_process_note`.
+- `ae-init` should stay a thin skill wrapper around `node scripts/ae-tools.mjs init`; the deterministic file creation remains in the CLI.
 - Generated Chinese files should be verified with explicit UTF-8 reads, for example `Get-Content -Encoding UTF8`, before editing.
 
 ## Validation
