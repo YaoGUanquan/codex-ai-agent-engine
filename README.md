@@ -172,6 +172,22 @@ node scripts/ae-tools.mjs recovery
 
 Codex 技能列表里显示的说明来自静态元数据。它不能在已经打开的 Codex 对话中实时切换，但可以重写项目本地元数据，然后重启或重新打开项目对话。
 
+也可以像项目级安装一样，在目标项目的 Codex 对话里让代理辅助切换。
+
+切换为中文：
+
+```text
+Fetch and follow the AE skill language switch instructions from https://raw.githubusercontent.com/YaoGUanquan/codex-ai-agent-engine/main/INSTALL.zh-CN.md and switch this project to zh-CN.
+```
+
+切换为英文：
+
+```text
+Fetch and follow the AE skill language switch instructions from https://raw.githubusercontent.com/YaoGUanquan/codex-ai-agent-engine/main/INSTALL.zh-CN.md and switch this project to en.
+```
+
+如需双语，把最后的 `zh-CN` 或 `en` 改成 `bilingual`。
+
 在已安装的目标项目中运行：
 
 ```bash

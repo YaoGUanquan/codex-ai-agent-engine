@@ -106,14 +106,26 @@ node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-
 
 Codex 技能列表中的描述是静态元数据文件。切换后需要重启或重新打开当前项目的 Codex 对话：
 
-```powershell
-node scripts\set-ae-language.mjs --lang zh-CN
+可以像安装一样，在目标项目的 Codex 对话里让代理辅助切换。
+
+切换为中文：
+
+```text
+Fetch and follow the AE skill language switch instructions from https://raw.githubusercontent.com/YaoGUanquan/codex-ai-agent-engine/main/INSTALL.zh-CN.md and switch this project to zh-CN.
 ```
 
-或：
+切换为英文：
 
-```bash
-node scripts/set-ae-language.mjs --lang bilingual
+```text
+Fetch and follow the AE skill language switch instructions from https://raw.githubusercontent.com/YaoGUanquan/codex-ai-agent-engine/main/INSTALL.zh-CN.md and switch this project to en.
+```
+
+如需双语，把最后的 `zh-CN` 或 `en` 改成 `bilingual`。
+
+```powershell
+node scripts\set-ae-language.mjs --lang zh-CN
+node scripts\set-ae-language.mjs --lang en
+node scripts\set-ae-language.mjs --lang bilingual
 ```
 
 ## 验证
