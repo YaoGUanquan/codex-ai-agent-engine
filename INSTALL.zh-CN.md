@@ -18,8 +18,8 @@ Codex 代理执行步骤：
 2. 在目标项目外创建临时目录。
 3. 将本仓库 clone 到临时目录。
 4. 运行项目级安装脚本，并把 `--target` 指向当前项目。如果用户希望技能列表显示中文或双语，追加 `--lang zh-CN` 或 `--lang bilingual`。
-5. 删除临时目录。
-6. 如果用户希望初始化当前项目的项目文档和长期记忆，继续执行 `node scripts/ae-tools.mjs init`。
+5. 如果用户希望初始化当前项目的项目文档和长期记忆，从目标项目目录执行 `node scripts/ae-tools.mjs init`。
+6. 删除临时目录。
 7. 提醒用户重启或重新打开当前项目的 Codex 对话。
 
 PowerShell 实现：
@@ -30,6 +30,9 @@ $target = (Get-Location).Path
 $tmp = Join-Path $env:TEMP ('ae-codex-install-' + [guid]::NewGuid().ToString('N'))
 git clone --depth 1 $repo $tmp
 node (Join-Path $tmp 'scripts\install-project.mjs') --target $target
+Push-Location $target
+node scripts\ae-tools.mjs init
+Pop-Location
 Remove-Item -Recurse -Force $tmp
 ```
 
@@ -47,6 +50,7 @@ target="$PWD"
 tmp="$(mktemp -d)"
 git clone --depth 1 "$repo" "$tmp"
 node "$tmp/scripts/install-project.mjs" --target "$target"
+(cd "$target" && node scripts/ae-tools.mjs init)
 rm -rf "$tmp"
 ```
 
