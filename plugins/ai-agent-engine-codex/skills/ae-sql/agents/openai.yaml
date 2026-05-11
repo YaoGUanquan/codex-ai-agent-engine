@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE 数据库操作"
+  short_description: "生成、审查或执行 SQL，默认只读并保留安全边界"
+  default_prompt: "使用 $ae-sql 根据当前仓库生成这条数据库操作 SQL。"
+policy:
+  allow_implicit_invocation: true

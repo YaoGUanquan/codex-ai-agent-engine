@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE 想法生成"
+  short_description: "生成可比较的方案方向、取舍和下一步"
+  default_prompt: "使用 $ae-ideate 帮我围绕这个目标生成几个可执行方向。"
+policy:
+  allow_implicit_invocation: true

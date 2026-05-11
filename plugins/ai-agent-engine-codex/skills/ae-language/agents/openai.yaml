@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE 切换语言"
+  short_description: "切换本地 AE skill 列表显示语言"
+  default_prompt: "使用 $ae-language 把本地 AE 显示语言切换为中文。"
+policy:
+  allow_implicit_invocation: true

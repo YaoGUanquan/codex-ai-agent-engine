@@ -1,0 +1,21 @@
+{
+  "name": "ai-agent-engine-codex",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "Codex-native AE-style workflow skills referencing https://gitee.com/jiangqiang1996/ai-agent-engine.",
+  "license": "GPL-2.0-only",
+  "scripts": {
+    "check": "node --check scripts/ae-tools.mjs && node --check scripts/install-project.mjs && node --check scripts/update-project.mjs && node --check scripts/update-ae-codex.mjs && node --check scripts/set-repository.mjs && node --check scripts/set-language.mjs && node --check scripts/set-ae-language.mjs && node --check plugins/ai-agent-engine-codex/scripts/ae-tools.mjs && node --check plugins/ai-agent-engine-codex/scripts/update-project.mjs && node --check plugins/ai-agent-engine-codex/scripts/set-language.mjs",
+    "help": "node scripts/ae-tools.mjs help"
+  },
+  "keywords": [
+    "codex",
+    "codex-plugin",
+    "ai-agent-engine",
+    "engineering-workflow",
+    "planning",
+    "review"
+  ],
+  "upstreamReference": "https://gitee.com/jiangqiang1996/ai-agent-engine"
+}

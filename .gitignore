@@ -1,0 +1,26 @@
+# Local/reference clones
+upstream-ai-agent-engine/
+
+# Runtime artifacts created by AE workflows in target projects
+.ae/
+docs/ae/gates/*.json
+docs/ae/reviews/
+docs/ae/handoffs/
+
+# Dependencies and build output
+node_modules/
+dist/
+build/
+coverage/
+.cache/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+*.log
+
+# Secrets
+.env
+.env.*
+!.env.example
+!.env.template

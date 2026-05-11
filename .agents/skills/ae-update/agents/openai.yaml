@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE 更新插件"
+  short_description: "从指定仓库更新项目本地 AE for Codex 安装"
+  default_prompt: "使用 $ae-update 更新当前项目的 AE for Codex 插件。"
+policy:
+  allow_implicit_invocation: true

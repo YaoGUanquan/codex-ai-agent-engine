@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE Swagger 解析"
+  short_description: "摘要解析 Swagger 和 OpenAPI 规格"
+  default_prompt: "使用 $ae-swagger-parser 摘要解析这个 OpenAPI 文件。"
+policy:
+  allow_implicit_invocation: true

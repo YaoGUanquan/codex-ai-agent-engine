@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE 经验沉淀"
+  short_description: "把问题、决策、命令和验证沉淀为可复用经验"
+  default_prompt: "使用 $ae-save-experience 记录这次处理过程的经验。"
+policy:
+  allow_implicit_invocation: true
