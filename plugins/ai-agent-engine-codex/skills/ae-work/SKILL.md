@@ -23,6 +23,7 @@ Then decide with the user when needed:
 
 - default branch or dirty worktree: explain the risk and ask before continuing, creating a branch, or creating a worktree.
 - feature branch and clean worktree: continue unless the task is risky enough to need a worktree.
+- if the plan touches shared config, auth, public contracts, or a risky refactor, propose an isolated branch or worktree and a baseline validation pass before editing.
 - Git writes such as commit, reset, clean, rebase, push, or worktree add require explicit user approval and Codex escalation rules.
 
 ## Task Analysis
@@ -44,11 +45,15 @@ Use the result to choose inline, serial, or parallel execution. Spawn sub-agents
 ## Execution Rules
 
 - Read the plan and referenced files first.
+- Execute one implementation unit or one small checkpoint at a time.
 - Keep changes scoped to the assigned unit or task.
 - Do not overwrite user-owned unrelated changes.
+- Establish a baseline when the task is a bug fix or behavior-sensitive refactor.
 - Add tests or update existing tests when behavior changes.
+- Stop and report blockers when the failure mode invalidates the current step or assumptions.
 - Run the narrowest meaningful validation, then broader validation when practical.
 - Track validation commands exactly for final reporting.
+- Prefer ae-debug for investigation-heavy failures and ae-tdd when the user wants or the change benefits from red-green-refactor discipline.
 
 ## Shipping
 

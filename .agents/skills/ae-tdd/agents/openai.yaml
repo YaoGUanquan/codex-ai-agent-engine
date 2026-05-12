@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE 测试驱动开发"
+  short_description: "以先失败测试为起点执行红绿重构循环"
+  default_prompt: "使用 $ae-tdd 以先写失败测试的方式实现这个改动。"
+policy:
+  allow_implicit_invocation: true
