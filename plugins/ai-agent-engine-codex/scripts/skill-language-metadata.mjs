@@ -43,6 +43,13 @@ export const skillMetadata = {
     promptEn: 'Use $ae-doc-structure to turn these notes into a structured artifact.',
     promptZh: '使用 $ae-doc-structure 把这些内容整理成结构化文档。',
   },
+  'ae-docx': {
+    display: { en: 'AE DOCX', zh: 'AE DOCX' },
+    en: 'Use OfficeCLI-oriented workflows for Word-style document tasks',
+    zh: '使用面向 OfficeCLI 的工作流处理 Word 文档任务',
+    promptEn: 'Use $ae-docx to handle this Word document task.',
+    promptZh: '使用 $ae-docx 处理这个 Word 文档任务。',
+  },
   'ae-frontend-design': {
     display: { en: 'AE Frontend Design', zh: 'AE 前端初版' },
     en: 'Build a usable first frontend version with browser validation',
@@ -92,12 +99,26 @@ export const skillMetadata = {
     promptEn: 'Use $ae-lfg to take this software requirement through plan, work, review, and validation.',
     promptZh: '使用 $ae-lfg 将这个软件需求推进到计划、实现、审查和验证。',
   },
+  'ae-officecli': {
+    display: { en: 'AE OfficeCLI', zh: 'AE OfficeCLI' },
+    en: 'Use OfficeCLI as an external engine for Office document automation',
+    zh: '将 OfficeCLI 作为外部引擎处理 Office 文档自动化任务',
+    promptEn: 'Use $ae-officecli to decide how this Office task should run through OfficeCLI.',
+    promptZh: '使用 $ae-officecli 判断这个 Office 任务应如何通过 OfficeCLI 执行。',
+  },
   'ae-plan': {
     display: { en: 'AE Plan', zh: 'AE 计划生成' },
     en: 'Create AE implementation plans before coding',
     zh: '编码前创建 AE 实现计划',
     promptEn: 'Use $ae-plan to turn this requirement into an implementation plan.',
     promptZh: '使用 $ae-plan 将这个需求转换为实现计划。',
+  },
+  'ae-pptx': {
+    display: { en: 'AE PPTX', zh: 'AE PPTX' },
+    en: 'Use OfficeCLI-oriented workflows for presentation tasks',
+    zh: '使用面向 OfficeCLI 的工作流处理演示文稿任务',
+    promptEn: 'Use $ae-pptx to handle this PowerPoint task.',
+    promptZh: '使用 $ae-pptx 处理这个 PowerPoint 任务。',
   },
   'ae-prompt-optimize': {
     display: { en: 'AE Prompt Optimize', zh: 'AE 提示词优化' },
@@ -182,6 +203,13 @@ export const skillMetadata = {
     zh: '带 Git 安全检查和验证证据执行计划',
     promptEn: 'Use $ae-work to implement this AE plan with validation evidence.',
     promptZh: '使用 $ae-work 执行这个 AE 计划并提供验证证据。',
+  },
+  'ae-xlsx': {
+    display: { en: 'AE XLSX', zh: 'AE XLSX' },
+    en: 'Use OfficeCLI-oriented workflows for spreadsheet tasks',
+    zh: '使用面向 OfficeCLI 的工作流处理电子表格任务',
+    promptEn: 'Use $ae-xlsx to handle this Excel task.',
+    promptZh: '使用 $ae-xlsx 处理这个 Excel 任务。',
   },
 }
 

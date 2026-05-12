@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE DOCX"
+  short_description: "使用面向 OfficeCLI 的工作流处理 Word 文档任务"
+  default_prompt: "使用 $ae-docx 处理这个 Word 文档任务。"
+policy:
+  allow_implicit_invocation: true

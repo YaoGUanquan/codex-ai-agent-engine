@@ -139,4 +139,4 @@ node scripts/ae-tools.mjs help
 node scripts/ae-tools.mjs init --dry-run
 ```
 
-Expected result: a capability list containing `ae-help`, `ae-lfg`, `ae-brainstorm`, `ae-plan`, `ae-work`, `ae-web-app`, `ae-backend`, `ae-debug`, `ae-tdd`, `ae-review`, and `ae-swagger-parser`.
+Expected result: a capability list containing `ae-help`, `ae-lfg`, `ae-brainstorm`, `ae-plan`, `ae-work`, `ae-officecli`, `ae-docx`, `ae-xlsx`, `ae-pptx`, `ae-web-app`, `ae-backend`, `ae-debug`, `ae-tdd`, `ae-review`, and `ae-swagger-parser`.

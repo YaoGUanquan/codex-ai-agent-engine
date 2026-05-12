@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE XLSX"
+  short_description: "使用面向 OfficeCLI 的工作流处理电子表格任务"
+  default_prompt: "使用 $ae-xlsx 处理这个 Excel 任务。"
+policy:
+  allow_implicit_invocation: true
