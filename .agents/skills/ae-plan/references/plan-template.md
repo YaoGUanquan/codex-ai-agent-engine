@@ -37,6 +37,7 @@ originFingerprint: <optional fingerprint>
 - Approach:
 - Tests:
 - Validation:
+- Rollback signals:
 - Deferred to implementation:
 
 ## Validation Plan

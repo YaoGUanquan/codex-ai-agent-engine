@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE 调试排障"
+  short_description: "在修改代码前系统化定位故障原因"
+  default_prompt: "使用 $ae-debug 排查这个故障。"
+policy:
+  allow_implicit_invocation: true

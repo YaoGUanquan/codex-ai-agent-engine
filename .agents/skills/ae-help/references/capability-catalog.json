@@ -92,6 +92,30 @@
       "purpose": "按现有前端栈和设计约束交付可用的前端初版体验。"
     },
     {
+      "name": "ae-web-app",
+      "entry": "/ae-web-app",
+      "target": "Web 应用开发",
+      "purpose": "基于现有仓库技术栈实现前端或轻量全栈 Web 流程，并结合浏览器验收与交付检查。"
+    },
+    {
+      "name": "ae-backend",
+      "entry": "/ae-backend",
+      "target": "后端实现",
+      "purpose": "基于仓库中的接口、服务、数据和权限契约实现后端行为。"
+    },
+    {
+      "name": "ae-debug",
+      "entry": "/ae-debug",
+      "target": "调试排障",
+      "purpose": "围绕构建失败、运行时异常、UI 问题和接口故障执行系统化排查与验证。"
+    },
+    {
+      "name": "ae-tdd",
+      "entry": "/ae-tdd",
+      "target": "测试驱动开发",
+      "purpose": "围绕明确行为执行先失败测试、最小实现、回归验证和重构。"
+    },
+    {
       "name": "ae-test-browser",
       "entry": "/ae-test-browser",
       "target": "浏览器验收",
@@ -179,6 +203,7 @@
   "notes": [
     "/ae-* 是兼容标签；Codex 中可靠触发方式是 skill 名称，例如“用 ae-work 执行这个计划”。",
     "涉及 Git 写入、网络、依赖安装、数据库写入、生产环境或破坏性操作时，必须按 Codex 审批规则执行。",
-    "OpenCode 的自动 slash command、agent registry、session navigation 和全局规则注入不是 Codex 原生能力。"
+    "OpenCode 的自动 slash command、agent registry、session navigation 和全局规则注入不是 Codex 原生能力。",
+    "本项目也参考了 https://github.com/openai/plugins 和 https://github.com/obra/superpowers 中的部分开发技能设计，但以 Codex 原生 skill 和本地脚本方式重写实现。"
   ]
 }

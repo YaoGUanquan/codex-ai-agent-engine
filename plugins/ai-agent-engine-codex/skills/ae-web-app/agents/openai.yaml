@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE Web 应用开发"
+  short_description: "基于现有仓库技术栈构建或扩展 Web 应用"
+  default_prompt: "使用 $ae-web-app 实现这个 Web 应用流程。"
+policy:
+  allow_implicit_invocation: true

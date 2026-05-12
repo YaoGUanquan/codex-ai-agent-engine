@@ -32,6 +32,22 @@ Read `references/review-output-template.md`.
 
 Findings must include severity, file/line when applicable, evidence, impact, and fix. Suppress vague style advice unless it creates a concrete risk. Pre-existing unrelated issues must be labeled as such and separated from regressions.
 
+Review order:
+
+- Check correctness and requirement alignment first.
+- Check validation adequacy, rollback safety, and missing edge cases next.
+- Check maintainability and local convention fit last.
+
+For plan and requirements reviews, verify:
+
+- scope clarity,
+- file ownership and touched modules,
+- validation sufficiency,
+- rollback or recovery path,
+- hidden product assumptions masquerading as implementation detail.
+
+Serious findings should block downstream execution until resolved or explicitly accepted by the user.
+
 ## Autofix Rules
 
 Only apply fixes when:

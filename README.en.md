@@ -4,6 +4,7 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 
 > Reference project: https://gitee.com/jiangqiang1996/ai-agent-engine<br>
 > This repository references the workflow design and capability model of the Gitee AI Agent Engine project above.<br>
+> It also draws on selected development-skill ideas from https://github.com/openai/plugins and https://github.com/obra/superpowers.<br>
 > It is not a direct OpenCode runtime port. It uses Codex skills, project-local plugin files, and local scripts.
 
 中文文档: [README.md](README.md)
@@ -67,6 +68,10 @@ node scripts/ae-tools.mjs help
 - `ae-doc-humanize`: rewrite structured or stiff notes into readable documents.
 - `ae-doc-structure`: turn messy notes into requirements, plans, handoffs, or checklists.
 - `ae-frontend-design`: build a usable first frontend version.
+- `ae-web-app`: implement a web frontend or light full-stack web flow using the repository stack.
+- `ae-backend`: implement API, service, data, and permission behavior from repository contracts.
+- `ae-debug`: investigate build failures, runtime errors, UI issues, and API incidents systematically.
+- `ae-tdd`: run a red-green-refactor loop when behavior is precise enough for test-first work.
 - `ae-test-browser`: validate UI flows in a real browser.
 - `ae-sql`: generate, review, or execute SQL with explicit safety boundaries.
 - `ae-swagger-parser`: summarize or filter Swagger/OpenAPI specs.
@@ -137,6 +142,16 @@ This creates:
 Existing files are skipped by default. `--force` only overwrites files that contain the AE init marker.
 
 Generated text files are written as UTF-8. On Windows, PowerShell can render valid UTF-8 Chinese text as garbled output, so verify with explicit UTF-8 reads or Git diff before rewriting files.
+
+## External References
+
+This repository keeps a clear Codex-native boundary:
+
+- `https://gitee.com/jiangqiang1996/ai-agent-engine` is the main AE workflow reference.
+- `https://github.com/obra/superpowers` informs parts of the planning, debugging, TDD, verification, and delivery-gate workflow design.
+- `https://github.com/openai/plugins` informs parts of the frontend, backend, web-app, and skill-packaging design.
+
+Those repositories are reference inputs. This project rewrites the relevant parts into local `ae-*` skills and helper scripts instead of reusing their runtimes.
 
 ## Daily Usage
 

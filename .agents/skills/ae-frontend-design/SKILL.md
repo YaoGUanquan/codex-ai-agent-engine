@@ -9,11 +9,14 @@ Build the first usable frontend version.
 
 ## Workflow
 
-1. Inspect the existing frontend stack, routing, design system, assets, and local conventions.
-2. Define the primary workflow the user must complete on the first screen.
-3. Implement the UI using existing components and icons when available.
-4. Cover expected states: empty, loading, success, error, disabled, and destructive confirmation when relevant.
-5. Run the project validation and browser checks when the app needs a dev server.
+1. Read `references/web-ui-quality.md`.
+2. Inspect the existing frontend stack, routing, design system, component library, assets, and local conventions.
+3. Identify the route, user workflow, data dependencies, and adjacent screens the first usable version must support.
+4. Implement the UI using existing components, icons, and patterns when available.
+5. Cover expected states: empty, loading, success, error, disabled, validation errors, and destructive confirmation when relevant.
+6. When the project uses React, Next.js, or Vite, follow local framework and build patterns instead of inventing a new structure.
+7. When the project uses shadcn or an equivalent local component system, extend it consistently instead of bypassing it.
+8. Run the project validation and browser checks when the app needs a dev server.
 
 ## Design Rules
 
@@ -21,3 +24,5 @@ Build the first usable frontend version.
 - Keep operational tools dense, calm, and scannable.
 - Ensure text fits containers on desktop and mobile.
 - Use real assets or generated bitmap assets when the interface needs visual content.
+- Preserve the existing design system and information density before adding visual novelty.
+- Route broader web-app implementation work to `ae-web-app` when the task spans UI plus app wiring or deployment concerns.

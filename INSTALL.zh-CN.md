@@ -136,4 +136,4 @@ node scripts\set-ae-language.mjs --lang bilingual
 node scripts/ae-tools.mjs help
 ```
 
-预期能看到 `ae-help`、`ae-lfg`、`ae-brainstorm`、`ae-plan`、`ae-work`、`ae-review`、`ae-swagger-parser`。
+预期能看到 `ae-help`、`ae-lfg`、`ae-brainstorm`、`ae-plan`、`ae-work`、`ae-web-app`、`ae-backend`、`ae-debug`、`ae-tdd`、`ae-review`、`ae-swagger-parser`。
