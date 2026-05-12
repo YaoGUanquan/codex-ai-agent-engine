@@ -86,6 +86,30 @@
       "purpose": "把散乱文本整理成结构化需求、计划、决策、检查清单或交付文档。"
     },
     {
+      "name": "ae-officecli",
+      "entry": "/ae-officecli",
+      "target": "OfficeCLI 路由",
+      "purpose": "将 OfficeCLI 作为可选外部引擎，用于 Word、Excel、PowerPoint 自动化任务的判断、检测和路由。"
+    },
+    {
+      "name": "ae-docx",
+      "entry": "/ae-docx",
+      "target": "Word 文档工作流",
+      "purpose": "使用面向 OfficeCLI 的工作流处理 `.docx` 创建、编辑、查询、渲染和验证。"
+    },
+    {
+      "name": "ae-xlsx",
+      "entry": "/ae-xlsx",
+      "target": "Excel 工作流",
+      "purpose": "使用面向 OfficeCLI 的工作流处理 `.xlsx` 创建、编辑、公式、查询和验证。"
+    },
+    {
+      "name": "ae-pptx",
+      "entry": "/ae-pptx",
+      "target": "PowerPoint 工作流",
+      "purpose": "使用面向 OfficeCLI 的工作流处理 `.pptx` 生成、编辑、渲染和验证。"
+    },
+    {
       "name": "ae-frontend-design",
       "entry": "/ae-frontend-design",
       "target": "前端初版",
@@ -204,6 +228,6 @@
     "/ae-* 是兼容标签；Codex 中可靠触发方式是 skill 名称，例如“用 ae-work 执行这个计划”。",
     "涉及 Git 写入、网络、依赖安装、数据库写入、生产环境或破坏性操作时，必须按 Codex 审批规则执行。",
     "OpenCode 的自动 slash command、agent registry、session navigation 和全局规则注入不是 Codex 原生能力。",
-    "本项目也参考了 https://github.com/openai/plugins 和 https://github.com/obra/superpowers 中的部分开发技能设计，但以 Codex 原生 skill 和本地脚本方式重写实现。"
+    "本项目也参考了 https://github.com/openai/plugins、https://github.com/obra/superpowers 和 https://github.com/iOfficeAI/OfficeCLI 中的部分技能与工作流设计，但以 Codex 原生 skill 和本地脚本方式重写实现。"
   ]
 }

@@ -5,6 +5,7 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 > Reference project: https://gitee.com/jiangqiang1996/ai-agent-engine<br>
 > This repository references the workflow design and capability model of the Gitee AI Agent Engine project above.<br>
 > It also draws on selected development-skill ideas from https://github.com/openai/plugins and https://github.com/obra/superpowers.<br>
+> It also draws on Office automation and agent-workflow ideas from https://github.com/iOfficeAI/OfficeCLI.<br>
 > It is not a direct OpenCode runtime port. It uses Codex skills, project-local plugin files, and local scripts.
 
 中文文档: [README.md](README.md)
@@ -67,6 +68,10 @@ node scripts/ae-tools.mjs help
 - `ae-review`: review code or documents with severity-ordered findings first.
 - `ae-doc-humanize`: rewrite structured or stiff notes into readable documents.
 - `ae-doc-structure`: turn messy notes into requirements, plans, handoffs, or checklists.
+- `ae-officecli`: use OfficeCLI as an optional external engine for Office document automation.
+- `ae-docx`: use OfficeCLI-oriented workflows for Word-style document tasks.
+- `ae-xlsx`: use OfficeCLI-oriented workflows for spreadsheet tasks.
+- `ae-pptx`: use OfficeCLI-oriented workflows for presentation tasks.
 - `ae-frontend-design`: build a usable first frontend version.
 - `ae-web-app`: implement a web frontend or light full-stack web flow using the repository stack.
 - `ae-backend`: implement API, service, data, and permission behavior from repository contracts.
@@ -150,6 +155,7 @@ This repository keeps a clear Codex-native boundary:
 - `https://gitee.com/jiangqiang1996/ai-agent-engine` is the main AE workflow reference.
 - `https://github.com/obra/superpowers` informs parts of the planning, debugging, TDD, verification, and delivery-gate workflow design.
 - `https://github.com/openai/plugins` informs parts of the frontend, backend, web-app, and skill-packaging design.
+- `https://github.com/iOfficeAI/OfficeCLI` informs parts of the Office automation, render-validation, and agent-friendly document workflow design.
 
 Those repositories are reference inputs. This project rewrites the relevant parts into local `ae-*` skills and helper scripts instead of reusing their runtimes.
 

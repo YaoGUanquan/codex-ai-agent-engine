@@ -16,10 +16,18 @@ try {
   run(process.execPath, [resolve(repoRoot, 'scripts', 'install-project.mjs'), '--target', targetRoot, '--lang', 'bilingual'])
 
   const expectedPaths = [
+    'plugins/ai-agent-engine-codex/skills/ae-officecli/SKILL.md',
+    'plugins/ai-agent-engine-codex/skills/ae-docx/SKILL.md',
+    'plugins/ai-agent-engine-codex/skills/ae-xlsx/SKILL.md',
+    'plugins/ai-agent-engine-codex/skills/ae-pptx/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-web-app/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-backend/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-debug/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-tdd/SKILL.md',
+    '.agents/skills/ae-officecli/agents/openai.yaml',
+    '.agents/skills/ae-docx/agents/openai.yaml',
+    '.agents/skills/ae-xlsx/agents/openai.yaml',
+    '.agents/skills/ae-pptx/agents/openai.yaml',
     '.agents/skills/ae-web-app/agents/openai.yaml',
     '.agents/skills/ae-backend/agents/openai.yaml',
     '.agents/skills/ae-debug/agents/openai.yaml',
@@ -32,21 +40,62 @@ try {
     if (!existsSync(fullPath)) throw new Error(`Missing installed path: ${relative(targetRoot, fullPath)}`)
   }
 
+  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'office'], { cwd: targetRoot })
+  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'docx'], { cwd: targetRoot })
+  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'xlsx'], { cwd: targetRoot })
+  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'pptx'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'web'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'backend'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'debug'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'tdd'], { cwd: targetRoot })
-  run(process.execPath, [resolve(targetRoot, 'scripts', 'set-ae-language.mjs'), '--lang', 'en'], { cwd: targetRoot })
+  const expectedBilingualLabels = [
+    ['ae-officecli', 'AE OfficeCLI'],
+    ['ae-docx', 'AE DOCX'],
+    ['ae-xlsx', 'AE XLSX'],
+    ['ae-pptx', 'AE PPTX'],
+  ]
+  for (const [skillName, expectedLabel] of expectedBilingualLabels) {
+    const yaml = readFileSync(resolve(targetRoot, '.agents', 'skills', skillName, 'agents', 'openai.yaml'), 'utf8')
+    if (!yaml.includes(expectedLabel)) {
+      throw new Error(`Initial bilingual install did not preserve ${skillName} label`)
+    }
+  }
 
-  const webAppYaml = readFileSync(resolve(targetRoot, '.agents', 'skills', 'ae-web-app', 'agents', 'openai.yaml'), 'utf8')
-  if (!webAppYaml.includes('AE Web App')) {
-    throw new Error('Installed language switch did not update ae-web-app metadata to English')
+  run(process.execPath, [resolve(targetRoot, 'scripts', 'set-ae-language.mjs'), '--lang', 'en'], { cwd: targetRoot })
+  const expectedEnglishLabels = [
+    ['ae-officecli', 'AE OfficeCLI'],
+    ['ae-docx', 'AE DOCX'],
+    ['ae-xlsx', 'AE XLSX'],
+    ['ae-pptx', 'AE PPTX'],
+    ['ae-web-app', 'AE Web App'],
+  ]
+  for (const [skillName, expectedLabel] of expectedEnglishLabels) {
+    const yaml = readFileSync(resolve(targetRoot, '.agents', 'skills', skillName, 'agents', 'openai.yaml'), 'utf8')
+    if (!yaml.includes(expectedLabel)) {
+      throw new Error(`Installed language switch did not update ${skillName} metadata to English`)
+    }
+  }
+
+  run(process.execPath, [resolve(targetRoot, 'scripts', 'set-ae-language.mjs'), '--lang', 'zh-CN'], { cwd: targetRoot })
+  const expectedChineseLabels = [
+    ['ae-officecli', 'AE OfficeCLI'],
+    ['ae-docx', 'AE DOCX'],
+    ['ae-xlsx', 'AE XLSX'],
+    ['ae-pptx', 'AE PPTX'],
+    ['ae-web-app', 'AE Web 应用开发'],
+  ]
+  for (const [skillName, expectedLabel] of expectedChineseLabels) {
+    const yaml = readFileSync(resolve(targetRoot, '.agents', 'skills', skillName, 'agents', 'openai.yaml'), 'utf8')
+    if (!yaml.includes(expectedLabel)) {
+      throw new Error(`Installed language switch did not update ${skillName} metadata to zh-CN`)
+    }
   }
 
   console.log(JSON.stringify({
     status: 'ok',
     targetRoot: relative(repoRoot, targetRoot),
-    verifiedSkills: ['ae-web-app', 'ae-backend', 'ae-debug', 'ae-tdd'],
+    verifiedSkills: ['ae-officecli', 'ae-docx', 'ae-xlsx', 'ae-pptx', 'ae-web-app', 'ae-backend', 'ae-debug', 'ae-tdd'],
+    verifiedLanguageModes: ['bilingual', 'en', 'zh-CN'],
   }, null, 2))
 } finally {
   cleanupTarget()
