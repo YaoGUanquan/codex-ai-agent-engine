@@ -7,6 +7,13 @@ description: Use when the user asks for AE debug, /ae-debug, investigate a faili
 
 Investigate a failure systematically before changing code.
 
+## Operating Principles
+
+- Reproduce or capture the failure before explaining it.
+- Prefer one precise hypothesis with a disconfirming check over several plausible stories.
+- Fix the nearest proven cause, then widen only if evidence requires it.
+- Preserve the failure evidence and validation command in the final report.
+
 ## Workflow
 
 1. Read `references/debugging-workflow.md`.
@@ -24,3 +31,4 @@ Investigate a failure systematically before changing code.
 - Prefer `ae-test-browser` for UI investigations that require a real browser.
 - Prefer `ae-sql` when the failure is tied to schema, data shape, or query behavior.
 - Avoid speculative rewrites when the failing path is narrow.
+- If the symptom disappears during investigation, report the last known evidence and what remains unproven.
