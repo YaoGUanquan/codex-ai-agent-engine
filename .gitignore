@@ -4,6 +4,7 @@ upstream-ai-agent-engine/
 # Runtime artifacts created by AE workflows in target projects
 .ae/
 docs/ae/gates/*.json
+docs/ae/brainstorms/
 docs/ae/reviews/
 docs/ae/handoffs/
 
