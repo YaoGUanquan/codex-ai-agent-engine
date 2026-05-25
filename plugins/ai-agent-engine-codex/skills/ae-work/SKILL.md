@@ -7,6 +7,13 @@ description: Use when the user asks for AE work, /ae-work, execute an AE plan, i
 
 Execute a plan or tightly scoped task with safety checks, validation, and delivery evidence.
 
+## Operating Principles
+
+- Read before editing and let the repository's existing structure decide the shape of the change.
+- Prefer the smallest behaviorally complete patch over broad cleanup.
+- Keep a clear chain from request, to changed files, to validation evidence.
+- Surface uncertainty early when it affects correctness, data safety, or public contracts.
+
 ## Pre-Edit Gate
 
 Before modifying any project file, run and inspect:
@@ -54,6 +61,8 @@ Use the result to choose inline, serial, or parallel execution. Spawn sub-agents
 - Run the narrowest meaningful validation, then broader validation when practical.
 - Track validation commands exactly for final reporting.
 - Prefer ae-debug for investigation-heavy failures and ae-tdd when the user wants or the change benefits from red-green-refactor discipline.
+- Do not bundle opportunistic refactors, formatting churn, dependency upgrades, or unrelated test rewrites into the task.
+- If verification cannot be run, name the exact blocker and the residual risk.
 
 ## Shipping
 

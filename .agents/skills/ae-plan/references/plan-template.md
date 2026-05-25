@@ -22,6 +22,23 @@ originFingerprint: <optional fingerprint>
 
 ## Scope
 
+## Readiness
+
+- Goal:
+- Acceptance criteria:
+- Non-goals:
+- Affected areas:
+- Validation surface:
+- Open questions:
+
+## Assumptions
+
+## Alternatives Considered
+
+- Recommended:
+- Alternative:
+- Rejected because:
+
 ## Decisions
 
 ## Risks
@@ -32,6 +49,7 @@ originFingerprint: <optional fingerprint>
 
 - Goal:
 - Requirements covered:
+- Acceptance criteria covered:
 - Depends on:
 - Files:
 - Approach:
@@ -43,6 +61,14 @@ originFingerprint: <optional fingerprint>
 ## Validation Plan
 
 ## Rollback / Recovery
+
+## Plan Self-Review
+
+- Placeholder scan:
+- Consistency check:
+- Scope check:
+- Acceptance coverage:
+- Validation gaps:
 
 ## Handoff
 ```

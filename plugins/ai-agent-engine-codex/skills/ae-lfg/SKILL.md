@@ -21,19 +21,21 @@ Follow `references/pipeline.md`.
 Default chain:
 
 1. ae-brainstorm if requirements are unclear or durable decisions are needed.
-2. ae-review domain:document for any created requirements artifact.
-3. ae-plan for S4 work.
-4. ae-review domain:document for the plan.
-5. ae-work after Git/worktree safety checks.
-6. Run validation commands.
-7. ae-review for code changes.
-8. Browser verification when UI changed and browser tools are available.
-9. Final gate with proof path or blocked reasons.
+2. Confirm requirements readiness: outcome, acceptance criteria, non-goals, chosen approach, validation expectations, and open questions.
+3. ae-review domain:document for any created requirements artifact.
+4. ae-plan for S4 work, including plan readiness and self-review.
+5. ae-review domain:document for the plan.
+6. ae-work after Git/worktree safety checks.
+7. Run validation commands.
+8. ae-review for code changes.
+9. Browser verification when UI changed and browser tools are available.
+10. Final gate with proof path or blocked reasons.
 
 ## Hard Rules
 
 - Never skip planning for S4 work.
 - Never start implementation while requirements or acceptance criteria are materially unclear.
+- Never treat a generated plan as ready until assumptions, alternatives, acceptance coverage, validation, and rollback signals have been checked.
 - Do not repeatedly ask whether to continue between normal phases; ask only when a decision, credential, permission, or P0/P1 risk requires the user.
 - Use Codex approval/escalation rules for Git writes, destructive actions, network fetches, dependency installs, database writes, and browser setup.
 - If a worktree transfer is chosen, stop after writing the handoff and tell the user where to continue.
