@@ -1,0 +1,22 @@
+{
+  "name": "Codex AI Agent Engine",
+  "description": "面向 Codex 的项目级 AI Agent 工作流 Skill，把需求澄清、技术计划、编码执行、代码审查、验证交付和经验沉淀串成可复用的研发闭环。",
+  "category": "development",
+  "pricing": "free",
+  "mode": "external-agent",
+  "homepage": "https://github.com/YaoGUanquan/codex-ai-agent-engine",
+  "repository": "https://github.com/YaoGUanquan/codex-ai-agent-engine",
+  "branch": "contest/uumit-skill-2026",
+  "skillPath": "contest/uumit-skill-2026/SKILL.md",
+  "tags": [
+    "Codex",
+    "AI Agent",
+    "软件工程",
+    "工作流",
+    "代码审查",
+    "需求分析",
+    "技术计划",
+    "自动化研发"
+  ],
+  "contestPitch": "Codex AI Agent Engine 让 Codex 不只是回答问题，而是像一个可协作的工程团队一样工作：先澄清需求，再生成计划，然后安全地修改代码，最后审查、验证、交接并沉淀经验。"
+}
