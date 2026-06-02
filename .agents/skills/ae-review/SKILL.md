@@ -26,6 +26,13 @@ Supported mode markers:
 
 Read `references/review-personas.md`. Use the smallest useful reviewer set. Do not spawn sub-agents unless the user explicitly requested/allowed parallel agent work. If sub-agents are allowed, each reviewer is read-only and must return evidence-backed findings.
 
+For significant code or plan reviews, apply two lanes even when you are not spawning sub-agents:
+
+- reviewer lane: correctness, testing, security, contracts, reliability, and concrete regression risk,
+- architect lane: boundary fit, coupling, long-term maintainability, alternatives, rollback, and whether the chosen shape matches the stated decision drivers.
+
+The lanes may be evaluated by one agent, but their conclusions must stay distinguishable in the review notes or final summary when they disagree.
+
 ## Findings Standard
 
 Read `references/review-output-template.md`.
@@ -47,6 +54,17 @@ For plan and requirements reviews, verify:
 - hidden product assumptions masquerading as implementation detail.
 
 Serious findings should block downstream execution until resolved or explicitly accepted by the user.
+
+## Verdict Rules
+
+Use deterministic verdicts:
+
+- `APPROVE`: no blocking findings and residual risk is acceptable for the requested scope.
+- `COMMENT`: findings are informational or low-risk and do not block execution.
+- `REQUEST_CHANGES`: correctness, validation, maintainability, contract, or rollback gaps must be fixed before delivery.
+- `BLOCK`: the review found a P0/P1 issue, unsafe missing requirement, invalid plan, or unreviewable state.
+
+Final result is the strictest lane verdict. Architect `BLOCK` or reviewer `REQUEST_CHANGES` means the overall review is not approved. If a serious finding is accepted by the user instead of fixed, record that acceptance as residual risk rather than silently approving it.
 
 ## Autofix Rules
 

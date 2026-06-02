@@ -25,20 +25,45 @@ Default chain:
 3. ae-review domain:document for any created requirements artifact.
 4. ae-plan for S4 work, including plan readiness and self-review.
 5. ae-review domain:document for the plan.
-6. ae-work after Git/worktree safety checks.
-7. Run validation commands.
-8. ae-review for code changes.
-9. Browser verification when UI changed and browser tools are available.
-10. Final gate with proof path or blocked reasons.
+6. Confirm the consensus gate before implementation: requirements and plan artifacts exist when needed, document review has no blocking findings, assumptions are explicit, and the user has accepted or delegated any open product decisions.
+7. ae-work after Git/worktree safety checks.
+8. Maintain execution evidence with checkpoint notes or a lightweight ledger under `docs/00-process/active/<task>/` for S4 work.
+9. Run validation commands.
+10. ae-review for code changes.
+11. Browser verification when UI changed and browser tools are available.
+12. Final gate with proof path or blocked reasons.
 
 ## Hard Rules
 
 - Never skip planning for S4 work.
 - Never start implementation while requirements or acceptance criteria are materially unclear.
 - Never treat a generated plan as ready until assumptions, alternatives, acceptance coverage, validation, and rollback signals have been checked.
+- Never treat "a file was generated" as consensus. The gate is only ready when the artifact content, review status, open decisions, and validation path are all known.
 - Do not repeatedly ask whether to continue between normal phases; ask only when a decision, credential, permission, or P0/P1 risk requires the user.
 - Use Codex approval/escalation rules for Git writes, destructive actions, network fetches, dependency installs, database writes, and browser setup.
 - If a worktree transfer is chosen, stop after writing the handoff and tell the user where to continue.
+
+## Consensus Gate
+
+Before ae-work starts on S4 tasks, record or confirm:
+
+- requirements status: none needed, confirmed inline, or artifact path,
+- plan status: artifact path and self-review result,
+- document review status: pass, findings accepted, or blocked,
+- open decisions: none, explicitly deferred, or user decision required,
+- validation contract: exact commands or checks expected before delivery.
+
+If any item is blocked or unknown, pause implementation and resolve the missing decision instead of assuming it.
+
+## Execution Evidence
+
+For S4 work, keep concise evidence in `docs/00-process/active/<task>/` when the task spans multiple checkpoints or turns. Use the smallest useful artifact:
+
+- `progress.md` for checkpoint summaries,
+- `ledger.jsonl` for structured step, command, result, and evidence records,
+- `handoff.md` when transferring to another branch, worktree, thread, or later session.
+
+Do not create process artifacts for tiny one-shot fixes unless they improve handoff or auditability.
 
 ## Final Response
 

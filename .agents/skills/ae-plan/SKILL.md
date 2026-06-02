@@ -14,6 +14,7 @@ Create a durable implementation plan. Planning answers how to build; it does not
 - Separate known facts, assumptions, open questions, and deferred work.
 - Make every implementation unit verifiable by a concrete command, file inspection, or user-flow check.
 - Treat planning as design compression: explore viable approaches, choose one, then turn it into executable units.
+- For non-trivial decisions, record the decision drivers, rejected alternatives, and consequences so downstream execution can preserve intent.
 
 ## Plan Readiness Gate
 
@@ -27,7 +28,16 @@ Before writing a plan, verify that these inputs are clear enough:
 
 If any item is materially unclear, ask one focused question or route to `ae-brainstorm`. Do not fill gaps with invented product behavior.
 
-For tasks with multiple plausible designs, compare 2-3 approaches before selecting one. Keep the comparison short: fit, trade-off, risk, and why the recommended approach wins.
+For tasks with multiple plausible designs, compare 2-3 approaches before selecting one. Keep the comparison short: fit, trade-off, risk, and why the recommended approach wins. When only one viable approach exists, state why the alternatives collapse instead of pretending there was a meaningful choice.
+
+For high-risk plans, add a deliberate planning pass before implementation units:
+
+- list the top 3 decision drivers,
+- name 3 pre-mortem failure scenarios,
+- include validation across the relevant levels: unit, integration, user flow, data/ops, or observability,
+- record rollback or recovery signals that would prove the plan is unsafe to continue.
+
+High-risk includes auth, permissions, public API contracts, migrations, data deletion, billing, concurrency, background jobs, security-sensitive flows, cross-module refactors, or broad behavior changes.
 
 ## Workflow
 
@@ -37,10 +47,11 @@ For tasks with multiple plausible designs, compare 2-3 approaches before selecti
 4. For design-heavy work, compare 2-3 materially different approaches and record the chosen approach.
 5. Use `references/plan-template.md` for structure.
 6. Break the work into implementation units that are small enough to validate independently.
-7. For each unit, name exact files, dependencies, tests, validation commands, risks, rollback signals, and deferred implementation notes.
-8. Run Plan Self-Review before presenting the plan.
-9. Write the plan to `docs/ae/plans/` before presenting next-step options.
-10. Recommend ae-review domain:document for significant plans, then ae-work when the user wants execution.
+7. Add ADR-style decision records for material choices: decision, drivers, alternatives, why chosen, consequences, and follow-ups.
+8. For each unit, name exact files, dependencies, tests, validation commands, risks, rollback signals, and deferred implementation notes.
+9. Run Plan Self-Review before presenting the plan.
+10. Write the plan to `docs/ae/plans/` before presenting next-step options.
+11. Recommend ae-review domain:document for significant plans, then ae-work when the user wants execution.
 
 ## Plan Self-Review
 
@@ -49,7 +60,9 @@ Before finalizing, check and fix the plan inline:
 - no `TBD`, `TODO`, placeholder sections, or vague verbs such as "wire up" without file-level detail,
 - no contradiction between scope, decisions, implementation units, and validation,
 - assumptions are explicit and do not masquerade as requirements,
+- alternatives and decision records explain why the selected approach is preferable,
 - every acceptance criterion maps to at least one implementation unit or validation step,
+- high-risk plans include pre-mortem failures and layered validation,
 - rollback and recovery signals are credible for the changed area,
 - the plan is still focused enough for one execution pass; otherwise split it.
 

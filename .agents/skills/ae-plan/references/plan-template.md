@@ -39,9 +39,31 @@ originFingerprint: <optional fingerprint>
 - Alternative:
 - Rejected because:
 
+## Decision Drivers
+
+- Driver 1:
+- Driver 2:
+- Driver 3:
+
 ## Decisions
 
+### ADR-1 - <decision title>
+
+- Decision:
+- Drivers:
+- Alternatives:
+- Why chosen:
+- Consequences:
+- Follow-ups:
+
 ## Risks
+
+## Pre-Mortem
+
+- Failure scenario 1:
+- Failure scenario 2:
+- Failure scenario 3:
+- Mitigations:
 
 ## Implementation Units
 
@@ -60,6 +82,12 @@ originFingerprint: <optional fingerprint>
 
 ## Validation Plan
 
+- Unit:
+- Integration:
+- User flow:
+- Data / operations:
+- Observability:
+
 ## Rollback / Recovery
 
 ## Plan Self-Review
@@ -69,6 +97,8 @@ originFingerprint: <optional fingerprint>
 - Scope check:
 - Acceptance coverage:
 - Validation gaps:
+- Alternatives and ADR check:
+- High-risk pre-mortem check:
 
 ## Handoff
 ```

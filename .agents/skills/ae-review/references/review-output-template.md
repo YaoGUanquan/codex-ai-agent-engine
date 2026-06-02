@@ -12,6 +12,12 @@ Findings first, ordered by severity.
 
 ## Open Questions
 
+## Lane Verdicts
+
+- Reviewer lane:
+- Architect lane:
+- Overall:
+
 ## Coverage
 
 ## Residual Risk
