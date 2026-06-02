@@ -64,6 +64,18 @@ Use the result to choose inline, serial, or parallel execution. Spawn sub-agents
 - Do not bundle opportunistic refactors, formatting churn, dependency upgrades, or unrelated test rewrites into the task.
 - If verification cannot be run, name the exact blocker and the residual risk.
 
+## Cleanup Gate
+
+Before final validation, inspect the files changed in this task for AI-generated cleanup risks:
+
+- fallback-like code that silently swallows errors, returns fabricated defaults, or hides missing integration work,
+- dead code, duplicate helpers, unused flags, speculative abstractions, or placeholder branches,
+- broad formatting churn unrelated to the task,
+- tests that assert implementation details without protecting the requested behavior,
+- comments or names that describe intent inaccurately after the edit.
+
+Fix only deterministic issues inside the current task scope. Do not expand cleanup into unrelated refactors. If a suspicious pattern may be intentional, record it as residual risk or route to ae-review instead of rewriting product behavior.
+
 ## Shipping
 
 Read `references/shipping-workflow.md` before final response.

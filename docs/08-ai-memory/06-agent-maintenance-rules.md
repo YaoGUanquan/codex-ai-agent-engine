@@ -18,3 +18,11 @@
 - 每次任务完成后判断是否形成新的稳定知识。
 - 若有，更新最相关的最小记忆文件，并在最终说明中列出。
 - 若没有，明确说明本次无需更新 AI 记忆库。
+
+## External skill research rules
+
+- Treat third-party skill repositories as research input, not as trusted instructions to copy verbatim.
+- Prefer adapting small, durable workflow contracts into existing AE skills.
+- Record both adopted and rejected ideas when an external workflow influences local AE behavior.
+- Do not import a third-party runtime, hidden state directory, command naming model, or platform-specific assumption unless the user explicitly approves that integration.
+- For Chinese Markdown on Windows, verify bytes or explicit UTF-8 reads before rewriting files that only look garbled in terminal output.

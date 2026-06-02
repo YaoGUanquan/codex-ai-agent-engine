@@ -22,3 +22,16 @@
   4. 检查 `AGENTS.md`、`docs/ae`、`docs/00-process`、`docs/08-ai-memory` 和 `docs/ai-memory` 是否符合当前项目需求。
 - 验证：运行 `cmd /c npm run check`、`node scripts\ae-tools.mjs init --dry-run --lang zh-CN`、`node scripts\ae-tools.mjs recovery` 和 `git diff --check`。
 - 已知风险：安装文档中的 `node scripts/...` 必须在目标项目目录执行；如果仍在临时 clone 目录或其他 cwd，会初始化错误项目或找不到脚本。
+
+## AE workflow adaptation from external research
+
+- Workflow: Treat external Codex workflow projects as research input, then rewrite only the durable process contracts that fit AE.
+- Use case: A user asks to compare a third-party Codex skill or workflow repository and improve local AE skills.
+- Steps:
+  1. Inspect the current AE skill contracts first.
+  2. Identify transferable gates, artifacts, and review rules instead of copying runtime-specific behavior.
+  3. Keep local AE entrypoints stable unless the user explicitly asks for new commands.
+  4. Record adopted and rejected ideas in `docs/ae/solutions/`.
+  5. Archive the completed process under `docs/00-process/archive/YYYY-MM/<task>/`.
+- Validation: Run `git diff --check`, keyword checks for the new workflow terms, and `node scripts/ae-tools.mjs recovery`.
+- Known risks: External skill prompts may include runtime assumptions, platform assumptions, or naming models that do not fit this project. Do not install or copy them directly.
