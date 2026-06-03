@@ -183,6 +183,12 @@
       "purpose": "创建或更新 Codex skill，遵循本地 skill-creator 规范。"
     },
     {
+      "name": "ae-skill-audit",
+      "entry": "/ae-skill-audit",
+      "target": "审计外部技能库",
+      "purpose": "只读审计外部 agent/skill 仓库，提炼可适配的 AE skill 改进或新增建议。"
+    },
+    {
       "name": "ae-agent-creator",
       "entry": "/ae-agent-creator",
       "target": "创建代理",

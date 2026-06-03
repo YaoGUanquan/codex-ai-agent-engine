@@ -1,6 +1,6 @@
 interface:
-  display_name: "AE 后端实现"
-  short_description: "基于仓库中的接口、服务和数据契约实现后端行为"
-  default_prompt: "使用 $ae-backend 实现这个后端改动。"
+  display_name: "AE 后端实现 / AE Backend"
+  short_description: "基于仓库中的接口、服务和数据契约实现后端行为 / Implement backend behavior using repository API, service, and data contracts"
+  default_prompt: "使用 $ae-backend 实现这个后端改动。 / Use $ae-backend to implement this backend change."
 policy:
   allow_implicit_invocation: true

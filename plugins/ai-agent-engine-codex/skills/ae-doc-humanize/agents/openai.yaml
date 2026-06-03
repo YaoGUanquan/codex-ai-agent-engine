@@ -1,6 +1,6 @@
 interface:
-  display_name: "AE 文档人读化"
-  short_description: "把结构化或生硬内容改写成更易读的文档"
-  default_prompt: "使用 $ae-doc-humanize 把这份内容改写成人更容易读的版本。"
+  display_name: "AE 文档人读化 / AE Doc Humanize"
+  short_description: "把结构化或生硬内容改写成更易读的文档 / Rewrite structured or stiff content into readable documents"
+  default_prompt: "使用 $ae-doc-humanize 把这份内容改写成人更容易读的版本。 / Use $ae-doc-humanize to make this document easier to read."
 policy:
   allow_implicit_invocation: true

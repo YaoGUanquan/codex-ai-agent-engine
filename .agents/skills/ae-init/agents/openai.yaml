@@ -1,6 +1,6 @@
 interface:
-  display_name: "AE 初始化"
-  short_description: "初始化项目文档、归档规则和 AI 记忆库"
-  default_prompt: "使用 $ae-init 初始化当前项目的 AGENTS.md、docs/ae、docs/00-process 和 docs/08-ai-memory。"
+  display_name: "AE 初始化 / AE Init"
+  short_description: "初始化项目文档、归档规则和 AI 记忆库 / Initialize project docs, archive rules, and AI memory"
+  default_prompt: "使用 $ae-init 初始化当前项目的 AGENTS.md、docs/ae、docs/00-process 和 docs/08-ai-memory。 / Use $ae-init to initialize AGENTS.md, docs/ae, docs/00-process, and docs/08-ai-memory for this project."
 policy:
   allow_implicit_invocation: true

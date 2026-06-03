@@ -13,7 +13,7 @@ cleanupTarget()
 mkdirSync(targetRoot, { recursive: true })
 
 try {
-  run(process.execPath, [resolve(repoRoot, 'scripts', 'install-project.mjs'), '--target', targetRoot, '--lang', 'bilingual'])
+  run(process.execPath, [resolve(repoRoot, 'scripts', 'install-project.mjs'), '--target', targetRoot])
 
   const expectedPaths = [
     'plugins/ai-agent-engine-codex/skills/ae-officecli/SKILL.md',

@@ -1,6 +1,6 @@
 interface:
-  display_name: "AE 文档结构化"
-  short_description: "把散乱内容整理成需求、计划、交接或检查清单"
-  default_prompt: "使用 $ae-doc-structure 把这些内容整理成结构化文档。"
+  display_name: "AE 文档结构化 / AE Doc Structure"
+  short_description: "把散乱内容整理成需求、计划、交接或检查清单 / Structure messy notes into requirements, plans, handoffs, or checklists"
+  default_prompt: "使用 $ae-doc-structure 把这些内容整理成结构化文档。 / Use $ae-doc-structure to turn these notes into a structured artifact."
 policy:
   allow_implicit_invocation: true

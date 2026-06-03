@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE Skill 审计 / AE Skill Audit"
+  short_description: "审计外部 agent/skill 仓库并提炼可适配的 AE 改进 / Audit external agent and skill repositories for AE-fit improvements"
+  default_prompt: "使用 $ae-skill-audit 分析这个外部 agent/skill 仓库，判断哪些模式适合改造成当前 AE skill。 / Use $ae-skill-audit to analyze this external agent or skill repository for AE-fit improvements."
+policy:
+  allow_implicit_invocation: true

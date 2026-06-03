@@ -155,6 +155,13 @@ export const skillMetadata = {
     promptEn: 'Use $ae-skill-creator to create a new Codex skill.',
     promptZh: '使用 $ae-skill-creator 帮我创建一个新的 Codex skill。',
   },
+  'ae-skill-audit': {
+    display: { en: 'AE Skill Audit', zh: 'AE Skill 审计' },
+    en: 'Audit external agent and skill repositories for AE-fit improvements',
+    zh: '审计外部 agent/skill 仓库并提炼可适配的 AE 改进',
+    promptEn: 'Use $ae-skill-audit to analyze this external agent or skill repository for AE-fit improvements.',
+    promptZh: '使用 $ae-skill-audit 分析这个外部 agent/skill 仓库，判断哪些模式适合改造成当前 AE skill。',
+  },
   'ae-sql': {
     display: { en: 'AE SQL', zh: 'AE 数据库操作' },
     en: 'Generate, review, or execute SQL with safety boundaries',

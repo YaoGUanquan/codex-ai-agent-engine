@@ -17,7 +17,7 @@ Steps for the Codex agent:
 1. Confirm the current working directory is the target project.
 2. Create a temporary directory outside the target project.
 3. Clone this repository into the temporary directory.
-4. Run the project installer with `--target` pointing to the current project. Add `--lang zh-CN` or `--lang bilingual` if the user wants non-English skill list metadata.
+4. Run the project installer with `--target` pointing to the current project. The default skill list metadata is bilingual; add `--lang en` or `--lang zh-CN` only when the user wants a single language.
 5. Run `node scripts/ae-tools.mjs init` from the target project if the user wants the target project to get `AGENTS.md`, `docs/ae`, `docs/00-process`, `docs/08-ai-memory`, archive rules, and UTF-8 Chinese handling rules.
 6. Remove the temporary directory.
 7. Tell the user to restart/reopen the Codex conversation for this project.
@@ -36,10 +36,11 @@ Pop-Location
 Remove-Item -Recurse -Force $tmp
 ```
 
-Chinese metadata variant:
+Single-language metadata variants:
 
 ```powershell
 node (Join-Path $tmp 'scripts\install-project.mjs') --target $target --lang zh-CN
+node (Join-Path $tmp 'scripts\install-project.mjs') --target $target --lang en
 ```
 
 Unix shell implementation:
@@ -54,13 +55,14 @@ node "$tmp/scripts/install-project.mjs" --target "$target"
 rm -rf "$tmp"
 ```
 
-Chinese metadata variant:
+Single-language metadata variants:
 
 ```bash
 node "$tmp/scripts/install-project.mjs" --target "$target" --lang zh-CN
+node "$tmp/scripts/install-project.mjs" --target "$target" --lang en
 ```
 
-Supported metadata languages are `en`, `zh-CN`, and `bilingual`.
+The default metadata language is `bilingual`. Supported metadata languages are `en`, `zh-CN`, and `bilingual`.
 
 ## Initialize Project Docs and AI Memory
 
@@ -104,7 +106,7 @@ or:
 node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-agent-engine.git --branch main
 ```
 
-The updater preserves the existing installed metadata language when possible. To override it, add `--lang en`, `--lang zh-CN`, or `--lang bilingual`.
+The updater preserves the existing installed metadata language when possible; if it cannot detect one, it defaults to bilingual metadata. To override it, add `--lang en`, `--lang zh-CN`, or `--lang bilingual`.
 
 ## Switch Skill List Language
 

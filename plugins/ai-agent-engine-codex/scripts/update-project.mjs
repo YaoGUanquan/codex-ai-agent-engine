@@ -8,7 +8,7 @@ const args = process.argv.slice(2)
 const targetRoot = resolve(readArg('--target') || process.cwd())
 const branch = readArg('--branch') || 'main'
 const repo = readArg('--repo') || readInstalledRepo(targetRoot)
-const lang = readArg('--lang') || readInstalledLang(targetRoot) || 'en'
+const lang = readArg('--lang') || readInstalledLang(targetRoot) || 'bilingual'
 const supportedLangs = new Set(['en', 'zh-CN', 'bilingual'])
 
 if (!supportedLangs.has(lang)) {
