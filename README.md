@@ -79,6 +79,9 @@ node scripts/ae-tools.mjs help
 - `ae-debug`：系统化排查构建失败、运行时异常、UI 问题和接口故障。
 - `ae-tdd`：围绕明确行为执行红绿重构式测试驱动开发。
 - `ae-test-browser`：用真实浏览器验收 UI 流程。
+- `ae-computer-use-guard`：约束 Codex Computer Use 的截图、上下文、阶段检查点、hooks 门禁和专家配置。
+- `ae-imagegen-prompt`：把视觉想法优化成图片生成提示词，支持参考图角色、生成预算和视频分镜素材；提示词-only 不强制 hooks。
+- `ae-video-edit-computer`：用本地工具优先和受约束的 Computer Use 执行桌面视频剪辑流程；GUI 前检查 hooks，FFmpeg/ffprobe 阶段前检查本地工具。
 - `ae-sql`：生成、审查或执行 SQL，并保留安全边界。
 - `ae-swagger-parser`：摘要或过滤 Swagger/OpenAPI 规格。
 - `ae-handoff`：沉淀任务状态、证据、阻塞点和下一步。

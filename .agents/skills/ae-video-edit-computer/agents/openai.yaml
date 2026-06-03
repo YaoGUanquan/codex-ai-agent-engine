@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE 电脑剪辑视频 / AE Video Edit Computer"
+  short_description: "以本地工具优先和 Computer Use 约束方式执行桌面视频剪辑流程 / Run desktop video-editing workflows with local tooling first and guarded Computer Use"
+  default_prompt: "使用 $ae-video-edit-computer 用本地素材和受约束的 Computer Use 剪辑这个视频。 / Use $ae-video-edit-computer to edit this video with local assets and guarded Computer Use."
+policy:
+  allow_implicit_invocation: true

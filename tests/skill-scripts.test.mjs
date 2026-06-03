@@ -39,6 +39,24 @@ test('renderYaml emits bilingual metadata for ae-help', () => {
   assert.match(yaml, /short_description: "查看 Codex 中可用的 AE 工作流能力 \/ List AE workflow capabilities for Codex"/)
 })
 
+test('renderYaml supports Computer Use video skills in all language modes', () => {
+  const skills = [
+    ['ae-computer-use-guard', 'AE Computer Use Guard', 'AE 电脑控制约束'],
+    ['ae-imagegen-prompt', 'AE Imagegen Prompt', 'AE 图片生成提示词'],
+    ['ae-video-edit-computer', 'AE Video Edit Computer', 'AE 电脑剪辑视频'],
+  ]
+
+  for (const [skillName, englishLabel, chineseLabel] of skills) {
+    const englishYaml = renderYaml(skillMetadata[skillName], 'en')
+    const chineseYaml = renderYaml(skillMetadata[skillName], 'zh-CN')
+    const bilingualYaml = renderYaml(skillMetadata[skillName], 'bilingual')
+
+    assert.match(englishYaml, new RegExp(`display_name: "${englishLabel}"`))
+    assert.match(chineseYaml, new RegExp(`display_name: "${chineseLabel}"`))
+    assert.match(bilingualYaml, new RegExp(`display_name: "${chineseLabel} / ${englishLabel}"`))
+  }
+})
+
 test('check-skill-mirror reports ok', () => {
   const result = runNodeScript('scripts/check-skill-mirror.mjs')
   assert.equal(result.status, 'ok')
@@ -54,13 +72,28 @@ test('check-skill-language-metadata reports ok', () => {
 test('check-install-smoke reports ok and verifies new skills', () => {
   const result = runNodeScript('scripts/check-install-smoke.mjs')
   assert.equal(result.status, 'ok')
-  assert.deepEqual(result.verifiedSkills, ['ae-officecli', 'ae-docx', 'ae-xlsx', 'ae-pptx', 'ae-web-app', 'ae-backend', 'ae-debug', 'ae-tdd'])
+  assert.deepEqual(result.verifiedSkills, [
+    'ae-officecli',
+    'ae-docx',
+    'ae-xlsx',
+    'ae-pptx',
+    'ae-web-app',
+    'ae-backend',
+    'ae-debug',
+    'ae-tdd',
+    'ae-computer-use-guard',
+    'ae-imagegen-prompt',
+    'ae-video-edit-computer',
+  ])
 })
 
 test('installed language switching updates OfficeCLI skills for all supported modes', () => {
   const result = runNodeScript('scripts/check-install-smoke.mjs')
   assert.equal(result.status, 'ok')
   assert.deepEqual(result.verifiedLanguageModes, ['bilingual', 'en', 'zh-CN'])
+  assert.equal(result.verifiedDefaultProfile, 'beginner+low_resource_2g4core_relay')
+  assert.equal(result.verifiedHookPolicy, 'computer_use_requires_hooks')
+  assert.equal(result.verifiedLocalToolPolicy, 'video_requires_ffmpeg_ffprobe_checks')
 })
 
 test('check-officecli-available returns ok or skip', () => {

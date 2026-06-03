@@ -18,6 +18,8 @@ const targetScripts = resolve(targetRoot, 'scripts')
 const targetWrapper = resolve(targetScripts, 'ae-tools.mjs')
 const targetUpdater = resolve(targetScripts, 'update-ae-codex.mjs')
 const targetLanguageSetter = resolve(targetScripts, 'set-ae-language.mjs')
+const sourceTemplates = resolve(repoRoot, 'docs', 'ae', 'templates')
+const targetTemplates = resolve(targetRoot, 'docs', 'ae', 'templates')
 const lang = readArg('--lang') || readInstalledLang(targetRoot) || 'bilingual'
 const supportedLangs = new Set(['en', 'zh-CN', 'bilingual'])
 
@@ -60,6 +62,11 @@ writeFileSync(targetUpdater, "#!/usr/bin/env node\nimport '../plugins/ai-agent-e
 writeFileSync(targetLanguageSetter, "#!/usr/bin/env node\nimport '../plugins/ai-agent-engine-codex/scripts/set-language.mjs'\n", 'utf8')
 
 runLanguageSetter(lang)
+
+if (existsSync(sourceTemplates)) {
+  mkdirSync(dirname(targetTemplates), { recursive: true })
+  cpSync(sourceTemplates, targetTemplates, { recursive: true, force: true })
+}
 
 console.log(JSON.stringify({
   status: 'installed',

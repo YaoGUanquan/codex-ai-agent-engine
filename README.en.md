@@ -79,6 +79,9 @@ node scripts/ae-tools.mjs help
 - `ae-debug`: investigate build failures, runtime errors, UI issues, and API incidents systematically.
 - `ae-tdd`: run a red-green-refactor loop when behavior is precise enough for test-first work.
 - `ae-test-browser`: validate UI flows in a real browser.
+- `ae-computer-use-guard`: constrain Codex Computer Use screenshots, context, stage checkpoints, hooks gates, and expert profiles.
+- `ae-imagegen-prompt`: turn visual ideas into image-generation prompts with reference roles, generation budgets, and storyboard assets; prompt-only work does not require hooks.
+- `ae-video-edit-computer`: run desktop video-editing workflows with local tooling first and guarded Computer Use; check hooks before GUI work and FFmpeg/ffprobe before local media stages.
 - `ae-sql`: generate, review, or execute SQL with explicit safety boundaries.
 - `ae-swagger-parser`: summarize or filter Swagger/OpenAPI specs.
 - `ae-handoff`: capture task state, evidence, blockers, and next steps.
