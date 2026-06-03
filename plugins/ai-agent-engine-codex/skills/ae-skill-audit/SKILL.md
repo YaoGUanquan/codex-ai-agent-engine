@@ -1,0 +1,67 @@
+---
+name: ae-skill-audit
+description: Use when the user asks to audit an external agent, skill, Claude Code, Codex, OpenCode, Cursor, or AI workflow repository and decide what can be adapted into local AE skills without copying external runtime behavior.
+---
+
+# AE Skill Audit
+
+Audit external agent and skill repositories, then translate useful patterns into Codex-native AE improvement options.
+
+## Operating Principles
+
+- Treat external repositories as reference input, not implementation to copy.
+- Prefer reusable workflow judgment over bulk-importing large skill catalogs.
+- Separate platform-specific runtime features from portable methods.
+- Keep recommendations compatible with this project's skill mirror, language metadata, help catalog, and Codex approval model.
+
+## Workflow
+
+1. Identify the external source, license, supported harnesses, and primary capability model.
+2. Inspect the repository structure: skills, agents, hooks, commands, MCP, docs, installer scripts, and manifests.
+3. Compare the external model with current AE boundaries: `ae-ideate`, `ae-brainstorm`, `ae-plan`, `ae-work`, `ae-review`, `ae-skill-creator`, `ae-agent-creator`, `ae-save-experience`, and `ae-help`.
+4. Classify findings using `references/audit-template.md`.
+5. Recommend one of:
+   - improve an existing AE skill,
+   - create a new narrowly scoped AE skill,
+   - add a reference/template only,
+   - reject or defer because the pattern does not fit Codex or AE.
+6. If the user asks to implement a recommendation, route to `ae-skill-creator` or `ae-work` and preserve the plugin source plus `.agents/skills` mirror.
+
+## Fit Criteria
+
+Good candidates:
+
+- strengthen planning, review, verification, safety, handoff, or skill governance,
+- reduce repeated manual judgment across projects,
+- can be expressed as Codex skill instructions or local scripts without relying on unavailable hooks,
+- have clear trigger conditions and validation expectations.
+
+Poor candidates:
+
+- require copying proprietary or license-incompatible text,
+- depend on Claude Code or OpenCode hook behavior that Codex cannot enforce,
+- duplicate an existing AE skill without a clear boundary improvement,
+- expand the plugin into unrelated business, marketing, or personal productivity catalogs.
+
+## Multi-Agent Use
+
+Do not spawn sub-agents unless the user explicitly allows parallel agent work. When allowed, split the audit into independent lanes:
+
+- external repository lane: structure, capabilities, license, and runtime assumptions,
+- AE fit lane: current skill overlap, mirror/catalog impact, and validation,
+- risk lane: licensing, platform mismatch, duplication, and maintenance cost.
+
+Each lane is read-only unless the user separately asks for implementation.
+
+## Output
+
+Return a concise decision report:
+
+- external repository summary,
+- adaptable patterns,
+- existing AE skills to improve,
+- new skill candidates,
+- rejected patterns and reasons,
+- implementation impact: files, metadata, validation commands,
+- recommended next step.
+

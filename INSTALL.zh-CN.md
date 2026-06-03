@@ -17,7 +17,7 @@ Codex 代理执行步骤：
 1. 确认当前工作目录就是目标项目。
 2. 在目标项目外创建临时目录。
 3. 将本仓库 clone 到临时目录。
-4. 运行项目级安装脚本，并把 `--target` 指向当前项目。如果用户希望技能列表显示中文或双语，追加 `--lang zh-CN` 或 `--lang bilingual`。
+4. 运行项目级安装脚本，并把 `--target` 指向当前项目。默认技能列表元数据为双语；只有用户明确想使用单一语言时，才追加 `--lang en` 或 `--lang zh-CN`。
 5. 如果用户希望初始化当前项目的项目文档和长期记忆，从目标项目目录执行 `node scripts/ae-tools.mjs init`。
 6. 删除临时目录。
 7. 提醒用户重启或重新打开当前项目的 Codex 对话。
@@ -36,10 +36,11 @@ Pop-Location
 Remove-Item -Recurse -Force $tmp
 ```
 
-中文技能列表元数据：
+单一语言技能列表元数据：
 
 ```powershell
 node (Join-Path $tmp 'scripts\install-project.mjs') --target $target --lang zh-CN
+node (Join-Path $tmp 'scripts\install-project.mjs') --target $target --lang en
 ```
 
 Unix shell 实现：
@@ -54,13 +55,14 @@ node "$tmp/scripts/install-project.mjs" --target "$target"
 rm -rf "$tmp"
 ```
 
-中文技能列表元数据：
+单一语言技能列表元数据：
 
 ```bash
 node "$tmp/scripts/install-project.mjs" --target "$target" --lang zh-CN
+node "$tmp/scripts/install-project.mjs" --target "$target" --lang en
 ```
 
-支持的元数据语言：`en`、`zh-CN`、`bilingual`。
+默认元数据语言为 `bilingual`。支持的元数据语言：`en`、`zh-CN`、`bilingual`。
 
 ## 初始化项目文档和长期记忆
 
@@ -100,7 +102,7 @@ node scripts\update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-
 node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-agent-engine.git --branch main
 ```
 
-更新脚本会尽量保留当前已经安装的技能列表语言。要显式覆盖，可追加 `--lang en`、`--lang zh-CN` 或 `--lang bilingual`。
+更新脚本会尽量保留当前已经安装的技能列表语言；如果无法识别，默认使用双语元数据。要显式覆盖，可追加 `--lang en`、`--lang zh-CN` 或 `--lang bilingual`。
 
 ## 切换技能列表语言
 

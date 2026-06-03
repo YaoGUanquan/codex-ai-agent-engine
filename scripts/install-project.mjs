@@ -18,7 +18,7 @@ const targetScripts = resolve(targetRoot, 'scripts')
 const targetWrapper = resolve(targetScripts, 'ae-tools.mjs')
 const targetUpdater = resolve(targetScripts, 'update-ae-codex.mjs')
 const targetLanguageSetter = resolve(targetScripts, 'set-ae-language.mjs')
-const lang = readArg('--lang') || readInstalledLang(targetRoot) || 'en'
+const lang = readArg('--lang') || readInstalledLang(targetRoot) || 'bilingual'
 const supportedLangs = new Set(['en', 'zh-CN', 'bilingual'])
 
 if (!supportedLangs.has(lang)) {

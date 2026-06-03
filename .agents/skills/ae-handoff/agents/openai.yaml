@@ -1,6 +1,6 @@
 interface:
-  display_name: "AE 会话交接"
-  short_description: "沉淀当前任务状态、验证、阻塞点和下一步"
-  default_prompt: "使用 $ae-handoff 为当前任务生成一个可继续的交接说明。"
+  display_name: "AE 会话交接 / AE Handoff"
+  short_description: "沉淀当前任务状态、验证、阻塞点和下一步 / Capture current task state, validation, blockers, and next steps"
+  default_prompt: "使用 $ae-handoff 为当前任务生成一个可继续的交接说明。 / Use $ae-handoff to create a continuation handoff for this task."
 policy:
   allow_implicit_invocation: true

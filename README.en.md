@@ -6,6 +6,7 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 > This repository references the workflow design and capability model of the Gitee AI Agent Engine project above.<br>
 > It also draws on selected development-skill ideas from https://github.com/openai/plugins and https://github.com/obra/superpowers.<br>
 > It also draws on Office automation and agent-workflow ideas from https://github.com/iOfficeAI/OfficeCLI.<br>
+> It also draws on external skill repository governance, continuous learning, verification-loop, and Codex adaptation boundary ideas from https://github.com/affaan-m/everything-claude-code.<br>
 > It is not a direct OpenCode runtime port. It uses Codex skills, project-local plugin files, and local scripts.
 
 中文文档: [README.md](README.md)
@@ -84,9 +85,10 @@ node scripts/ae-tools.mjs help
 - `ae-prompt-optimize`: turn vague requests into executable Codex prompts.
 - `ae-save-experience`: capture reusable project experience.
 - `ae-skill-creator`: create or update Codex skills.
+- `ae-skill-audit`: audit external agent/skill repositories and extract AE-fit improvements.
 - `ae-agent-creator`: create Codex-compatible agent prompts and delegation templates.
 - `ae-update`: update the project-local AE for Codex installation.
-- `ae-language`: switch project-local AE skill display language.
+- `ae-language`: advanced entrypoint for switching project-local AE skill display language.
 
 The helper CLI is available through:
 
@@ -110,14 +112,14 @@ From this repository, install directly with:
 node scripts/install-project.mjs --target /path/to/your/codex-project
 ```
 
-Install Chinese or bilingual skill metadata:
+The default install uses bilingual skill-list metadata. You can explicitly switch to Chinese or English:
 
 ```bash
 node scripts/install-project.mjs --target /path/to/your/codex-project --lang zh-CN
-node scripts/install-project.mjs --target /path/to/your/codex-project --lang bilingual
+node scripts/install-project.mjs --target /path/to/your/codex-project --lang en
 ```
 
-Supported metadata languages are `en`, `zh-CN`, and `bilingual`.
+The default metadata language is `bilingual`. Supported metadata languages are `en`, `zh-CN`, and `bilingual`.
 
 The installer writes these paths inside the target project:
 
@@ -191,7 +193,7 @@ node scripts/ae-tools.mjs recovery
 
 ## Skill List Language
 
-The skill list descriptions shown by Codex come from static metadata. They cannot switch live inside an already-open Codex conversation, but you can rewrite the project-local metadata and then restart or reopen the project conversation.
+The skill list descriptions shown by Codex come from static metadata. The default install uses bilingual metadata. They cannot switch live inside an already-open Codex conversation, but you can rewrite the project-local metadata and then restart or reopen the project conversation.
 
 You can also ask a Codex agent in the target project to switch the language for you.
 
@@ -231,7 +233,7 @@ From an installed target project:
 node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-agent-engine.git --branch main
 ```
 
-The updater preserves the installed language metadata when possible. To override it:
+The updater preserves the installed language metadata when possible; if it cannot detect one, it defaults to bilingual metadata. To override it:
 
 ```bash
 node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-agent-engine.git --branch main --lang bilingual

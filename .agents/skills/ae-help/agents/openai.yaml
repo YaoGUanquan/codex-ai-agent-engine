@@ -1,6 +1,6 @@
 interface:
-  display_name: "AE 帮助"
-  short_description: "查看 Codex 中可用的 AE 工作流能力"
-  default_prompt: "使用 $ae-help 查看我应该使用哪个 AE 工作流入口。"
+  display_name: "AE 帮助 / AE Help"
+  short_description: "查看 Codex 中可用的 AE 工作流能力 / List AE workflow capabilities for Codex"
+  default_prompt: "使用 $ae-help 查看我应该使用哪个 AE 工作流入口。 / Use $ae-help to show which AE workflow entrypoint I should use."
 policy:
   allow_implicit_invocation: true

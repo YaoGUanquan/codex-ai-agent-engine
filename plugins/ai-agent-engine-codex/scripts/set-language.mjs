@@ -4,7 +4,7 @@ import { resolve } from 'node:path'
 import { renderYaml, skillMetadata, supportedLanguages } from './skill-language-metadata.mjs'
 
 const args = process.argv.slice(2)
-const lang = readArg('--lang') || args[0] || 'en'
+const lang = readArg('--lang') || args[0] || 'bilingual'
 const targetRoot = resolve(readArg('--target') || process.cwd())
 
 if (!supportedLanguages.has(lang)) {
