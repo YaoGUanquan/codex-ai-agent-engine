@@ -51,6 +51,7 @@ It contains:
 - `skills/ae-work`: guarded implementation workflow.
 - `skills/ae-review`: layered code/document review.
 - `skills/ae-swagger-parser`: OpenAPI/Swagger summary workflow.
+- `skills/ae-skill-audit`: external agent/skill repository audit workflow.
 - `scripts/ae-tools.mjs`: deterministic helper script.
 
 The script currently supports:
@@ -69,9 +70,10 @@ node scripts/ae-tools.mjs swagger openapi.json method:POST path:/login mode:deta
 Implemented now:
 
 - Codex plugin scaffold.
-- Seven valid Codex skills with UI metadata.
+- Thirty-one Codex skills with UI metadata in both plugin source and `.agents/skills` mirror.
 - Capability catalog and migration references.
 - Help, recovery, task analysis, gate, and OpenAPI JSON smoke paths.
+- Project-local installer and updater with bilingual skill-list metadata as the default.
 - Explicit Codex permission model language for Git, network, destructive commands, browser setup, and database writes.
 
 Deferred intentionally:
@@ -84,7 +86,7 @@ Deferred intentionally:
 - OpenCode style `/ae-*` slash command auto-registration.
 - Automatic model scenario routing.
 - Automatic global rule injection.
-- `/ae-update` because it implies reset/clean/pull/build operations.
+- OpenCode hook parity and automatic runtime enforcement.
 
 ## Validation Performed
 
@@ -94,6 +96,7 @@ Deferred intentionally:
 - Parsed plugin JSON, MCP JSON, and capability catalog JSON.
 - Ran `node --check` on `scripts/ae-tools.mjs`.
 - Ran help, recovery, scan task analysis, final gate, blocked gate, and Swagger JSON detail smoke tests.
+- Ran `cmd /c npm run check` after adding the skill mirror, language metadata checks, install smoke checks, and default bilingual metadata behavior.
 
 ## Recommended Next Phase
 

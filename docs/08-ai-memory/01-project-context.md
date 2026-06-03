@@ -11,7 +11,10 @@
 - Node.js package.json
 - package type: module
 - README.md
+- README.en.md
 - README.zh-CN.md
+- INSTALL.md
+- INSTALL.zh-CN.md
 - project-local Codex agents
 - plugin directory
 - scripts directory
@@ -20,7 +23,10 @@
 ## 重要路径
 
 - README.md
+- README.en.md
 - README.zh-CN.md
+- INSTALL.md
+- INSTALL.zh-CN.md
 - .agents
 - plugins
 - scripts
@@ -28,5 +34,11 @@
 
 ## 可用脚本
 
-- check: node --check scripts/ae-tools.mjs && node --check scripts/install-project.mjs && node --check scripts/update-project.mjs && node --check scripts/update-ae-codex.mjs && node --check scripts/set-repository.mjs && node --check scripts/set-language.mjs && node --check scripts/set-ae-language.mjs && node --check plugins/ai-agent-engine-codex/scripts/ae-tools.mjs && node --check plugins/ai-agent-engine-codex/scripts/update-project.mjs && node --check plugins/ai-agent-engine-codex/scripts/set-language.mjs
+- check: cmd /c npm run check
 - help: node scripts/ae-tools.mjs help
+
+## 当前约定
+
+- 项目级安装默认使用双语 skill 列表元数据；`--lang en|zh-CN|bilingual` 仍可显式覆盖。
+- 插件源目录 `plugins/ai-agent-engine-codex/skills` 与本项目安装镜像 `.agents/skills` 必须保持一致。
+- 外部 agent/skill 仓库研究默认走 `ae-skill-audit`，先审计再决定是否改造为本地 AE skill。
