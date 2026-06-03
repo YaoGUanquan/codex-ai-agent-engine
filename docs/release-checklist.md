@@ -22,10 +22,14 @@ $tmp = Join-Path (Get-Location) '.tmp-install-smoke'
 New-Item -ItemType Directory -Force -Path $tmp | Out-Null
 node scripts\install-project.mjs --target $tmp
 node (Join-Path $tmp 'scripts\ae-tools.mjs') help
+Get-Content (Join-Path $tmp '.agents\skills\ae-help\agents\openai.yaml') -Encoding UTF8
 node (Join-Path $tmp 'scripts\set-ae-language.mjs') --lang zh-CN
 node (Join-Path $tmp 'scripts\set-ae-language.mjs') --lang en
+node (Join-Path $tmp 'scripts\set-ae-language.mjs') --lang bilingual
 Remove-Item -Recurse -Force $tmp
 ```
+
+The default install should produce bilingual skill-list metadata, for example `AE 帮助 / AE Help`.
 
 4. Confirm no reference clone is present:
 
