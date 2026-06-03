@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE 图片生成提示词 / AE Imagegen Prompt"
+  short_description: "优化图片生成提示词，支持参考图角色、分镜输出和安全配置 / Optimize image-generation prompts with reference roles, storyboard output, and safe profiles"
+  default_prompt: "使用 $ae-imagegen-prompt 将这个视觉想法改写成图片生成提示词。 / Use $ae-imagegen-prompt to turn this visual idea into an image-generation prompt."
+policy:
+  allow_implicit_invocation: true

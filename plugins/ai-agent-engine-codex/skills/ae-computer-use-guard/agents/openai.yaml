@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE 电脑控制约束 / AE Computer Use Guard"
+  short_description: "约束 Codex Computer Use，提供新人安全预算和专家配置模式 / Constrain Codex Computer Use with beginner-safe budgets and expert profiles"
+  default_prompt: "使用 $ae-computer-use-guard 在用 Computer Use 控制桌面应用前做约束。 / Use $ae-computer-use-guard before controlling a desktop app with Computer Use."
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,53 @@
+# Optional AE skill profile configuration.
+# Copy to .codex/ae-skill-profiles.yaml to customize local behavior.
+# Missing, invalid, unknown, or unsafe values are ignored or clamped.
+# Installed default: beginner + low_resource, assuming a 2G/4-core relay (2G/4核中转).
+# Change server_profile only after the user or operator confirms a stronger upstream.
+
+user_mode: beginner # beginner | standard | expert
+server_profile: low_resource # default 2G/4-core relay; standard | high_capacity require explicit opt-in
+
+hook_guard:
+  check_before_computer_use: true
+  ask_before_install: true
+  deny_computer_use_when_missing: true
+  imagegen_prompt_only_requires_hooks: false
+  imagegen_gui_handoff_requires_hooks: true
+
+local_tool_guard:
+  check_before_video_processing: true
+  ask_before_install: true
+  required_video_tools:
+    - ffmpeg
+    - ffprobe
+
+skill_overrides:
+  ae-computer-use-guard:
+    max_screenshots_per_stage: 1
+    max_actions_per_stage: 3
+    max_image_width: 960
+    max_image_height: 540
+    image_quality: 45
+    max_stage_minutes: 8
+    max_failures_per_stage: 1
+
+  ae-imagegen-prompt:
+    default_aspect_ratio: auto
+    output_count: 1
+    style_strength: medium
+    prompt_language: auto
+    negative_prompt_level: light
+    video_storyboard_mode: conservative
+    reference_fidelity: high
+    ask_before_generation: true
+
+  ae-video-edit-computer:
+    target_editor: auto
+    default_platform: short_video
+    output_resolution: 1080p
+    output_fps: 30
+    max_stage_duration_minutes: 8
+    local_tool_preference: ffmpeg_first
+    use_generated_images_when_missing: ask
+    subtitle_mode: ask
+    bgm_mode: ask

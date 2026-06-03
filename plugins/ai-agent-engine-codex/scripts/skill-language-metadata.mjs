@@ -218,6 +218,27 @@ export const skillMetadata = {
     promptEn: 'Use $ae-xlsx to handle this Excel task.',
     promptZh: '使用 $ae-xlsx 处理这个 Excel 任务。',
   },
+  'ae-computer-use-guard': {
+    display: { en: 'AE Computer Use Guard', zh: 'AE 电脑控制约束' },
+    en: 'Constrain Codex Computer Use with beginner-safe budgets and expert profiles',
+    zh: '约束 Codex Computer Use，提供新人安全预算和专家配置模式',
+    promptEn: 'Use $ae-computer-use-guard before controlling a desktop app with Computer Use.',
+    promptZh: '使用 $ae-computer-use-guard 在用 Computer Use 控制桌面应用前做约束。',
+  },
+  'ae-imagegen-prompt': {
+    display: { en: 'AE Imagegen Prompt', zh: 'AE 图片生成提示词' },
+    en: 'Optimize image-generation prompts with reference roles, storyboard output, and safe profiles',
+    zh: '优化图片生成提示词，支持参考图角色、分镜输出和安全配置',
+    promptEn: 'Use $ae-imagegen-prompt to turn this visual idea into an image-generation prompt.',
+    promptZh: '使用 $ae-imagegen-prompt 将这个视觉想法改写成图片生成提示词。',
+  },
+  'ae-video-edit-computer': {
+    display: { en: 'AE Video Edit Computer', zh: 'AE 电脑剪辑视频' },
+    en: 'Run desktop video-editing workflows with local tooling first and guarded Computer Use',
+    zh: '以本地工具优先和 Computer Use 约束方式执行桌面视频剪辑流程',
+    promptEn: 'Use $ae-video-edit-computer to edit this video with local assets and guarded Computer Use.',
+    promptZh: '使用 $ae-video-edit-computer 用本地素材和受约束的 Computer Use 剪辑这个视频。',
+  },
 }
 
 export function renderYaml(item, selectedLang) {

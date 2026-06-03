@@ -1,0 +1,18 @@
+{
+  "name": "ae-computer-use-hard-guard",
+  "description": "Example hook policy for AE Computer Use guard. Review against the current Codex hooks documentation before enabling.",
+  "events": {
+    "PreToolUse": [
+      {
+        "command": "python .codex/hooks/pre-tool-use-computer-budget.py"
+      }
+    ]
+  },
+  "policy": {
+    "computer_use_requires_hooks": true,
+    "deny_computer_use_when_missing": true,
+    "max_images_per_request": 1,
+    "keep_old_screenshots": false,
+    "allow_raw_video_upload": false
+  }
+}
