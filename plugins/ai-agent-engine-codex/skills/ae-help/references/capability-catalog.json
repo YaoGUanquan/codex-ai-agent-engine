@@ -40,6 +40,13 @@
       "artifactPath": "docs/ae/brainstorms"
     },
     {
+      "name": "ae-prd",
+      "entry": "/ae-prd",
+      "target": "PRD 需求文档",
+      "purpose": "在实现计划前沉淀 WHAT 层面的产品需求、范围、验收标准和待定问题。",
+      "artifactPath": "docs/ae/prds"
+    },
+    {
       "name": "ae-lfg",
       "entry": "/ae-lfg",
       "target": "默认全流程",
@@ -134,6 +141,12 @@
       "purpose": "围绕构建失败、运行时异常、UI 问题和接口故障执行系统化排查与验证。"
     },
     {
+      "name": "ae-task-loop",
+      "entry": "/ae-task-loop",
+      "target": "任务循环",
+      "purpose": "固定成功标准，围绕探索性修复、环境搭建或遗留问题循环验证直到通过或明确阻塞。"
+    },
+    {
       "name": "ae-tdd",
       "entry": "/ae-tdd",
       "target": "测试驱动开发",
@@ -163,6 +176,13 @@
       "entry": "/ae-handoff",
       "target": "会话交接",
       "purpose": "沉淀当前任务状态、文件、命令、结论、阻塞点和下一步。"
+    },
+    {
+      "name": "ae-work-report",
+      "entry": "/ae-work-report",
+      "target": "工作总结",
+      "purpose": "基于 Git 历史、当前未提交变更和已有报告生成日报、周报或指定范围工作总结。",
+      "artifactPath": "docs/ae/work-reports"
     },
     {
       "name": "ae-prompt-optimize",
@@ -214,6 +234,11 @@
       "name": "init",
       "purpose": "初始化当前项目的 Codex 项目说明、AE 工作流目录、过程文档、归档规则、UTF-8 中文处理规则和长期 AI 记忆库文档。",
       "script": "node scripts/ae-tools.mjs init [--lang en|zh-CN|bilingual] [--dry-run] [--force]"
+    },
+    {
+      "name": "check-ae-artifacts",
+      "purpose": "检查 docs/ae 中 PRD、计划和其他 AE 产物 frontmatter 的基本合规性。",
+      "script": "node scripts/check-ae-artifacts.mjs [--target <project>]"
     }
   ],
   "artifactPaths": {
@@ -228,7 +253,9 @@
     "workflowArchive": "docs/00-process/archive",
     "topicArchive": "docs/99-archive",
     "aiMemory": "docs/08-ai-memory",
-    "aiMemoryCompat": "docs/ai-memory"
+    "aiMemoryCompat": "docs/ai-memory",
+    "prds": "docs/ae/prds",
+    "workReports": "docs/ae/work-reports"
   },
   "notes": [
     "/ae-* 是兼容标签；Codex 中可靠触发方式是 skill 名称，例如“用 ae-work 执行这个计划”。",

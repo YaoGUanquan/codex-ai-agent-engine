@@ -113,6 +113,13 @@ export const skillMetadata = {
     promptEn: 'Use $ae-plan to turn this requirement into an implementation plan.',
     promptZh: '使用 $ae-plan 将这个需求转换为实现计划。',
   },
+  'ae-prd': {
+    display: { en: 'AE PRD', zh: 'AE PRD' },
+    en: 'Capture product requirements before implementation planning',
+    zh: '在实现计划前沉淀产品需求和验收边界',
+    promptEn: 'Use $ae-prd to define the requirement before planning.',
+    promptZh: '使用 $ae-prd 在计划前定义这个需求。',
+  },
   'ae-pptx': {
     display: { en: 'AE PPTX', zh: 'AE PPTX' },
     en: 'Use OfficeCLI-oriented workflows for presentation tasks',
@@ -183,6 +190,13 @@ export const skillMetadata = {
     promptEn: 'Use $ae-tdd to implement this change with a failing test first.',
     promptZh: '使用 $ae-tdd 以先写失败测试的方式实现这个改动。',
   },
+  'ae-task-loop': {
+    display: { en: 'AE Task Loop', zh: 'AE 任务循环' },
+    en: 'Iterate on exploratory tasks with fixed success criteria and validation',
+    zh: '固定成功标准并循环执行探索性任务与验证',
+    promptEn: 'Use $ae-task-loop to iterate until this exploratory task is verified or blocked.',
+    promptZh: '使用 $ae-task-loop 循环执行这个探索性任务，直到验证通过或明确阻塞。',
+  },
   'ae-test-browser': {
     display: { en: 'AE Browser Test', zh: 'AE 浏览器验收' },
     en: 'Validate UI flows, screenshots, console, and network in a real browser',
@@ -210,6 +224,13 @@ export const skillMetadata = {
     zh: '带 Git 安全检查和验证证据执行计划',
     promptEn: 'Use $ae-work to implement this AE plan with validation evidence.',
     promptZh: '使用 $ae-work 执行这个 AE 计划并提供验证证据。',
+  },
+  'ae-work-report': {
+    display: { en: 'AE Work Report', zh: 'AE 工作总结' },
+    en: 'Generate concise work reports from Git history and current changes',
+    zh: '基于 Git 历史和当前变更生成简洁工作总结',
+    promptEn: 'Use $ae-work-report to generate a daily, weekly, or scoped work report.',
+    promptZh: '使用 $ae-work-report 生成日报、周报或指定范围工作总结。',
   },
   'ae-xlsx': {
     display: { en: 'AE XLSX', zh: 'AE XLSX' },

@@ -21,7 +21,8 @@ node scripts/ae-tools.mjs swagger <source> method:POST keyword:login mode:detail
 
 ## Boundaries
 
-- JSON is supported with no dependencies.
-- YAML support depends on a local `yaml` package. If unavailable, ask for JSON or install only with user approval.
+- Local JSON, YAML, and YML specs are supported without extra dependencies.
+- Local internal JSON Pointer `$ref` values such as `#/components/schemas/User` are resolved for summary output.
+- Remote URLs still follow Codex network/browsing approval rules. Do not fetch remote specs with shell unless authorized.
 - Swagger UI HTML pages are not specs. Ask for the actual JSON/YAML URL.
 - Do not generate SDKs, tests, or client code unless separately requested.
