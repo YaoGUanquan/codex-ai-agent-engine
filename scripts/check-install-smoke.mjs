@@ -21,6 +21,9 @@ try {
   run(process.execPath, [resolve(repoRoot, 'scripts', 'install-project.mjs'), '--target', targetRoot])
 
   const expectedPaths = [
+    'plugins/ai-agent-engine-codex/skills/ae-prd/SKILL.md',
+    'plugins/ai-agent-engine-codex/skills/ae-work-report/SKILL.md',
+    'plugins/ai-agent-engine-codex/skills/ae-task-loop/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-officecli/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-docx/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-xlsx/SKILL.md',
@@ -32,6 +35,9 @@ try {
     'plugins/ai-agent-engine-codex/skills/ae-computer-use-guard/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-imagegen-prompt/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-video-edit-computer/SKILL.md',
+    '.agents/skills/ae-prd/agents/openai.yaml',
+    '.agents/skills/ae-work-report/agents/openai.yaml',
+    '.agents/skills/ae-task-loop/agents/openai.yaml',
     '.agents/skills/ae-officecli/agents/openai.yaml',
     '.agents/skills/ae-docx/agents/openai.yaml',
     '.agents/skills/ae-xlsx/agents/openai.yaml',
@@ -59,6 +65,9 @@ try {
   }
 
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'office'], { cwd: targetRoot })
+  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'prd'], { cwd: targetRoot })
+  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'report'], { cwd: targetRoot })
+  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'loop'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'docx'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'xlsx'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'pptx'], { cwd: targetRoot })
@@ -67,6 +76,9 @@ try {
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'debug'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'tdd'], { cwd: targetRoot })
   const expectedBilingualLabels = [
+    ['ae-prd', 'AE PRD'],
+    ['ae-work-report', 'AE Work Report'],
+    ['ae-task-loop', 'AE Task Loop'],
     ['ae-officecli', 'AE OfficeCLI'],
     ['ae-docx', 'AE DOCX'],
     ['ae-xlsx', 'AE XLSX'],
@@ -116,6 +128,9 @@ try {
 
   run(process.execPath, [resolve(targetRoot, 'scripts', 'set-ae-language.mjs'), '--lang', 'en'], { cwd: targetRoot })
   const expectedEnglishLabels = [
+    ['ae-prd', 'AE PRD'],
+    ['ae-work-report', 'AE Work Report'],
+    ['ae-task-loop', 'AE Task Loop'],
     ['ae-officecli', 'AE OfficeCLI'],
     ['ae-docx', 'AE DOCX'],
     ['ae-xlsx', 'AE XLSX'],
@@ -134,6 +149,9 @@ try {
 
   run(process.execPath, [resolve(targetRoot, 'scripts', 'set-ae-language.mjs'), '--lang', 'zh-CN'], { cwd: targetRoot })
   const expectedChineseLabels = [
+    ['ae-prd', 'AE PRD'],
+    ['ae-work-report', 'AE 工作总结'],
+    ['ae-task-loop', 'AE 任务循环'],
     ['ae-officecli', 'AE OfficeCLI'],
     ['ae-docx', 'AE DOCX'],
     ['ae-xlsx', 'AE XLSX'],
@@ -154,6 +172,9 @@ try {
     status: 'ok',
     targetRoot: relative(repoRoot, targetRoot),
     verifiedSkills: [
+      'ae-prd',
+      'ae-work-report',
+      'ae-task-loop',
       'ae-officecli',
       'ae-docx',
       'ae-xlsx',

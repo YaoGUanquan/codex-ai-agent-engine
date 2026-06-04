@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE 任务循环 / AE Task Loop"
+  short_description: "固定成功标准并循环执行探索性任务与验证 / Iterate on exploratory tasks with fixed success criteria and validation"
+  default_prompt: "使用 $ae-task-loop 循环执行这个探索性任务，直到验证通过或明确阻塞。 / Use $ae-task-loop to iterate until this exploratory task is verified or blocked."
+policy:
+  allow_implicit_invocation: true

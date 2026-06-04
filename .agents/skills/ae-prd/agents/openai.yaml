@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE PRD / AE PRD"
+  short_description: "在实现计划前沉淀产品需求和验收边界 / Capture product requirements before implementation planning"
+  default_prompt: "使用 $ae-prd 在计划前定义这个需求。 / Use $ae-prd to define the requirement before planning."
+policy:
+  allow_implicit_invocation: true

@@ -1,7 +1,9 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { resolve } from 'node:path'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { join, resolve } from 'node:path'
+import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 
 import { renderYaml, skillMetadata } from '../plugins/ai-agent-engine-codex/scripts/skill-language-metadata.mjs'
@@ -73,6 +75,9 @@ test('check-install-smoke reports ok and verifies new skills', () => {
   const result = runNodeScript('scripts/check-install-smoke.mjs')
   assert.equal(result.status, 'ok')
   assert.deepEqual(result.verifiedSkills, [
+    'ae-prd',
+    'ae-work-report',
+    'ae-task-loop',
     'ae-officecli',
     'ae-docx',
     'ae-xlsx',
@@ -113,6 +118,134 @@ test('package check script runs officecli checks as commands', () => {
   const checkScript = packageJson.scripts.check
   assert.match(checkScript, /node scripts\/check-officecli-available\.mjs/)
   assert.match(checkScript, /node scripts\/check-officecli-smoke\.mjs/)
+  assert.match(checkScript, /node scripts\/check-ae-artifacts\.mjs/)
+})
+
+test('renderYaml supports PRD, work report, and task loop metadata', () => {
+  const skills = [
+    ['ae-prd', 'AE PRD'],
+    ['ae-work-report', 'AE Work Report'],
+    ['ae-task-loop', 'AE Task Loop'],
+  ]
+
+  for (const [skillName, englishLabel] of skills) {
+    const yaml = renderYaml(skillMetadata[skillName], 'en')
+    assert.match(yaml, new RegExp(`display_name: "${englishLabel}"`))
+  }
+})
+
+test('swagger parses local YAML and resolves local schema refs', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-swagger-'))
+  try {
+    writeFileSync(join(tempRoot, 'openapi.yaml'), [
+      'openapi: 3.0.0',
+      'info:',
+      '  title: YAML API',
+      '  version: 1.0.0',
+      'paths:',
+      '  /users:',
+      '    post:',
+      '      tags: [users]',
+      '      summary: Create user',
+      '      requestBody:',
+      '        content:',
+      '          application/json:',
+      '            schema:',
+      '              $ref: "#/components/schemas/UserInput"',
+      '      responses:',
+      '        "200":',
+      '          description: ok',
+      'components:',
+      '  schemas:',
+      '    UserInput:',
+      '      type: object',
+      '      properties:',
+      '        name:',
+      '          type: string',
+      '',
+    ].join('\n'), 'utf8')
+
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'swagger', 'openapi.yaml', 'method:POST', 'path:/users', 'mode:detail'], tempRoot)
+    assert.equal(result.title, 'YAML API')
+    assert.equal(result.openapi, '3.0.0')
+    assert.equal(result.matched_operations, 1)
+    assert.equal(result.operations[0].requestBody.content['application/json'].schema.type, 'object')
+    assert.equal(result.operations[0].requestBody.content['application/json'].schema.properties.name.type, 'string')
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('swagger parses YAML sequence objects used by parameters', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-swagger-'))
+  try {
+    writeFileSync(join(tempRoot, 'openapi.yaml'), [
+      'openapi: 3.0.0',
+      'info:',
+      '  title: Common YAML API',
+      '  version: 1.0.0',
+      'paths:',
+      '  /users/{id}:',
+      '    get:',
+      '      tags:',
+      '        - users',
+      '      summary: Get user',
+      '      parameters:',
+      '        - name: id',
+      '          in: path',
+      '          required: true',
+      '          schema:',
+      '            type: string',
+      '      responses:',
+      '        "200":',
+      '          description: ok',
+      '',
+    ].join('\n'), 'utf8')
+
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'swagger', 'openapi.yaml', 'method:GET', 'path:/users/{id}', 'mode:detail'], tempRoot)
+    assert.equal(result.matched_operations, 1)
+    assert.deepEqual(result.operations[0].tags, ['users'])
+    assert.deepEqual(result.operations[0].parameters, [{
+      name: 'id',
+      in: 'path',
+      required: true,
+      description: null,
+      schema: {
+        type: 'string',
+        format: null,
+      },
+    }])
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('check-ae-artifacts rejects invalid managed frontmatter', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-artifacts-'))
+  try {
+    mkdirSync(join(tempRoot, 'docs', 'ae', 'prds'), { recursive: true })
+    writeFileSync(join(tempRoot, 'docs', 'ae', 'prds', 'bad.md'), [
+      '---',
+      'type: prd',
+      'status: active',
+      'date: 2026-06-04',
+      'topic: missing',
+      '---',
+      '# Bad PRD',
+      '',
+    ].join('\n'), 'utf8')
+
+    const result = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'check-ae-artifacts.mjs'), '--target', tempRoot], {
+      cwd: repoRoot,
+      encoding: 'utf8',
+      stdio: 'pipe',
+    })
+    assert.notEqual(result.status, 0)
+    assert.match(result.stderr, /status/)
+    assert.match(result.stderr, /prd/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
 })
 
 function runNodeScript(relativePath) {
@@ -128,6 +261,26 @@ function runNodeScript(relativePath) {
     0,
     [
       `Command failed: node ${relativePath}`,
+      result.stdout?.trim() || '',
+      result.stderr?.trim() || '',
+    ].filter(Boolean).join('\n'),
+  )
+
+  return JSON.parse(result.stdout)
+}
+
+function runNodeScriptJson(args, cwd = repoRoot) {
+  const result = spawnSync(process.execPath, args.map((arg, index) => index === 0 ? resolve(repoRoot, arg) : arg), {
+    cwd,
+    encoding: 'utf8',
+    stdio: 'pipe',
+  })
+
+  assert.equal(
+    result.status,
+    0,
+    [
+      `Command failed: node ${args.join(' ')}`,
       result.stdout?.trim() || '',
       result.stderr?.trim() || '',
     ].filter(Boolean).join('\n'),
