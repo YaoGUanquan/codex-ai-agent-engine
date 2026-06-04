@@ -15,6 +15,7 @@
 - `04-known-pitfalls.md`：历史坑点、易混淆边界和编码问题。
 - `05-decision-log.md`：长期有效的决策。
 - `06-agent-maintenance-rules.md`：AI 读取和更新记忆的规则。
+- `08-phase-two-tooling.md`：Phase 2 图谱、merge、浏览器/DevTools 路由决策。
 - `99-prompt-template.md`：初始化或维护记忆库的提示词模板。
 
 ## 维护规则

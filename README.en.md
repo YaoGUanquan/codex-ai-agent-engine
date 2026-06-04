@@ -99,6 +99,15 @@ The helper CLI is available through:
 node scripts/ae-tools.mjs help
 ```
 
+Additional helper commands:
+
+```bash
+node scripts/ae-tools.mjs ae-graph-build --root scripts
+node scripts/ae-tools.mjs ae-graph-query --root scripts --path ae-tools.mjs
+```
+
+`ae-graph-build` and `ae-graph-query` are shallow, read-only dependency graph helpers. They scan source files and emit JSON for quick dependency previews. They do not write `.ae/graph.db`, maintain graph freshness, shard a graph schema, or render a preview page.
+
 ## Project-Level Installation
 
 Project-level installation is the recommended path. It writes only inside the target project and avoids changing global Codex configuration.
@@ -180,6 +189,13 @@ Inspect OpenAPI:
 
 ```bash
 node scripts/ae-tools.mjs swagger openapi.json method:POST keyword:login mode:detail
+```
+
+Inspect a shallow dependency graph:
+
+```bash
+node scripts/ae-tools.mjs ae-graph-build --root scripts
+node scripts/ae-tools.mjs ae-graph-query --root scripts --path ae-tools.mjs
 ```
 
 Initialize a project memory and archive scaffold:
@@ -306,7 +322,10 @@ docs/ai-memory/                  # Compatibility pointer after init
 - `/ae-*` names are compatibility labels, not auto-registered Codex slash commands.
 - Reliable trigger style is: `Use ae-work ...`, `Use ae-review ...`, `Use ae-plan ...`.
 - This MVP does not provide a real MCP server yet. `.mcp.json` is intentionally empty.
-- YAML OpenAPI parsing is deferred; JSON OpenAPI works without dependencies.
+- Local JSON/YAML OpenAPI parsing works without extra dependencies for common spec structures; complex YAML remains bounded by the lightweight parser.
+- `ae-graph-build` and `ae-graph-query` are shallow read-only scripts, not the full OpenCode graph tool.
+- `ae-merge-branch` is intentionally deferred until `ae-work` has stronger Git evidence and authorization boundaries.
+- Chrome DevTools behavior is routed through existing Browser, Playwright, or available DevTools tools in `ae-test-browser`; this project does not dynamically register OpenCode MCP tools.
 - Git writes, destructive filesystem actions, network fetches, dependency installs, database writes, and browser setup must use Codex's explicit approval model.
 
 ## Development Checks
@@ -318,6 +337,7 @@ npm run check
 node --check scripts/ae-tools.mjs
 node --check plugins/ai-agent-engine-codex/scripts/ae-tools.mjs
 node scripts/ae-tools.mjs help
+node scripts/ae-tools.mjs ae-graph-build --root scripts
 ```
 
 Validate skills with your local Codex skill validator if available.

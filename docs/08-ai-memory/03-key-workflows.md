@@ -36,3 +36,16 @@
   5. Archive the completed process under `docs/00-process/archive/YYYY-MM/<task>/`.
 - Validation: Run `cmd /c npm run check`, `git diff --check`, and targeted help checks such as `node scripts/ae-tools.mjs help skill`.
 - Known risks: External skill prompts may include runtime assumptions, platform assumptions, or naming models that do not fit this project. Do not install or copy them directly.
+
+## Phase 2 shallow graph and browser routing
+
+- Workflow: Add high-value Phase 2 helpers only when they can stay read-only, bounded, and Codex-native.
+- Use case: A user asks to continue porting OpenCode-inspired graph, merge, or browser/DevTools capabilities.
+- Steps:
+  1. Prefer shallow helper scripts before persistent MCP tools when the schema and write lifecycle are not settled.
+  2. Use `node scripts/ae-tools.mjs ae-graph-build --root <path>` for a quick JSON dependency preview.
+  3. Use `node scripts/ae-tools.mjs ae-graph-query --root <path> --path <file>` or `--keyword <text>` for a focused graph query.
+  4. Keep `ae-merge-branch` deferred until Git evidence, rollback, and authorization rules are stronger.
+  5. Route browser debugging through `ae-test-browser` with Browser, Playwright, or an already available DevTools-capable tool.
+- Validation: Run `npm.cmd test`, `npm.cmd run check`, `git diff --check`, and `node scripts/check-skill-mirror.mjs`.
+- Known risks: The graph helper is static and shallow; dynamic imports, aliases, generated code, and framework-specific resolution may be incomplete.

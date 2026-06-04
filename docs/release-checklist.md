@@ -7,6 +7,8 @@ Use this before publishing a GitHub release.
 ```bash
 npm run check
 node scripts/ae-tools.mjs help
+node scripts/ae-tools.mjs ae-graph-build --root scripts
+node scripts/ae-tools.mjs ae-graph-query --root scripts --path ae-tools.mjs
 ```
 
 2. Validate skills if your local Codex skill validator is available:

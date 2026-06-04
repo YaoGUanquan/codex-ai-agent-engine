@@ -63,6 +63,8 @@ node scripts/ae-tools.mjs task-analyze --mode scan --task "..."
 node scripts/ae-tools.mjs task-analyze --mode plan --plan docs/ae/plans/example-plan.md
 node scripts/ae-tools.mjs gate --workflow work --checkpoint final --validation "npm test"
 node scripts/ae-tools.mjs swagger openapi.json method:POST path:/login mode:detail
+node scripts/ae-tools.mjs ae-graph-build [--root <path>] [--limit 500]
+node scripts/ae-tools.mjs ae-graph-query [--root <path>] (--path <file>|--keyword <text>)
 ```
 
 ## MVP Boundaries
@@ -72,15 +74,17 @@ Implemented now:
 - Codex plugin scaffold.
 - Thirty-one Codex skills with UI metadata in both plugin source and `.agents/skills` mirror.
 - Capability catalog and migration references.
-- Help, recovery, task analysis, gate, and OpenAPI JSON smoke paths.
+- Help, recovery, task analysis, gate, OpenAPI JSON/YAML smoke paths, and shallow dependency graph scan/query helpers.
 - Project-local installer and updater with bilingual skill-list metadata as the default.
 - Explicit Codex permission model language for Git, network, destructive commands, browser setup, and database writes.
+- Browser acceptance routed through Codex Browser, Playwright, or available DevTools tooling instead of dynamic OpenCode MCP registration.
 
 Deferred intentionally:
 
 - Real MCP server.
-- SQLite file graph build/query.
+- Full SQLite-backed file graph build/query with schema design, sharding, freshness, and preview UI.
 - SQL/JDBC tool.
+- `ae-merge-branch`, until `ae-work` has stronger Git evidence and authorization boundaries.
 - Handoff/new-session automation.
 - Prompt optimize that creates new sessions.
 - OpenCode style `/ae-*` slash command auto-registration.
@@ -101,7 +105,7 @@ Deferred intentionally:
 ## Recommended Next Phase
 
 1. Convert `ae-tools.mjs` into a real MCP server only after the script surface stabilizes.
-2. Add YAML parsing for Swagger/OpenAPI through a dependency-managed package or MCP server.
+2. Decide whether Swagger/OpenAPI YAML needs a dependency-managed parser after the lightweight parser proves insufficient.
 3. Add review-contract as a script/MCP command that emits selected reviewer personas.
-4. Port graph build/query as a separate MCP module with explicit `.ae/graph.db` write approval.
-5. Add a small installer or marketplace entry only after deciding whether this plugin should be repo-local or home-local.
+4. Promote graph build/query to a separate MCP module only after defining `.ae/graph.db` schema, write approval, freshness policy, shard strategy, and preview expectations.
+5. Revisit `ae-merge-branch` only after Git evidence capture, rollback guidance, and explicit authorization rules are stronger in `ae-work`.

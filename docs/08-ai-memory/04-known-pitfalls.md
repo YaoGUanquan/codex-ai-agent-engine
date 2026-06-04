@@ -11,3 +11,9 @@
 
 - `init` 生成的可续跑过程笔记位于 `docs/00-process/active`，不能只让 `recovery` 扫描 `docs/ae`。
 - 安装示例里清理临时目录前后都可以运行 init，但命令必须显式进入 `$target` 或 `"$target"`。
+
+## Phase 2 tooling boundaries
+
+- `ae-graph-build` / `ae-graph-query` are shallow read-only helpers. Do not describe them as a full graph database, MCP server, freshness tracker, shard manager, or preview UI.
+- Do not expose `ae-merge-branch` as a skill until Git write authorization, rollback, and evidence requirements are explicitly stronger.
+- Do not assume OpenCode dynamic Chrome DevTools MCP registration exists in Codex. Route browser checks through `ae-test-browser` and the browser tools actually available in the session.
