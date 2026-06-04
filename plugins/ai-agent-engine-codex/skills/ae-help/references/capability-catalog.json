@@ -239,6 +239,16 @@
       "name": "check-ae-artifacts",
       "purpose": "检查 docs/ae 中 PRD、计划和其他 AE 产物 frontmatter 的基本合规性。",
       "script": "node scripts/check-ae-artifacts.mjs [--target <project>]"
+    },
+    {
+      "name": "ae-graph-build",
+      "purpose": "构建浅层只读依赖图 JSON，用于 Phase 2 前的文件和导入关系预览；不写入 .ae/graph.db。",
+      "script": "node scripts/ae-tools.mjs ae-graph-build [--root <path>] [--limit 500]"
+    },
+    {
+      "name": "ae-graph-query",
+      "purpose": "按 path 或 keyword 查询浅层依赖图结果；每次查询重新扫描当前工作区，不包含 freshness、分片或预览页。",
+      "script": "node scripts/ae-tools.mjs ae-graph-query [--root <path>] (--path <file>|--keyword <text>)"
     }
   ],
   "artifactPaths": {
@@ -261,6 +271,9 @@
     "/ae-* 是兼容标签；Codex 中可靠触发方式是 skill 名称，例如“用 ae-work 执行这个计划”。",
     "涉及 Git 写入、网络、依赖安装、数据库写入、生产环境或破坏性操作时，必须按 Codex 审批规则执行。",
     "OpenCode 的自动 slash command、agent registry、session navigation 和全局规则注入不是 Codex 原生能力。",
+    "ae-graph-build / ae-graph-query 当前是浅层只读脚本，不移植 OpenCode 的完整图谱 schema、SQLite 存储、分片、freshness 或预览页。",
+    "ae-merge-branch 暂不作为 Codex skill 暴露；Git merge 类写操作需等待 ae-work 的 Git 证据链和授权边界进一步增强。",
+    "ae-chrome-devtools 不照搬动态 MCP 注册；Codex 中通过现有 Browser、Playwright 或 DevTools 可用工具路由，并由 ae-test-browser 记录证据。",
     "本项目也参考了 https://github.com/openai/plugins、https://github.com/obra/superpowers 和 https://github.com/iOfficeAI/OfficeCLI 中的部分技能与工作流设计，但以 Codex 原生 skill 和本地脚本方式重写实现。"
   ]
 }

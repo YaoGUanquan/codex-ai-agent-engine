@@ -9,6 +9,13 @@ Minimum browser evidence for a claimed pass:
 5. At least one screenshot or equivalent visual confirmation when layout matters.
 6. Desktop and mobile checks when responsive behavior is relevant.
 
+Route selection:
+
+- Use Browser/in-app browser when the task is a local page inspection, manual flow, screenshot, click/type interaction, or quick localhost validation.
+- Use Playwright when the task needs repeatable scripted evidence, multiple assertions, viewport matrix checks, or console/network capture across a flow.
+- Use DevTools only when the current Codex session exposes a stable DevTools-capable tool and the task needs lower-level inspection beyond Browser or Playwright.
+- Do not dynamically register Chrome DevTools MCP servers or assume OpenCode tool registration behavior.
+
 Minimum browser evidence for a failure:
 
 1. Route or URL reached.

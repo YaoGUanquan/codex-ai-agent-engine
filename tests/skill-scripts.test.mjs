@@ -119,6 +119,8 @@ test('package check script runs officecli checks as commands', () => {
   assert.match(checkScript, /node scripts\/check-officecli-available\.mjs/)
   assert.match(checkScript, /node scripts\/check-officecli-smoke\.mjs/)
   assert.match(checkScript, /node scripts\/check-ae-artifacts\.mjs/)
+  assert.match(checkScript, /node scripts\/ae-tools\.mjs ae-graph-build --root scripts/)
+  assert.match(checkScript, /node scripts\/ae-tools\.mjs ae-graph-query --root scripts --path ae-tools\.mjs/)
 })
 
 test('renderYaml supports PRD, work report, and task loop metadata', () => {
@@ -243,6 +245,50 @@ test('check-ae-artifacts rejects invalid managed frontmatter', () => {
     assert.notEqual(result.status, 0)
     assert.match(result.stderr, /status/)
     assert.match(result.stderr, /prd/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('graph-build reports shallow local dependencies', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-graph-'))
+  try {
+    mkdirSync(join(tempRoot, 'src'), { recursive: true })
+    writeFileSync(join(tempRoot, 'src', 'main.js'), [
+      "import { helper } from './helper.js'",
+      "import fs from 'node:fs'",
+      'helper()',
+      '',
+    ].join('\n'), 'utf8')
+    writeFileSync(join(tempRoot, 'src', 'helper.js'), [
+      'export function helper() {',
+      "  return 'ok'",
+      '}',
+      '',
+    ].join('\n'), 'utf8')
+
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'ae-graph-build', '--root', '.'], tempRoot)
+    assert.equal(result.status, 'ok')
+    assert.equal(result.mode, 'shallow-dependency-graph')
+    assert.ok(result.nodes.some((node) => node.path === 'src/main.js'))
+    assert.ok(result.edges.some((edge) => edge.from === 'src/main.js' && edge.to === 'src/helper.js' && edge.type === 'imports'))
+    assert.ok(result.externalDependencies.some((dep) => dep.from === 'src/main.js' && dep.dependency === 'node:fs'))
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('graph-query filters shallow graph by path', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-graph-'))
+  try {
+    mkdirSync(join(tempRoot, 'src'), { recursive: true })
+    writeFileSync(join(tempRoot, 'src', 'main.js'), "import './helper.js'\n", 'utf8')
+    writeFileSync(join(tempRoot, 'src', 'helper.js'), 'export const value = 1\n', 'utf8')
+
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'ae-graph-query', '--root', '.', '--path', 'src/main.js'], tempRoot)
+    assert.equal(result.status, 'ok')
+    assert.deepEqual(result.matchedNodes.map((node) => node.path), ['src/main.js'])
+    assert.ok(result.relatedEdges.some((edge) => edge.to === 'src/helper.js'))
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }
