@@ -420,6 +420,49 @@ test('task-analyze treats enabled auto as automatic safe suggestion', () => {
   }
 })
 
+test('task-analyze warns and falls back to auto for unknown multi-agent enabled values', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-'))
+  try {
+    mkdirSync(join(tempRoot, '.codex'), { recursive: true })
+    mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
+    writeFileSync(join(tempRoot, '.codex', 'ae-skill-profiles.yaml'), [
+      'multi_agent:',
+      '  enabled: maybe',
+      '  mode: suggest',
+      '  max_workers: 2',
+      '  min_parallel_units: 2',
+      '  require_clean_git: true',
+      '  require_plan_dependencies: true',
+      '  require_disjoint_files: true',
+      '  allow_write_agents: false',
+      '  review_lanes_parallel: true',
+      '',
+    ].join('\n'), 'utf8')
+    writeFileSync(join(tempRoot, 'docs', 'ae', 'plans', 'plan.md'), [
+      '### U1 - First unit',
+      '',
+      '- Depends on: none',
+      '- Files:',
+      '  - `src/one.js`',
+      '',
+      '### U2 - Second unit',
+      '',
+      '- Depends on: none',
+      '- Files:',
+      '  - `src/two.js`',
+      '',
+    ].join('\n'), 'utf8')
+
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'task-analyze', '--mode', 'plan', '--plan', 'docs/ae/plans/plan.md'], tempRoot)
+    assert.equal(result.multi_agent_config.effective.enabled, 'auto')
+    assert.equal(result.execution_strategy, 'suggest_parallel')
+    assert.ok(result.warnings.includes('Ignoring unknown multi_agent.enabled: maybe'))
+    assert.equal(result.parallel_eligibility.can_spawn_write_agents, false)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
 test('task-analyze uses opt-in multi-agent suggest config for dependency waves', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-'))
   try {
@@ -475,6 +518,52 @@ test('task-analyze uses opt-in multi-agent suggest config for dependency waves',
   }
 })
 
+test('task-analyze blocks auto write agents unless allow_write_agents is true', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-'))
+  try {
+    mkdirSync(join(tempRoot, '.codex'), { recursive: true })
+    mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
+    writeFileSync(join(tempRoot, '.codex', 'ae-skill-profiles.yaml'), [
+      'multi_agent:',
+      '  enabled: auto',
+      '  mode: auto',
+      '  max_workers: 3',
+      '  min_parallel_units: 2',
+      '  require_clean_git: true',
+      '  require_plan_dependencies: true',
+      '  require_disjoint_files: true',
+      '  allow_write_agents: false',
+      '  review_lanes_parallel: true',
+      '',
+    ].join('\n'), 'utf8')
+    writeFileSync(join(tempRoot, 'docs', 'ae', 'plans', 'plan.md'), [
+      '### U1 - First unit',
+      '',
+      '- Depends on: none',
+      '- Files:',
+      '  - `src/one.js`',
+      '',
+      '### U2 - Second unit',
+      '',
+      '- Depends on: none',
+      '- Files:',
+      '  - `src/two.js`',
+      '',
+    ].join('\n'), 'utf8')
+
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'task-analyze', '--mode', 'plan', '--plan', 'docs/ae/plans/plan.md'], tempRoot)
+    assert.equal(result.multi_agent_config.effective.enabled, 'auto')
+    assert.equal(result.multi_agent_config.effective.mode, 'auto')
+    assert.equal(result.execution_strategy, 'serial_with_multi_agent_blockers')
+    assert.equal(result.parallel_eligibility.can_parallelize, false)
+    assert.equal(result.parallel_eligibility.can_spawn_write_agents, false)
+    assert.deepEqual(result.parallel_eligibility.blockers, ['multi_agent.allow_write_agents is false'])
+    assert.deepEqual(result.parallel_waves.map((wave) => wave.unit_ids), [['U1'], ['U2']])
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
 test('task-analyze reports auto parallel readiness only with write-agent opt-in', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-'))
   try {
@@ -523,6 +612,50 @@ test('task-analyze reports auto parallel readiness only with write-agent opt-in'
     assert.equal(result.parallel_eligibility.can_spawn_write_agents, true)
     assert.deepEqual(result.parallel_eligibility.blockers, [])
     assert.deepEqual(result.parallel_waves.map((wave) => wave.unit_ids), [['U1', 'U2'], ['U3']])
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('task-analyze keeps review_only as read-only parallel strategy without write agents', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-'))
+  try {
+    mkdirSync(join(tempRoot, '.codex'), { recursive: true })
+    mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
+    writeFileSync(join(tempRoot, '.codex', 'ae-skill-profiles.yaml'), [
+      'multi_agent:',
+      '  enabled: auto',
+      '  mode: review_only',
+      '  max_workers: 3',
+      '  min_parallel_units: 2',
+      '  require_clean_git: true',
+      '  require_plan_dependencies: true',
+      '  require_disjoint_files: true',
+      '  allow_write_agents: true',
+      '  review_lanes_parallel: true',
+      '',
+    ].join('\n'), 'utf8')
+    writeFileSync(join(tempRoot, 'docs', 'ae', 'plans', 'plan.md'), [
+      '### U1 - First unit',
+      '',
+      '- Depends on: none',
+      '- Files:',
+      '  - `src/one.js`',
+      '',
+      '### U2 - Second unit',
+      '',
+      '- Depends on: none',
+      '- Files:',
+      '  - `src/two.js`',
+      '',
+    ].join('\n'), 'utf8')
+
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'task-analyze', '--mode', 'plan', '--plan', 'docs/ae/plans/plan.md'], tempRoot)
+    assert.equal(result.execution_strategy, 'parallel_review_only')
+    assert.equal(result.parallel_eligibility.can_parallelize, false)
+    assert.equal(result.parallel_eligibility.can_spawn_write_agents, false)
+    assert.deepEqual(result.parallel_eligibility.blockers, ['multi_agent.mode is review_only; write workers remain disabled'])
+    assert.deepEqual(result.parallel_waves.map((wave) => wave.unit_ids), [['U1'], ['U2']])
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }

@@ -17,3 +17,17 @@
   - `npm run check` was blocked by local PowerShell execution policy for `npm.ps1`.
   - `npm.cmd run check` passed.
   - `npm.cmd test` passed with 20 tests.
+
+## 2026-06-08 Follow-up Test Hardening
+
+- Added missing `task-analyze` regression coverage for:
+  - unknown `multi_agent.enabled` values falling back to default `auto` with a warning,
+  - `enabled: auto` plus `mode: auto` staying blocked when `allow_write_agents: false`,
+  - `mode: review_only` remaining read-only and never authorizing write agents.
+- No production-code fix was required; the added regression tests passed against the current implementation.
+- Validation passed:
+  - `node --test tests/skill-scripts.test.mjs --test-name-pattern "unknown multi-agent enabled|blocks auto write agents|review_only"`
+  - `npm.cmd test` with 26 tests.
+  - `npm.cmd run check`.
+  - `node scripts/check-skill-mirror.mjs`.
+  - `git diff --check`.
