@@ -113,6 +113,15 @@ try {
   if (!profileTemplate.includes('ffmpeg') || !profileTemplate.includes('ffprobe')) {
     throw new Error('Installed profile template does not list ffmpeg/ffprobe local tool defaults')
   }
+  if (!profileTemplate.includes('multi_agent:')) {
+    throw new Error('Installed profile template does not include multi_agent defaults')
+  }
+  if (!profileTemplate.includes('enabled: false # opt-in only')) {
+    throw new Error('Installed profile template does not keep multi_agent disabled by default')
+  }
+  if (!profileTemplate.includes('max_workers: 3')) {
+    throw new Error('Installed profile template does not document multi_agent max_workers default')
+  }
 
   const hooksReadme = readFileSync(resolve(targetRoot, 'docs', 'ae', 'templates', 'computer-use-hooks', 'README.md'), 'utf8')
   if (!hooksReadme.includes('Computer Use') || !hooksReadme.includes('ffmpeg')) {
@@ -191,6 +200,7 @@ try {
     verifiedDefaultProfile: 'beginner+low_resource_2g4core_relay',
     verifiedHookPolicy: 'computer_use_requires_hooks',
     verifiedLocalToolPolicy: 'video_requires_ffmpeg_ffprobe_checks',
+    verifiedMultiAgentPolicy: 'multi_agent_disabled_by_default',
   }, null, 2))
 } finally {
   cleanupTarget()

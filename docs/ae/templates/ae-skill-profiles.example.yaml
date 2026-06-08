@@ -21,6 +21,17 @@ local_tool_guard:
     - ffmpeg
     - ffprobe
 
+multi_agent:
+  enabled: false # opt-in only; missing config keeps AE execution single-agent by default
+  mode: suggest # suggest | review_only | auto
+  max_workers: 3 # hard-clamped by ae-tools; do not force unused workers
+  min_parallel_units: 2
+  require_clean_git: true
+  require_plan_dependencies: true
+  require_disjoint_files: true
+  allow_write_agents: false # write workers require explicit opt-in beyond enabled=true
+  review_lanes_parallel: true
+
 skill_overrides:
   ae-computer-use-guard:
     max_screenshots_per_stage: 1

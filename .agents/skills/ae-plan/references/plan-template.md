@@ -74,6 +74,7 @@ originFingerprint: <optional fingerprint>
 - Acceptance criteria covered:
 - Depends on:
 - Files:
+- Forbidden files:
 - Approach:
 - Tests:
 - Validation:
@@ -104,3 +105,5 @@ originFingerprint: <optional fingerprint>
 ```
 
 All paths must be repository-relative. Do not write code in the plan.
+
+For multi-agent readiness, every implementation unit must keep `Depends on:` explicit. Use `none` for independent units or comma-separated unit IDs such as `U1, U2`. Use `Forbidden files:` to name shared files, lockfiles, generated outputs, or public contracts that a delegated worker must not edit.

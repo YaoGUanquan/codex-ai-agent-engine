@@ -26,6 +26,18 @@ const sourceExts = new Set([
 ])
 const sourceNames = new Set(['Dockerfile', 'Makefile', 'Jenkinsfile'])
 const stopWords = new Set('the a an in on at to for of with and or is are was were be been being have has had do does did will would could should may might can this that these those it its from by as not no but if then else when where how what which who why all each every both few some any most other such than too very just about after before into over under until up down out use using used fix add update remove create implement plan review task feature bug error issue'.split(' '))
+const defaultMultiAgentConfig = {
+  enabled: false,
+  mode: 'suggest',
+  max_workers: 3,
+  min_parallel_units: 2,
+  require_clean_git: true,
+  require_plan_dependencies: true,
+  require_disjoint_files: true,
+  allow_write_agents: false,
+  review_lanes_parallel: true,
+}
+const multiAgentModes = new Set(['suggest', 'review_only', 'auto'])
 
 function main() {
   const [command, ...args] = process.argv.slice(2)
@@ -913,13 +925,14 @@ function taskAnalyze(worktree, args) {
   const opts = parseOptions(args)
   const mode = opts.mode || 'scan'
   if (!['scan', 'plan'].includes(mode)) throw new Error('task-analyze --mode must be scan or plan')
+  const multiAgent = loadMultiAgentConfig(worktree)
   if (mode === 'plan') {
     if (!opts.plan) throw new Error('task-analyze --mode plan requires --plan <path>')
     const planPath = safeResolve(worktree, opts.plan)
     const text = readText(planPath)
     const units = extractPlanUnits(text)
     const enriched = units.map((unit, index) => ({ ...unit, priority: index + 1, suggested_validation: suggestValidation(unit.files.map((f) => f.path)) }))
-    return buildTaskOutput(enriched)
+    return buildTaskOutput(enriched, multiAgent.warnings, { multiAgent, source_mode: 'plan' })
   }
 
   const task = opts.task || opts._.join(' ')
@@ -936,7 +949,10 @@ function taskAnalyze(worktree, args) {
       priority: index + 1,
     }))
     : [{ id: 'S1', description: task, files: [], suggested_validation: ['run the narrowest relevant project validation'], priority: 1 }]
-  return buildTaskOutput(units, grouped.length === 0 ? ['No matching source files found; manual scoping required.'] : [])
+  return buildTaskOutput(units, [
+    ...multiAgent.warnings,
+    ...(grouped.length === 0 ? ['No matching source files found; manual scoping required.'] : []),
+  ], { multiAgent, source_mode: 'scan' })
 }
 
 function gate(worktree, args) {
@@ -1227,9 +1243,26 @@ function extractPlanUnits(text) {
     return {
       id,
       description: (match[2] || `Unit ${index + 1}`).trim(),
+      depends_on: extractUnitDependencies(body),
       files: extractFiles(body).map((path) => ({ path, source: 'plan' })),
     }
   })
+}
+
+function extractUnitDependencies(text) {
+  const match = text.match(/^\s*-\s*Depends on:\s*([^\n\r]*)/im) || text.match(/^\s*Depends on:\s*([^\n\r]*)/im)
+  if (!match) return null
+  const raw = match[1].trim()
+  if (!raw || /^(none|n\/a|not_applicable|null|无|无依赖|-+)$/i.test(raw)) return []
+  return raw
+    .split(/[,，、\s]+/)
+    .map((item) => normalizeDependencyId(item))
+    .filter(Boolean)
+}
+
+function normalizeDependencyId(value) {
+  const match = String(value).trim().match(/^(?:unit\s*)?(u\d+)$/i)
+  return match ? match[1].toUpperCase() : null
 }
 
 function findNextMajorSection(text, startIndex) {
@@ -1254,7 +1287,7 @@ function extractFiles(text) {
 
 function normalizeRelPath(input) {
   const value = input.trim().replace(/^\.\//, '').replace(/\\/g, '/')
-  if (!value || value.includes('..') || value.startsWith('/') || /^[a-zA-Z]:/.test(value)) return null
+  if (!value || /\s/.test(value) || value.includes('..') || value.startsWith('/') || /^[a-zA-Z]:/.test(value)) return null
   return value.replace(/[),.;:]+$/, '')
 }
 
@@ -1300,7 +1333,9 @@ function suggestValidation(paths) {
   return commands.length > 0 ? [...new Set(commands)] : ['run project-specific validation']
 }
 
-function buildTaskOutput(units, warnings = []) {
+function buildTaskOutput(units, warnings = [], options = {}) {
+  const multiAgent = options.multiAgent || { config: { ...defaultMultiAgentConfig }, source: 'default', path: null, warnings: [] }
+  const config = multiAgent.config
   const conflict_matrix = []
   for (let i = 0; i < units.length; i++) {
     for (let j = i + 1; j < units.length; j++) {
@@ -1310,13 +1345,166 @@ function buildTaskOutput(units, warnings = []) {
     }
   }
   const hasConflict = conflict_matrix.length > 0
+  const dependencyReport = analyzeDependencies(units)
+  const parallelBlockers = multiAgentBlockers(units, {
+    config,
+    hasConflict,
+    dependencyReport,
+    sourceMode: options.source_mode || 'scan',
+  })
+  const canParallelize = parallelBlockers.length === 0
+  const waves = buildParallelWaves(units, {
+    maxWorkers: config.max_workers,
+    serial: hasConflict || !dependencyReport.is_valid,
+  })
   return {
     units,
     conflict_matrix,
     parallel_groups: [{ id: 'G1', unit_ids: units.map((u) => u.id), is_parallel_safe: !hasConflict, blocker_reason: hasConflict ? 'shared files detected' : undefined }],
+    multi_agent_config: {
+      source: multiAgent.source,
+      path: multiAgent.path,
+      effective: config,
+    },
+    execution_strategy: chooseExecutionStrategy(config, canParallelize),
+    parallel_eligibility: {
+      can_parallelize: canParallelize,
+      can_spawn_write_agents: canParallelize && config.enabled && config.mode === 'auto' && config.allow_write_agents,
+      blockers: parallelBlockers,
+      pre_spawn_requirements: config.require_clean_git ? ['ae-work pre-edit gate must confirm a clean Git state before write delegation'] : [],
+      dependency_declarations_present: dependencyReport.declarations_present,
+      notes: multiAgentNotes(config),
+    },
+    parallel_waves: waves,
     execution_order: units.map((u) => u.id),
     warnings,
   }
+}
+
+function loadMultiAgentConfig(worktree) {
+  const profilePath = join(worktree, '.codex', 'ae-skill-profiles.yaml')
+  const warnings = []
+  if (!existsSync(profilePath)) {
+    return {
+      config: { ...defaultMultiAgentConfig },
+      source: 'default',
+      path: null,
+      warnings,
+    }
+  }
+  try {
+    const profile = parseSimpleYaml(readText(profilePath))
+    const raw = isPlainObject(profile.multi_agent) ? profile.multi_agent : {}
+    return {
+      config: normalizeMultiAgentConfig(raw, warnings),
+      source: 'profile',
+      path: '.codex/ae-skill-profiles.yaml',
+      warnings,
+    }
+  } catch (error) {
+    warnings.push(`Ignoring invalid .codex/ae-skill-profiles.yaml multi_agent config: ${error.message}`)
+    return {
+      config: { ...defaultMultiAgentConfig },
+      source: 'default',
+      path: '.codex/ae-skill-profiles.yaml',
+      warnings,
+    }
+  }
+}
+
+function normalizeMultiAgentConfig(raw, warnings) {
+  const config = { ...defaultMultiAgentConfig }
+  for (const key of ['enabled', 'require_clean_git', 'require_plan_dependencies', 'require_disjoint_files', 'allow_write_agents', 'review_lanes_parallel']) {
+    if (typeof raw[key] === 'boolean') config[key] = raw[key]
+  }
+  if (typeof raw.mode === 'string' && multiAgentModes.has(raw.mode)) {
+    config.mode = raw.mode
+  } else if (raw.mode !== undefined) {
+    warnings.push(`Ignoring unknown multi_agent.mode: ${raw.mode}`)
+  }
+  config.max_workers = clampInteger(raw.max_workers, defaultMultiAgentConfig.max_workers, 1, 8)
+  config.min_parallel_units = clampInteger(raw.min_parallel_units, defaultMultiAgentConfig.min_parallel_units, 2, 8)
+  return config
+}
+
+function clampInteger(value, fallback, min, max) {
+  if (!Number.isInteger(value)) return fallback
+  return Math.min(max, Math.max(min, value))
+}
+
+function analyzeDependencies(units) {
+  const unitIds = new Set(units.map((unit) => unit.id))
+  const declarationsPresent = units.length <= 1 || units.every((unit) => Array.isArray(unit.depends_on))
+  const unknown = []
+  for (const unit of units) {
+    for (const dependency of unit.depends_on || []) {
+      if (!unitIds.has(dependency)) unknown.push({ unit: unit.id, dependency })
+    }
+  }
+  return {
+    declarations_present: declarationsPresent,
+    unknown,
+    is_valid: unknown.length === 0,
+  }
+}
+
+function multiAgentBlockers(units, context) {
+  const { config, hasConflict, dependencyReport, sourceMode } = context
+  const blockers = []
+  if (!config.enabled) return ['multi_agent.enabled is false']
+  if (config.max_workers < 2) blockers.push('multi_agent.max_workers is less than 2')
+  if (units.length < config.min_parallel_units) blockers.push(`fewer than ${config.min_parallel_units} implementation units`)
+  if (config.mode === 'review_only') blockers.push('multi_agent.mode is review_only; write workers remain disabled')
+  if (config.require_disjoint_files && hasConflict) blockers.push('shared files detected across units')
+  if (config.require_plan_dependencies && sourceMode !== 'plan') blockers.push('plan mode is required for dependency-aware parallel execution')
+  if (config.require_plan_dependencies && !dependencyReport.declarations_present) blockers.push('plan units must declare Depends on')
+  for (const item of dependencyReport.unknown) blockers.push(`unknown dependency ${item.dependency} referenced by ${item.unit}`)
+  if (config.mode === 'auto' && !config.allow_write_agents) blockers.push('multi_agent.allow_write_agents is false')
+  return blockers
+}
+
+function chooseExecutionStrategy(config, canParallelize) {
+  if (!config.enabled) return 'serial'
+  if (config.mode === 'review_only') return 'parallel_review_only'
+  if (!canParallelize) return config.mode === 'auto' ? 'serial_with_multi_agent_blockers' : 'suggest_serial'
+  if (config.mode === 'auto') return config.allow_write_agents ? 'auto_parallel_ready' : 'auto_parallel_blocked'
+  return 'suggest_parallel'
+}
+
+function multiAgentNotes(config) {
+  const notes = [
+    'task-analyze only reports strategy; the orchestrating Codex agent decides whether to spawn sub-agents',
+  ]
+  if (config.require_clean_git) notes.push('run git status, current branch, and latest commit before write delegation')
+  if (!config.allow_write_agents) notes.push('write-agent spawning is disabled unless allow_write_agents is explicitly true')
+  return notes
+}
+
+function buildParallelWaves(units, options) {
+  const maxWorkers = Math.max(1, options.maxWorkers || 1)
+  if (options.serial || units.length <= 1) return units.map((unit, index) => ({ id: `W${index + 1}`, unit_ids: [unit.id] }))
+  const byId = new Map(units.map((unit) => [unit.id, unit]))
+  const completed = new Set()
+  const remaining = new Set(units.map((unit) => unit.id))
+  const waves = []
+
+  while (remaining.size > 0) {
+    const ready = [...remaining].filter((id) => (byId.get(id).depends_on || []).every((dependency) => completed.has(dependency)))
+    if (ready.length === 0) {
+      for (const id of remaining) waves.push({ id: `W${waves.length + 1}`, unit_ids: [id], blocker_reason: 'cyclic or unresolved dependencies' })
+      break
+    }
+    for (let i = 0; i < ready.length; i += maxWorkers) {
+      const chunk = ready.slice(i, i + maxWorkers)
+      waves.push({ id: `W${waves.length + 1}`, unit_ids: chunk })
+      for (const id of chunk) {
+        remaining.delete(id)
+        completed.add(id)
+      }
+    }
+  }
+
+  return waves
 }
 
 function loadSpec(path) {
