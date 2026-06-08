@@ -1355,7 +1355,7 @@ function buildTaskOutput(units, warnings = [], options = {}) {
   const canParallelize = parallelBlockers.length === 0
   const waves = buildParallelWaves(units, {
     maxWorkers: config.max_workers,
-    serial: hasConflict || !dependencyReport.is_valid,
+    serial: !canParallelize,
   })
   return {
     units,
