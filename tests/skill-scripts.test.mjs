@@ -427,6 +427,59 @@ test('task-analyze uses opt-in multi-agent suggest config for dependency waves',
   }
 })
 
+test('task-analyze reports auto parallel readiness only with write-agent opt-in', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-'))
+  try {
+    mkdirSync(join(tempRoot, '.codex'), { recursive: true })
+    mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
+    writeFileSync(join(tempRoot, '.codex', 'ae-skill-profiles.yaml'), [
+      'multi_agent:',
+      '  enabled: true',
+      '  mode: auto',
+      '  max_workers: 3',
+      '  min_parallel_units: 2',
+      '  require_clean_git: true',
+      '  require_plan_dependencies: true',
+      '  require_disjoint_files: true',
+      '  allow_write_agents: true',
+      '  review_lanes_parallel: true',
+      '',
+    ].join('\n'), 'utf8')
+    writeFileSync(join(tempRoot, 'docs', 'ae', 'plans', 'plan.md'), [
+      '### U1 - First unit',
+      '',
+      '- Depends on: none',
+      '- Files:',
+      '  - `src/one.js`',
+      '',
+      '### U2 - Second unit',
+      '',
+      '- Depends on: none',
+      '- Files:',
+      '  - `src/two.js`',
+      '',
+      '### U3 - Third unit',
+      '',
+      '- Depends on: U1',
+      '- Files:',
+      '  - `tests/one.test.js`',
+      '',
+    ].join('\n'), 'utf8')
+
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'task-analyze', '--mode', 'plan', '--plan', 'docs/ae/plans/plan.md'], tempRoot)
+    assert.equal(result.multi_agent_config.effective.enabled, true)
+    assert.equal(result.multi_agent_config.effective.mode, 'auto')
+    assert.equal(result.multi_agent_config.effective.allow_write_agents, true)
+    assert.equal(result.execution_strategy, 'auto_parallel_ready')
+    assert.equal(result.parallel_eligibility.can_parallelize, true)
+    assert.equal(result.parallel_eligibility.can_spawn_write_agents, true)
+    assert.deepEqual(result.parallel_eligibility.blockers, [])
+    assert.deepEqual(result.parallel_waves.map((wave) => wave.unit_ids), [['U1', 'U2'], ['U3']])
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
 function runNodeScript(relativePath) {
   const scriptPath = resolve(repoRoot, relativePath)
   const result = spawnSync(process.execPath, [scriptPath], {
