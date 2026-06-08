@@ -264,6 +264,49 @@ Or ask a Codex agent:
 Fetch and follow the update instructions from https://raw.githubusercontent.com/YaoGUanquan/codex-ai-agent-engine/main/INSTALL.md
 ```
 
+## Multi-Agent Auto Configuration
+
+`multi_agent.enabled` supports three values:
+
+- `auto`: the default. `task-analyze` analyzes safe parallelism and reports `execution_strategy`, `parallel_eligibility`, and `parallel_waves`, but it does not authorize write-worker agents by itself.
+- `true`: explicitly enables multi-agent analysis. Safety gates still apply.
+- `false`: hard off switch that forces serial execution.
+
+Recommended safe default:
+
+```yaml
+multi_agent:
+  enabled: auto
+  mode: suggest
+  max_workers: 3
+  min_parallel_units: 2
+  require_clean_git: true
+  require_plan_dependencies: true
+  require_disjoint_files: true
+  allow_write_agents: false
+  review_lanes_parallel: true
+```
+
+The updater copies the latest template to `docs/ae/templates/ae-skill-profiles.example.yaml`, but it does not overwrite the local runtime profile. To enable or adjust the profile in a target project:
+
+```bash
+mkdir -p .codex
+cp docs/ae/templates/ae-skill-profiles.example.yaml .codex/ae-skill-profiles.yaml
+```
+
+Windows PowerShell:
+
+```powershell
+New-Item -ItemType Directory -Force -Path .codex | Out-Null
+Copy-Item docs\ae\templates\ae-skill-profiles.example.yaml .codex\ae-skill-profiles.yaml
+```
+
+Write-agent auto parallelism requires additional explicit opt-in with `mode: auto` and `allow_write_agents: true`. Even then, `task-analyze` requires clear plan dependencies, disjoint files, and Git-clean preconditions. After merging this branch to `main`, other projects should update first, copy or edit `.codex/ae-skill-profiles.yaml`, then verify against a real plan:
+
+```bash
+node scripts/ae-tools.mjs task-analyze --mode plan --plan docs/ae/plans/<your-plan>.md
+```
+
 ## Manual Installation
 
 Use manual installation only when you do not want to run the installer.
