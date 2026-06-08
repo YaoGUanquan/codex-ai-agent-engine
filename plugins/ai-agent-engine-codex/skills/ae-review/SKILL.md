@@ -26,6 +26,8 @@ Supported mode markers:
 
 Read `references/review-personas.md`. Use the smallest useful reviewer set. Do not spawn sub-agents unless the user explicitly requested/allowed parallel agent work. If sub-agents are allowed, each reviewer is read-only and must return evidence-backed findings.
 
+If `.codex/ae-skill-profiles.yaml` has `multi_agent.enabled: true` and `multi_agent.review_lanes_parallel: true`, read-only reviewer lanes may run in parallel when the scope is large enough and each lane has a distinct lens. This does not authorize write workers. Keep reviewer outputs evidence-backed and merge them under the strictest verdict.
+
 For significant code or plan reviews, apply two lanes even when you are not spawning sub-agents:
 
 - reviewer lane: correctness, testing, security, contracts, reliability, and concrete regression risk,

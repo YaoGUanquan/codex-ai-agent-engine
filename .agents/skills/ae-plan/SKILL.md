@@ -53,6 +53,13 @@ High-risk includes auth, permissions, public API contracts, migrations, data del
 10. Write the plan to `docs/ae/plans/` before presenting next-step options.
 11. Recommend ae-review domain:document for significant plans, then ae-work when the user wants execution.
 
+When the task may benefit from multi-agent execution, make the plan dependency-aware even if multi-agent config is currently disabled:
+
+- Every implementation unit must include `Depends on:` with either `none` or explicit unit IDs such as `U1`.
+- Every implementation unit must list owned files clearly enough for `task-analyze` to detect overlap.
+- Do not design units only to reach a worker count. Split by real file ownership and dependency boundaries.
+- Shared config, public contracts, migrations, auth, lockfiles, and cross-cutting abstractions should usually stay serial unless a later plan proves disjoint ownership.
+
 ## Plan Self-Review
 
 Before finalizing, check and fix the plan inline:

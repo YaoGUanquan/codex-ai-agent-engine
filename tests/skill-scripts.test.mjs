@@ -99,6 +99,7 @@ test('installed language switching updates OfficeCLI skills for all supported mo
   assert.equal(result.verifiedDefaultProfile, 'beginner+low_resource_2g4core_relay')
   assert.equal(result.verifiedHookPolicy, 'computer_use_requires_hooks')
   assert.equal(result.verifiedLocalToolPolicy, 'video_requires_ffmpeg_ffprobe_checks')
+  assert.equal(result.verifiedMultiAgentPolicy, 'multi_agent_disabled_by_default')
 })
 
 test('check-officecli-available returns ok or skip', () => {
@@ -289,6 +290,92 @@ test('graph-query filters shallow graph by path', () => {
     assert.equal(result.status, 'ok')
     assert.deepEqual(result.matchedNodes.map((node) => node.path), ['src/main.js'])
     assert.ok(result.relatedEdges.some((edge) => edge.to === 'src/helper.js'))
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('task-analyze reports multi-agent defaults as disabled', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-'))
+  try {
+    mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
+    writeFileSync(join(tempRoot, 'docs', 'ae', 'plans', 'plan.md'), [
+      '### U1 - First unit',
+      '',
+      '- Depends on: none',
+      '- Files:',
+      '  - `src/one.js`',
+      '',
+      '### U2 - Second unit',
+      '',
+      '- Depends on: none',
+      '- Files:',
+      '  - `src/two.js`',
+      '',
+    ].join('\n'), 'utf8')
+
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'task-analyze', '--mode', 'plan', '--plan', 'docs/ae/plans/plan.md'], tempRoot)
+    assert.equal(result.multi_agent_config.source, 'default')
+    assert.equal(result.multi_agent_config.effective.enabled, false)
+    assert.equal(result.execution_strategy, 'serial')
+    assert.deepEqual(result.parallel_eligibility.blockers, ['multi_agent.enabled is false'])
+    assert.equal(result.parallel_waves.length, 1)
+    assert.deepEqual(result.parallel_waves[0].unit_ids, ['U1', 'U2'])
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('task-analyze uses opt-in multi-agent suggest config for dependency waves', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-'))
+  try {
+    mkdirSync(join(tempRoot, '.codex'), { recursive: true })
+    mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
+    writeFileSync(join(tempRoot, '.codex', 'ae-skill-profiles.yaml'), [
+      'multi_agent:',
+      '  enabled: true',
+      '  mode: suggest',
+      '  max_workers: 2',
+      '  min_parallel_units: 2',
+      '  require_clean_git: true',
+      '  require_plan_dependencies: true',
+      '  require_disjoint_files: true',
+      '  allow_write_agents: false',
+      '  review_lanes_parallel: true',
+      '',
+    ].join('\n'), 'utf8')
+    writeFileSync(join(tempRoot, 'docs', 'ae', 'plans', 'plan.md'), [
+      '### U1 - Script analysis',
+      '',
+      '- Depends on: none',
+      '- Files:',
+      '  - `scripts/a.mjs`',
+      '',
+      '### U2 - Skill docs',
+      '',
+      '- Depends on: none',
+      '- Files:',
+      '  - `docs/skill.md`',
+      '',
+      '### U3 - Tests',
+      '',
+      '- Depends on: U1',
+      '- Files:',
+      '  - `tests/a.test.mjs`',
+      '',
+    ].join('\n'), 'utf8')
+
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'task-analyze', '--mode', 'plan', '--plan', 'docs/ae/plans/plan.md'], tempRoot)
+    assert.equal(result.multi_agent_config.source, 'profile')
+    assert.equal(result.multi_agent_config.path, '.codex/ae-skill-profiles.yaml')
+    assert.equal(result.multi_agent_config.effective.enabled, true)
+    assert.equal(result.multi_agent_config.effective.max_workers, 2)
+    assert.equal(result.execution_strategy, 'suggest_parallel')
+    assert.equal(result.parallel_eligibility.can_parallelize, true)
+    assert.equal(result.parallel_eligibility.can_spawn_write_agents, false)
+    assert.deepEqual(result.parallel_eligibility.blockers, [])
+    assert.deepEqual(result.parallel_waves.map((wave) => wave.unit_ids), [['U1', 'U2'], ['U3']])
+    assert.deepEqual(result.units.map((unit) => unit.depends_on), [[], [], ['U1']])
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }
