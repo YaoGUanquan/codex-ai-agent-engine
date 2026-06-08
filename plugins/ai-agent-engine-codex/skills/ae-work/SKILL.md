@@ -49,11 +49,13 @@ node scripts/ae-tools.mjs task-analyze --mode scan --task "<description>"
 
 Use the result to choose inline, serial, or parallel execution. Spawn sub-agents only when the user explicitly allowed parallel agent work and file ownership is disjoint. Use `references/work-subagent-template.md` for delegated prompts.
 
-If `.codex/ae-skill-profiles.yaml` contains `multi_agent.enabled: true`, treat `task-analyze` as the source of truth for `execution_strategy`, `parallel_eligibility`, and `parallel_waves`.
+If `.codex/ae-skill-profiles.yaml` contains `multi_agent.enabled: auto` or `multi_agent.enabled: true`, treat `task-analyze` as the source of truth for `execution_strategy`, `parallel_eligibility`, and `parallel_waves`.
 
+- `auto` enabled state means automatically analyze whether parallel work is safe. It does not mean scripts spawn agents.
 - `suggest` mode may recommend waves, but the orchestrating agent must still decide whether to spawn sub-agents.
 - `review_only` mode allows parallel read-only review lanes but keeps write workers disabled.
 - `auto` mode is eligible for write workers only when `parallel_eligibility.can_spawn_write_agents` is true, the Pre-Edit Gate confirmed a clean safe branch, plan units declare dependencies, and file ownership is disjoint.
+- `multi_agent.enabled: false` is a hard off switch and must force serial execution.
 - Never force a minimum of three workers. Use no more than the safe units in the current wave and no more than `multi_agent.max_workers`.
 - If `parallel_eligibility.blockers` is non-empty, fall back to serial execution or report the blocker instead of guessing.
 

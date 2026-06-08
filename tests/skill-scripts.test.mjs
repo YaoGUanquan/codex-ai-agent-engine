@@ -99,7 +99,7 @@ test('installed language switching updates OfficeCLI skills for all supported mo
   assert.equal(result.verifiedDefaultProfile, 'beginner+low_resource_2g4core_relay')
   assert.equal(result.verifiedHookPolicy, 'computer_use_requires_hooks')
   assert.equal(result.verifiedLocalToolPolicy, 'video_requires_ffmpeg_ffprobe_checks')
-  assert.equal(result.verifiedMultiAgentPolicy, 'multi_agent_disabled_by_default')
+  assert.equal(result.verifiedMultiAgentPolicy, 'multi_agent_auto_analysis_by_default')
 })
 
 test('check-officecli-available returns ok or skip', () => {
@@ -295,7 +295,7 @@ test('graph-query filters shallow graph by path', () => {
   }
 })
 
-test('task-analyze reports multi-agent defaults as disabled', () => {
+test('task-analyze reports multi-agent defaults as auto suggest', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-'))
   try {
     mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
@@ -316,10 +316,13 @@ test('task-analyze reports multi-agent defaults as disabled', () => {
 
     const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'task-analyze', '--mode', 'plan', '--plan', 'docs/ae/plans/plan.md'], tempRoot)
     assert.equal(result.multi_agent_config.source, 'default')
-    assert.equal(result.multi_agent_config.effective.enabled, false)
-    assert.equal(result.execution_strategy, 'serial')
-    assert.deepEqual(result.parallel_eligibility.blockers, ['multi_agent.enabled is false'])
-    assert.deepEqual(result.parallel_waves.map((wave) => wave.unit_ids), [['U1'], ['U2']])
+    assert.equal(result.multi_agent_config.effective.enabled, 'auto')
+    assert.equal(result.multi_agent_config.effective.mode, 'suggest')
+    assert.equal(result.execution_strategy, 'suggest_parallel')
+    assert.equal(result.parallel_eligibility.can_parallelize, true)
+    assert.equal(result.parallel_eligibility.can_spawn_write_agents, false)
+    assert.deepEqual(result.parallel_eligibility.blockers, [])
+    assert.deepEqual(result.parallel_waves.map((wave) => wave.unit_ids), [['U1', 'U2']])
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }
@@ -367,6 +370,51 @@ test('task-analyze keeps multi-agent disabled when enabled is false', () => {
     assert.equal(result.parallel_eligibility.can_spawn_write_agents, false)
     assert.deepEqual(result.parallel_eligibility.blockers, ['multi_agent.enabled is false'])
     assert.deepEqual(result.parallel_waves.map((wave) => wave.unit_ids), [['U1'], ['U2']])
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('task-analyze treats enabled auto as automatic safe suggestion', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-'))
+  try {
+    mkdirSync(join(tempRoot, '.codex'), { recursive: true })
+    mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
+    writeFileSync(join(tempRoot, '.codex', 'ae-skill-profiles.yaml'), [
+      'multi_agent:',
+      '  enabled: auto',
+      '  mode: suggest',
+      '  max_workers: 2',
+      '  min_parallel_units: 2',
+      '  require_clean_git: true',
+      '  require_plan_dependencies: true',
+      '  require_disjoint_files: true',
+      '  allow_write_agents: false',
+      '  review_lanes_parallel: true',
+      '',
+    ].join('\n'), 'utf8')
+    writeFileSync(join(tempRoot, 'docs', 'ae', 'plans', 'plan.md'), [
+      '### U1 - First unit',
+      '',
+      '- Depends on: none',
+      '- Files:',
+      '  - `src/one.js`',
+      '',
+      '### U2 - Second unit',
+      '',
+      '- Depends on: none',
+      '- Files:',
+      '  - `src/two.js`',
+      '',
+    ].join('\n'), 'utf8')
+
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'task-analyze', '--mode', 'plan', '--plan', 'docs/ae/plans/plan.md'], tempRoot)
+    assert.equal(result.multi_agent_config.effective.enabled, 'auto')
+    assert.equal(result.execution_strategy, 'suggest_parallel')
+    assert.equal(result.parallel_eligibility.can_parallelize, true)
+    assert.equal(result.parallel_eligibility.can_spawn_write_agents, false)
+    assert.deepEqual(result.parallel_eligibility.blockers, [])
+    assert.deepEqual(result.parallel_waves.map((wave) => wave.unit_ids), [['U1', 'U2']])
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }

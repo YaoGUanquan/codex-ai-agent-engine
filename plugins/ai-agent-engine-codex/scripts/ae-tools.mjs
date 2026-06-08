@@ -27,7 +27,7 @@ const sourceExts = new Set([
 const sourceNames = new Set(['Dockerfile', 'Makefile', 'Jenkinsfile'])
 const stopWords = new Set('the a an in on at to for of with and or is are was were be been being have has had do does did will would could should may might can this that these those it its from by as not no but if then else when where how what which who why all each every both few some any most other such than too very just about after before into over under until up down out use using used fix add update remove create implement plan review task feature bug error issue'.split(' '))
 const defaultMultiAgentConfig = {
-  enabled: false,
+  enabled: 'auto',
   mode: 'suggest',
   max_workers: 3,
   min_parallel_units: 2,
@@ -38,6 +38,7 @@ const defaultMultiAgentConfig = {
   review_lanes_parallel: true,
 }
 const multiAgentModes = new Set(['suggest', 'review_only', 'auto'])
+const multiAgentEnabledValues = new Set(['auto', true, false])
 
 function main() {
   const [command, ...args] = process.argv.slice(2)
@@ -1369,7 +1370,7 @@ function buildTaskOutput(units, warnings = [], options = {}) {
     execution_strategy: chooseExecutionStrategy(config, canParallelize),
     parallel_eligibility: {
       can_parallelize: canParallelize,
-      can_spawn_write_agents: canParallelize && config.enabled && config.mode === 'auto' && config.allow_write_agents,
+      can_spawn_write_agents: canParallelize && config.enabled !== false && config.mode === 'auto' && config.allow_write_agents,
       blockers: parallelBlockers,
       pre_spawn_requirements: config.require_clean_git ? ['ae-work pre-edit gate must confirm a clean Git state before write delegation'] : [],
       dependency_declarations_present: dependencyReport.declarations_present,
@@ -1414,7 +1415,12 @@ function loadMultiAgentConfig(worktree) {
 
 function normalizeMultiAgentConfig(raw, warnings) {
   const config = { ...defaultMultiAgentConfig }
-  for (const key of ['enabled', 'require_clean_git', 'require_plan_dependencies', 'require_disjoint_files', 'allow_write_agents', 'review_lanes_parallel']) {
+  if (multiAgentEnabledValues.has(raw.enabled)) {
+    config.enabled = raw.enabled
+  } else if (raw.enabled !== undefined) {
+    warnings.push(`Ignoring unknown multi_agent.enabled: ${raw.enabled}`)
+  }
+  for (const key of ['require_clean_git', 'require_plan_dependencies', 'require_disjoint_files', 'allow_write_agents', 'review_lanes_parallel']) {
     if (typeof raw[key] === 'boolean') config[key] = raw[key]
   }
   if (typeof raw.mode === 'string' && multiAgentModes.has(raw.mode)) {
@@ -1451,7 +1457,7 @@ function analyzeDependencies(units) {
 function multiAgentBlockers(units, context) {
   const { config, hasConflict, dependencyReport, sourceMode } = context
   const blockers = []
-  if (!config.enabled) return ['multi_agent.enabled is false']
+  if (config.enabled === false) return ['multi_agent.enabled is false']
   if (config.max_workers < 2) blockers.push('multi_agent.max_workers is less than 2')
   if (units.length < config.min_parallel_units) blockers.push(`fewer than ${config.min_parallel_units} implementation units`)
   if (config.mode === 'review_only') blockers.push('multi_agent.mode is review_only; write workers remain disabled')
@@ -1464,7 +1470,7 @@ function multiAgentBlockers(units, context) {
 }
 
 function chooseExecutionStrategy(config, canParallelize) {
-  if (!config.enabled) return 'serial'
+  if (config.enabled === false) return 'serial'
   if (config.mode === 'review_only') return 'parallel_review_only'
   if (!canParallelize) return config.mode === 'auto' ? 'serial_with_multi_agent_blockers' : 'suggest_serial'
   if (config.mode === 'auto') return config.allow_write_agents ? 'auto_parallel_ready' : 'auto_parallel_blocked'
@@ -1476,6 +1482,7 @@ function multiAgentNotes(config) {
     'task-analyze only reports strategy; the orchestrating Codex agent decides whether to spawn sub-agents',
   ]
   if (config.require_clean_git) notes.push('run git status, current branch, and latest commit before write delegation')
+  if (config.enabled === 'auto') notes.push('multi_agent.enabled=auto only enables analysis and recommendations; write workers still require mode=auto and allow_write_agents=true')
   if (!config.allow_write_agents) notes.push('write-agent spawning is disabled unless allow_write_agents is explicitly true')
   return notes
 }
