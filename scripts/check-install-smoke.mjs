@@ -116,8 +116,8 @@ try {
   if (!profileTemplate.includes('multi_agent:')) {
     throw new Error('Installed profile template does not include multi_agent defaults')
   }
-  if (!profileTemplate.includes('enabled: false # opt-in only')) {
-    throw new Error('Installed profile template does not keep multi_agent disabled by default')
+  if (!profileTemplate.includes('enabled: auto # auto analyzes safe parallelism')) {
+    throw new Error('Installed profile template does not set multi_agent to auto analysis by default')
   }
   if (!profileTemplate.includes('max_workers: 3')) {
     throw new Error('Installed profile template does not document multi_agent max_workers default')
@@ -200,7 +200,7 @@ try {
     verifiedDefaultProfile: 'beginner+low_resource_2g4core_relay',
     verifiedHookPolicy: 'computer_use_requires_hooks',
     verifiedLocalToolPolicy: 'video_requires_ffmpeg_ffprobe_checks',
-    verifiedMultiAgentPolicy: 'multi_agent_disabled_by_default',
+    verifiedMultiAgentPolicy: 'multi_agent_auto_analysis_by_default',
   }, null, 2))
 } finally {
   cleanupTarget()
