@@ -16,6 +16,7 @@
 - `05-decision-log.md`：长期有效的决策。
 - `06-agent-maintenance-rules.md`：AI 读取和更新记忆的规则。
 - `08-phase-two-tooling.md`：Phase 2 图谱、merge、浏览器/DevTools 路由决策。
+- `09-multi-agent-auto-config.md`：`multi_agent.enabled: auto` 的默认策略、升级路径和安全边界。
 - `99-prompt-template.md`：初始化或维护记忆库的提示词模板。
 
 ## 维护规则

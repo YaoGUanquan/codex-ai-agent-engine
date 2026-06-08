@@ -42,3 +42,11 @@
 - Context: Graph build/query is valuable but a full OpenCode-style graph requires schema, persistence, sharding, freshness, and preview work. Merge automation writes Git state and needs stronger evidence and authorization. Dynamic DevTools MCP registration is not a stable Codex project-local contract.
 - Impact: Users get immediate graph visibility through JSON helper commands without committing to `.ae/graph.db`. Browser validation instructions stay Codex-native. Git merge automation remains unavailable until safety rules mature.
 - Re-evaluate when: A persistent graph schema is designed, Codex exposes a stable DevTools tool contract, or `ae-work` gains stronger Git write evidence, rollback, and explicit authorization gates.
+
+## 2026-06-08: Multi-agent defaults to auto analysis, not write-agent spawning
+
+- Date: 2026-06-08
+- Decision: Make `multi_agent.enabled: auto` the default profile policy, keep `enabled: false` as the hard off switch, and require explicit `mode: auto` plus `allow_write_agents: true` before write-agent auto parallelism can be considered.
+- Context: The user wanted multi-agent execution to be available by default when beneficial, but the earlier boolean switch was too blunt: `false` disabled useful analysis, while `true` could be misread as authorizing write workers.
+- Impact: `task-analyze` now reports safe parallelism recommendations by default and emits blockers, waves, and notes. Installed projects still need a local `.codex/ae-skill-profiles.yaml` to customize runtime policy; update scripts do not overwrite that local file.
+- Re-evaluate when: Codex exposes stronger first-class sub-agent orchestration contracts, write-worker isolation becomes mechanically enforceable, or real end-to-end multi-agent execution tests are added.

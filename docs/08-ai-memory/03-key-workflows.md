@@ -49,3 +49,17 @@
   5. Route browser debugging through `ae-test-browser` with Browser, Playwright, or an already available DevTools-capable tool.
 - Validation: Run `npm.cmd test`, `npm.cmd run check`, `git diff --check`, and `node scripts/check-skill-mirror.mjs`.
 - Known risks: The graph helper is static and shallow; dynamic imports, aliases, generated code, and framework-specific resolution may be incomplete.
+
+## Multi-agent auto config rollout
+
+- Workflow: Roll out `multi_agent.enabled: auto` to installed projects without silently enabling write-agent spawning.
+- Use case: A user asks how another project should update after the multi-agent config branch is merged.
+- Steps:
+  1. Merge the feature branch to `main`.
+  2. In each installed target project, run `node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-agent-engine.git --branch main`.
+  3. Create or update `.codex/ae-skill-profiles.yaml` from `docs/ae/templates/ae-skill-profiles.example.yaml`; the updater copies templates but does not overwrite the local runtime profile.
+  4. Keep `enabled: auto`, `mode: suggest`, and `allow_write_agents: false` as the safe baseline.
+  5. Only use `mode: auto` plus `allow_write_agents: true` when the user explicitly opts into write-agent auto parallelism.
+  6. Verify with `node scripts/ae-tools.mjs task-analyze --mode plan --plan docs/ae/plans/<your-plan>.md`.
+- Validation: Run `npm.cmd test`, `npm.cmd run check`, `node scripts/check-install-smoke.mjs`, and targeted task-analyze tests for the config matrix.
+- Known risks: `task-analyze` reports policy and waves; actual sub-agent spawning remains an orchestration decision and must respect blockers.

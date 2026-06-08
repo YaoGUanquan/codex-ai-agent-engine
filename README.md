@@ -264,6 +264,49 @@ node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-
 Fetch and follow the update instructions from https://raw.githubusercontent.com/YaoGUanquan/codex-ai-agent-engine/main/INSTALL.md
 ```
 
+## 多 agent auto 配置
+
+`multi_agent.enabled` 支持三种值：
+
+- `auto`：默认值。`task-analyze` 会自动分析是否适合并行、输出 `execution_strategy`、`parallel_eligibility` 和 `parallel_waves`，但不会直接授权写入型子代理。
+- `true`：显式开启多 agent 分析，行为与 `auto` 一样仍需满足安全门禁。
+- `false`：硬关闭，强制串行。
+
+推荐先使用安全默认配置：
+
+```yaml
+multi_agent:
+  enabled: auto
+  mode: suggest
+  max_workers: 3
+  min_parallel_units: 2
+  require_clean_git: true
+  require_plan_dependencies: true
+  require_disjoint_files: true
+  allow_write_agents: false
+  review_lanes_parallel: true
+```
+
+更新脚本会复制最新模板到 `docs/ae/templates/ae-skill-profiles.example.yaml`，但不会自动覆盖项目本地运行配置。要在目标项目启用或调整本地配置：
+
+```bash
+mkdir -p .codex
+cp docs/ae/templates/ae-skill-profiles.example.yaml .codex/ae-skill-profiles.yaml
+```
+
+Windows PowerShell：
+
+```powershell
+New-Item -ItemType Directory -Force -Path .codex | Out-Null
+Copy-Item docs\ae\templates\ae-skill-profiles.example.yaml .codex\ae-skill-profiles.yaml
+```
+
+如需允许写入型子代理自动并行，必须额外显式设置 `mode: auto` 和 `allow_write_agents: true`。即便如此，`task-analyze` 仍会要求计划依赖清晰、文件不冲突、并满足 Git 清洁状态等前置条件。合并到主分支后，其他项目应先运行更新命令，再复制或编辑 `.codex/ae-skill-profiles.yaml`，最后用实际计划验证：
+
+```bash
+node scripts/ae-tools.mjs task-analyze --mode plan --plan docs/ae/plans/<your-plan>.md
+```
+
 ## 手动安装
 
 如果不想运行安装脚本，再使用手动安装。

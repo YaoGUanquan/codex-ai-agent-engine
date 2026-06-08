@@ -104,6 +104,41 @@ node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-
 
 更新脚本会尽量保留当前已经安装的技能列表语言；如果无法识别，默认使用双语元数据。要显式覆盖，可追加 `--lang en`、`--lang zh-CN` 或 `--lang bilingual`。
 
+## 配置多 agent auto 模式
+
+从已合并的 `main` 分支更新后，最新配置模板会出现在 `docs/ae/templates/ae-skill-profiles.example.yaml`。更新脚本不会覆盖 `.codex/ae-skill-profiles.yaml`，因为它是项目本地运行策略。
+
+在目标项目中使用安全的 auto 分析默认值：
+
+```powershell
+New-Item -ItemType Directory -Force -Path .codex | Out-Null
+Copy-Item docs\ae\templates\ae-skill-profiles.example.yaml .codex\ae-skill-profiles.yaml
+```
+
+或：
+
+```bash
+mkdir -p .codex
+cp docs/ae/templates/ae-skill-profiles.example.yaml .codex/ae-skill-profiles.yaml
+```
+
+除非用户明确需要写入型子代理自动并行，否则保持这个基线：
+
+```yaml
+multi_agent:
+  enabled: auto
+  mode: suggest
+  allow_write_agents: false
+```
+
+`enabled: auto` 只让 `task-analyze` 推荐并行波次，不会直接派发写入型子代理。写入型自动并行还必须显式设置 `mode: auto`、`allow_write_agents: true`，并满足 Git 清洁状态、计划依赖声明和文件不冲突等门禁。
+
+用真实计划验证当前生效策略：
+
+```bash
+node scripts/ae-tools.mjs task-analyze --mode plan --plan docs/ae/plans/<your-plan>.md
+```
+
 ## 切换技能列表语言
 
 Codex 技能列表中的描述是静态元数据文件。切换后需要重启或重新打开当前项目的 Codex 对话：

@@ -108,6 +108,41 @@ node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-
 
 The updater preserves the existing installed metadata language when possible; if it cannot detect one, it defaults to bilingual metadata. To override it, add `--lang en`, `--lang zh-CN`, or `--lang bilingual`.
 
+## Configure Multi-Agent Auto Mode
+
+After updating from the merged `main` branch, the latest profile template is available at `docs/ae/templates/ae-skill-profiles.example.yaml`. The updater does not overwrite `.codex/ae-skill-profiles.yaml`, because that file is a local runtime policy.
+
+To use the safe auto analysis default in the target project:
+
+```powershell
+New-Item -ItemType Directory -Force -Path .codex | Out-Null
+Copy-Item docs\ae\templates\ae-skill-profiles.example.yaml .codex\ae-skill-profiles.yaml
+```
+
+or:
+
+```bash
+mkdir -p .codex
+cp docs/ae/templates/ae-skill-profiles.example.yaml .codex/ae-skill-profiles.yaml
+```
+
+Keep this baseline unless the user explicitly wants write-agent auto parallelism:
+
+```yaml
+multi_agent:
+  enabled: auto
+  mode: suggest
+  allow_write_agents: false
+```
+
+`enabled: auto` lets `task-analyze` recommend parallel waves. It does not spawn write agents. Write-agent auto parallelism requires `mode: auto`, `allow_write_agents: true`, clean Git state, dependency-aware plan mode, and disjoint files.
+
+Verify the effective policy against a real plan:
+
+```bash
+node scripts/ae-tools.mjs task-analyze --mode plan --plan docs/ae/plans/<your-plan>.md
+```
+
 ## Switch Skill List Language
 
 The skill list descriptions in Codex are static metadata files. Switch them in the installed project, then restart or reopen the Codex conversation:
