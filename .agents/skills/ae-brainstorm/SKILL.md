@@ -15,6 +15,7 @@ Clarify what should be built. Produce a requirements artifact only when it will 
 - Prefer 2-3 materially different approaches before converging on design-heavy work.
 - Keep the output behavior-focused so `ae-plan` can turn it into implementation units.
 - If the request is too large for one plan, decompose it before refining details.
+- Treat requirement quality like a pre-implementation test surface: WHAT/WHY, measurable success, assumptions, and non-goals must be inspectable before planning.
 
 ## Workflow
 
@@ -24,11 +25,12 @@ Clarify what should be built. Produce a requirements artifact only when it will 
 4. Ask one question at a time when requirements are unclear; prefer multiple choice when the options are known.
 5. Identify goals, non-goals, users or systems affected, success criteria, edge cases, validation signals, and open questions.
 6. Track material ambiguity explicitly. Continue clarifying until the remaining ambiguity is low enough that a plan can name files, risks, validation, and rollback without inventing behavior.
-7. For design-heavy work, compare 2-3 materially different approaches before converging.
-8. When a design needs validation, present the smallest useful design slices instead of a full speculative implementation.
-9. When durable decisions exist, write a requirements file using `references/requirements-capture.md`.
-10. If the behavior is already clear, summarize the confirmed scope and route to ae-plan or ae-work.
-11. If the user wants to continue, route to ae-plan with the requirements path.
+7. Ask at most three clarification questions before recording explicit assumptions; ask fewer when repository evidence is enough.
+8. For design-heavy work, compare 2-3 materially different approaches before converging.
+9. When a design needs validation, present the smallest useful design slices instead of a full speculative implementation.
+10. When durable decisions exist, write a requirements file using `references/requirements-capture.md`.
+11. If the behavior is already clear, summarize the confirmed scope and route to ae-plan or ae-work.
+12. If the user wants to continue, route to ae-plan with the requirements path.
 
 ## Requirements Readiness
 
@@ -40,6 +42,7 @@ Before routing to `ae-plan`, make sure the downstream plan will have:
 - chosen approach when alternatives were considered,
 - validation expectations,
 - unresolved questions labeled as open rather than assumed.
+- a requirement-quality checklist when the work is S4, externally visible, or likely to be delegated.
 
 If any missing item would change architecture, data shape, public behavior, security posture, or validation strategy, do not route to implementation. Ask the next highest-leverage question or record the blocker.
 

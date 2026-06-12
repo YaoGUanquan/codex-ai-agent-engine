@@ -17,24 +17,6 @@ test('renderYaml emits Chinese metadata for ae-web-app', () => {
   assert.match(yaml, /default_prompt: "使用 \$ae-web-app 实现这个 Web 应用流程。"/)
 })
 
-test('renderYaml emits Chinese metadata for ae-officecli', () => {
-  const yaml = renderYaml(skillMetadata['ae-officecli'], 'zh-CN')
-  assert.match(yaml, /display_name: "AE OfficeCLI"/)
-  assert.match(yaml, /short_description: "将 OfficeCLI 作为外部引擎处理 Office 文档自动化任务"/)
-})
-
-test('renderYaml emits Chinese metadata for OfficeCLI format skills', () => {
-  const docxYaml = renderYaml(skillMetadata['ae-docx'], 'zh-CN')
-  const xlsxYaml = renderYaml(skillMetadata['ae-xlsx'], 'zh-CN')
-  const pptxYaml = renderYaml(skillMetadata['ae-pptx'], 'zh-CN')
-  assert.match(docxYaml, /display_name: "AE DOCX"/)
-  assert.match(docxYaml, /default_prompt: "使用 \$ae-docx 处理这个 Word 文档任务。"/)
-  assert.match(xlsxYaml, /display_name: "AE XLSX"/)
-  assert.match(xlsxYaml, /default_prompt: "使用 \$ae-xlsx 处理这个 Excel 任务。"/)
-  assert.match(pptxYaml, /display_name: "AE PPTX"/)
-  assert.match(pptxYaml, /default_prompt: "使用 \$ae-pptx 处理这个 PowerPoint 任务。"/)
-})
-
 test('renderYaml emits bilingual metadata for ae-help', () => {
   const yaml = renderYaml(skillMetadata['ae-help'], 'bilingual')
   assert.match(yaml, /display_name: "AE 帮助 \/ AE Help"/)
@@ -82,6 +64,22 @@ test('check-skill-language-metadata reports ok', () => {
   assert.equal(result.skillCount, result.metadataCount)
 })
 
+test('OfficeCLI skills are removed from active metadata', () => {
+  assert.equal(skillMetadata['ae-officecli'], undefined)
+  assert.equal(skillMetadata['ae-docx'], undefined)
+  assert.equal(skillMetadata['ae-xlsx'], undefined)
+  assert.equal(skillMetadata['ae-pptx'], undefined)
+})
+
+test('renderYaml supports Spec Kit inspired workflow metadata', () => {
+  const constitutionYaml = renderYaml(skillMetadata['ae-constitution'], 'en')
+  const tasksYaml = renderYaml(skillMetadata['ae-tasks'], 'en')
+  assert.match(constitutionYaml, /display_name: "AE Constitution"/)
+  assert.match(constitutionYaml, /project governance/)
+  assert.match(tasksYaml, /display_name: "AE Tasks"/)
+  assert.match(tasksYaml, /dependency-ordered/)
+})
+
 test('check-install-smoke reports ok and verifies new skills', () => {
   const result = runNodeScript('scripts/check-install-smoke.mjs')
   assert.equal(result.status, 'ok')
@@ -91,10 +89,8 @@ test('check-install-smoke reports ok and verifies new skills', () => {
     'ae-prd',
     'ae-work-report',
     'ae-task-loop',
-    'ae-officecli',
-    'ae-docx',
-    'ae-xlsx',
-    'ae-pptx',
+    'ae-constitution',
+    'ae-tasks',
     'ae-web-app',
     'ae-backend',
     'ae-debug',
@@ -178,7 +174,7 @@ test('help can find Claude Code delegation capability', () => {
   assert.match(output, /claude-delegate/)
 })
 
-test('installed language switching updates OfficeCLI skills for all supported modes', () => {
+test('installed language switching updates active skills for all supported modes', () => {
   const result = runNodeScript('scripts/check-install-smoke.mjs')
   assert.equal(result.status, 'ok')
   assert.deepEqual(result.verifiedLanguageModes, ['bilingual', 'en', 'zh-CN'])
@@ -186,25 +182,14 @@ test('installed language switching updates OfficeCLI skills for all supported mo
   assert.equal(result.verifiedHookPolicy, 'computer_use_requires_hooks')
   assert.equal(result.verifiedLocalToolPolicy, 'video_requires_ffmpeg_ffprobe_checks')
   assert.equal(result.verifiedMultiAgentPolicy, 'multi_agent_auto_analysis_by_default')
+  assert.equal(result.verifiedSkillGovernancePolicy, 'source_mirror_metadata_and_path_safety')
 })
 
-test('check-officecli-available returns ok or skip', () => {
-  const result = runNodeScript('scripts/check-officecli-available.mjs')
-  assert.match(result.status, /^(ok|skip)$/)
-  assert.equal(typeof result.available, 'boolean')
-})
-
-test('check-officecli-smoke returns ok or skip', () => {
-  const result = runNodeScript('scripts/check-officecli-smoke.mjs')
-  assert.match(result.status, /^(ok|skip)$/)
-  assert.equal(typeof result.available, 'boolean')
-})
-
-test('package check script runs officecli checks as commands', () => {
+test('package check script omits OfficeCLI checks', () => {
   const packageJson = JSON.parse(runNodeScriptRaw('node -e "console.log(JSON.stringify(require(\'./package.json\')))"'))
   const checkScript = packageJson.scripts.check
-  assert.match(checkScript, /node scripts\/check-officecli-available\.mjs/)
-  assert.match(checkScript, /node scripts\/check-officecli-smoke\.mjs/)
+  assert.doesNotMatch(checkScript, /node scripts\/check-officecli-available\.mjs/)
+  assert.doesNotMatch(checkScript, /node scripts\/check-officecli-smoke\.mjs/)
   assert.match(checkScript, /node scripts\/check-ae-artifacts\.mjs/)
   assert.match(checkScript, /node scripts\/ae-tools\.mjs ae-graph-build --root scripts/)
   assert.match(checkScript, /node scripts\/ae-tools\.mjs ae-graph-query --root scripts --path ae-tools\.mjs/)
@@ -215,6 +200,8 @@ test('renderYaml supports PRD, work report, and task loop metadata', () => {
     ['ae-prd', 'AE PRD'],
     ['ae-work-report', 'AE Work Report'],
     ['ae-task-loop', 'AE Task Loop'],
+    ['ae-constitution', 'AE Constitution'],
+    ['ae-tasks', 'AE Tasks'],
   ]
 
   for (const [skillName, englishLabel] of skills) {

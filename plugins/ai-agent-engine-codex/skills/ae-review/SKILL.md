@@ -53,9 +53,22 @@ For plan and requirements reviews, verify:
 - file ownership and touched modules,
 - validation sufficiency,
 - rollback or recovery path,
-- hidden product assumptions masquerading as implementation detail.
+- hidden product assumptions masquerading as implementation detail,
+- cross-artifact consistency across requirements, constitution, plan, tasks, and validation evidence when those artifacts exist.
 
 Serious findings should block downstream execution until resolved or explicitly accepted by the user.
+
+## Cross-Artifact Review
+
+When reviewing S4 workflow documents, compare available artifacts in this order:
+
+1. `AGENTS.md` and `docs/ae/constitution.md` for governing rules.
+2. Requirements or PRD for WHAT/WHY and acceptance criteria.
+3. Plan for HOW, files, risks, validation, and rollback.
+4. Tasks for dependency order, file ownership, and parallel markers.
+5. Gate or validation evidence for actual proof.
+
+Flag contradictions, missing coverage, orphan tasks, and tasks that introduce behavior not present in the approved requirements or plan.
 
 ## Verdict Rules
 

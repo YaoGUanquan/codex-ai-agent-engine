@@ -32,6 +32,12 @@ multi_agent:
   allow_write_agents: false # write workers require explicit opt-in beyond enabled=auto/true
   review_lanes_parallel: true
 
+skill_governance:
+  require_source_mirror_match: true
+  require_metadata_for_each_skill: true
+  require_agent_openai_yaml: true
+  forbid_path_traversal: true
+
 skill_overrides:
   ae-computer-use-guard:
     max_screenshots_per_stage: 1

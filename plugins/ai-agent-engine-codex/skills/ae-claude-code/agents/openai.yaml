@@ -1,6 +1,6 @@
 interface:
-  display_name: "AE Claude Code"
-  short_description: "Use local Claude Code CLI as a controlled external worker"
-  default_prompt: "Use $ae-claude-code to delegate a bounded analysis or patch proposal to local Claude Code CLI."
+  display_name: "AE Claude Code / AE Claude Code"
+  short_description: "将本地 Claude Code CLI 作为受控外部 worker 使用 / Use local Claude Code CLI as a controlled external worker"
+  default_prompt: "使用 $ae-claude-code 将受限分析或 patch 候选方案委派给本地 Claude Code CLI。 / Use $ae-claude-code to delegate a bounded analysis or patch proposal to local Claude Code CLI."
 policy:
   allow_implicit_invocation: true

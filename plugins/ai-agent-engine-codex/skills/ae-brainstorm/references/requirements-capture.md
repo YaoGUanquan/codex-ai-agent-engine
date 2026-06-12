@@ -18,14 +18,19 @@ Required sections:
 8. Chosen Approach
 9. Validation Signals
 10. Open Questions
-11. Planning Notes
-12. Self-Review
+11. Requirement Quality Checklist
+12. Planning Notes
+13. Self-Review
 
 Self-Review checks:
 
 - No placeholder sections remain.
 - Requirements do not contradict goals or non-goals.
 - Acceptance criteria are testable or inspectable.
+- WHAT and WHY are clear before HOW.
+- Technology choices are constraints only when they came from the user, repository, or accepted approach.
+- Critical ambiguities are either answered, limited to three clarification questions, or recorded as assumptions.
+- Each acceptance criterion has a validation signal.
 - Open questions are explicit and not hidden in assumptions.
 - The scope is small enough for one `ae-plan`; otherwise split it.
 

@@ -62,6 +62,7 @@ If `.codex/ae-skill-profiles.yaml` contains `multi_agent.enabled: auto` or `mult
 ## Execution Rules
 
 - Read the plan and referenced files first.
+- If the plan references a constitution, checklist, or task artifact, read it before editing and treat unresolved blockers as pre-implementation blockers.
 - Execute one implementation unit or one small checkpoint at a time.
 - Keep changes scoped to the assigned unit or task.
 - Do not overwrite user-owned unrelated changes.
@@ -70,6 +71,7 @@ If `.codex/ae-skill-profiles.yaml` contains `multi_agent.enabled: auto` or `mult
 - Stop and report blockers when the failure mode invalidates the current step or assumptions.
 - Run the narrowest meaningful validation, then broader validation when practical.
 - Track validation commands exactly for final reporting.
+- When using a task artifact, mark or report task completion only after the corresponding file change or validation evidence exists.
 - Prefer ae-debug for investigation-heavy failures and ae-tdd when the user wants or the change benefits from red-green-refactor discipline.
 - Do not bundle opportunistic refactors, formatting churn, dependency upgrades, or unrelated test rewrites into the task.
 - If verification cannot be run, name the exact blocker and the residual risk.

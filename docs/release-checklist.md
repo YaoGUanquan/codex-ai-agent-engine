@@ -42,7 +42,18 @@ node --test tests/skill-scripts.test.mjs --test-name-pattern "multi-agent|auto|r
 
 The installed template should include `multi_agent.enabled: auto`, `mode: suggest`, `max_workers: 3`, and `allow_write_agents: false`. `enabled: auto` must report analysis and suggested waves only; write-agent auto parallelism requires explicit `mode: auto` and `allow_write_agents: true`.
 
-5. Confirm no reference clone is present:
+5. Verify skill governance and Spec Kit-inspired workflow entries:
+
+```bash
+node scripts/check-skill-mirror.mjs
+node scripts/check-skill-language-metadata.mjs
+node scripts/ae-tools.mjs help constitution
+node scripts/ae-tools.mjs help tasks
+```
+
+The active catalog should include `ae-constitution` and `ae-tasks`, and should not include removed OfficeCLI skills.
+
+6. Confirm no reference clone is present:
 
 ```bash
 ls upstream-ai-agent-engine
@@ -50,7 +61,7 @@ ls upstream-ai-agent-engine
 
 This should fail or show no directory.
 
-6. Commit and tag:
+7. Commit and tag:
 
 ```bash
 git add .

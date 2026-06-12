@@ -24,10 +24,8 @@ try {
     'plugins/ai-agent-engine-codex/skills/ae-prd/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-work-report/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-task-loop/SKILL.md',
-    'plugins/ai-agent-engine-codex/skills/ae-officecli/SKILL.md',
-    'plugins/ai-agent-engine-codex/skills/ae-docx/SKILL.md',
-    'plugins/ai-agent-engine-codex/skills/ae-xlsx/SKILL.md',
-    'plugins/ai-agent-engine-codex/skills/ae-pptx/SKILL.md',
+    'plugins/ai-agent-engine-codex/skills/ae-constitution/SKILL.md',
+    'plugins/ai-agent-engine-codex/skills/ae-tasks/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-web-app/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-backend/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-debug/SKILL.md',
@@ -39,10 +37,8 @@ try {
     '.agents/skills/ae-prd/agents/openai.yaml',
     '.agents/skills/ae-work-report/agents/openai.yaml',
     '.agents/skills/ae-task-loop/agents/openai.yaml',
-    '.agents/skills/ae-officecli/agents/openai.yaml',
-    '.agents/skills/ae-docx/agents/openai.yaml',
-    '.agents/skills/ae-xlsx/agents/openai.yaml',
-    '.agents/skills/ae-pptx/agents/openai.yaml',
+    '.agents/skills/ae-constitution/agents/openai.yaml',
+    '.agents/skills/ae-tasks/agents/openai.yaml',
     '.agents/skills/ae-web-app/agents/openai.yaml',
     '.agents/skills/ae-backend/agents/openai.yaml',
     '.agents/skills/ae-debug/agents/openai.yaml',
@@ -52,6 +48,8 @@ try {
     '.agents/skills/ae-imagegen-prompt/agents/openai.yaml',
     '.agents/skills/ae-video-edit-computer/agents/openai.yaml',
     'docs/ae/templates/ae-skill-profiles.example.yaml',
+    'docs/ae/templates/constitution-template.md',
+    'docs/ae/templates/requirements-quality-checklist.md',
     'docs/ae/templates/computer-use-hooks/README.md',
     'docs/ae/templates/computer-use-hooks/hooks.example.json',
     'docs/ae/templates/computer-use-hooks/pre-tool-use-computer-budget.example.py',
@@ -66,13 +64,11 @@ try {
     throw new Error('Install removed a pre-existing user docs/ae/templates file')
   }
 
-  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'office'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'prd'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'report'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'loop'], { cwd: targetRoot })
-  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'docx'], { cwd: targetRoot })
-  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'xlsx'], { cwd: targetRoot })
-  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'pptx'], { cwd: targetRoot })
+  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'constitution'], { cwd: targetRoot })
+  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'tasks'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'web'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'backend'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'debug'], { cwd: targetRoot })
@@ -90,10 +86,8 @@ try {
     ['ae-prd', 'AE PRD'],
     ['ae-work-report', 'AE Work Report'],
     ['ae-task-loop', 'AE Task Loop'],
-    ['ae-officecli', 'AE OfficeCLI'],
-    ['ae-docx', 'AE DOCX'],
-    ['ae-xlsx', 'AE XLSX'],
-    ['ae-pptx', 'AE PPTX'],
+    ['ae-constitution', 'AE Constitution'],
+    ['ae-tasks', 'AE Tasks'],
     ['ae-claude-code', 'AE Claude Code'],
     ['ae-computer-use-guard', 'AE 电脑控制约束 / AE Computer Use Guard'],
     ['ae-imagegen-prompt', 'AE 图片生成提示词 / AE Imagegen Prompt'],
@@ -134,6 +128,12 @@ try {
   if (!profileTemplate.includes('max_workers: 3')) {
     throw new Error('Installed profile template does not document multi_agent max_workers default')
   }
+  if (!profileTemplate.includes('skill_governance:')) {
+    throw new Error('Installed profile template does not include skill governance defaults')
+  }
+  if (!profileTemplate.includes('forbid_path_traversal: true')) {
+    throw new Error('Installed profile template does not include path traversal governance defaults')
+  }
 
   const hooksReadme = readFileSync(resolve(targetRoot, 'docs', 'ae', 'templates', 'computer-use-hooks', 'README.md'), 'utf8')
   if (!hooksReadme.includes('Computer Use') || !hooksReadme.includes('ffmpeg')) {
@@ -152,10 +152,8 @@ try {
     ['ae-prd', 'AE PRD'],
     ['ae-work-report', 'AE Work Report'],
     ['ae-task-loop', 'AE Task Loop'],
-    ['ae-officecli', 'AE OfficeCLI'],
-    ['ae-docx', 'AE DOCX'],
-    ['ae-xlsx', 'AE XLSX'],
-    ['ae-pptx', 'AE PPTX'],
+    ['ae-constitution', 'AE Constitution'],
+    ['ae-tasks', 'AE Tasks'],
     ['ae-web-app', 'AE Web App'],
     ['ae-claude-code', 'AE Claude Code'],
     ['ae-computer-use-guard', 'AE Computer Use Guard'],
@@ -174,10 +172,8 @@ try {
     ['ae-prd', 'AE PRD'],
     ['ae-work-report', 'AE 工作总结'],
     ['ae-task-loop', 'AE 任务循环'],
-    ['ae-officecli', 'AE OfficeCLI'],
-    ['ae-docx', 'AE DOCX'],
-    ['ae-xlsx', 'AE XLSX'],
-    ['ae-pptx', 'AE PPTX'],
+    ['ae-constitution', 'AE Constitution'],
+    ['ae-tasks', 'AE Tasks'],
     ['ae-web-app', 'AE Web 应用开发'],
     ['ae-claude-code', 'AE Claude Code'],
     ['ae-computer-use-guard', 'AE 电脑控制约束'],
@@ -198,10 +194,8 @@ try {
       'ae-prd',
       'ae-work-report',
       'ae-task-loop',
-      'ae-officecli',
-      'ae-docx',
-      'ae-xlsx',
-      'ae-pptx',
+      'ae-constitution',
+      'ae-tasks',
       'ae-web-app',
       'ae-backend',
       'ae-debug',
@@ -216,6 +210,7 @@ try {
     verifiedHookPolicy: 'computer_use_requires_hooks',
     verifiedLocalToolPolicy: 'video_requires_ffmpeg_ffprobe_checks',
     verifiedMultiAgentPolicy: 'multi_agent_auto_analysis_by_default',
+    verifiedSkillGovernancePolicy: 'source_mirror_metadata_and_path_safety',
     verifiedCommands: ['recovery', 'claude-delegate'],
   }, null, 2))
 } finally {
