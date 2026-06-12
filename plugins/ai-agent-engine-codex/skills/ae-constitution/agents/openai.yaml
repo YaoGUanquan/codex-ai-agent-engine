@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE Constitution / AE Constitution"
+  short_description: "Create durable project governance for AE plans and reviews / Create durable project governance for AE plans and reviews"
+  default_prompt: "Use $ae-constitution to define project governance principles. / Use $ae-constitution to define project governance principles."
+policy:
+  allow_implicit_invocation: true

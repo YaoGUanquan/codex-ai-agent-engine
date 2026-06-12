@@ -20,6 +20,11 @@ Findings first, ordered by severity.
 
 ## Coverage
 
+- Requirements covered:
+- Plan units covered:
+- Task IDs covered:
+- Governance checks:
+
 ## Residual Risk
 ```
 

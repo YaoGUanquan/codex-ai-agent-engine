@@ -11,7 +11,6 @@ It also references selected development workflow ideas from:
 
 - https://github.com/obra/superpowers
 - https://github.com/openai/plugins
-- https://github.com/iOfficeAI/OfficeCLI
 
 Those repositories are treated as read-only references. This project does not vendor or run their runtimes; it rewrites the relevant ideas into local Codex skills and helper scripts where appropriate.
 

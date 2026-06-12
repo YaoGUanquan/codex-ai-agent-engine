@@ -14,13 +14,14 @@ Capture what should be built before implementation planning. This skill answers 
 - Prefer a concise PRD for small work and a fuller PRD for cross-module or ambiguous work.
 - Use repository-relative paths in artifacts.
 - Create a durable artifact only when it helps downstream planning or handoff.
+- Keep success criteria technology-agnostic unless the product requirement is explicitly technical.
 
 ## Workflow
 
 1. Read existing project docs and nearby feature context before making claims.
 2. Classify the request as quick answer, lightweight requirement, standard PRD, or deep PRD.
-3. Ask one focused question only when the answer changes scope, success criteria, risk, or validation.
-4. Record goals, users or affected systems, functional requirements, acceptance criteria, non-goals, constraints, validation expectations, and open questions.
+3. Ask one focused question only when the answer changes scope, success criteria, risk, or validation; use no more than three clarification questions before recording explicit assumptions.
+4. Record goals, users or affected systems, functional requirements, acceptance criteria, non-goals, constraints, validation expectations, assumptions, and open questions.
 5. When creating a PRD artifact, write it under `docs/ae/prds/` with frontmatter:
 
 ```yaml
@@ -41,6 +42,8 @@ Before routing to planning, confirm:
 - intended outcome is clear,
 - acceptance criteria are testable or explicitly deferred,
 - non-goals and boundaries are named,
+- assumptions are separated from confirmed requirements,
+- WHAT/WHY are clear before HOW,
 - unresolved questions are visible,
 - validation expectations are known.
 

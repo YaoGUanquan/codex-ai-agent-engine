@@ -68,6 +68,20 @@
       "artifactPath": "docs/ae/plans"
     },
     {
+      "name": "ae-constitution",
+      "entry": "/ae-constitution",
+      "target": "Project governance",
+      "purpose": "Create or update durable AE project principles that plans, reviews, tasks, and gates can inspect.",
+      "artifactPath": "docs/ae/constitution.md"
+    },
+    {
+      "name": "ae-tasks",
+      "entry": "/ae-tasks",
+      "target": "Implementation task breakdown",
+      "purpose": "Turn an approved AE plan into dependency-ordered task IDs with file paths, validation tasks, and parallel-safety markers.",
+      "artifactPath": "docs/ae/tasks"
+    },
+    {
       "name": "ae-work",
       "entry": "/ae-work",
       "target": "计划执行",
@@ -98,30 +112,6 @@
       "entry": "/ae-doc-structure",
       "target": "文档结构化",
       "purpose": "把散乱文本整理成结构化需求、计划、决策、检查清单或交付文档。"
-    },
-    {
-      "name": "ae-officecli",
-      "entry": "/ae-officecli",
-      "target": "OfficeCLI 路由",
-      "purpose": "将 OfficeCLI 作为可选外部引擎，用于 Word、Excel、PowerPoint 自动化任务的判断、检测和路由。"
-    },
-    {
-      "name": "ae-docx",
-      "entry": "/ae-docx",
-      "target": "Word 文档工作流",
-      "purpose": "使用面向 OfficeCLI 的工作流处理 `.docx` 创建、编辑、查询、渲染和验证。"
-    },
-    {
-      "name": "ae-xlsx",
-      "entry": "/ae-xlsx",
-      "target": "Excel 工作流",
-      "purpose": "使用面向 OfficeCLI 的工作流处理 `.xlsx` 创建、编辑、公式、查询和验证。"
-    },
-    {
-      "name": "ae-pptx",
-      "entry": "/ae-pptx",
-      "target": "PowerPoint 工作流",
-      "purpose": "使用面向 OfficeCLI 的工作流处理 `.pptx` 生成、编辑、渲染和验证。"
     },
     {
       "name": "ae-frontend-design",
@@ -277,7 +267,9 @@
     "aiMemory": "docs/08-ai-memory",
     "aiMemoryCompat": "docs/ai-memory",
     "prds": "docs/ae/prds",
-    "workReports": "docs/ae/work-reports"
+    "workReports": "docs/ae/work-reports",
+    "constitution": "docs/ae/constitution.md",
+    "tasks": "docs/ae/tasks"
   },
   "notes": [
     "/ae-* 是兼容标签；Codex 中可靠触发方式是 skill 名称，例如“用 ae-work 执行这个计划”。",
@@ -286,6 +278,6 @@
     "ae-graph-build / ae-graph-query 当前是浅层只读脚本，不移植 OpenCode 的完整图谱 schema、SQLite 存储、分片、freshness 或预览页。",
     "ae-merge-branch 暂不作为 Codex skill 暴露；Git merge 类写操作需等待 ae-work 的 Git 证据链和授权边界进一步增强。",
     "ae-chrome-devtools 不照搬动态 MCP 注册；Codex 中通过现有 Browser、Playwright 或 DevTools 可用工具路由，并由 ae-test-browser 记录证据。",
-    "本项目也参考了 https://github.com/openai/plugins、https://github.com/obra/superpowers 和 https://github.com/iOfficeAI/OfficeCLI 中的部分技能与工作流设计，但以 Codex 原生 skill 和本地脚本方式重写实现。"
+    "Spec Kit is used as a workflow reference for constitution, requirement checklist, task breakdown, and cross-artifact analysis patterns; this project adapts those ideas into AE skills without vendoring the Specify runtime."
   ]
 }

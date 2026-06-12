@@ -1,6 +1,0 @@
-interface:
-  display_name: "AE PPTX / AE PPTX"
-  short_description: "使用面向 OfficeCLI 的工作流处理演示文稿任务 / Use OfficeCLI-oriented workflows for presentation tasks"
-  default_prompt: "使用 $ae-pptx 处理这个 PowerPoint 任务。 / Use $ae-pptx to handle this PowerPoint task."
-policy:
-  allow_implicit_invocation: true

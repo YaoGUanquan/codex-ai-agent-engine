@@ -10,6 +10,8 @@ const mirrorRoot = resolve(repoRoot, '.agents', 'skills')
 
 const sourceSkills = listSkillDirs(sourceRoot)
 const metadataSkills = Object.keys(skillMetadata).sort()
+const invalidSourceSkills = sourceSkills.filter((name) => !/^[a-z0-9][a-z0-9-]*$/.test(name))
+const invalidMetadataSkills = metadataSkills.filter((name) => !/^[a-z0-9][a-z0-9-]*$/.test(name))
 
 const missingMetadata = sourceSkills.filter((name) => !metadataSkills.includes(name))
 const extraMetadata = metadataSkills.filter((name) => !sourceSkills.includes(name))
@@ -20,7 +22,9 @@ if (
   missingMetadata.length === 0 &&
   extraMetadata.length === 0 &&
   missingSourceYaml.length === 0 &&
-  missingMirrorYaml.length === 0
+  missingMirrorYaml.length === 0 &&
+  invalidSourceSkills.length === 0 &&
+  invalidMetadataSkills.length === 0
 ) {
   console.log(JSON.stringify({
     status: 'ok',
@@ -36,6 +40,8 @@ console.error(JSON.stringify({
   extraMetadata,
   missingSourceYaml,
   missingMirrorYaml,
+  invalidSourceSkills,
+  invalidMetadataSkills,
 }, null, 2))
 process.exit(1)
 

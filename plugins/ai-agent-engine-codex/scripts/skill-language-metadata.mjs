@@ -29,6 +29,13 @@ export const skillMetadata = {
     promptEn: 'Use $ae-claude-code to delegate a bounded analysis or patch proposal to local Claude Code CLI.',
     promptZh: '使用 $ae-claude-code 将受限分析或 patch 候选方案委派给本地 Claude Code CLI。',
   },
+  'ae-constitution': {
+    display: { en: 'AE Constitution', zh: 'AE Constitution' },
+    en: 'Create durable project governance for AE plans and reviews',
+    zh: 'Create durable project governance for AE plans and reviews',
+    promptEn: 'Use $ae-constitution to define project governance principles.',
+    promptZh: 'Use $ae-constitution to define project governance principles.',
+  },
   'ae-debug': {
     display: { en: 'AE Debug', zh: 'AE 调试排障' },
     en: 'Investigate failures systematically before changing code',
@@ -49,13 +56,6 @@ export const skillMetadata = {
     zh: '把散乱内容整理成需求、计划、交接或检查清单',
     promptEn: 'Use $ae-doc-structure to turn these notes into a structured artifact.',
     promptZh: '使用 $ae-doc-structure 把这些内容整理成结构化文档。',
-  },
-  'ae-docx': {
-    display: { en: 'AE DOCX', zh: 'AE DOCX' },
-    en: 'Use OfficeCLI-oriented workflows for Word-style document tasks',
-    zh: '使用面向 OfficeCLI 的工作流处理 Word 文档任务',
-    promptEn: 'Use $ae-docx to handle this Word document task.',
-    promptZh: '使用 $ae-docx 处理这个 Word 文档任务。',
   },
   'ae-frontend-design': {
     display: { en: 'AE Frontend Design', zh: 'AE 前端初版' },
@@ -106,13 +106,6 @@ export const skillMetadata = {
     promptEn: 'Use $ae-lfg to take this software requirement through plan, work, review, and validation.',
     promptZh: '使用 $ae-lfg 将这个软件需求推进到计划、实现、审查和验证。',
   },
-  'ae-officecli': {
-    display: { en: 'AE OfficeCLI', zh: 'AE OfficeCLI' },
-    en: 'Use OfficeCLI as an external engine for Office document automation',
-    zh: '将 OfficeCLI 作为外部引擎处理 Office 文档自动化任务',
-    promptEn: 'Use $ae-officecli to decide how this Office task should run through OfficeCLI.',
-    promptZh: '使用 $ae-officecli 判断这个 Office 任务应如何通过 OfficeCLI 执行。',
-  },
   'ae-plan': {
     display: { en: 'AE Plan', zh: 'AE 计划生成' },
     en: 'Create AE implementation plans before coding',
@@ -126,13 +119,6 @@ export const skillMetadata = {
     zh: '在实现计划前沉淀产品需求和验收边界',
     promptEn: 'Use $ae-prd to define the requirement before planning.',
     promptZh: '使用 $ae-prd 在计划前定义这个需求。',
-  },
-  'ae-pptx': {
-    display: { en: 'AE PPTX', zh: 'AE PPTX' },
-    en: 'Use OfficeCLI-oriented workflows for presentation tasks',
-    zh: '使用面向 OfficeCLI 的工作流处理演示文稿任务',
-    promptEn: 'Use $ae-pptx to handle this PowerPoint task.',
-    promptZh: '使用 $ae-pptx 处理这个 PowerPoint 任务。',
   },
   'ae-prompt-optimize': {
     display: { en: 'AE Prompt Optimize', zh: 'AE 提示词优化' },
@@ -204,6 +190,13 @@ export const skillMetadata = {
     promptEn: 'Use $ae-task-loop to iterate until this exploratory task is verified or blocked.',
     promptZh: '使用 $ae-task-loop 循环执行这个探索性任务，直到验证通过或明确阻塞。',
   },
+  'ae-tasks': {
+    display: { en: 'AE Tasks', zh: 'AE Tasks' },
+    en: 'Create dependency-ordered implementation task artifacts',
+    zh: 'Create dependency-ordered implementation task artifacts',
+    promptEn: 'Use $ae-tasks to turn this approved AE plan into implementation tasks.',
+    promptZh: 'Use $ae-tasks to turn this approved AE plan into implementation tasks.',
+  },
   'ae-test-browser': {
     display: { en: 'AE Browser Test', zh: 'AE 浏览器验收' },
     en: 'Validate UI flows, screenshots, console, and network in a real browser',
@@ -238,13 +231,6 @@ export const skillMetadata = {
     zh: '基于 Git 历史和当前变更生成简洁工作总结',
     promptEn: 'Use $ae-work-report to generate a daily, weekly, or scoped work report.',
     promptZh: '使用 $ae-work-report 生成日报、周报或指定范围工作总结。',
-  },
-  'ae-xlsx': {
-    display: { en: 'AE XLSX', zh: 'AE XLSX' },
-    en: 'Use OfficeCLI-oriented workflows for spreadsheet tasks',
-    zh: '使用面向 OfficeCLI 的工作流处理电子表格任务',
-    promptEn: 'Use $ae-xlsx to handle this Excel task.',
-    promptZh: '使用 $ae-xlsx 处理这个 Excel 任务。',
   },
   'ae-computer-use-guard': {
     display: { en: 'AE Computer Use Guard', zh: 'AE 电脑控制约束' },

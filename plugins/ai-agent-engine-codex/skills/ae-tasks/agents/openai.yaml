@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE Tasks / AE Tasks"
+  short_description: "Create dependency-ordered implementation task artifacts / Create dependency-ordered implementation task artifacts"
+  default_prompt: "Use $ae-tasks to turn this approved AE plan into implementation tasks. / Use $ae-tasks to turn this approved AE plan into implementation tasks."
+policy:
+  allow_implicit_invocation: true

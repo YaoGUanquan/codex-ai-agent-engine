@@ -7,6 +7,9 @@ const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
 const sourceRoot = resolve(repoRoot, 'plugins', 'ai-agent-engine-codex', 'skills')
 const mirrorRoot = resolve(repoRoot, '.agents', 'skills')
 
+ensureInsideRepo(sourceRoot, 'sourceRoot')
+ensureInsideRepo(mirrorRoot, 'mirrorRoot')
+
 const sourceFiles = listFiles(sourceRoot)
 const mirrorFiles = listFiles(mirrorRoot)
 
@@ -46,9 +49,11 @@ function listFiles(root) {
 }
 
 function walk(root) {
+  ensureInsideRepo(root, 'walkRoot')
   const results = []
   for (const entry of readdirSync(root)) {
     const full = resolve(root, entry)
+    ensureInsideRepo(full, 'skillFile')
     const stat = statSync(full)
     if (stat.isDirectory()) {
       results.push(...walk(full))
@@ -61,4 +66,11 @@ function walk(root) {
 
 function normalize(content) {
   return content.replace(/\r\n/g, '\n')
+}
+
+function ensureInsideRepo(path, label) {
+  const relativePath = relative(repoRoot, path)
+  if (relativePath === '' || relativePath.startsWith('..') || /^[A-Za-z]:/.test(relativePath)) {
+    throw new Error(`${label} must stay inside repository: ${path}`)
+  }
 }

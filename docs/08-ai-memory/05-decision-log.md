@@ -50,3 +50,11 @@
 - Context: The user wanted multi-agent execution to be available by default when beneficial, but the earlier boolean switch was too blunt: `false` disabled useful analysis, while `true` could be misread as authorizing write workers.
 - Impact: `task-analyze` now reports safe parallelism recommendations by default and emits blockers, waves, and notes. Installed projects still need a local `.codex/ae-skill-profiles.yaml` to customize runtime policy; update scripts do not overwrite that local file.
 - Re-evaluate when: Codex exposes stronger first-class sub-agent orchestration contracts, write-worker isolation becomes mechanically enforceable, or real end-to-end multi-agent execution tests are added.
+
+## 2026-06-12: Adapt Spec Kit workflow patterns without vendoring runtime
+
+- Date: 2026-06-12
+- Decision: Use GitHub Spec Kit as a workflow reference for constitution, requirement quality checklist, task breakdown, and cross-artifact analysis, but keep AE artifact roots and Codex skill/runtime boundaries.
+- Context: Spec Kit has useful governance and spec-driven workflow patterns, but importing Specify CLI or `.specify/` would create a second workflow root and dependency model.
+- Impact: Add `ae-constitution` and `ae-tasks`, strengthen requirement clarification and PRD quality gates, expand review/work cross-artifact checks, and add skill governance checks for mirror, metadata, and path-safety consistency. Active OfficeCLI skills are removed from the catalog.
+- Re-evaluate when: AE adds a first-class runtime orchestrator, task artifacts become too heavy for common work, or Codex gains native spec/constitution workflow support.

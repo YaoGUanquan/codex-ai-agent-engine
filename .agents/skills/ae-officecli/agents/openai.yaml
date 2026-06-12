@@ -1,6 +1,0 @@
-interface:
-  display_name: "AE OfficeCLI / AE OfficeCLI"
-  short_description: "将 OfficeCLI 作为外部引擎处理 Office 文档自动化任务 / Use OfficeCLI as an external engine for Office document automation"
-  default_prompt: "使用 $ae-officecli 判断这个 Office 任务应如何通过 OfficeCLI 执行。 / Use $ae-officecli to decide how this Office task should run through OfficeCLI."
-policy:
-  allow_implicit_invocation: true
