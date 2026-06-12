@@ -32,6 +32,7 @@ try {
     'plugins/ai-agent-engine-codex/skills/ae-backend/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-debug/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-tdd/SKILL.md',
+    'plugins/ai-agent-engine-codex/skills/ae-claude-code/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-computer-use-guard/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-imagegen-prompt/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-video-edit-computer/SKILL.md',
@@ -46,6 +47,7 @@ try {
     '.agents/skills/ae-backend/agents/openai.yaml',
     '.agents/skills/ae-debug/agents/openai.yaml',
     '.agents/skills/ae-tdd/agents/openai.yaml',
+    '.agents/skills/ae-claude-code/agents/openai.yaml',
     '.agents/skills/ae-computer-use-guard/agents/openai.yaml',
     '.agents/skills/ae-imagegen-prompt/agents/openai.yaml',
     '.agents/skills/ae-video-edit-computer/agents/openai.yaml',
@@ -75,6 +77,11 @@ try {
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'backend'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'debug'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'tdd'], { cwd: targetRoot })
+  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'claude'], { cwd: targetRoot })
+  const claudeCheckResult = JSON.parse(run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'claude-delegate', '--check'], { cwd: targetRoot }).stdout)
+  if (!['ok', 'skip'].includes(claudeCheckResult.status) || typeof claudeCheckResult.available !== 'boolean') {
+    throw new Error('Installed claude-delegate check did not return stable availability JSON')
+  }
   const expectedBilingualLabels = [
     ['ae-prd', 'AE PRD'],
     ['ae-work-report', 'AE Work Report'],
@@ -83,6 +90,7 @@ try {
     ['ae-docx', 'AE DOCX'],
     ['ae-xlsx', 'AE XLSX'],
     ['ae-pptx', 'AE PPTX'],
+    ['ae-claude-code', 'AE Claude Code'],
     ['ae-computer-use-guard', 'AE 电脑控制约束 / AE Computer Use Guard'],
     ['ae-imagegen-prompt', 'AE 图片生成提示词 / AE Imagegen Prompt'],
     ['ae-video-edit-computer', 'AE 电脑剪辑视频 / AE Video Edit Computer'],
@@ -145,6 +153,7 @@ try {
     ['ae-xlsx', 'AE XLSX'],
     ['ae-pptx', 'AE PPTX'],
     ['ae-web-app', 'AE Web App'],
+    ['ae-claude-code', 'AE Claude Code'],
     ['ae-computer-use-guard', 'AE Computer Use Guard'],
     ['ae-imagegen-prompt', 'AE Imagegen Prompt'],
     ['ae-video-edit-computer', 'AE Video Edit Computer'],
@@ -166,6 +175,7 @@ try {
     ['ae-xlsx', 'AE XLSX'],
     ['ae-pptx', 'AE PPTX'],
     ['ae-web-app', 'AE Web 应用开发'],
+    ['ae-claude-code', 'AE Claude Code'],
     ['ae-computer-use-guard', 'AE 电脑控制约束'],
     ['ae-imagegen-prompt', 'AE 图片生成提示词'],
     ['ae-video-edit-computer', 'AE 电脑剪辑视频'],
@@ -192,6 +202,7 @@ try {
       'ae-backend',
       'ae-debug',
       'ae-tdd',
+      'ae-claude-code',
       'ae-computer-use-guard',
       'ae-imagegen-prompt',
       'ae-video-edit-computer',
@@ -201,6 +212,7 @@ try {
     verifiedHookPolicy: 'computer_use_requires_hooks',
     verifiedLocalToolPolicy: 'video_requires_ffmpeg_ffprobe_checks',
     verifiedMultiAgentPolicy: 'multi_agent_auto_analysis_by_default',
+    verifiedCommands: ['claude-delegate'],
   }, null, 2))
 } finally {
   cleanupTarget()
