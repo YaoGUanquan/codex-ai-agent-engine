@@ -22,6 +22,13 @@ export const skillMetadata = {
     promptEn: 'Use $ae-brainstorm to clarify this feature idea before planning.',
     promptZh: '使用 $ae-brainstorm 在计划前澄清这个功能想法。',
   },
+  'ae-claude-code': {
+    display: { en: 'AE Claude Code', zh: 'AE Claude Code' },
+    en: 'Use local Claude Code CLI as a controlled external worker',
+    zh: '将本地 Claude Code CLI 作为受控外部 worker 使用',
+    promptEn: 'Use $ae-claude-code to delegate a bounded analysis or patch proposal to local Claude Code CLI.',
+    promptZh: '使用 $ae-claude-code 将受限分析或 patch 候选方案委派给本地 Claude Code CLI。',
+  },
   'ae-debug': {
     display: { en: 'AE Debug', zh: 'AE 调试排障' },
     en: 'Investigate failures systematically before changing code',
