@@ -143,6 +143,33 @@ test('claude-delegate supports Windows cmd shims', () => {
   }
 })
 
+test('claude-delegate discovers Windows cmd shims on PATH', { skip: process.platform !== 'win32' }, () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-claude-path-shim-'))
+  try {
+    const shimPath = join(tempRoot, 'claude.cmd')
+    writeFileSync(shimPath, [
+      '@echo off',
+      'if "%1"=="--version" (',
+      '  echo 9.9.9 path-shim',
+      '  exit /b 0',
+      ')',
+      'echo path-shim-output:%*',
+      '',
+    ].join('\r\n'), 'utf8')
+    chmodSync(shimPath, 0o755)
+
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'claude-delegate', '--check'], repoRoot, {
+      PATH: `${tempRoot};${process.env.PATH || ''}`,
+    })
+    assert.equal(result.status, 'ok')
+    assert.equal(result.available, true)
+    assert.equal(result.command, 'claude.cmd')
+    assert.match(result.version, /9\.9\.9 path-shim/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
 test('claude-delegate sends default prompts through stdin', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-claude-prompt-'))
   try {
@@ -755,9 +782,10 @@ function runNodeScript(relativePath) {
   return JSON.parse(result.stdout)
 }
 
-function runNodeScriptJson(args, cwd = repoRoot) {
+function runNodeScriptJson(args, cwd = repoRoot, env = {}) {
   const result = spawnSync(process.execPath, args.map((arg, index) => index === 0 ? resolve(repoRoot, arg) : arg), {
     cwd,
+    env: { ...process.env, ...env },
     encoding: 'utf8',
     stdio: 'pipe',
   })
