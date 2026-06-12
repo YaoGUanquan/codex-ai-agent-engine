@@ -2,6 +2,7 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
 import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { spawnSync } from 'node:child_process'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -63,6 +64,9 @@ function main() {
       case 'swagger':
         printSwagger(args)
         break
+      case 'claude-delegate':
+        printJson(claudeDelegate(process.cwd(), args))
+        break
       case 'ae-graph-build':
       case 'graph-build':
         printJson(graphBuild(process.cwd(), args))
@@ -72,7 +76,7 @@ function main() {
         printJson(graphQuery(process.cwd(), args))
         break
       default:
-        throw new Error(`Unknown command: ${command}\nAvailable: help, init, recovery, task-analyze, gate, swagger, ae-graph-build, ae-graph-query`)
+        throw new Error(`Unknown command: ${command}\nAvailable: help, init, recovery, task-analyze, gate, swagger, claude-delegate, ae-graph-build, ae-graph-query`)
     }
   } catch (error) {
     console.error(formatError(error))
@@ -1035,6 +1039,111 @@ function printSwagger(args) {
     operations: mode === 'detail' ? filtered.slice(0, 5).map(detailOperation) : filtered.slice(0, 50).map(summaryOperation),
   }
   printJson(result)
+}
+
+function claudeDelegate(worktree, args) {
+  const opts = parseOptions(args)
+  const command = opts.command || opts.claude || 'claude'
+  const availability = checkCommandAvailable(command)
+  const base = {
+    command,
+    cwd: worktree,
+    mode: opts.mode || 'patch-proposal',
+    write_policy: 'codex-reviewed',
+    notes: [
+      'Claude output must be reviewed by Codex before applying changes.',
+      'Direct writes require explicit user opt-in and an isolated worktree.',
+    ],
+  }
+
+  if (truthy(opts.check)) {
+    return availability.available
+      ? { status: 'ok', available: true, ...base, version: availability.version }
+      : { status: 'skip', available: false, ...base, reason: availability.reason }
+  }
+
+  if (!availability.available) {
+    return { status: 'skip', available: false, ...base, reason: availability.reason }
+  }
+
+  const prompt = loadClaudePrompt(worktree, opts)
+  const invocation = claudeDelegateInvocation(opts, prompt)
+  const timeoutMs = clampInteger(Number(opts.timeout_ms || opts.timeout || 120000), 120000, 1000, 600000)
+  const result = runExternalCommand(command, invocation.args, {
+    cwd: worktree,
+    input: invocation.input,
+    encoding: 'utf8',
+    timeout: timeoutMs,
+  })
+
+  return {
+    status: result.status === 0 ? 'ok' : 'failed',
+    available: true,
+    ...base,
+    version: availability.version,
+    args: invocation.args,
+    timeout_ms: timeoutMs,
+    exit_code: result.status,
+    signal: result.signal,
+    stdout: result.stdout || '',
+    stderr: result.stderr || '',
+  }
+}
+
+function checkCommandAvailable(command) {
+  const result = runExternalCommand(command, ['--version'], {
+    encoding: 'utf8',
+    timeout: 10000,
+  })
+  if (result.error) {
+    return {
+      available: false,
+      reason: result.error.code === 'ENOENT'
+        ? `${command} was not found on PATH`
+        : result.error.message,
+    }
+  }
+  if (result.status !== 0) {
+    const output = [result.stdout, result.stderr].filter(Boolean).join('\n').trim()
+    return {
+      available: false,
+      reason: output || `${command} --version exited with ${result.status}`,
+    }
+  }
+  return {
+    available: true,
+    version: [result.stdout, result.stderr].filter(Boolean).join('\n').trim() || null,
+  }
+}
+
+function runExternalCommand(command, args, options = {}) {
+  const isWindowsScript = process.platform === 'win32' && /\.(cmd|bat)$/i.test(command)
+  if (!isWindowsScript) {
+    return spawnSync(command, args, {
+      ...options,
+      stdio: 'pipe',
+    })
+  }
+  return spawnSync(process.env.ComSpec || 'cmd.exe', ['/d', '/s', '/c', command, ...args], {
+    ...options,
+    stdio: 'pipe',
+    windowsVerbatimArguments: false,
+  })
+}
+
+function loadClaudePrompt(worktree, opts) {
+  if (opts['prompt-file']) return readText(safeResolve(worktree, opts['prompt-file']))
+  if (opts.prompt) return String(opts.prompt)
+  throw new Error('claude-delegate requires --check, --prompt, or --prompt-file')
+}
+
+function claudeDelegateInvocation(opts, prompt) {
+  const configured = arrayOpt(opts['claude-arg'])
+  if (configured.length > 0) return { args: configured, input: prompt }
+  return {
+    args: ['-p'],
+    input: prompt,
+  }
 }
 
 function graphBuild(worktree, args) {

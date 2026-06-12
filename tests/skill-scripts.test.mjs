@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { chmodSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
@@ -59,6 +59,17 @@ test('renderYaml supports Computer Use video skills in all language modes', () =
   }
 })
 
+test('renderYaml supports Claude Code delegation metadata', () => {
+  const englishYaml = renderYaml(skillMetadata['ae-claude-code'], 'en')
+  const chineseYaml = renderYaml(skillMetadata['ae-claude-code'], 'zh-CN')
+  const bilingualYaml = renderYaml(skillMetadata['ae-claude-code'], 'bilingual')
+
+  assert.match(englishYaml, /display_name: "AE Claude Code"/)
+  assert.match(englishYaml, /short_description: "Use local Claude Code CLI as a controlled external worker"/)
+  assert.match(chineseYaml, /display_name: "AE Claude Code"/)
+  assert.match(bilingualYaml, /AE Claude Code/)
+})
+
 test('check-skill-mirror reports ok', () => {
   const result = runNodeScript('scripts/check-skill-mirror.mjs')
   assert.equal(result.status, 'ok')
@@ -75,6 +86,7 @@ test('check-install-smoke reports ok and verifies new skills', () => {
   const result = runNodeScript('scripts/check-install-smoke.mjs')
   assert.equal(result.status, 'ok')
   assert.ok(result.verifiedCommands.includes('recovery'))
+  assert.ok(result.verifiedCommands.includes('claude-delegate'))
   assert.deepEqual(result.verifiedSkills, [
     'ae-prd',
     'ae-work-report',
@@ -87,10 +99,83 @@ test('check-install-smoke reports ok and verifies new skills', () => {
     'ae-backend',
     'ae-debug',
     'ae-tdd',
+    'ae-claude-code',
     'ae-computer-use-guard',
     'ae-imagegen-prompt',
     'ae-video-edit-computer',
   ])
+})
+
+test('claude-delegate availability check returns ok or skip', () => {
+  const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'claude-delegate', '--check'])
+  assert.match(result.status, /^(ok|skip)$/)
+  assert.equal(typeof result.available, 'boolean')
+  assert.equal(result.write_policy, 'codex-reviewed')
+})
+
+test('claude-delegate prompt mode skips safely when Claude is unavailable', () => {
+  const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'claude-delegate', '--prompt', 'Summarize the repo.'])
+  assert.match(result.status, /^(ok|skip|failed)$/)
+  assert.equal(typeof result.available, 'boolean')
+  if (!result.available) {
+    assert.equal(result.status, 'skip')
+    assert.match(result.reason, /claude/)
+  }
+})
+
+test('claude-delegate supports Windows cmd shims', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-claude-shim-'))
+  try {
+    const shimPath = join(tempRoot, 'claude.cmd')
+    writeFileSync(shimPath, [
+      '@echo off',
+      'if "%1"=="--version" (',
+      '  echo 9.9.9 test-shim',
+      '  exit /b 0',
+      ')',
+      'echo shim-output:%*',
+      '',
+    ].join('\r\n'), 'utf8')
+    chmodSync(shimPath, 0o755)
+
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'claude-delegate', '--check', '--command', shimPath])
+    assert.equal(result.status, 'ok')
+    assert.equal(result.available, true)
+    assert.match(result.version, /9\.9\.9 test-shim/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('claude-delegate sends default prompts through stdin', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-claude-prompt-'))
+  try {
+    const shimPath = join(tempRoot, 'claude.cmd')
+    writeFileSync(shimPath, [
+      '@echo off',
+      'if "%1"=="--version" (',
+      '  echo 9.9.9 test-shim',
+      '  exit /b 0',
+      ')',
+      'set /p PROMPT=',
+      'echo shim-prompt:%PROMPT%',
+      '',
+    ].join('\r\n'), 'utf8')
+    chmodSync(shimPath, 0o755)
+
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'claude-delegate', '--prompt', 'AE_CLAUDE_OK', '--command', shimPath])
+    assert.equal(result.status, 'ok')
+    assert.deepEqual(result.args, ['-p'])
+    assert.match(result.stdout, /shim-prompt:AE_CLAUDE_OK/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('help can find Claude Code delegation capability', () => {
+  const output = runNodeScriptRaw('node scripts/ae-tools.mjs help claude')
+  assert.match(output, /ae-claude-code/)
+  assert.match(output, /claude-delegate/)
 })
 
 test('installed language switching updates OfficeCLI skills for all supported modes', () => {

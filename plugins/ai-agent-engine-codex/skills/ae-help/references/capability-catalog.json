@@ -40,6 +40,13 @@
       "artifactPath": "docs/ae/brainstorms"
     },
     {
+      "name": "ae-claude-code",
+      "entry": "/ae-claude-code",
+      "target": "Claude Code CLI 委派",
+      "purpose": "将本地 Claude Code CLI 作为受控外部 worker，用于只读分析、审查或 patch 候选方案；Codex 仍负责审查、应用和验证。",
+      "script": "node scripts/ae-tools.mjs claude-delegate --check"
+    },
+    {
       "name": "ae-prd",
       "entry": "/ae-prd",
       "target": "PRD 需求文档",
@@ -249,6 +256,11 @@
       "name": "ae-graph-query",
       "purpose": "按 path 或 keyword 查询浅层依赖图结果；每次查询重新扫描当前工作区，不包含 freshness、分片或预览页。",
       "script": "node scripts/ae-tools.mjs ae-graph-query [--root <path>] (--path <file>|--keyword <text>)"
+    },
+    {
+      "name": "claude-delegate",
+      "purpose": "检查或调用本地 Claude Code CLI，默认用于受控分析和 patch 候选方案，不自动写入活动工作区。",
+      "script": "node scripts/ae-tools.mjs claude-delegate --check | --prompt-file <path> [--claude-arg <arg>]"
     }
   ],
   "artifactPaths": {
