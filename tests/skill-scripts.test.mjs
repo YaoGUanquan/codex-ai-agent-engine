@@ -74,6 +74,7 @@ test('check-skill-language-metadata reports ok', () => {
 test('check-install-smoke reports ok and verifies new skills', () => {
   const result = runNodeScript('scripts/check-install-smoke.mjs')
   assert.equal(result.status, 'ok')
+  assert.ok(result.verifiedCommands.includes('recovery'))
   assert.deepEqual(result.verifiedSkills, [
     'ae-prd',
     'ae-work-report',
