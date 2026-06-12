@@ -1043,8 +1043,9 @@ function printSwagger(args) {
 
 function claudeDelegate(worktree, args) {
   const opts = parseOptions(args)
-  const command = opts.command || opts.claude || 'claude'
-  const availability = checkCommandAvailable(command)
+  const requestedCommand = opts.command || opts.claude || 'claude'
+  const availability = checkCommandAvailable(requestedCommand)
+  const command = availability.command || requestedCommand
   const base = {
     command,
     cwd: worktree,
@@ -1095,6 +1096,22 @@ function checkCommandAvailable(command) {
     encoding: 'utf8',
     timeout: 10000,
   })
+  if (result.error?.code === 'ENOENT') {
+    const windowsShim = resolveWindowsPathCommand(command)
+    if (windowsShim) {
+      const shimResult = runExternalCommand(windowsShim, ['--version'], {
+        encoding: 'utf8',
+        timeout: 10000,
+      })
+      if (!shimResult.error && shimResult.status === 0) {
+        return {
+          available: true,
+          command: windowsShim,
+          version: [shimResult.stdout, shimResult.stderr].filter(Boolean).join('\n').trim() || null,
+        }
+      }
+    }
+  }
   if (result.error) {
     return {
       available: false,
@@ -1112,8 +1129,27 @@ function checkCommandAvailable(command) {
   }
   return {
     available: true,
+    command,
     version: [result.stdout, result.stderr].filter(Boolean).join('\n').trim() || null,
   }
+}
+
+function resolveWindowsPathCommand(command) {
+  if (process.platform !== 'win32') return null
+  if (command.includes('\\') || command.includes('/') || extname(command)) return null
+  const pathDirs = String(process.env.PATH || '').split(';').filter(Boolean)
+  const pathExts = String(process.env.PATHEXT || '.COM;.EXE;.BAT;.CMD')
+    .split(';')
+    .map((ext) => ext.trim().toLowerCase())
+    .filter(Boolean)
+  for (const dir of pathDirs) {
+    for (const ext of ['.cmd', '.bat']) {
+      if (!pathExts.includes(ext)) continue
+      const candidate = join(dir, `${command}${ext}`)
+      if (existsSync(candidate)) return `${command}${ext}`
+    }
+  }
+  return null
 }
 
 function runExternalCommand(command, args, options = {}) {

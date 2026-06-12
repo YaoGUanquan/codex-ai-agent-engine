@@ -17,6 +17,20 @@ try {
   const existingTemplatePath = resolve(existingTemplateDir, 'user-template.md')
   mkdirSync(existingTemplateDir, { recursive: true })
   writeFileSync(existingTemplatePath, 'user-owned template\n', 'utf8')
+  const staleSkillDirs = ['ae-officecli', 'ae-docx', 'ae-xlsx', 'ae-pptx']
+  for (const skillName of staleSkillDirs) {
+    const staleSkillDir = resolve(targetRoot, '.agents', 'skills', skillName)
+    mkdirSync(staleSkillDir, { recursive: true })
+    writeFileSync(resolve(staleSkillDir, 'SKILL.md'), `# stale ${skillName}\n`, 'utf8')
+  }
+  const staleScriptPaths = [
+    resolve(targetRoot, 'scripts', 'check-officecli-available.mjs'),
+    resolve(targetRoot, 'scripts', 'check-officecli-smoke.mjs'),
+  ]
+  for (const staleScriptPath of staleScriptPaths) {
+    mkdirSync(resolve(staleScriptPath, '..'), { recursive: true })
+    writeFileSync(staleScriptPath, '// stale officecli script\n', 'utf8')
+  }
 
   run(process.execPath, [resolve(repoRoot, 'scripts', 'install-project.mjs'), '--target', targetRoot])
 
@@ -62,6 +76,17 @@ try {
   }
   if (!existsSync(existingTemplatePath)) {
     throw new Error('Install removed a pre-existing user docs/ae/templates file')
+  }
+  for (const skillName of staleSkillDirs) {
+    const staleSkillDir = resolve(targetRoot, '.agents', 'skills', skillName)
+    if (existsSync(staleSkillDir)) {
+      throw new Error(`Install left removed OfficeCLI skill in target mirror: ${skillName}`)
+    }
+  }
+  for (const staleScriptPath of staleScriptPaths) {
+    if (existsSync(staleScriptPath)) {
+      throw new Error(`Install left removed OfficeCLI script in target project: ${relative(targetRoot, staleScriptPath)}`)
+    }
   }
 
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'prd'], { cwd: targetRoot })

@@ -20,6 +20,8 @@ const targetUpdater = resolve(targetScripts, 'update-ae-codex.mjs')
 const targetLanguageSetter = resolve(targetScripts, 'set-ae-language.mjs')
 const sourceTemplates = resolve(repoRoot, 'docs', 'ae', 'templates')
 const targetTemplates = resolve(targetRoot, 'docs', 'ae', 'templates')
+const removedSkillNames = ['ae-officecli', 'ae-docx', 'ae-xlsx', 'ae-pptx']
+const removedScriptNames = ['check-officecli-available.mjs', 'check-officecli-smoke.mjs']
 const lang = readArg('--lang') || readInstalledLang(targetRoot) || 'bilingual'
 const supportedLangs = new Set(['en', 'zh-CN', 'bilingual'])
 
@@ -36,6 +38,10 @@ if (existsSync(targetPlugin)) rmSync(targetPlugin, { recursive: true, force: tru
 cpSync(sourcePlugin, targetPlugin, { recursive: true })
 
 mkdirSync(targetAgentsSkills, { recursive: true })
+for (const name of removedSkillNames) {
+  const dst = resolve(targetAgentsSkills, name)
+  if (existsSync(dst)) rmSync(dst, { recursive: true, force: true })
+}
 const sourceSkills = resolve(sourcePlugin, 'skills')
 for (const name of listDirs(sourceSkills)) {
   const dst = resolve(targetAgentsSkills, name)
@@ -57,6 +63,10 @@ else marketplace.plugins.push(entry)
 writeJson(targetMarketplace, marketplace)
 
 mkdirSync(targetScripts, { recursive: true })
+for (const name of removedScriptNames) {
+  const dst = resolve(targetScripts, name)
+  if (existsSync(dst)) rmSync(dst, { recursive: true, force: true })
+}
 writeFileSync(targetWrapper, "#!/usr/bin/env node\nimport '../plugins/ai-agent-engine-codex/scripts/ae-tools.mjs'\n", 'utf8')
 writeFileSync(targetUpdater, "#!/usr/bin/env node\nimport '../plugins/ai-agent-engine-codex/scripts/update-project.mjs'\n", 'utf8')
 writeFileSync(targetLanguageSetter, "#!/usr/bin/env node\nimport '../plugins/ai-agent-engine-codex/scripts/set-language.mjs'\n", 'utf8')
