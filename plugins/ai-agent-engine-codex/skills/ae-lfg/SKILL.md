@@ -11,7 +11,7 @@ Run the full AE engineering workflow in Codex. This is an orchestrator skill: it
 
 1. Read `references/task-routing.md` and classify the request.
 2. If the request is not S4 multi-step implementation, route to the narrower skill and explain the route briefly.
-3. Run `node scripts/ae-tools.mjs recovery` to inspect existing `docs/ae` artifacts when the repository has project files.
+3. From the target project root, run `node scripts/ae-tools.mjs recovery` to inspect existing `docs/ae` artifacts when the repository has project files. This is a project-level wrapper command installed under `scripts/`; do not look for a separate recovery script inside the `ae-lfg` skill directory.
 4. Do not modify project files before the workflow reaches ae-work and Git/worktree checks are complete.
 
 ## Pipeline

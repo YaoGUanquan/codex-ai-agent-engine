@@ -75,6 +75,10 @@ try {
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'backend'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'debug'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'tdd'], { cwd: targetRoot })
+  const recoveryResult = JSON.parse(run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'recovery'], { cwd: targetRoot }).stdout)
+  if (recoveryResult.exists !== true || recoveryResult.worktree !== targetRoot) {
+    throw new Error('Installed recovery command did not inspect the target project root')
+  }
   const expectedBilingualLabels = [
     ['ae-prd', 'AE PRD'],
     ['ae-work-report', 'AE Work Report'],
@@ -201,6 +205,7 @@ try {
     verifiedHookPolicy: 'computer_use_requires_hooks',
     verifiedLocalToolPolicy: 'video_requires_ffmpeg_ffprobe_checks',
     verifiedMultiAgentPolicy: 'multi_agent_auto_analysis_by_default',
+    verifiedCommands: ['recovery'],
   }, null, 2))
 } finally {
   cleanupTarget()

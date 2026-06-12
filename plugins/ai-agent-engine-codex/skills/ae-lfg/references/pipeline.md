@@ -3,7 +3,7 @@
 AE LFG standard chain:
 
 1. Classify task with task-routing.md.
-2. Recover existing docs/ae artifacts with `node scripts/ae-tools.mjs recovery`.
+2. Recover existing docs/ae artifacts from the target project root with `node scripts/ae-tools.mjs recovery`; the command is installed as the project-level `scripts/ae-tools.mjs` wrapper, not as a file under the `ae-lfg` skill directory.
 3. Clarify requirements with ae-brainstorm when behavior is not already clear.
 4. Confirm requirements readiness: outcome, acceptance criteria, non-goals, chosen approach, validation expectations, and explicit open questions.
 5. Review requirements if a requirements artifact was created.
