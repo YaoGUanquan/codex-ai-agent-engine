@@ -19,10 +19,10 @@ Add configuration-aware analysis and skill guidance for multi-agent execution. K
 
 - Goal: Make AE task analysis and skill docs support an opt-in multi-agent execution policy.
 - Acceptance criteria:
-  - `.codex/ae-skill-profiles.yaml` example documents `multi_agent` defaults with `enabled: false`.
-  - `task-analyze` reports effective multi-agent config, strategy, blockers, and parallel waves.
+  - `.codex/ae-skill-profiles.yaml` example documents the safe `multi_agent.enabled: auto` analysis default.
+  - `task-analyze` reports effective multi-agent config, strategy, read/write lane eligibility, blockers, owned files, forbidden files, and parallel waves.
   - `ae-work`, `ae-review`, and `ae-plan` explain how to use the config without forcing parallel writes.
-  - Tests cover disabled defaults and enabled suggest-mode analysis.
+  - Tests cover disabled defaults, enabled suggest-mode analysis, read-only review lanes, write-worker pre-edit gating, forbidden-file parsing, and dependency punctuation.
 - Non-goals: Build a real agent registry, auto-spawn agents from `ae-tools`, or force a minimum of three workers.
 - Affected areas: `plugins/ai-agent-engine-codex/scripts/ae-tools.mjs`, skill docs in plugin and `.agents` mirror, profile template, smoke checks, tests.
 - Validation surface: `npm test`, `npm run check`, targeted `task-analyze` command.
@@ -33,6 +33,7 @@ Add configuration-aware analysis and skill guidance for multi-agent execution. K
 - Codex sub-agent spawning remains an orchestration behavior controlled by the host, not a script-side runtime.
 - Existing plans may not declare dependencies; in that case enabled multi-agent write execution should be blocked or downgraded.
 - Read-only review lanes are lower risk than parallel write workers.
+- `parallel_eligibility` can remain as a compatibility summary, but new orchestration should use `read_parallel_eligibility` and `write_parallel_eligibility`.
 
 ## Alternatives Considered
 
@@ -50,11 +51,11 @@ Add configuration-aware analysis and skill guidance for multi-agent execution. K
 
 ### ADR-1 - Config-Gated Multi-Agent Execution
 
-- Decision: Extend `.codex/ae-skill-profiles.yaml` with `multi_agent` and teach `task-analyze` to emit execution strategy and waves.
+- Decision: Extend `.codex/ae-skill-profiles.yaml` with `multi_agent` and teach `task-analyze` to emit execution strategy, lane-specific eligibility, owned/forbidden file boundaries, and waves.
 - Drivers: reuse existing profile path, avoid runtime registry assumptions, keep defaults safe.
 - Alternatives: separate config file, new skill, hard-coded parallelism.
 - Why chosen: the existing profile template already handles optional local behavior and safe defaults.
-- Consequences: plans need better `Depends on` and file ownership fields to unlock parallel execution.
+- Consequences: plans need explicit `Depends on`, `Files`, and `Forbidden files` fields to unlock safe parallel execution.
 - Follow-ups: a future MCP/server implementation could consume the same output to automate spawning.
 
 ## Risks
@@ -66,26 +67,26 @@ Add configuration-aware analysis and skill guidance for multi-agent execution. K
 ## Pre-Mortem
 
 - Failure scenario 1: Enabled config causes unsafe write parallelism on overlapping files.
-- Failure scenario 2: Missing dependency declarations are treated as safe.
+- Failure scenario 2: Missing or punctuated dependency declarations are treated as safe or incomplete.
 - Failure scenario 3: Installed templates drift from smoke-check expectations.
-- Mitigations: require disjoint file checks, block or downgrade when dependency markers are missing, add tests and install smoke checks.
+- Mitigations: require disjoint file checks, block or downgrade when dependency markers are missing, normalize dependency IDs, keep forbidden files separate from owned files, add tests and install smoke checks.
 
 ## Implementation Units
 
 ### U1 - task-analyze config and waves
 
-- Goal: Add effective multi-agent config, strategy, blockers, and parallel wave output.
+- Goal: Add effective multi-agent config, strategy, lane-specific blockers, owned/forbidden file boundaries, and parallel wave output.
 - Requirements covered: config-aware execution analysis.
-- Acceptance criteria covered: `task-analyze` reports defaults and enabled suggest-mode waves.
+- Acceptance criteria covered: `task-analyze` reports defaults, enabled suggest-mode waves, read/write lane eligibility, conservative write-spawn readiness, forbidden files, and dependency punctuation handling.
 - Depends on: none.
 - Files:
   - `plugins/ai-agent-engine-codex/scripts/ae-tools.mjs`
   - `tests/skill-scripts.test.mjs`
-- Approach: load `.codex/ae-skill-profiles.yaml` when present, clamp `multi_agent`, parse plan dependencies, compute non-conflicting waves, and keep old fields.
+- Approach: load `.codex/ae-skill-profiles.yaml` when present, clamp `multi_agent`, parse plan dependencies and file boundary fields, compute non-conflicting waves, and keep old fields as compatibility summaries.
 - Tests: add Node test cases with temporary worktrees and plan files.
 - Validation: `node --test tests/skill-scripts.test.mjs`.
 - Rollback signals: existing `task-analyze` tests or smoke checks fail.
-- Deferred to implementation: exact wording of blocker reasons.
+- Deferred to implementation: none.
 
 ### U2 - skill and profile documentation
 
@@ -133,7 +134,7 @@ Add configuration-aware analysis and skill guidance for multi-agent execution. K
 
 ## Rollback / Recovery
 
-Revert this branch's edits if task-analyze output breaks existing consumers. Because old fields remain present, expected rollback risk is limited to newly added output and docs.
+Revert this branch's edits if task-analyze output breaks existing consumers. Because old fields remain present, expected rollback risk is limited to newly added lane-specific output and docs. Consumers should migrate from `parallel_eligibility.can_spawn_write_agents` to `write_parallel_eligibility.config_allows_write_agents` plus an independently completed Pre-Edit Gate.
 
 ## Plan Self-Review
 
@@ -147,4 +148,4 @@ Revert this branch's edits if task-analyze output breaks existing consumers. Bec
 
 ## Handoff
 
-Execute inline on branch `codex/multi-agent-execution-config`; do not spawn write workers for this implementation because the files are tightly coupled.
+Executed inline on branch `codex/optimize-multi-agent-logic`; do not spawn write workers for this implementation because the files are tightly coupled.

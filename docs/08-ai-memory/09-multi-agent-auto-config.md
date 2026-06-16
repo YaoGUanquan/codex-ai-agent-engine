@@ -5,9 +5,10 @@
 
 - `multi_agent.enabled` accepts `auto`, `true`, and `false`.
 - Default is `auto`.
-- `enabled: auto` means analysis and recommendations only. It lets `task-analyze` report `execution_strategy`, `parallel_eligibility`, and `parallel_waves`.
+- `enabled: auto` means analysis and recommendations only. It lets `task-analyze` report `execution_strategy`, `read_parallel_eligibility`, `write_parallel_eligibility`, and `parallel_waves`. `parallel_eligibility` remains a compatibility summary.
 - `enabled: false` is a hard off switch and forces serial execution.
 - Write-agent auto parallelism is not authorized by `enabled: auto` alone.
+- Read-only review lanes use `read_parallel_eligibility`; write-worker delegation uses `write_parallel_eligibility` plus a separately completed Git Pre-Edit Gate.
 
 ## Safe Baseline
 
@@ -36,6 +37,7 @@ Write-agent auto parallelism requires all of these:
 - plan mode with dependency declarations,
 - disjoint file ownership,
 - clean Git state before delegation when `require_clean_git: true`.
+- `write_parallel_eligibility.config_allows_write_agents: true`; `can_spawn_write_agents_now` remains false until the orchestrating agent verifies the active worktree.
 
 ## Other Project Update Path
 
