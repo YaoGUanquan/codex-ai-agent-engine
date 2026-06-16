@@ -266,7 +266,7 @@ Fetch and follow the update instructions from https://raw.githubusercontent.com/
 
 `multi_agent.enabled` supports three values:
 
-- `auto`: the default. `task-analyze` analyzes safe parallelism and reports `execution_strategy`, `parallel_eligibility`, and `parallel_waves`, but it does not authorize write-worker agents by itself.
+- `auto`: the default. `task-analyze` analyzes safe parallelism and reports `execution_strategy`, `read_parallel_eligibility`, `write_parallel_eligibility`, and `parallel_waves`, but it does not authorize write-worker agents by itself.
 - `true`: explicitly enables multi-agent analysis. Safety gates still apply.
 - `false`: hard off switch that forces serial execution.
 
@@ -299,7 +299,7 @@ New-Item -ItemType Directory -Force -Path .codex | Out-Null
 Copy-Item docs\ae\templates\ae-skill-profiles.example.yaml .codex\ae-skill-profiles.yaml
 ```
 
-Write-agent auto parallelism requires additional explicit opt-in with `mode: auto` and `allow_write_agents: true`. Even then, `task-analyze` requires clear plan dependencies, disjoint files, and Git-clean preconditions. After merging this branch to `main`, other projects should update first, copy or edit `.codex/ae-skill-profiles.yaml`, then verify against a real plan:
+Read-only review lanes use `read_parallel_eligibility`; write workers use `write_parallel_eligibility`. Write-agent auto parallelism requires additional explicit opt-in with `mode: auto` and `allow_write_agents: true`. Even then, `task-analyze` only reports config readiness; the orchestrating agent must complete the Git Pre-Edit Gate before any write-worker spawn. After merging this branch to `main`, other projects should update first, copy or edit `.codex/ae-skill-profiles.yaml`, then verify against a real plan:
 
 ```bash
 node scripts/ae-tools.mjs task-analyze --mode plan --plan docs/ae/plans/<your-plan>.md

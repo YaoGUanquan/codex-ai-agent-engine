@@ -1386,11 +1386,13 @@ function extractPlanUnits(text) {
     const bodyStart = match.index + match[0].length
     const sectionEnd = next?.index ?? findNextMajorSection(text, bodyStart)
     const body = text.slice(bodyStart, sectionEnd)
+    const forbiddenFiles = extractUnitFiles(body, 'Forbidden files')
     return {
       id,
       description: (match[2] || `Unit ${index + 1}`).trim(),
       depends_on: extractUnitDependencies(body),
-      files: extractFiles(body).map((path) => ({ path, source: 'plan' })),
+      files: extractOwnedUnitFiles(body, forbiddenFiles).map((path) => ({ path, source: 'plan' })),
+      forbidden_files: forbiddenFiles,
     }
   })
 }
@@ -1407,13 +1409,40 @@ function extractUnitDependencies(text) {
 }
 
 function normalizeDependencyId(value) {
-  const match = String(value).trim().match(/^(?:unit\s*)?(u\d+)$/i)
+  const cleaned = String(value).trim().replace(/[),.;:]+$/, '')
+  const match = cleaned.match(/^(?:unit\s*)?(u\d+)$/i)
   return match ? match[1].toUpperCase() : null
 }
 
 function findNextMajorSection(text, startIndex) {
   const nextMajor = text.slice(startIndex).search(/\n##\s+/)
   return nextMajor >= 0 ? startIndex + nextMajor : text.length
+}
+
+function extractUnitFiles(text, label) {
+  const section = extractListFieldSection(text, label)
+  if (section === null) return []
+  if (/^\s*(none|n\/a|not_applicable|null|[-]+)\s*$/i.test(section.trim())) return []
+  return extractFiles(section)
+}
+
+function extractOwnedUnitFiles(text, forbiddenFiles) {
+  const filesSection = extractListFieldSection(text, 'Files')
+  const owned = filesSection === null ? extractFiles(text) : extractUnitFiles(text, 'Files')
+  const forbidden = new Set(forbiddenFiles)
+  return owned.filter((path) => !forbidden.has(path))
+}
+
+function extractListFieldSection(text, label) {
+  const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const match = text.match(new RegExp(`^\\s*-?\\s*${escaped}:\\s*([^\\n\\r]*)`, 'im'))
+  if (!match || match.index === undefined) return null
+  const lineEnd = text.indexOf('\n', match.index)
+  const bodyStart = lineEnd === -1 ? text.length : lineEnd + 1
+  const inline = match[1].trim()
+  const nextField = text.slice(bodyStart).search(/^\s*-?\s*[A-Z][A-Za-z /-]*:\s*/m)
+  const block = nextField >= 0 ? text.slice(bodyStart, bodyStart + nextField) : text.slice(bodyStart)
+  return [inline, block].filter(Boolean).join('\n').trim()
 }
 
 function extractFiles(text) {
@@ -1492,17 +1521,30 @@ function buildTaskOutput(units, warnings = [], options = {}) {
   }
   const hasConflict = conflict_matrix.length > 0
   const dependencyReport = analyzeDependencies(units)
-  const parallelBlockers = multiAgentBlockers(units, {
+  const commonParallelBlockers = multiAgentBlockers(units, {
     config,
     hasConflict,
     dependencyReport,
     sourceMode: options.source_mode || 'scan',
+    includeWriteBlockers: false,
   })
-  const canParallelize = parallelBlockers.length === 0
+  const readBlockers = [...commonParallelBlockers]
+  if (!config.review_lanes_parallel) readBlockers.push('multi_agent.review_lanes_parallel is false')
+  const writeBlockers = multiAgentBlockers(units, {
+    config,
+    hasConflict,
+    dependencyReport,
+    sourceMode: options.source_mode || 'scan',
+    includeWriteBlockers: true,
+  })
+  const canReadParallelize = readBlockers.length === 0
+  const canWriteParallelize = writeBlockers.length === 0
   const waves = buildParallelWaves(units, {
     maxWorkers: config.max_workers,
-    serial: !canParallelize,
+    serial: !canReadParallelize,
   })
+  const preSpawnRequirements = config.require_clean_git ? ['ae-work pre-edit gate must confirm a clean Git state before write delegation'] : []
+  const configAllowsWriteAgents = canWriteParallelize && config.enabled !== false && config.mode === 'auto' && config.allow_write_agents
   return {
     units,
     conflict_matrix,
@@ -1512,12 +1554,26 @@ function buildTaskOutput(units, warnings = [], options = {}) {
       path: multiAgent.path,
       effective: config,
     },
-    execution_strategy: chooseExecutionStrategy(config, canParallelize),
+    execution_strategy: chooseExecutionStrategy(config, canReadParallelize, canWriteParallelize),
+    read_parallel_eligibility: {
+      can_parallelize: canReadParallelize,
+      blockers: readBlockers,
+      notes: multiAgentNotes(config, 'read'),
+    },
+    write_parallel_eligibility: {
+      can_parallelize: canWriteParallelize,
+      config_allows_write_agents: configAllowsWriteAgents,
+      can_spawn_write_agents_now: false,
+      blockers: writeBlockers,
+      pre_spawn_requirements: preSpawnRequirements,
+      dependency_declarations_present: dependencyReport.declarations_present,
+      notes: multiAgentNotes(config, 'write'),
+    },
     parallel_eligibility: {
-      can_parallelize: canParallelize,
-      can_spawn_write_agents: canParallelize && config.enabled !== false && config.mode === 'auto' && config.allow_write_agents,
-      blockers: parallelBlockers,
-      pre_spawn_requirements: config.require_clean_git ? ['ae-work pre-edit gate must confirm a clean Git state before write delegation'] : [],
+      can_parallelize: canReadParallelize,
+      can_spawn_write_agents: false,
+      blockers: readBlockers,
+      pre_spawn_requirements: preSpawnRequirements,
       dependency_declarations_present: dependencyReport.declarations_present,
       notes: multiAgentNotes(config),
     },
@@ -1600,33 +1656,34 @@ function analyzeDependencies(units) {
 }
 
 function multiAgentBlockers(units, context) {
-  const { config, hasConflict, dependencyReport, sourceMode } = context
+  const { config, hasConflict, dependencyReport, sourceMode, includeWriteBlockers = true } = context
   const blockers = []
   if (config.enabled === false) return ['multi_agent.enabled is false']
   if (config.max_workers < 2) blockers.push('multi_agent.max_workers is less than 2')
   if (units.length < config.min_parallel_units) blockers.push(`fewer than ${config.min_parallel_units} implementation units`)
-  if (config.mode === 'review_only') blockers.push('multi_agent.mode is review_only; write workers remain disabled')
+  if (includeWriteBlockers && config.mode === 'review_only') blockers.push('multi_agent.mode is review_only; write workers remain disabled')
   if (config.require_disjoint_files && hasConflict) blockers.push('shared files detected across units')
   if (config.require_plan_dependencies && sourceMode !== 'plan') blockers.push('plan mode is required for dependency-aware parallel execution')
   if (config.require_plan_dependencies && !dependencyReport.declarations_present) blockers.push('plan units must declare Depends on')
   for (const item of dependencyReport.unknown) blockers.push(`unknown dependency ${item.dependency} referenced by ${item.unit}`)
-  if (config.mode === 'auto' && !config.allow_write_agents) blockers.push('multi_agent.allow_write_agents is false')
+  if (includeWriteBlockers && config.mode === 'auto' && !config.allow_write_agents) blockers.push('multi_agent.allow_write_agents is false')
   return blockers
 }
 
-function chooseExecutionStrategy(config, canParallelize) {
+function chooseExecutionStrategy(config, canReadParallelize, canWriteParallelize = canReadParallelize) {
   if (config.enabled === false) return 'serial'
   if (config.mode === 'review_only') return 'parallel_review_only'
-  if (!canParallelize) return config.mode === 'auto' ? 'serial_with_multi_agent_blockers' : 'suggest_serial'
+  if (!canReadParallelize) return config.mode === 'auto' ? 'serial_with_multi_agent_blockers' : 'suggest_serial'
+  if (!canWriteParallelize && config.mode === 'auto') return 'serial_with_multi_agent_blockers'
   if (config.mode === 'auto') return config.allow_write_agents ? 'auto_parallel_ready' : 'auto_parallel_blocked'
   return 'suggest_parallel'
 }
 
-function multiAgentNotes(config) {
+function multiAgentNotes(config, lane = 'compat') {
   const notes = [
     'task-analyze only reports strategy; the orchestrating Codex agent decides whether to spawn sub-agents',
   ]
-  if (config.require_clean_git) notes.push('run git status, current branch, and latest commit before write delegation')
+  if (lane !== 'read' && config.require_clean_git) notes.push('run git status, current branch, and latest commit before write delegation')
   if (config.enabled === 'auto') notes.push('multi_agent.enabled=auto only enables analysis and recommendations; write workers still require mode=auto and allow_write_agents=true')
   if (!config.allow_write_agents) notes.push('write-agent spawning is disabled unless allow_write_agents is explicitly true')
   return notes
