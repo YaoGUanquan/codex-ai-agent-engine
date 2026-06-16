@@ -655,10 +655,12 @@ test('task-analyze blocks auto write agents unless allow_write_agents is true', 
     assert.equal(result.multi_agent_config.effective.enabled, 'auto')
     assert.equal(result.multi_agent_config.effective.mode, 'auto')
     assert.equal(result.execution_strategy, 'serial_with_multi_agent_blockers')
-    assert.equal(result.parallel_eligibility.can_parallelize, false)
+    assert.equal(result.read_parallel_eligibility.can_parallelize, true)
+    assert.deepEqual(result.read_parallel_eligibility.blockers, [])
+    assert.equal(result.write_parallel_eligibility.can_parallelize, false)
     assert.equal(result.parallel_eligibility.can_spawn_write_agents, false)
-    assert.deepEqual(result.parallel_eligibility.blockers, ['multi_agent.allow_write_agents is false'])
-    assert.deepEqual(result.parallel_waves.map((wave) => wave.unit_ids), [['U1'], ['U2']])
+    assert.deepEqual(result.write_parallel_eligibility.blockers, ['multi_agent.allow_write_agents is false'])
+    assert.deepEqual(result.parallel_waves.map((wave) => wave.unit_ids), [['U1', 'U2']])
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }
@@ -709,7 +711,9 @@ test('task-analyze reports auto parallel readiness only with write-agent opt-in'
     assert.equal(result.multi_agent_config.effective.allow_write_agents, true)
     assert.equal(result.execution_strategy, 'auto_parallel_ready')
     assert.equal(result.parallel_eligibility.can_parallelize, true)
-    assert.equal(result.parallel_eligibility.can_spawn_write_agents, true)
+    assert.equal(result.parallel_eligibility.can_spawn_write_agents, false)
+    assert.equal(result.write_parallel_eligibility.config_allows_write_agents, true)
+    assert.equal(result.write_parallel_eligibility.can_spawn_write_agents_now, false)
     assert.deepEqual(result.parallel_eligibility.blockers, [])
     assert.deepEqual(result.parallel_waves.map((wave) => wave.unit_ids), [['U1', 'U2'], ['U3']])
   } finally {
@@ -752,10 +756,125 @@ test('task-analyze keeps review_only as read-only parallel strategy without writ
 
     const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'task-analyze', '--mode', 'plan', '--plan', 'docs/ae/plans/plan.md'], tempRoot)
     assert.equal(result.execution_strategy, 'parallel_review_only')
-    assert.equal(result.parallel_eligibility.can_parallelize, false)
+    assert.equal(result.read_parallel_eligibility.can_parallelize, true)
+    assert.deepEqual(result.read_parallel_eligibility.blockers, [])
+    assert.equal(result.write_parallel_eligibility.can_parallelize, false)
+    assert.equal(result.write_parallel_eligibility.config_allows_write_agents, false)
+    assert.equal(result.write_parallel_eligibility.can_spawn_write_agents_now, false)
+    assert.deepEqual(result.write_parallel_eligibility.blockers, ['multi_agent.mode is review_only; write workers remain disabled'])
+    assert.equal(result.parallel_eligibility.can_parallelize, true)
     assert.equal(result.parallel_eligibility.can_spawn_write_agents, false)
-    assert.deepEqual(result.parallel_eligibility.blockers, ['multi_agent.mode is review_only; write workers remain disabled'])
-    assert.deepEqual(result.parallel_waves.map((wave) => wave.unit_ids), [['U1'], ['U2']])
+    assert.deepEqual(result.parallel_waves.map((wave) => wave.unit_ids), [['U1', 'U2']])
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('task-analyze separates write config readiness from pre-edit spawn readiness', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-'))
+  try {
+    mkdirSync(join(tempRoot, '.codex'), { recursive: true })
+    mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
+    writeFileSync(join(tempRoot, '.codex', 'ae-skill-profiles.yaml'), [
+      'multi_agent:',
+      '  enabled: true',
+      '  mode: auto',
+      '  max_workers: 3',
+      '  min_parallel_units: 2',
+      '  require_clean_git: true',
+      '  require_plan_dependencies: true',
+      '  require_disjoint_files: true',
+      '  allow_write_agents: true',
+      '  review_lanes_parallel: true',
+      '',
+    ].join('\n'), 'utf8')
+    writeFileSync(join(tempRoot, 'docs', 'ae', 'plans', 'plan.md'), [
+      '### U1 - First unit',
+      '',
+      '- Depends on: none',
+      '- Files:',
+      '  - `src/one.js`',
+      '',
+      '### U2 - Second unit',
+      '',
+      '- Depends on: none',
+      '- Files:',
+      '  - `src/two.js`',
+      '',
+    ].join('\n'), 'utf8')
+
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'task-analyze', '--mode', 'plan', '--plan', 'docs/ae/plans/plan.md'], tempRoot)
+    assert.equal(result.execution_strategy, 'auto_parallel_ready')
+    assert.equal(result.write_parallel_eligibility.can_parallelize, true)
+    assert.equal(result.write_parallel_eligibility.config_allows_write_agents, true)
+    assert.equal(result.write_parallel_eligibility.can_spawn_write_agents_now, false)
+    assert.deepEqual(result.write_parallel_eligibility.pre_spawn_requirements, ['ae-work pre-edit gate must confirm a clean Git state before write delegation'])
+    assert.equal(result.parallel_eligibility.can_spawn_write_agents, false)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('task-analyze parses forbidden files separately from owned files', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-'))
+  try {
+    mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
+    writeFileSync(join(tempRoot, 'docs', 'ae', 'plans', 'plan.md'), [
+      '### U1 - Script unit',
+      '',
+      '- Depends on: none',
+      '- Files:',
+      '  - `src/one.js`',
+      '- Forbidden files:',
+      '  - `package-lock.json`',
+      '  - `src/shared.js`',
+      '',
+      '### U2 - Docs unit',
+      '',
+      '- Depends on: none',
+      '- Files:',
+      '  - `docs/guide.md`',
+      '- Forbidden files: none',
+      '',
+    ].join('\n'), 'utf8')
+
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'task-analyze', '--mode', 'plan', '--plan', 'docs/ae/plans/plan.md'], tempRoot)
+    assert.deepEqual(result.units[0].files.map((file) => file.path), ['src/one.js'])
+    assert.deepEqual(result.units[0].forbidden_files, ['package-lock.json', 'src/shared.js'])
+    assert.deepEqual(result.units[1].forbidden_files, [])
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('task-analyze keeps comma-separated dependency ids with trailing punctuation', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-'))
+  try {
+    mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
+    writeFileSync(join(tempRoot, 'docs', 'ae', 'plans', 'plan.md'), [
+      '### U1 - First unit',
+      '',
+      '- Depends on: none.',
+      '- Files:',
+      '  - `src/one.js`',
+      '',
+      '### U2 - Second unit',
+      '',
+      '- Depends on: none.',
+      '- Files:',
+      '  - `src/two.js`',
+      '',
+      '### U3 - Third unit',
+      '',
+      '- Depends on: U1, U2.',
+      '- Files:',
+      '  - `tests/one.test.js`',
+      '',
+    ].join('\n'), 'utf8')
+
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'task-analyze', '--mode', 'plan', '--plan', 'docs/ae/plans/plan.md'], tempRoot)
+    assert.deepEqual(result.units.map((unit) => unit.depends_on), [[], [], ['U1', 'U2']])
+    assert.deepEqual(result.parallel_waves.map((wave) => wave.unit_ids), [['U1', 'U2'], ['U3']])
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }

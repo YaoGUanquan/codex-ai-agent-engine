@@ -50,3 +50,22 @@
   - `node --test tests/skill-scripts.test.mjs --test-name-pattern "multi-agent|auto|review_only"`.
   - `npm.cmd run check`.
   - `npm.cmd test`.
+
+## 2026-06-16 Official Subagents Alignment Follow-Up
+
+- Reviewed current OpenAI Codex subagents guidance and compared it with local multi-agent behavior.
+- Implemented lane-specific `task-analyze` output:
+  - `read_parallel_eligibility` for read-only review/exploration lanes,
+  - `write_parallel_eligibility` for write-worker config readiness and blockers,
+  - conservative compatibility `parallel_eligibility` that no longer claims write agents can spawn immediately.
+- Kept script-side behavior conservative: `task-analyze` reports strategy only; it still does not spawn subagents.
+- Fixed `review_only` so read-only lanes can remain parallel while write workers stay blocked.
+- Fixed `Files:` and `Forbidden files:` parsing so delegated workers get owned files separately from forbidden boundaries.
+- Fixed dependency ID normalization for punctuation such as `Depends on: U1, U2.`.
+- Updated plugin skill docs and `.agents/skills` mirrors for `ae-work`, `ae-review`, and the plan template.
+- Updated `README.en.md`, `docs/08-ai-memory/09-multi-agent-auto-config.md`, and this plan to document the new contract.
+- Validation passed:
+  - `npm.cmd test` with 34 tests.
+  - `npm.cmd run check`.
+  - `node scripts/ae-tools.mjs task-analyze --mode plan --plan docs/ae/plans/2026-06-08-001-multi-agent-execution-config-plan.md`.
+  - `node scripts/check-skill-mirror.mjs`.

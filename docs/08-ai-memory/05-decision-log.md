@@ -51,6 +51,14 @@
 - Impact: `task-analyze` now reports safe parallelism recommendations by default and emits blockers, waves, and notes. Installed projects still need a local `.codex/ae-skill-profiles.yaml` to customize runtime policy; update scripts do not overwrite that local file.
 - Re-evaluate when: Codex exposes stronger first-class sub-agent orchestration contracts, write-worker isolation becomes mechanically enforceable, or real end-to-end multi-agent execution tests are added.
 
+## 2026-06-16: Split read and write multi-agent eligibility
+
+- Date: 2026-06-16
+- Decision: `task-analyze` must report read-only and write-worker parallel eligibility separately. Use `read_parallel_eligibility` for review/exploration lanes and `write_parallel_eligibility` for write-worker readiness. Keep `parallel_eligibility` only as a conservative compatibility summary.
+- Context: OpenAI Codex subagents guidance recommends parallel agents first for read-heavy tasks and warns that write-heavy parallel work needs extra care. The previous output could block `review_only` read lanes and could make write-agent readiness look stronger than the actual Git Pre-Edit Gate allowed.
+- Impact: `review_only` can now recommend read-only parallel waves without authorizing write workers. Write-worker config readiness is expressed as `write_parallel_eligibility.config_allows_write_agents`, while `can_spawn_write_agents_now` remains false until the orchestrating agent verifies the current worktree. Plan units now expose `forbidden_files` separately from owned `files`.
+- Re-evaluate when: Codex exposes a machine-checkable subagent pre-spawn gate, project custom agents are added under `.codex/agents`, or external consumers depend on the old `parallel_eligibility.can_spawn_write_agents` field.
+
 ## 2026-06-12: Adapt Spec Kit workflow patterns without vendoring runtime
 
 - Date: 2026-06-12

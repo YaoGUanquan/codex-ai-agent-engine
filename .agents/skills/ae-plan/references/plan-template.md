@@ -106,4 +106,4 @@ originFingerprint: <optional fingerprint>
 
 All paths must be repository-relative. Do not write code in the plan.
 
-For multi-agent readiness, every implementation unit must keep `Depends on:` explicit. Use `none` for independent units or comma-separated unit IDs such as `U1, U2`. Use `Forbidden files:` to name shared files, lockfiles, generated outputs, or public contracts that a delegated worker must not edit.
+For multi-agent readiness, every implementation unit must keep `Depends on:` explicit. Use `none` for independent units or comma-separated unit IDs such as `U1, U2`. Use `Forbidden files:` to name shared files, lockfiles, generated outputs, or public contracts that a delegated worker must not edit. `task-analyze` parses `Files:` as owned files and `Forbidden files:` as a separate forbidden boundary, so do not duplicate forbidden paths under `Files:`.
