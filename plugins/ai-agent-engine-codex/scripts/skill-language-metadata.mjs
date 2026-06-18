@@ -99,6 +99,13 @@ export const skillMetadata = {
     promptEn: 'Use $ae-language to switch local AE display language.',
     promptZh: '使用 $ae-language 把本地 AE 显示语言切换为中文。',
   },
+  'ae-markitdown': {
+    display: { en: 'AE Markitdown', zh: 'AE Markitdown' },
+    en: 'Convert local files to Markdown',
+    zh: '将本地轻量文件转换为 Markdown',
+    promptEn: 'Use $ae-markitdown to convert this local file to Markdown.',
+    promptZh: '使用 $ae-markitdown 将这个本地文件转换为 Markdown。',
+  },
   'ae-lfg': {
     display: { en: 'AE LFG', zh: 'AE 全流程' },
     en: 'Full AE workflow from requirement to verified delivery',
@@ -168,6 +175,13 @@ export const skillMetadata = {
     zh: '生成、审查或执行 SQL，默认只读并保留安全边界',
     promptEn: 'Use $ae-sql to generate SQL from the current repository contract.',
     promptZh: '使用 $ae-sql 根据当前仓库生成这条数据库操作 SQL。',
+  },
+  'ae-static-server': {
+    display: { en: 'AE Static Server', zh: 'AE 静态服务器' },
+    en: 'Serve local static files for browser preview',
+    zh: '为本地静态文件提供浏览器预览服务',
+    promptEn: 'Use $ae-static-server to preview this local static file or directory.',
+    promptZh: '使用 $ae-static-server 预览这个本地静态文件或目录。',
   },
   'ae-swagger-parser': {
     display: { en: 'AE Swagger Parser', zh: 'AE Swagger 解析' },

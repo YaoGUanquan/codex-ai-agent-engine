@@ -1,0 +1,7 @@
+interface:
+  display_name: "AE Markitdown"
+  short_description: "Convert local files to Markdown"
+  default_prompt: "Use $ae-markitdown to convert this local file to Markdown."
+policy:
+  allow_implicit_invocation: true
+

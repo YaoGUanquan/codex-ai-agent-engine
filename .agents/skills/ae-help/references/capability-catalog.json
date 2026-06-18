@@ -169,6 +169,20 @@
       "script": "node scripts/ae-tools.mjs swagger <source> [method:GET] [path:/x] [tag:users] [keyword:login] [mode:detail]"
     },
     {
+      "name": "ae-markitdown",
+      "entry": "/ae-markitdown",
+      "target": "Local file to Markdown",
+      "purpose": "Convert lightweight local files such as HTML, CSV, TSV, JSON, YAML, XML, text, and Markdown into Markdown without fetching remote URLs.",
+      "script": "node scripts/ae-tools.mjs markitdown <file> [--format json|csv|html|text]"
+    },
+    {
+      "name": "ae-static-server",
+      "entry": "/ae-static-server",
+      "target": "Static preview server",
+      "purpose": "Serve a local static file or directory for quick browser preview; use --dry-run to plan the URL without starting a process.",
+      "script": "node scripts/ae-tools.mjs static-server <file-or-directory> [--port 4173] [--dry-run]"
+    },
+    {
       "name": "ae-handoff",
       "entry": "/ae-handoff",
       "target": "会话交接",
@@ -239,18 +253,38 @@
     },
     {
       "name": "ae-graph-build",
-      "purpose": "构建浅层只读依赖图 JSON，用于 Phase 2 前的文件和导入关系预览；不写入 .ae/graph.db。",
+      "purpose": "Build a shallow dependency graph JSON snapshot with freshness metadata for pre-Phase 2 file and import relation preview.",
       "script": "node scripts/ae-tools.mjs ae-graph-build [--root <path>] [--limit 500]"
     },
     {
       "name": "ae-graph-query",
-      "purpose": "按 path 或 keyword 查询浅层依赖图结果；每次查询重新扫描当前工作区，不包含 freshness、分片或预览页。",
+      "purpose": "Query the shallow dependency graph by path or keyword and report freshness metadata.",
       "script": "node scripts/ae-tools.mjs ae-graph-query [--root <path>] (--path <file>|--keyword <text>)"
     },
     {
       "name": "claude-delegate",
       "purpose": "检查或调用本地 Claude Code CLI，默认用于受控分析和 patch 候选方案，不自动写入活动工作区。",
       "script": "node scripts/ae-tools.mjs claude-delegate --check | --prompt-file <path> [--claude-arg <arg>]"
+    },
+    {
+      "name": "review-contract",
+      "purpose": "Generate a deterministic AE review contract with selected reviewers, target coverage, and optional evidence-ledger record.",
+      "script": "node scripts/ae-tools.mjs review-contract --kind code --mode report-only --targets code,document [--write-evidence]"
+    },
+    {
+      "name": "evidence",
+      "purpose": "Read or write lightweight AE evidence ledger records under docs/ae/evidence.",
+      "script": "node scripts/ae-tools.mjs evidence read"
+    },
+    {
+      "name": "markitdown",
+      "purpose": "Convert a local lightweight file to Markdown.",
+      "script": "node scripts/ae-tools.mjs markitdown <file>"
+    },
+    {
+      "name": "static-server",
+      "purpose": "Serve a local static file or directory for browser preview.",
+      "script": "node scripts/ae-tools.mjs static-server <path> --port 4173 [--dry-run]"
     }
   ],
   "artifactPaths": {
@@ -269,13 +303,15 @@
     "prds": "docs/ae/prds",
     "workReports": "docs/ae/work-reports",
     "constitution": "docs/ae/constitution.md",
-    "tasks": "docs/ae/tasks"
+    "tasks": "docs/ae/tasks",
+    "evidence": "docs/ae/evidence",
+    "graphs": "docs/ae/graphs"
   },
   "notes": [
     "/ae-* 是兼容标签；Codex 中可靠触发方式是 skill 名称，例如“用 ae-work 执行这个计划”。",
     "涉及 Git 写入、网络、依赖安装、数据库写入、生产环境或破坏性操作时，必须按 Codex 审批规则执行。",
     "OpenCode 的自动 slash command、agent registry、session navigation 和全局规则注入不是 Codex 原生能力。",
-    "ae-graph-build / ae-graph-query 当前是浅层只读脚本，不移植 OpenCode 的完整图谱 schema、SQLite 存储、分片、freshness 或预览页。",
+    "ae-graph-build / ae-graph-query now provide a shallow JSON graph with freshness evidence; this still does not port the full OpenCode graph schema, SQLite storage, sharding, or preview UI.",
     "ae-merge-branch 暂不作为 Codex skill 暴露；Git merge 类写操作需等待 ae-work 的 Git 证据链和授权边界进一步增强。",
     "ae-chrome-devtools 不照搬动态 MCP 注册；Codex 中通过现有 Browser、Playwright 或 DevTools 可用工具路由，并由 ae-test-browser 记录证据。",
     "Spec Kit is used as a workflow reference for constitution, requirement checklist, task breakdown, and cross-artifact analysis patterns; this project adapts those ideas into AE skills without vendoring the Specify runtime."

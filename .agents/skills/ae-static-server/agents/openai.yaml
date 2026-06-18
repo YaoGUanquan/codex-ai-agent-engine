@@ -1,0 +1,7 @@
+interface:
+  display_name: "AE Static Server"
+  short_description: "Serve local static files for browser preview"
+  default_prompt: "Use $ae-static-server to preview this local static file or directory."
+policy:
+  allow_implicit_invocation: true
+

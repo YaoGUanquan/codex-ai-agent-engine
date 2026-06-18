@@ -3,6 +3,8 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSy
 import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawnSync } from 'node:child_process'
+import { createHash } from 'node:crypto'
+import { createServer } from 'node:http'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -67,6 +69,18 @@ function main() {
       case 'claude-delegate':
         printJson(claudeDelegate(process.cwd(), args))
         break
+      case 'review-contract':
+        printJson(reviewContract(process.cwd(), args))
+        break
+      case 'evidence':
+        printJson(evidenceCommand(process.cwd(), args))
+        break
+      case 'markitdown':
+        printJson(markitdown(process.cwd(), args))
+        break
+      case 'static-server':
+        staticServer(process.cwd(), args)
+        break
       case 'ae-graph-build':
       case 'graph-build':
         printJson(graphBuild(process.cwd(), args))
@@ -76,7 +90,7 @@ function main() {
         printJson(graphQuery(process.cwd(), args))
         break
       default:
-        throw new Error(`Unknown command: ${command}\nAvailable: help, init, recovery, task-analyze, gate, swagger, claude-delegate, ae-graph-build, ae-graph-query`)
+        throw new Error(`Unknown command: ${command}\nAvailable: help, init, recovery, task-analyze, gate, swagger, claude-delegate, review-contract, evidence, markitdown, static-server, ae-graph-build, ae-graph-query`)
     }
   } catch (error) {
     console.error(formatError(error))
@@ -1182,12 +1196,282 @@ function claudeDelegateInvocation(opts, prompt) {
   }
 }
 
+function reviewContract(worktree, args) {
+  const opts = parseOptions(args)
+  const kind = String(opts.kind || opts._[0] || 'code')
+  const mode = String(opts.mode || 'report-only')
+  const targets = splitCsv(opts.targets || opts.targetTypes)
+  const reviewers = selectReviewersForContract(kind, opts, targets)
+  const targetCoverage = computeReviewTargetCoverage(targets, reviewers)
+  const result = {
+    status: 'ok',
+    kind,
+    normalizedKind: kind === 'mixed' || kind === 'hybrid' ? 'general' : kind,
+    mode,
+    reviewers,
+    targetCoverage,
+    gate: kind === 'code'
+      ? 'P0/P1 findings block delivery unless explicitly accepted by the user.'
+      : 'Document findings block downstream work when they invalidate scope, acceptance, validation, or rollback.',
+    notes: [
+      'This contract selects review lenses only; it does not replace the review itself.',
+      'Use the evidence command or --write-evidence to persist the contract for later gate checks.',
+    ],
+  }
+  if (truthy(opts['write-evidence'])) {
+    result.evidence = writeEvidenceRecord(worktree, 'review-contract', {
+      kind,
+      mode,
+      reviewers,
+      targetCoverage,
+      inputs: redactOptions(opts),
+    })
+  }
+  return result
+}
+
+function selectReviewersForContract(kind, opts, targets = []) {
+  const reviewers = new Set()
+  if (kind === 'code') {
+    for (const name of ['correctness-reviewer', 'testing-reviewer', 'standards-reviewer', 'maintainability-reviewer']) reviewers.add(name)
+  } else {
+    for (const name of ['coherence-reviewer', 'feasibility-reviewer']) reviewers.add(name)
+  }
+  if (kind === 'general' || kind === 'mixed' || kind === 'hybrid') {
+    for (const name of ['coherence-reviewer', 'feasibility-reviewer', 'traceability-reviewer']) reviewers.add(name)
+  }
+  for (const target of targets) {
+    for (const name of targetReviewers(target)) reviewers.add(name)
+  }
+  if (truthy(opts['has-security']) || truthy(opts.has_security)) reviewers.add('security-reviewer')
+  if (truthy(opts['has-api']) || truthy(opts.has_api)) reviewers.add('api-contract-reviewer')
+  if (truthy(opts['has-reliability']) || truthy(opts.has_reliability)) reviewers.add('reliability-reviewer')
+  if (truthy(opts['has-performance']) || truthy(opts.has_performance)) reviewers.add('performance-reviewer')
+  if (truthy(opts['has-database']) || truthy(opts.has_database) || truthy(opts['has-migrations']) || truthy(opts.has_migrations)) reviewers.add('data-migrations-reviewer')
+  if (truthy(opts['has-evidence']) || truthy(opts.has_evidence_claim)) reviewers.add('evidence-reviewer')
+  if (truthy(opts['has-goal-alignment']) || truthy(opts.has_goal_alignment)) reviewers.add('goal-alignment-reviewer')
+  return [...reviewers]
+}
+
+function targetReviewers(target) {
+  const map = {
+    code: ['correctness-reviewer', 'testing-reviewer', 'maintainability-reviewer'],
+    requirements: ['requirements-reviewer'],
+    design: ['design-lens-reviewer'],
+    prototype: ['prototype-reviewer'],
+    'test-case': ['test-case-reviewer'],
+    plan: ['step-granularity-reviewer', 'product-lens-reviewer'],
+    config: ['standards-reviewer'],
+    asset: ['agent-native-reviewer'],
+    document: ['coherence-reviewer', 'feasibility-reviewer', 'evidence-reviewer'],
+  }
+  return map[target] || []
+}
+
+function computeReviewTargetCoverage(targets, reviewers) {
+  const selected = new Set(reviewers)
+  const coverage = {}
+  for (const target of targets) {
+    const candidates = targetReviewers(target)
+    const matched = candidates.filter((name) => selected.has(name))
+    coverage[target] = {
+      status: matched.length > 0 ? 'covered' : 'uncovered',
+      reviewers: matched,
+    }
+  }
+  return coverage
+}
+
+function evidenceCommand(worktree, args) {
+  const [subcommand = 'read', ...rest] = args
+  if (subcommand === 'read') return readEvidenceLedger(worktree)
+  if (subcommand === 'write') {
+    const opts = parseOptions(rest)
+    const kind = String(opts.kind || 'manual')
+    const payload = opts.payload ? JSON.parse(String(opts.payload)) : redactOptions(opts)
+    return { status: 'ok', evidence: writeEvidenceRecord(worktree, kind, payload) }
+  }
+  throw new Error('evidence supports: read, write')
+}
+
+function markitdown(worktree, args) {
+  const opts = parseOptions(args)
+  const fileArg = opts.file || opts._[0]
+  if (!fileArg) throw new Error('markitdown requires a local file path')
+  const filePath = safeResolve(worktree, fileArg)
+  if (!existsSync(filePath) || !statSync(filePath).isFile()) throw new Error(`file not found: ${fileArg}`)
+  const size = statSync(filePath).size
+  if (size > 10 * 1024 * 1024) throw new Error('markitdown file limit is 10 MB')
+  const format = String(opts.format || detectMarkdownFormat(filePath)).toLowerCase()
+  const text = readText(filePath)
+  return {
+    status: 'ok',
+    tool: 'markitdown',
+    file: normalizeRelPath(relative(worktree, filePath)),
+    format,
+    fileSize: size,
+    markdown: convertToMarkdown(format, text, basename(filePath)),
+  }
+}
+
+function detectMarkdownFormat(filePath) {
+  const ext = extname(filePath).toLowerCase()
+  if (ext === '.html' || ext === '.htm') return 'html'
+  if (ext === '.csv') return 'csv'
+  if (ext === '.tsv') return 'tsv'
+  if (ext === '.json') return 'json'
+  if (ext === '.yaml' || ext === '.yml') return 'yaml'
+  if (ext === '.xml') return 'xml'
+  if (ext === '.md' || ext === '.markdown') return 'markdown'
+  if (ext === '.txt' || ext === '') return 'text'
+  throw new Error(`unsupported lightweight markitdown format: ${ext || '<none>'}`)
+}
+
+function convertToMarkdown(format, text, title) {
+  if (format === 'markdown') return text
+  if (format === 'text') return `# ${title}\n\n\`\`\`text\n${text}\n\`\`\`\n`
+  if (format === 'json') return jsonToMarkdown(text)
+  if (format === 'csv') return delimitedToMarkdown(text, ',')
+  if (format === 'tsv') return delimitedToMarkdown(text, '\t')
+  if (format === 'html') return htmlToMarkdown(text)
+  if (format === 'yaml' || format === 'xml') return `# ${title}\n\n\`\`\`${format}\n${text}\n\`\`\`\n`
+  throw new Error(`unsupported lightweight markitdown format: ${format}`)
+}
+
+function jsonToMarkdown(text) {
+  const value = JSON.parse(text)
+  if (Array.isArray(value) && value.every(isPlainObject)) {
+    return objectsToMarkdownTable(value)
+  }
+  return `\`\`\`json\n${JSON.stringify(value, null, 2)}\n\`\`\`\n`
+}
+
+function delimitedToMarkdown(text, delimiter) {
+  const rows = parseDelimited(text, delimiter)
+  if (rows.length === 0) return ''
+  const headers = rows[0]
+  const data = rows.slice(1)
+  return markdownTable(headers, data)
+}
+
+function parseDelimited(text, delimiter) {
+  return text.replace(/\r\n/g, '\n').split('\n').filter((line) => line.length > 0).slice(0, 5001).map((line) => line.split(delimiter).map((cell) => cell.trim()))
+}
+
+function objectsToMarkdownTable(rows) {
+  const headers = [...new Set(rows.flatMap((row) => Object.keys(row)))].slice(0, 50)
+  return markdownTable(headers, rows.slice(0, 5000).map((row) => headers.map((key) => scalarMarkdownCell(row[key]))))
+}
+
+function markdownTable(headers, rows) {
+  const safeHeaders = headers.map(scalarMarkdownCell)
+  const lines = [
+    `| ${safeHeaders.join(' | ')} |`,
+    `| ${safeHeaders.map(() => '---').join(' | ')} |`,
+  ]
+  for (const row of rows) {
+    lines.push(`| ${safeHeaders.map((_, index) => scalarMarkdownCell(row[index] ?? '')).join(' | ')} |`)
+  }
+  return `${lines.join('\n')}\n`
+}
+
+function scalarMarkdownCell(value) {
+  if (value === null || value === undefined) return ''
+  if (typeof value === 'object') return JSON.stringify(value).replace(/\|/g, '\\|')
+  return String(value).replace(/\|/g, '\\|').replace(/\r?\n/g, ' ')
+}
+
+function htmlToMarkdown(text) {
+  return text
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, '# $1\n\n')
+    .replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, '## $1\n\n')
+    .replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, '### $1\n\n')
+    .replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, '$1\n\n')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, '- $1\n')
+    .replace(/<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi, '[$2]($1)')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .trim() + '\n'
+}
+
+function staticServer(worktree, args) {
+  const opts = parseOptions(args)
+  const targetArg = opts._[0] || opts.path || '.'
+  const targetPath = safeResolve(worktree, targetArg)
+  if (!existsSync(targetPath)) throw new Error(`static-server target not found: ${targetArg}`)
+  const stat = statSync(targetPath)
+  const port = clampInteger(Number(opts.port || 4173), 4173, 1, 65535)
+  const host = String(opts.host || '127.0.0.1')
+  const rel = normalizeRelPath(relative(worktree, targetPath)) || '.'
+  const urlPath = stat.isDirectory() ? '/' : `/${encodeURI(basename(targetPath))}`
+  const base = {
+    status: 'ok',
+    tool: 'static-server',
+    host,
+    port,
+    url: `http://${host}:${port}${urlPath}`,
+    serving: {
+      path: rel,
+      type: stat.isDirectory() ? 'directory' : 'file',
+    },
+  }
+  if (truthy(opts['dry-run'])) {
+    printJson({ ...base, dryRun: true })
+    return
+  }
+  const root = stat.isDirectory() ? targetPath : dirname(targetPath)
+  const server = createServer((request, response) => {
+    try {
+      const requestPath = decodeURIComponent((request.url || '/').split('?')[0] || '/')
+      const localPath = requestPath === '/' && stat.isFile() ? targetPath : resolve(root, `.${requestPath}`)
+      const relPath = relative(root, localPath)
+      if (relPath.startsWith('..') || isAbsolute(relPath) || !existsSync(localPath) || !statSync(localPath).isFile()) {
+        response.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' })
+        response.end('Not found')
+        return
+      }
+      response.writeHead(200, { 'content-type': contentType(localPath) })
+      response.end(readFileSync(localPath))
+    } catch (error) {
+      response.writeHead(500, { 'content-type': 'text/plain; charset=utf-8' })
+      response.end(error instanceof Error ? error.message : String(error))
+    }
+  })
+  server.listen(port, host, () => {
+    printJson({ ...base, dryRun: false, pid: process.pid })
+  })
+}
+
+function contentType(path) {
+  const ext = extname(path).toLowerCase()
+  const map = {
+    '.html': 'text/html; charset=utf-8',
+    '.htm': 'text/html; charset=utf-8',
+    '.js': 'text/javascript; charset=utf-8',
+    '.mjs': 'text/javascript; charset=utf-8',
+    '.css': 'text/css; charset=utf-8',
+    '.json': 'application/json; charset=utf-8',
+    '.svg': 'image/svg+xml',
+    '.txt': 'text/plain; charset=utf-8',
+  }
+  return map[ext] || 'application/octet-stream'
+}
+
 function graphBuild(worktree, args) {
   const opts = parseOptions(args)
   const root = opts.root ? safeResolve(worktree, opts.root) : worktree
   const files = collectSourceFiles(root).slice(0, Number(opts.limit || 500))
   const graph = buildShallowGraph(root, files)
-  return {
+  const store = truthy(opts['no-write'])
+    ? { path: 'docs/ae/graphs/graph.json', schemaVersion: 1, written: false }
+    : writeGraphStore(worktree, root, graph)
+  const result = {
     status: 'ok',
     mode: 'shallow-dependency-graph',
     root: toPosix(relative(worktree, root)) || '.',
@@ -1198,12 +1482,15 @@ function graphBuild(worktree, args) {
     externalDependencies: graph.externalDependencies,
     nodes: graph.nodes,
     edges: graph.edges,
+    freshness: graphFreshness(worktree, root, graph),
+    store,
     limitations: [
       'static shallow scan only',
-      'no SQLite persistence, sharding, freshness tracking, or preview page',
+      'JSON snapshot only; no SQLite persistence, sharding, or preview page',
       'dynamic imports, generated code, aliases, and framework-specific resolution may be incomplete',
     ],
   }
+  return result
 }
 
 function graphQuery(worktree, args) {
@@ -1226,7 +1513,46 @@ function graphQuery(worktree, args) {
     matchedNodes,
     relatedEdges,
     externalDependencies: graph.externalDependencies.filter((dep) => !path || dep.from === path),
+    freshness: graph.freshness,
+    store: graph.store,
     limitations: graph.limitations,
+  }
+}
+
+function graphFreshness(worktree, root, graph) {
+  const input = {
+    root: toPosix(relative(worktree, root)) || '.',
+    nodes: graph.nodes.map((node) => node.path),
+    edges: graph.edges,
+    externalDependencies: graph.externalDependencies,
+    git: gitFingerprint(worktree),
+  }
+  return {
+    status: 'fresh',
+    canUseAsEvidence: true,
+    fingerprint: stableHash(input),
+    basis: ['current filesystem scan completed during this command'],
+    git: input.git,
+  }
+}
+
+function writeGraphStore(worktree, root, graph) {
+  const relPath = 'docs/ae/graphs/graph.json'
+  const target = safeResolve(worktree, relPath)
+  mkdirSync(dirname(target), { recursive: true })
+  const snapshot = {
+    schemaVersion: 1,
+    generatedAt: new Date().toISOString(),
+    root: toPosix(relative(worktree, root)) || '.',
+    freshness: graphFreshness(worktree, root, graph),
+    nodes: graph.nodes,
+    edges: graph.edges,
+    externalDependencies: graph.externalDependencies,
+  }
+  writeFileSync(target, `${JSON.stringify(snapshot, null, 2)}\n`, 'utf8')
+  return {
+    path: relPath,
+    schemaVersion: 1,
   }
 }
 
@@ -1236,6 +1562,144 @@ function readJson(path) {
 
 function readText(path) {
   return textDecoder.decode(readFileSync(path))
+}
+
+function writeEvidenceRecord(worktree, kind, payload) {
+  const safeKind = safeName(kind)
+  const id = `${new Date().toISOString().replace(/[-:.]/g, '').replace('Z', 'Z')}-${stableHash(payload).slice(0, 12)}`
+  const relPath = `docs/ae/evidence/artifacts/${safeKind}/${id}.json`
+  const target = safeResolve(worktree, relPath)
+  mkdirSync(dirname(target), { recursive: true })
+  const previous = readLastEvidenceEvent(worktree)
+  const record = {
+    schemaVersion: 1,
+    id,
+    evidenceKind: safeKind,
+    payload,
+    timestamps: {
+      writtenAt: new Date().toISOString(),
+    },
+    git: gitFingerprint(worktree),
+    hashes: {
+      previousRecordHash: previous?.recordHash || null,
+      payloadHash: stableHash(payload),
+      recordHash: null,
+    },
+  }
+  record.hashes.recordHash = stableHash({ ...record, hashes: { ...record.hashes, recordHash: null } })
+  writeFileSync(target, `${JSON.stringify(record, null, 2)}\n`, 'utf8')
+  appendEvidenceEvent(worktree, {
+    id,
+    evidenceKind: safeKind,
+    artifactPath: relPath,
+    artifactHash: stableHash(readText(target)),
+    recordHash: record.hashes.recordHash,
+    previousRecordHash: record.hashes.previousRecordHash,
+    writtenAt: record.timestamps.writtenAt,
+  })
+  return {
+    kind: safeKind,
+    id,
+    path: relPath,
+    recordHash: record.hashes.recordHash,
+  }
+}
+
+function readEvidenceLedger(worktree) {
+  const ledgerPath = safeResolve(worktree, 'docs/ae/evidence/ledger.jsonl')
+  if (!existsSync(ledgerPath)) {
+    return { status: 'ok', state: 'missing', records: [], diagnostics: ['ledger.jsonl does not exist'] }
+  }
+  const diagnostics = []
+  const records = []
+  let previousRecordHash = null
+  const lines = readText(ledgerPath).split(/\r?\n/).filter(Boolean)
+  for (const [index, line] of lines.entries()) {
+    let event
+    try {
+      event = JSON.parse(line)
+    } catch {
+      diagnostics.push(`ledger line ${index + 1} is not valid JSON`)
+      continue
+    }
+    if (event.previousRecordHash !== previousRecordHash) diagnostics.push(`ledger chain mismatch: ${event.id}`)
+    previousRecordHash = event.recordHash
+    const artifactPath = safeResolve(worktree, event.artifactPath)
+    if (!existsSync(artifactPath)) {
+      diagnostics.push(`artifact missing: ${event.artifactPath}`)
+      continue
+    }
+    const content = readText(artifactPath)
+    if (stableHash(content) !== event.artifactHash) diagnostics.push(`artifact hash mismatch: ${event.id}`)
+    const record = JSON.parse(content)
+    if (record.hashes?.recordHash !== event.recordHash) diagnostics.push(`record hash mismatch: ${event.id}`)
+    records.push(record)
+  }
+  return {
+    status: 'ok',
+    state: diagnostics.length > 0 ? 'unverifiable' : records.length > 0 ? 'passed' : 'missing',
+    records,
+    diagnostics,
+  }
+}
+
+function appendEvidenceEvent(worktree, event) {
+  const ledgerPath = safeResolve(worktree, 'docs/ae/evidence/ledger.jsonl')
+  mkdirSync(dirname(ledgerPath), { recursive: true })
+  const existing = existsSync(ledgerPath) ? readText(ledgerPath) : ''
+  writeFileSync(ledgerPath, `${existing}${JSON.stringify(event)}\n`, 'utf8')
+}
+
+function readLastEvidenceEvent(worktree) {
+  const ledgerPath = safeResolve(worktree, 'docs/ae/evidence/ledger.jsonl')
+  if (!existsSync(ledgerPath)) return null
+  const last = readText(ledgerPath).split(/\r?\n/).filter(Boolean).at(-1)
+  return last ? JSON.parse(last) : null
+}
+
+function gitFingerprint(worktree) {
+  const head = runGitOptional(worktree, ['rev-parse', 'HEAD'])
+  const branch = runGitOptional(worktree, ['branch', '--show-current'])
+  const status = runGitOptional(worktree, ['status', '--porcelain'])
+  return {
+    available: Boolean(head),
+    head: head || null,
+    branch: branch || null,
+    statusHash: status ? stableHash(status) : null,
+    dirty: Boolean(status),
+  }
+}
+
+function runGitOptional(worktree, args) {
+  const result = spawnSync('git', args, { cwd: worktree, encoding: 'utf8', stdio: 'pipe', timeout: 10000 })
+  return result.status === 0 ? result.stdout.trim() : ''
+}
+
+function stableHash(value) {
+  return createHash('sha256').update(stableStringify(value), 'utf8').digest('hex')
+}
+
+function stableStringify(value) {
+  if (value === null || typeof value !== 'object') return JSON.stringify(value)
+  if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`
+  return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`).join(',')}}`
+}
+
+function safeName(value) {
+  const name = String(value).replace(/[^a-zA-Z0-9._-]/g, '-')
+  if (!name || name === '.' || name === '..') throw new Error(`invalid safe name: ${value}`)
+  return name
+}
+
+function splitCsv(value) {
+  if (!value) return []
+  return String(value).split(',').map((item) => item.trim()).filter(Boolean)
+}
+
+function redactOptions(opts) {
+  const out = { ...opts }
+  delete out._
+  return out
 }
 
 function listFiles(dir) {
