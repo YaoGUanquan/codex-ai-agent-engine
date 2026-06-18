@@ -52,6 +52,16 @@ test('renderYaml supports Claude Code delegation metadata', () => {
   assert.match(bilingualYaml, /AE Claude Code/)
 })
 
+test('renderYaml supports markitdown and static server metadata', () => {
+  const markitdownYaml = renderYaml(skillMetadata['ae-markitdown'], 'en')
+  const staticServerYaml = renderYaml(skillMetadata['ae-static-server'], 'en')
+
+  assert.match(markitdownYaml, /display_name: "AE Markitdown"/)
+  assert.match(markitdownYaml, /Convert local files to Markdown/)
+  assert.match(staticServerYaml, /display_name: "AE Static Server"/)
+  assert.match(staticServerYaml, /Serve local static files/)
+})
+
 test('check-skill-mirror reports ok', () => {
   const result = runNodeScript('scripts/check-skill-mirror.mjs')
   assert.equal(result.status, 'ok')
@@ -96,6 +106,8 @@ test('check-install-smoke reports ok and verifies new skills', () => {
     'ae-debug',
     'ae-tdd',
     'ae-claude-code',
+    'ae-markitdown',
+    'ae-static-server',
     'ae-computer-use-guard',
     'ae-imagegen-prompt',
     'ae-video-edit-computer',
@@ -199,6 +211,16 @@ test('help can find Claude Code delegation capability', () => {
   const output = runNodeScriptRaw('node scripts/ae-tools.mjs help claude')
   assert.match(output, /ae-claude-code/)
   assert.match(output, /claude-delegate/)
+})
+
+test('help can find markitdown and static server capabilities', () => {
+  const markitdownOutput = runNodeScriptRaw('node scripts/ae-tools.mjs help markitdown')
+  assert.match(markitdownOutput, /ae-markitdown/)
+  assert.match(markitdownOutput, /markitdown/)
+
+  const serverOutput = runNodeScriptRaw('node scripts/ae-tools.mjs help static')
+  assert.match(serverOutput, /ae-static-server/)
+  assert.match(serverOutput, /static-server/)
 })
 
 test('installed language switching updates active skills for all supported modes', () => {
@@ -371,6 +393,10 @@ test('graph-build reports shallow local dependencies', () => {
     const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'ae-graph-build', '--root', '.'], tempRoot)
     assert.equal(result.status, 'ok')
     assert.equal(result.mode, 'shallow-dependency-graph')
+    assert.equal(result.freshness.status, 'fresh')
+    assert.equal(result.freshness.canUseAsEvidence, true)
+    assert.equal(typeof result.freshness.fingerprint, 'string')
+    assert.equal(result.store.path, 'docs/ae/graphs/graph.json')
     assert.ok(result.nodes.some((node) => node.path === 'src/main.js'))
     assert.ok(result.edges.some((edge) => edge.from === 'src/main.js' && edge.to === 'src/helper.js' && edge.type === 'imports'))
     assert.ok(result.externalDependencies.some((dep) => dep.from === 'src/main.js' && dep.dependency === 'node:fs'))
@@ -388,8 +414,80 @@ test('graph-query filters shallow graph by path', () => {
 
     const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'ae-graph-query', '--root', '.', '--path', 'src/main.js'], tempRoot)
     assert.equal(result.status, 'ok')
+    assert.equal(result.freshness.status, 'fresh')
+    assert.equal(result.store.path, 'docs/ae/graphs/graph.json')
     assert.deepEqual(result.matchedNodes.map((node) => node.path), ['src/main.js'])
     assert.ok(result.relatedEdges.some((edge) => edge.to === 'src/helper.js'))
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('review-contract selects reviewers and writes evidence ledger records', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-review-contract-'))
+  try {
+    const result = runNodeScriptJson([
+      'scripts/ae-tools.mjs',
+      'review-contract',
+      '--kind',
+      'code',
+      '--mode',
+      'report-only',
+      '--targets',
+      'code,document',
+      '--has-security',
+      '--write-evidence',
+    ], tempRoot)
+
+    assert.equal(result.status, 'ok')
+    assert.equal(result.kind, 'code')
+    assert.ok(result.reviewers.includes('correctness-reviewer'))
+    assert.ok(result.reviewers.includes('security-reviewer'))
+    assert.equal(result.targetCoverage.code.status, 'covered')
+    assert.equal(result.evidence.kind, 'review-contract')
+    assert.match(result.evidence.path, /^docs\/ae\/evidence\/artifacts\/review-contract\//)
+
+    const ledger = runNodeScriptJson(['scripts/ae-tools.mjs', 'evidence', 'read'], tempRoot)
+    assert.equal(ledger.status, 'ok')
+    assert.equal(ledger.state, 'passed')
+    assert.equal(ledger.records.length, 1)
+    assert.equal(ledger.records[0].evidenceKind, 'review-contract')
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('markitdown converts JSON arrays and CSV files to Markdown tables', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-markitdown-'))
+  try {
+    writeFileSync(join(tempRoot, 'items.json'), JSON.stringify([{ name: 'Ada', score: 2 }, { name: 'Lin', score: 3 }]), 'utf8')
+    writeFileSync(join(tempRoot, 'items.csv'), 'name,score\nAda,2\nLin,3\n', 'utf8')
+
+    const jsonResult = runNodeScriptJson(['scripts/ae-tools.mjs', 'markitdown', 'items.json'], tempRoot)
+    assert.equal(jsonResult.status, 'ok')
+    assert.equal(jsonResult.format, 'json')
+    assert.match(jsonResult.markdown, /\| name \| score \|/)
+    assert.match(jsonResult.markdown, /\| Ada \| 2 \|/)
+
+    const csvResult = runNodeScriptJson(['scripts/ae-tools.mjs', 'markitdown', 'items.csv'], tempRoot)
+    assert.equal(csvResult.status, 'ok')
+    assert.equal(csvResult.format, 'csv')
+    assert.match(csvResult.markdown, /\| name \| score \|/)
+    assert.match(csvResult.markdown, /\| Lin \| 3 \|/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('static-server dry run returns a local preview URL without starting a process', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-static-server-'))
+  try {
+    writeFileSync(join(tempRoot, 'index.html'), '<!doctype html><title>AE</title>', 'utf8')
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'static-server', 'index.html', '--port', '43123', '--dry-run'], tempRoot)
+    assert.equal(result.status, 'ok')
+    assert.equal(result.serving.path, 'index.html')
+    assert.equal(result.url, 'http://127.0.0.1:43123/index.html')
+    assert.equal(result.dryRun, true)
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }

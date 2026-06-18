@@ -26,6 +26,14 @@ Supported mode markers:
 
 Read `references/review-personas.md`. Use the smallest useful reviewer set. Do not spawn sub-agents unless the user explicitly requested/allowed parallel agent work. If sub-agents are allowed, each reviewer is read-only and must return evidence-backed findings.
 
+When reviewer selection is non-trivial, generate a deterministic contract before dispatching lanes:
+
+```powershell
+node scripts/ae-tools.mjs review-contract --kind code --mode report-only --targets code,document --write-evidence
+```
+
+Use the returned reviewers and target coverage as the review routing baseline. The command writes lightweight evidence under `docs/ae/evidence` only when `--write-evidence` is present.
+
 If `.codex/ae-skill-profiles.yaml` has `multi_agent.enabled: auto` or `multi_agent.enabled: true`, and `multi_agent.review_lanes_parallel: true`, read-only reviewer lanes may run in parallel when the scope is large enough and each lane has a distinct lens. When `task-analyze` is available, use `read_parallel_eligibility` and `parallel_waves` for read-only lane planning; do not treat write-worker blockers as blockers for read-only review. This does not authorize write workers. Keep reviewer outputs evidence-backed and merge them under the strictest verdict. `multi_agent.enabled: false` disables parallel reviewer lanes.
 
 For significant code or plan reviews, apply two lanes even when you are not spawning sub-agents:
@@ -57,6 +65,15 @@ For plan and requirements reviews, verify:
 - cross-artifact consistency across requirements, constitution, plan, tasks, and validation evidence when those artifacts exist.
 
 Serious findings should block downstream execution until resolved or explicitly accepted by the user.
+
+## Evidence
+
+When a review is used as a delivery gate, preserve enough proof for later checks:
+
+- include worktree, branch, and current Git status summary in the review output when available;
+- cite validation commands exactly;
+- when `review-contract --write-evidence` was used, mention the returned evidence path;
+- use `node scripts/ae-tools.mjs evidence read` to inspect existing evidence records before relying on them.
 
 ## Cross-Artifact Review
 

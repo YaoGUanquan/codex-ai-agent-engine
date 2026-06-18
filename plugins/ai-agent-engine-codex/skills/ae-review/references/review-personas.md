@@ -20,9 +20,15 @@ Use these personas as review lenses. In Codex they are not automatically registe
 - coherence-reviewer: internal consistency and terminology drift.
 - feasibility-reviewer: missing dependencies, unrealistic steps, migration risk.
 - product-lens-reviewer: scope, product assumptions, value and complexity tradeoffs.
+- requirements-reviewer: requirement clarity, acceptance verifiability, roles, constraints, and unresolved decisions.
 - design-lens-reviewer: UX flows, information architecture, interaction states.
 - adversarial-reviewer: failure scenarios and challenged assumptions.
 - test-case-reviewer: test case completeness and verifiability.
+- traceability-reviewer: requirement-design-plan-task-implementation-test evidence chains.
+- evidence-reviewer: factual claims, command evidence, external references, and proof integrity.
+- goal-alignment-reviewer: requested outcome coverage and unfulfilled success criteria.
+- step-granularity-reviewer: plan step size, dependency order, and scriptability.
+- prototype-reviewer: mockup/prototype completeness and requirement consistency.
 - doc-equivalence-reviewer: conversion fidelity between structured and human-readable docs.
 
 ## Research Domain
@@ -40,3 +46,7 @@ Add reliability for async, infra, queues, retries, jobs, or failure recovery.
 Add data-migrations for database/schema/data movement.
 Add performance for hot paths, large data, caching, or render-heavy UI.
 For documents, always include coherence and feasibility, then add conditional lenses based on content.
+Add requirements-reviewer for requirements or PRDs.
+Add traceability-reviewer when multiple AE artifacts must agree.
+Add evidence-reviewer when a document claims validation, quotes external sources, or cites delivery proof.
+Add goal-alignment-reviewer when the user supplied explicit success criteria.
