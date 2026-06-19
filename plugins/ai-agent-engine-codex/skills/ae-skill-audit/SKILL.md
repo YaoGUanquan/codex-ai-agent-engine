@@ -17,9 +17,9 @@ Audit external agent and skill repositories, then translate useful patterns into
 ## Workflow
 
 1. Identify the external source, license, supported harnesses, and primary capability model.
-2. Inspect the repository structure: skills, agents, hooks, commands, MCP, docs, installer scripts, and manifests.
+2. Inspect the repository structure: skills, agents, hooks, commands, MCP, docs, installer scripts, manifests, deterministic engineering mechanisms, and license metadata.
 3. Compare the external model with current AE boundaries: `ae-ideate`, `ae-brainstorm`, `ae-plan`, `ae-work`, `ae-review`, `ae-skill-creator`, `ae-agent-creator`, `ae-save-experience`, and `ae-help`.
-4. Classify findings using `references/audit-template.md`.
+4. Classify findings using `references/audit-template.md`, including deterministic engineering patterns and license compatibility before recommending reuse.
 5. Recommend one of:
    - improve an existing AE skill,
    - create a new narrowly scoped AE skill,
@@ -35,6 +35,7 @@ Good candidates:
 - reduce repeated manual judgment across projects,
 - can be expressed as Codex skill instructions or local scripts without relying on unavailable hooks,
 - have clear trigger conditions and validation expectations.
+- expose deterministic engineering patterns such as file selection, schema validation, routing contracts, evidence capture, reflection or filtering passes, dry-run previews, or bounded tool access that can be rewritten as AE guidance.
 
 Poor candidates:
 
@@ -42,6 +43,7 @@ Poor candidates:
 - depend on Claude Code or OpenCode hook behavior that Codex cannot enforce,
 - duplicate an existing AE skill without a clear boundary improvement,
 - expand the plugin into unrelated business, marketing, or personal productivity catalogs.
+- require source-derived templates, prompts, scripts, or assets whose license is missing, unclear, or incompatible with this GPL-2.0-only project.
 
 ## Multi-Agent Use
 
@@ -59,9 +61,10 @@ Return a concise decision report:
 
 - external repository summary,
 - adaptable patterns,
+- deterministic engineering patterns,
 - existing AE skills to improve,
 - new skill candidates,
 - rejected patterns and reasons,
+- license compatibility notes,
 - implementation impact: files, metadata, validation commands,
 - recommended next step.
-
