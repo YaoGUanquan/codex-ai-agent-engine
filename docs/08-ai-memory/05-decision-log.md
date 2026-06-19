@@ -82,3 +82,11 @@
 - Context: OCR's strongest transferable ideas are constrained file/review scope, rule-profile attention, position checking, and reflection/contradiction filtering. Direct runtime integration would duplicate `ae-review` and add a second LLM/review backend.
 - Impact: `ae-review` gains `Diff Review Discipline`, manual position checks, contradiction checks, and optional code review rule profiles. `ae-skill-audit` gains deterministic engineering and license compatibility audit dimensions. A regression test locks the behavior into plugin source and mirror.
 - Re-evaluate when: AE has a formal finding schema, users explicitly request OCR CLI integration, or review-scope/position-validation tooling has a clear JSON contract and validation path.
+
+## 2026-06-19: Adapt Claude Code best-practice taxonomy without vendoring runtime
+
+- Date: 2026-06-19
+- Decision: Use `shanraisshan/claude-code-best-practice` as a taxonomy and deterministic-check reference, but rewrite guidance into existing AE skills and do not vendor Claude runtime files, hooks, settings, command catalogs, sounds, schedules, or prompt text.
+- Context: The repository is useful for source freshness, extension routing, delegation boundaries, second-model review, and memory placement. Its runtime assumptions are Claude Code-specific and do not map directly to Codex project-local skills.
+- Impact: `ae-skill-audit`, `ae-skill-creator`, `ae-agent-creator`, `ae-claude-code`, `ae-plan`, `ae-review`, and `ae-save-experience` gain explicit routing and trust-boundary guidance. `claude-delegate` reports diagnostics when a successful run produces empty stdout and stderr.
+- Re-evaluate when: Codex exposes stable project hooks, schedulers, permission profiles, or an agent registry that can enforce these behaviors natively.

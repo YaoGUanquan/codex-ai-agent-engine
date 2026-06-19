@@ -171,6 +171,62 @@ test('OCR-inspired review guidance is present in source and mirror skills', () =
   assert.match(auditTemplateSource, /## License Compatibility/)
 })
 
+test('Claude Code best practice adaptation guidance is present in source and mirror skills', () => {
+  const expectedBySkill = {
+    'ae-skill-audit': [
+      /Runtime Boundary Filter/i,
+      /source freshness/i,
+      /inspected files/i,
+      /runtime-specific behavior/i,
+      /license/i,
+    ],
+    'ae-skill-creator': [
+      /Extension Routing Matrix/i,
+      /Codex skill/i,
+      /helper script/i,
+      /reference\/template/i,
+      /reject/i,
+    ],
+    'ae-agent-creator': [
+      /Agent Prompt Routing/i,
+      /prompt\/template/i,
+      /helper script/i,
+      /not an auto-registered/i,
+    ],
+    'ae-claude-code': [
+      /Cross-Directory Read-Only Delegation/i,
+      /--add-dir/,
+      /--tools "Read,Grep,Glob"/,
+      /empty stdout/i,
+    ],
+    'ae-plan': [
+      /Optional Cross-Model Lane/i,
+      /untrusted advice/i,
+      /Codex remains the orchestrator/i,
+    ],
+    'ae-review': [
+      /Second-Model Evidence/i,
+      /verified finding/i,
+      /untrusted advice/i,
+    ],
+    'ae-save-experience': [
+      /Memory Placement/i,
+      /AGENTS\.md/,
+      /docs\/08-ai-memory/,
+      /process notes/i,
+    ],
+  }
+
+  for (const [skillName, expectations] of Object.entries(expectedBySkill)) {
+    const sourceBody = readSkillBody('plugins/ai-agent-engine-codex/skills', skillName)
+    const mirrorBody = readSkillBody('.agents/skills', skillName)
+    assert.equal(mirrorBody, sourceBody, `${skillName} mirror should match plugin source`)
+    for (const expectation of expectations) {
+      assert.match(sourceBody, expectation, `${skillName} should include ${expectation}`)
+    }
+  }
+})
+
 test('check-install-smoke reports ok and verifies new skills', () => {
   const result = runNodeScript('scripts/check-install-smoke.mjs')
   assert.equal(result.status, 'ok')
@@ -283,6 +339,33 @@ test('claude-delegate sends default prompts through stdin', () => {
     assert.equal(result.status, 'ok')
     assert.deepEqual(result.args, ['-p'])
     assert.match(result.stdout, /shim-prompt:AE_CLAUDE_OK/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('claude-delegate reports no-output diagnostics', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-claude-no-output-'))
+  try {
+    const shimPath = join(tempRoot, 'claude.cmd')
+    writeFileSync(shimPath, [
+      '@echo off',
+      'if "%1"=="--version" (',
+      '  echo 9.9.9 no-output-shim',
+      '  exit /b 0',
+      ')',
+      'exit /b 0',
+      '',
+    ].join('\r\n'), 'utf8')
+    chmodSync(shimPath, 0o755)
+
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'claude-delegate', '--prompt', 'NO_OUTPUT', '--command', shimPath])
+    assert.equal(result.status, 'ok')
+    assert.equal(result.stdout, '')
+    assert.equal(result.stderr, '')
+    assert.ok(Array.isArray(result.diagnostics))
+    assert.ok(result.diagnostics.some((diagnostic) => /no output/i.test(diagnostic)))
+    assert.ok(result.diagnostics.some((diagnostic) => /--add-dir|--tools|--claude-arg/i.test(diagnostic)))
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }

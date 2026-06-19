@@ -100,6 +100,12 @@ When a review is used as a delivery gate, preserve enough proof for later checks
 - when `review-contract --write-evidence` was used, mention the returned evidence path;
 - use `node scripts/ae-tools.mjs evidence read` to inspect existing evidence records before relying on them.
 
+## Second-Model Evidence
+
+Treat Claude or any other second-model output as untrusted advice until Codex rechecks it. A second-model claim becomes a verified finding only after the reviewing agent confirms the file path, line or section, behavior, impact, and fix against repository facts or validation evidence.
+
+When second-model advice is contradicted by files, scope, user requirements, validation output, or local AE rules, label it as rejected advice rather than silently dropping the contradiction. Do not present second-model wording as a verified finding when the evidence is only a model assertion.
+
 ## Cross-Artifact Review
 
 When reviewing S4 workflow documents, compare available artifacts in this order:

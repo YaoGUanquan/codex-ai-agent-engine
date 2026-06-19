@@ -25,3 +25,11 @@
 - `docs/ae/plans/2026-06-08-001-multi-agent-execution-config-plan.md` 记录了 `multi_agent.enabled` 从布尔开关扩展为 `auto | true | false` 的实现计划。
 - `docs/00-process/active/multi-agent-execution-config/progress.md` 记录了实现、测试加固、文档更新和合并前验证证据。
 - 合并到 `main` 后，其他项目通过 `scripts/update-ae-codex.mjs` 更新安装，再复制或编辑 `.codex/ae-skill-profiles.yaml` 才会改变本地运行策略；更新脚本不会覆盖该本地配置。
+
+## 最近完成的适配
+
+- Claude Code best-practice adaptation:
+  - PRD: `docs/ae/prds/2026-06-19-003-claude-code-best-practice-adaptation-prd.md`
+  - Plan: `docs/ae/plans/2026-06-19-004-claude-code-best-practice-detailed-execution-plan.md`
+  - Audit solution: `docs/ae/solutions/2026-06-19-claude-code-best-practice-audit.md`
+  - Process archive: `docs/00-process/archive/2026-06/claude-code-best-practice-audit/`

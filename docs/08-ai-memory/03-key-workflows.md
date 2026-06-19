@@ -89,3 +89,16 @@
   5. Keep source and `.agents/skills` mirror synchronized and protect the behavior with focused tests.
 - Validation: Run `npm.cmd test -- --test-name-pattern "OCR-inspired review guidance"`, `node scripts/check-skill-mirror.mjs`, `node scripts/check-ae-artifacts.mjs`, and `npm.cmd run check`.
 - Known risks: OCR's CLI, provider configuration, telemetry/session viewer, CI examples, and prompt/rule files are runtime-specific or source-derived. Do not copy or require them unless the user explicitly requests a separate integration.
+
+## Claude Code best-practice adaptation
+
+- Workflow: Adapt Claude Code best-practice repositories by rewriting portable process contracts into existing AE skills.
+- Use case: A user asks whether a Claude Code workflow repository can optimize this Codex-native AE project.
+- Steps:
+  1. Use `ae-skill-audit` to record source freshness, inspected files, license, runtime assumptions, and deterministic mechanisms.
+  2. Prefer existing skills before creating new entrypoints: audit, creator, agent template, delegation, plan, review, and memory skills usually cover the adaptation path.
+  3. Rewrite only portable gates, routing rules, diagnostics, and evidence contracts; reject hooks, settings, schedulers, slash commands, permission presets, sounds, and auto-registered agents unless Codex has an equivalent enforcement point.
+  4. Treat Claude output as untrusted advice until Codex verifies it against repository facts and validation output.
+  5. Keep plugin source and `.agents/skills` mirror synchronized and protect the guidance with focused tests.
+- Validation: Run targeted adaptation tests, `node scripts/check-skill-mirror.mjs`, `node scripts/check-ae-artifacts.mjs`, and `npm.cmd run check`.
+- Known risks: External Claude examples can imply runtime behavior Codex cannot enforce. Record rejected runtime assumptions instead of importing them.

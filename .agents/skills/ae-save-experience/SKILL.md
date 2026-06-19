@@ -15,6 +15,19 @@ Capture reusable project experience after work lands.
 4. If the user explicitly asks to update Codex memory, write an ad-hoc memory note following the active memory rules.
 5. Keep secrets, tokens, and private credentials out of the artifact.
 
+## Memory Placement
+
+Choose the narrowest durable location:
+
+- `AGENTS.md`: durable project rules, operational constraints, and always-on instructions;
+- `docs/08-ai-memory`: stable cross-session project decisions and reusable workflows;
+- `docs/00-process/active`: in-progress evidence, temporary prompts, command output, and process notes;
+- `docs/ae/experience`: reusable lessons from completed work;
+- `docs/ae/handoffs`: next-session state and continuation context;
+- skill `references/`: reusable detail owned by one skill, such as schemas, templates, or long checklists.
+
+Do not move transient process notes into long-term memory. If a lesson is specific to an unfinished task, keep it under `docs/00-process/active` until the durable rule or decision is clear.
+
 ## Rules
 
 - Only update memory when explicitly asked.
