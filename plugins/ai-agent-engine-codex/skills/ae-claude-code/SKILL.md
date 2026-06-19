@@ -44,6 +44,22 @@ Only use Claude for direct file writes when all of these are true:
 
 If any gate fails, fall back to read-only or patch-proposal mode.
 
+## Cross-Directory Read-Only Delegation
+
+For simple project-root delegation, prefer:
+
+```powershell
+node scripts/ae-tools.mjs claude-delegate --prompt-file <repo-relative-file>
+```
+
+Cross-directory audits may require direct Claude CLI arguments so the external repository is readable while the current worktree remains controlled. Keep the scope read-only and explicit, for example:
+
+```powershell
+claude -p --output-format json --no-session-persistence --permission-mode plan --tools "Read,Grep,Glob" --allowedTools "Read,Grep,Glob" --add-dir "<external-repo-path>"
+```
+
+If `claude-delegate` returns exit code `0` with empty stdout and empty stderr, treat the result as no usable advice, not as evidence. Retry with a narrower prompt, a summary-only request, or explicit `--claude-arg` values such as `--add-dir` and read-only `--tools "Read,Grep,Glob"`.
+
 ## Prompt Contract
 
 Ask Claude for structured output:

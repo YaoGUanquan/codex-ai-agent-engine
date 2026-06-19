@@ -1090,8 +1090,10 @@ function claudeDelegate(worktree, args) {
     encoding: 'utf8',
     timeout: timeoutMs,
   })
+  const stdout = result.stdout || ''
+  const stderr = result.stderr || ''
 
-  return {
+  const response = {
     status: result.status === 0 ? 'ok' : 'failed',
     available: true,
     ...base,
@@ -1100,9 +1102,16 @@ function claudeDelegate(worktree, args) {
     timeout_ms: timeoutMs,
     exit_code: result.status,
     signal: result.signal,
-    stdout: result.stdout || '',
-    stderr: result.stderr || '',
+    stdout,
+    stderr,
   }
+  if (result.status === 0 && !stdout.trim() && !stderr.trim()) {
+    response.diagnostics = [
+      'Claude exited successfully but produced no output on stdout or stderr.',
+      'Retry with a narrower prompt, explicit --claude-arg values, --add-dir for external repositories, and read-only --tools such as "Read,Grep,Glob".',
+    ]
+  }
+  return response
 }
 
 function checkCommandAvailable(command) {

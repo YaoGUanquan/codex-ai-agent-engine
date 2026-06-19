@@ -22,6 +22,27 @@ Create or update Codex skills using the local skill-creator standard.
 4. Keep `SKILL.md` concise and move optional detail into `references/`.
 5. Run the skill validator when available.
 
+## Extension Routing Matrix
+
+Before creating or updating an extension, route the request to the smallest Codex-native artifact that can enforce the behavior:
+
+| Request shape | Use | Reject or defer when |
+| --- | --- | --- |
+| Repeatable workflow judgment with clear triggers, boundaries, and validation | Codex skill | An existing skill already covers it without a boundary improvement |
+| Deterministic local parsing, validation, transformation, or evidence generation | helper script | It needs external credentials, network writes, or runtime hooks by default |
+| Optional examples, long checklists, schemas, prompt contracts, or reusable snippets | reference/template | The detail is source-derived, license-incompatible, or too volatile |
+| One-time requirement, plan, review, handoff, or execution evidence | process artifact | The artifact would become hidden behavior users must remember |
+| Hook, scheduler, permission, auto-MCP, sound, statusline, or registry behavior Codex cannot enforce | reject/defer | A rewritten process contract can fit an existing AE skill instead |
+
+Metadata checklist:
+
+- trigger clarity and examples;
+- scope, non-goals, and forbidden behavior;
+- arguments or expected inputs;
+- artifact outputs and storage path;
+- validation command;
+- plugin source plus `.agents/skills` mirror sync.
+
 ## Rules
 
 - Do not create extra README-style files inside the skill unless required.

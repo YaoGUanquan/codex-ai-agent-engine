@@ -27,6 +27,18 @@ Audit external agent and skill repositories, then translate useful patterns into
    - reject or defer because the pattern does not fit Codex or AE.
 6. If the user asks to implement a recommendation, route to `ae-skill-creator` or `ae-work` and preserve the plugin source plus `.agents/skills` mirror.
 
+## Runtime Boundary Filter
+
+For every external repository, record the source URL, license, observed date or commit when available, and inspected files before recommending adaptation. Treat source freshness as evidence: stale examples may still contain useful process ideas, but they should not define current Codex behavior without local verification.
+
+Classify each finding into portable method, local deterministic mechanism, or runtime-specific behavior:
+
+- portable method: planning gates, review contracts, evidence capture, source freshness checks, routing criteria, schema validation, dry-run previews, and bounded tool access that can be rewritten as AE guidance;
+- local deterministic mechanism: helper scripts or checks that can run under this repository's `scripts/` and validation model;
+- runtime-specific behavior: Claude Code or OpenCode hooks, slash commands, MCP auto-loading, schedulers, permission presets, sounds, status lines, settings, or agent registries that Codex cannot enforce here.
+
+Reject direct ports of runtime-specific behavior unless the current Codex environment has an equivalent enforcement point. If a useful idea comes from such behavior, rewrite only the process contract and note the rejected runtime assumption and license impact.
+
 ## Fit Criteria
 
 Good candidates:

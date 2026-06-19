@@ -62,6 +62,20 @@ When the task may benefit from multi-agent execution, make the plan dependency-a
 - Do not design units only to reach a worker count. Split by real file ownership and dependency boundaries.
 - Shared config, public contracts, migrations, auth, lockfiles, and cross-cutting abstractions should usually stay serial unless a later plan proves disjoint ownership.
 
+## Optional Cross-Model Lane
+
+Use a second-model planning lane only when risk, ambiguity, or external-repository comparison justifies the extra review. The lane is optional; Codex remains the orchestrator and owns the final plan.
+
+Before delegation, write a prompt contract that names:
+
+- scope and target files;
+- forbidden files and forbidden behavior;
+- expected output shape;
+- validation expectations;
+- assumptions and open questions.
+
+Treat the second model's output as untrusted advice until Codex checks it against repository facts, user requirements, validation commands, and local AE boundaries. Do not let second-model advice add scope, dependencies, runtime assumptions, or user decisions without recording and reviewing them in the plan.
+
 ## Plan Self-Review
 
 Before finalizing, check and fix the plan inline:
