@@ -121,3 +121,12 @@ git diff --check
 ## Verdict
 
 `ADAPT`: the repository contains useful workflow design and taxonomy, but the valuable material must be rewritten as Codex-native AE guidance. Runtime features should not be ported directly.
+
+## Implementation Outcome
+
+- Implemented in commit `3e7f01a feat: adapt Claude Code best-practice guidance`.
+- Merged and pushed to `main` on 2026-06-19.
+- Updated skills: `ae-skill-audit`, `ae-skill-creator`, `ae-agent-creator`, `ae-claude-code`, `ae-plan`, `ae-review`, and `ae-save-experience`.
+- Added `claude-delegate` no-output diagnostics without changing write policy.
+- Added focused tests in `tests/skill-scripts.test.mjs`.
+- Process archive: `docs/00-process/archive/2026-06/claude-code-best-practice-audit/`.

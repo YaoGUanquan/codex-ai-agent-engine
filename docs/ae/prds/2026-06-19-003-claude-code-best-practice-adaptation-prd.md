@@ -1,6 +1,6 @@
 ---
 type: prd
-status: drafted
+status: completed
 date: 2026-06-19
 topic: claude-code-best-practice-adaptation
 ---
@@ -70,5 +70,11 @@ git diff --check
 
 ## Open Questions
 
-- Should `ae-claude-code` grow CLI flags for `--add-dir` and read-only tool allowlists, or only document direct `claude -p` fallback patterns?
-- Should routing guidance become a standalone template under `docs/ae/templates`, or stay embedded in skill instructions?
+- Resolved for this pass: `ae-claude-code` documents direct `claude -p` fallback patterns and adds no-output diagnostics; it does not add wrapper flags for `--add-dir` or read-only tool allowlists.
+- Resolved for this pass: routing guidance stays embedded in existing skills. No standalone template or new router skill was added.
+
+## Completion
+
+- Implemented in commit `3e7f01a feat: adapt Claude Code best-practice guidance`.
+- Merged and pushed to `main` on 2026-06-19.
+- Process archive: `docs/00-process/archive/2026-06/claude-code-best-practice-audit/`.

@@ -102,3 +102,4 @@
   5. Keep plugin source and `.agents/skills` mirror synchronized and protect the guidance with focused tests.
 - Validation: Run targeted adaptation tests, `node scripts/check-skill-mirror.mjs`, `node scripts/check-ae-artifacts.mjs`, and `npm.cmd run check`.
 - Known risks: External Claude examples can imply runtime behavior Codex cannot enforce. Record rejected runtime assumptions instead of importing them.
+- Landed example: commit `3e7f01a` adapted `shanraisshan/claude-code-best-practice` by updating existing AE skills, adding no-output delegation diagnostics, preserving source/mirror sync, and archiving process evidence under `docs/00-process/archive/2026-06/claude-code-best-practice-audit/`.

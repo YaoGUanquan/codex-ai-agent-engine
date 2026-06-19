@@ -1,6 +1,6 @@
 ---
 type: plan
-status: drafted
+status: completed
 date: 2026-06-19
 title: claude-code-best-practice-detailed-execution
 origin: docs/ae/prds/2026-06-19-003-claude-code-best-practice-adaptation-prd.md
@@ -540,4 +540,6 @@ Implement the first adaptation pass from the audit. This pass updates existing A
 
 ## Handoff
 
-When the user approves execution, run `ae-work` against this plan. Do not implement from the older `003` plan unless explicitly requested; this `004` plan is the detailed execution source of truth.
+Completed in commit `3e7f01a feat: adapt Claude Code best-practice guidance`, merged and pushed to `main` on 2026-06-19. The older `003` plan is retained as superseded planning history.
+
+Process archive: `docs/00-process/archive/2026-06/claude-code-best-practice-audit/`.

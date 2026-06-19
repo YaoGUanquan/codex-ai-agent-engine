@@ -88,5 +88,5 @@
 - Date: 2026-06-19
 - Decision: Use `shanraisshan/claude-code-best-practice` as a taxonomy and deterministic-check reference, but rewrite guidance into existing AE skills and do not vendor Claude runtime files, hooks, settings, command catalogs, sounds, schedules, or prompt text.
 - Context: The repository is useful for source freshness, extension routing, delegation boundaries, second-model review, and memory placement. Its runtime assumptions are Claude Code-specific and do not map directly to Codex project-local skills.
-- Impact: `ae-skill-audit`, `ae-skill-creator`, `ae-agent-creator`, `ae-claude-code`, `ae-plan`, `ae-review`, and `ae-save-experience` gain explicit routing and trust-boundary guidance. `claude-delegate` reports diagnostics when a successful run produces empty stdout and stderr.
+- Impact: `ae-skill-audit`, `ae-skill-creator`, `ae-agent-creator`, `ae-claude-code`, `ae-plan`, `ae-review`, and `ae-save-experience` gain explicit routing and trust-boundary guidance. `claude-delegate` reports diagnostics when a successful run produces empty stdout and stderr. The implementation landed on `main` in commit `3e7f01a`.
 - Re-evaluate when: Codex exposes stable project hooks, schedulers, permission profiles, or an agent registry that can enforce these behaviors natively.
