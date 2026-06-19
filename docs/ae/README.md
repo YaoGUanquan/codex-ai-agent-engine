@@ -29,6 +29,11 @@
 
 ## 最近完成的适配
 
+- Ponytail minimality adaptation:
+  - PRD: `docs/ae/prds/2026-06-19-001-ponytail-minimality-adaptation-prd.md`
+  - Plan: `docs/ae/plans/2026-06-19-001-ponytail-minimality-adaptation-plan.md`
+  - Experience: `docs/ae/experience/2026-06-19-ponytail-minimality-adaptation.md`
+  - Process archive: `docs/00-process/archive/2026-06/ponytail-minimality-adaptation/summary.md`
 - Claude Code best-practice adaptation:
   - PRD: `docs/ae/prds/2026-06-19-003-claude-code-best-practice-adaptation-prd.md`
   - Plan: `docs/ae/plans/2026-06-19-004-claude-code-best-practice-detailed-execution-plan.md`

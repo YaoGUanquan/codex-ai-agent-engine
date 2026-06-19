@@ -1,6 +1,6 @@
 ---
 type: plan
-status: ready
+status: completed
 date: 2026-06-12
 title: claude-code-delegate-skill
 origin: docs/ae/brainstorms/2026-06-12-claude-code-delegate-skill-requirements.md
@@ -152,4 +152,6 @@ Remove the new skill folders, metadata entry, help entry, command branch, and te
 
 ## Handoff
 
-Proceed with `ae-work` on the current branch `codex/add-claude-cli-delegate-skill`.
+Completed and archived. The original implementation added `ae-claude-code`, `claude-delegate`, metadata/help integration, install smoke coverage, and tests. Follow-up passes added Windows `.cmd/.bat` shim support and changed prompt delivery to stdin for the default `claude -p` invocation.
+
+Archive: `docs/00-process/archive/2026-06/claude-code-delegate-skill/progress.md`.

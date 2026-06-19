@@ -34,3 +34,10 @@
 - Green test: same command passed after changing default invocation to `claude -p` with prompt content on stdin.
 - `npm.cmd test`: passed, 32 tests after the stdin prompt fix.
 - `npm.cmd run check`: passed after the stdin prompt fix.
+
+## Archive
+
+- Status: done.
+- Archived: 2026-06-19.
+- Archive path: `docs/00-process/archive/2026-06/claude-code-delegate-skill/`.
+- Related plan status: `docs/ae/plans/2026-06-12-001-claude-code-delegate-skill-plan.md` marked completed during archive maintenance.

@@ -1,6 +1,6 @@
 ---
 type: plan
-status: drafted
+status: completed
 date: 2026-06-19
 title: ponytail-minimality-adaptation
 origin: docs/ae/prds/2026-06-19-001-ponytail-minimality-adaptation-prd.md
@@ -384,3 +384,17 @@ Recommended execution sequence:
 4. Execute U3 and U4 as small consistency refinements.
 5. Record the U5 metadata/catalog decision; edit catalog or metadata only if public descriptions or help behavior changed.
 6. Run U6 validation and report exact evidence.
+
+## Completion Record
+
+- Completed: 2026-06-19
+- Commit: `43bb77d feat: adapt minimality review guidance`
+- Pushed: `main -> origin/main`
+- U1 result: `ae-work` plugin source and mirror gained a Minimality Gate and stronger cleanup checks.
+- U2 result: `ae-review` plugin source and mirror gained a Complexity Lane with `delete`, `stdlib`, `native`, `yagni`, and `shrink` tags. TDD added `expected impact` after the first valid red run exposed the omission.
+- U3 result: `ae-plan` plugin source and mirror gained simplest-viable-route guidance and a speculative-abstraction self-review check.
+- U4 result: `ae-task-loop` plugin source and mirror gained smallest plausible fix hypothesis guidance.
+- U5 result: no help catalog or language metadata edit was needed because skill frontmatter descriptions and public help catalog behavior did not change.
+- U6 result: validation passed and final gate proof was written at `docs/ae/gates/20260619T034035Z-work-final.json` (ignored by Git per project policy).
+- Documentation result: `README.en.md`, `docs/ae/experience/2026-06-19-ponytail-minimality-adaptation.md`, and `docs/08-ai-memory/10-minimality-review.md` document the outcome.
+- Archive: `docs/00-process/archive/2026-06/ponytail-minimality-adaptation/summary.md`

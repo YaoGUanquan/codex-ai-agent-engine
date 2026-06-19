@@ -69,3 +69,10 @@
   - `npm.cmd run check`.
   - `node scripts/ae-tools.mjs task-analyze --mode plan --plan docs/ae/plans/2026-06-08-001-multi-agent-execution-config-plan.md`.
   - `node scripts/check-skill-mirror.mjs`.
+
+## Archive
+
+- Status: done.
+- Archived: 2026-06-19.
+- Archive path: `docs/00-process/archive/2026-06/multi-agent-execution-config/`.
+- Related plan status: `docs/ae/plans/2026-06-08-001-multi-agent-execution-config-plan.md` marked completed during archive maintenance.

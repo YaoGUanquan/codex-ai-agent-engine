@@ -63,3 +63,10 @@ node scripts/ae-tools.mjs task-analyze --mode plan --plan docs/ae/plans/<your-pl
 ## Known Risk
 
 The repository validates policy loading and strategy output. Real Codex sub-agent spawning is still an orchestrator decision outside `ae-tools.mjs`, so final delegation must read the `task-analyze` output and respect blockers.
+
+## Delivery Record
+
+- Primary implementation archive: `docs/00-process/archive/2026-06/multi-agent-execution-config/progress.md`.
+- Work report: `docs/ae/work-reports/2026-06-08-multi-agent-auto-config-report.md`.
+- Plan: `docs/ae/plans/2026-06-08-001-multi-agent-execution-config-plan.md`.
+- Later 2026-06-16 alignment split read-only and write-worker eligibility; this remains part of the same durable policy.

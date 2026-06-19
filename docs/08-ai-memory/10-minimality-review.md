@@ -25,3 +25,12 @@ Minimality must not remove or discourage:
 ## Validation Pattern
 
 The regression test `Ponytail-inspired minimality guidance is present in source and mirror skills` in `tests/skill-scripts.test.mjs` locks the guidance into both plugin source and `.agents/skills` mirror. It should fail if source/mirror drift or if the key minimality/complexity language is removed.
+
+## Delivery Record
+
+- First landed in commit `43bb77d feat: adapt minimality review guidance`.
+- Process archive: `docs/00-process/archive/2026-06/ponytail-minimality-adaptation/summary.md`.
+- Related durable artifacts:
+  - `docs/ae/prds/2026-06-19-001-ponytail-minimality-adaptation-prd.md`
+  - `docs/ae/plans/2026-06-19-001-ponytail-minimality-adaptation-plan.md`
+  - `docs/ae/experience/2026-06-19-ponytail-minimality-adaptation.md`

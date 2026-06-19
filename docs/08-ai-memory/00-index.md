@@ -15,8 +15,11 @@
 - `04-known-pitfalls.md`：历史坑点、易混淆边界和编码问题。
 - `05-decision-log.md`：长期有效的决策。
 - `06-agent-maintenance-rules.md`：AI 读取和更新记忆的规则。
+- `07-computer-use-video-skills.md`：Computer Use、图像提示和视频编辑技能的稳定边界。
 - `08-phase-two-tooling.md`：Phase 2 图谱、merge、浏览器/DevTools 路由决策。
 - `09-multi-agent-auto-config.md`：`multi_agent.enabled: auto` 的默认策略、升级路径和安全边界。
+- `10-minimality-review.md`：Ponytail-inspired minimality gate and complexity review adaptation boundaries.
+- `11-ocr-review-guidance.md`：OCR-inspired diff review discipline, rule profiles, deterministic engineering audit, and prompt pattern boundaries.
 - `99-prompt-template.md`：初始化或维护记忆库的提示词模板。
 
 ## 维护规则
@@ -25,5 +28,4 @@
 
 ## 2026-06-19 Addendum
 
-- `10-minimality-review.md`: Ponytail-inspired minimality gate and complexity review adaptation boundaries.
-- `11-ocr-review-guidance.md`: OCR-inspired diff review discipline, rule profiles, deterministic engineering audit, and prompt pattern boundaries.
+- Claude Code best-practice adaptation is recorded in `03-key-workflows.md`, `05-decision-log.md`, and `docs/ae/experience/2026-06-19-claude-code-best-practice-adaptation.md` rather than a separate memory file.

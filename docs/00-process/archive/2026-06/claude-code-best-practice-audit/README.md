@@ -16,6 +16,7 @@ Audited `shanraisshan/claude-code-best-practice` and adapted portable workflow g
 - Completed plan: `docs/ae/plans/2026-06-19-004-claude-code-best-practice-detailed-execution-plan.md`
 - Audit solution: `docs/ae/solutions/2026-06-19-claude-code-best-practice-audit.md`
 - Experience note: `docs/ae/experience/2026-06-19-claude-code-best-practice-adaptation.md`
+- Process evidence: `progress.md`, `claude-prompt.md`, `claude-prompt-short.md`, and `claude-summary-review-prompt.md`
 
 ## Implementation
 

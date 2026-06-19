@@ -39,6 +39,12 @@ Final gate proof:
 
 - `docs/ae/gates/20260619T034035Z-work-final.json`
 
+Git delivery:
+
+- Commit: `43bb77d feat: adapt minimality review guidance`
+- Push: `main -> origin/main`
+- Archive: `docs/00-process/archive/2026-06/ponytail-minimality-adaptation/summary.md`
+
 ## Reusable Lesson
 
 When adapting external skill repositories, prefer portable engineering judgment over importing command catalogs or runtime hooks. For minimality patterns, explicitly protect validation, security, accessibility, data-loss handling, and user-requested behavior so "less code" does not become "less correctness."

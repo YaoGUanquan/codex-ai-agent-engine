@@ -1,6 +1,6 @@
 ---
 type: prd
-status: drafted
+status: completed
 date: 2026-06-19
 topic: ponytail-minimality-adaptation
 ---
@@ -134,3 +134,16 @@ The useful parts should be adapted into AE-native skills without importing Ponyt
 - Should the complexity lane be invoked automatically for every significant `ae-review`, or only when the user asks for over-engineering/minimality review?
 - Should deliberate simplification markers use a standard comment token such as `AE deferred:` or remain plain plan/review notes?
 - Should a future `ae-debt-ledger` skill be created to harvest simplification markers, or should that remain out of scope until real markers accumulate?
+
+## Completion
+
+- Completed: 2026-06-19
+- Commit: `43bb77d feat: adapt minimality review guidance`
+- Outcome: accepted as an AE-native adaptation. Existing skills were improved instead of adding Ponytail-named skills or importing runtime hooks.
+- Validation evidence:
+  - `node --test --test-name-pattern "Ponytail-inspired minimality guidance" tests/skill-scripts.test.mjs`
+  - `node --test tests/skill-scripts.test.mjs`
+  - `npm.cmd run check`
+  - `node scripts/check-skill-mirror.mjs`
+  - `node scripts/check-ae-artifacts.mjs`
+- Archive: `docs/00-process/archive/2026-06/ponytail-minimality-adaptation/summary.md`

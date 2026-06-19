@@ -542,4 +542,6 @@ Implement the first adaptation pass from the audit. This pass updates existing A
 
 Completed in commit `3e7f01a feat: adapt Claude Code best-practice guidance`, merged and pushed to `main` on 2026-06-19. The older `003` plan is retained as superseded planning history.
 
+Validation evidence: `npm.cmd test`, `npm.cmd run check`, `node scripts/check-skill-mirror.mjs`, `node scripts/check-ae-artifacts.mjs`, and `git diff --check`.
+
 Process archive: `docs/00-process/archive/2026-06/claude-code-best-practice-audit/`.
