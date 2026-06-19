@@ -1,6 +1,6 @@
 ---
 type: prd
-status: drafted
+status: completed
 date: 2026-06-19
 topic: ocr-review-guidance-adaptation
 ---
@@ -88,5 +88,19 @@ Strengthen AE review and external skill audit guidance with OCR-inspired determi
 
 ## Open Questions
 
-- Should Phase 2 introduce a new script command for review-scope previews, or should review scope remain manual until finding schemas are formalized?
-- Should rule profiles remain one combined reference file, or later split by language if the file becomes too long?
+- Resolved for this pass: review scope remains manual until finding schemas are formalized.
+- Resolved for this pass: rule profiles remain one combined reference file.
+
+## Completion
+
+- Completed: 2026-06-19.
+- Commit: `90c29b3 feat: adapt OCR review guidance`.
+- Pushed: `main -> origin/main`.
+- Outcome: accepted as an AE-native review/audit guidance adaptation. No OCR runtime, CLI, CI workflow, provider configuration, or source-derived prompt/rule text was imported.
+- Validation evidence:
+  - `node scripts/check-skill-mirror.mjs`
+  - `node scripts/check-ae-artifacts.mjs`
+  - `npm.cmd test -- --test-name-pattern "OCR-inspired review guidance"`
+  - `npm.cmd test`
+  - `npm.cmd run check`
+- Archive: `docs/00-process/archive/2026-06/ocr-review-guidance-adaptation/summary.md`

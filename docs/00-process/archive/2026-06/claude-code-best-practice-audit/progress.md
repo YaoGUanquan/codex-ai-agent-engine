@@ -11,8 +11,11 @@
 
 - `git clone --depth 1 https://github.com/shanraisshan/claude-code-best-practice.git "$env:TEMP\claude-code-best-practice-audit"`
 - `node scripts/ae-tools.mjs claude-delegate --check`
-- `node scripts/ae-tools.mjs claude-delegate --prompt-file docs/00-process/active/claude-code-best-practice-audit/claude-prompt.md`
-- `node scripts/ae-tools.mjs claude-delegate --prompt-file docs/00-process/active/claude-code-best-practice-audit/claude-prompt-short.md --timeout 240000`
+- Historical command before archive: `node scripts/ae-tools.mjs claude-delegate --prompt-file docs/00-process/active/claude-code-best-practice-audit/claude-prompt.md`
+- Historical command before archive: `node scripts/ae-tools.mjs claude-delegate --prompt-file docs/00-process/active/claude-code-best-practice-audit/claude-prompt-short.md --timeout 240000`
+- Archived prompt paths:
+  - `docs/00-process/archive/2026-06/claude-code-best-practice-audit/claude-prompt.md`
+  - `docs/00-process/archive/2026-06/claude-code-best-practice-audit/claude-prompt-short.md`
 - `claude -p --output-format json --no-session-persistence --permission-mode plan --tools "Read,Grep,Glob" --allowedTools "Read,Grep,Glob" --add-dir "C:\Users\yaogu\AppData\Local\Temp\claude-code-best-practice-audit"`
 - `claude -p --output-format json --no-session-persistence --tools "" --max-budget-usd 0.25`
 

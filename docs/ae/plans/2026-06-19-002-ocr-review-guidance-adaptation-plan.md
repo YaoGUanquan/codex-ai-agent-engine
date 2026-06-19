@@ -1,6 +1,6 @@
 ---
 type: plan
-status: drafted
+status: completed
 date: 2026-06-19
 title: ocr-review-guidance-adaptation
 origin: docs/ae/prds/2026-06-19-002-ocr-review-guidance-adaptation-prd.md
@@ -411,3 +411,16 @@ Execution prompt:
 ```text
 Use ae-work to execute docs/ae/plans/2026-06-19-002-ocr-review-guidance-adaptation-plan.md. Keep it serial, do not add OCR runtime integration, do not add new ae-tools commands, and validate with npm test plus npm run check.
 ```
+
+## Completion Record
+
+- Completed: 2026-06-19.
+- Commit: `90c29b3 feat: adapt OCR review guidance`.
+- Pushed: `main -> origin/main`.
+- U1 result: `ae-review` plugin source and mirror gained conditional Diff Review Discipline, manual position checks, contradiction checks, and full-scan preservation.
+- U2 result: `ae-review/references/code-review-rule-profiles.md` was added in plugin source and `.agents` mirror with AE-authored review lenses.
+- U3 result: `ae-skill-audit` and its audit template gained deterministic engineering and license compatibility dimensions.
+- U4 result: `tests/skill-scripts.test.mjs` gained focused OCR-inspired source/mirror regression coverage.
+- U5 result: validation passed with mirror, artifact, focused test, full test, full check, and whitespace checks.
+- Documentation result: PRD, plan, solution, execution prompt, experience note, and AI memory were updated.
+- Archive: `docs/00-process/archive/2026-06/ocr-review-guidance-adaptation/summary.md`

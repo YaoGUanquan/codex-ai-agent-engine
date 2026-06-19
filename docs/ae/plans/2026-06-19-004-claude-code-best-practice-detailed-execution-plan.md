@@ -15,7 +15,7 @@ origin: docs/ae/prds/2026-06-19-003-claude-code-best-practice-adaptation-prd.md
 - PRD: `docs/ae/prds/2026-06-19-003-claude-code-best-practice-adaptation-prd.md`
 - Audit: `docs/ae/solutions/2026-06-19-claude-code-best-practice-audit.md`
 - Prior plan: `docs/ae/plans/2026-06-19-003-claude-code-best-practice-adaptation-plan.md`
-- Process evidence: `docs/00-process/active/claude-code-best-practice-audit/progress.md`
+- Process evidence: `docs/00-process/archive/2026-06/claude-code-best-practice-audit/progress.md`
 
 ## Scope
 
@@ -178,7 +178,7 @@ Implement the first adaptation pass from the audit. This pass updates existing A
 - Approach:
   1. Run `git status --short --branch`.
   2. Confirm untracked audit artifacts are expected:
-     - `docs/00-process/active/claude-code-best-practice-audit/`
+     - `docs/00-process/archive/2026-06/claude-code-best-practice-audit/`
      - `docs/ae/solutions/2026-06-19-claude-code-best-practice-audit.md`
      - `docs/ae/prds/2026-06-19-003-claude-code-best-practice-adaptation-prd.md`
      - `docs/ae/plans/2026-06-19-003-claude-code-best-practice-adaptation-plan.md`
@@ -444,7 +444,7 @@ Implement the first adaptation pass from the audit. This pass updates existing A
 - Acceptance criteria covered: all validation commands pass.
 - Depends on: U1, U2, U3, U4, U5.
 - Files:
-  - `docs/00-process/active/claude-code-best-practice-audit/progress.md`
+  - `docs/00-process/archive/2026-06/claude-code-best-practice-audit/progress.md`
 - Forbidden files:
   - external clone files
 - Approach:
@@ -477,7 +477,7 @@ Implement the first adaptation pass from the audit. This pass updates existing A
      ```powershell
      git diff --check
      ```
-  8. Append concise validation evidence to `docs/00-process/active/claude-code-best-practice-audit/progress.md`.
+  8. Append concise validation evidence to `docs/00-process/archive/2026-06/claude-code-best-practice-audit/progress.md` during final archive maintenance.
 - Tests:
   - all tests above.
 - Validation:
@@ -519,7 +519,7 @@ Implement the first adaptation pass from the audit. This pass updates existing A
 - If U1 tests are wrong, revert only the added tests before changing implementation.
 - If U2/U4/U5 wording is too broad, revert the specific skill sections and mirror copies, then rerun `node scripts/check-skill-mirror.mjs`.
 - If U3 script diagnostic breaks delegate behavior, revert only `plugins/ai-agent-engine-codex/scripts/ae-tools.mjs` and its no-output test, while keeping `ae-claude-code` documentation if still accurate.
-- If memory docs become noisy, move one-off evidence back to `docs/00-process/active/claude-code-best-practice-audit/progress.md` and keep only durable decisions in `docs/08-ai-memory`.
+- If memory docs become noisy, keep one-off evidence in `docs/00-process/archive/2026-06/claude-code-best-practice-audit/progress.md` and keep only durable decisions in `docs/08-ai-memory`.
 
 ## Plan Self-Review
 
