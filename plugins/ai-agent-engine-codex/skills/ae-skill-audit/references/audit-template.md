@@ -8,6 +8,14 @@
 - Supported harnesses:
 - Primary purpose:
 
+## License Compatibility
+
+- SPDX or stated license:
+- Project compatibility:
+- Copying allowed:
+- Attribution or notice required:
+- Reuse boundary:
+
 ## Structure
 
 - Skills:
@@ -24,6 +32,10 @@ List patterns that can be expressed as Codex-native skill workflow, validation, 
 ## Platform-Specific Patterns
 
 List patterns that depend on unavailable runtime behavior, such as hook enforcement, global command injection, or non-Codex agent registries.
+
+## Deterministic Engineering Patterns
+
+List portable workflow mechanics that constrain agent behavior without depending on a specific runtime, such as deterministic file selection, schema validation, routing contracts, evidence capture, reflection or filtering passes, dry-run previews, bounded tool access, or structured output checks.
 
 ## AE Fit
 
@@ -54,4 +66,3 @@ Use one verdict:
 - `ADAPT`: useful, but requires Codex-specific rewriting.
 - `DEFER`: promising but needs more evidence.
 - `REJECT`: poor fit, duplicate, unsafe, or license/platform mismatch.
-

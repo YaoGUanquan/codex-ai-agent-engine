@@ -22,6 +22,17 @@ Supported mode markers:
 - `mode:autofix`: apply only deterministic fixes after reporting internally.
 - `mode:headless`: concise pipeline review.
 
+## Diff Review Discipline
+
+Apply this section only when `domain:code` uses a diff-like scope: `from:<ref>`, `recent:<N>`, `session`, or the default Git status/diff review. `full` and `full:<path>` remain repository or path scans and must not be narrowed to changed lines only.
+
+For diff-like scopes:
+
+- Make the finding subject newly added or modified code whenever possible. Deleted lines, unchanged context, and other files may support the evidence, but they should not become the primary finding unless the user explicitly requested a broader scan.
+- Perform a manual position check before finalizing each code finding: re-open the target file, diff, or hunk context and confirm the path plus line still identifies the affected code. If the exact line is uncertain, report the finding at path level and state the location uncertainty.
+- Run a contradiction check before final output. If the reviewed diff directly contradicts a finding's factual claim, mark the finding as contradicted or remove it only when the contradiction is certain. Do not discard security, reliability, contract, or architecture findings merely because the diff alone cannot prove them.
+- When file type matters, consult `references/code-review-rule-profiles.md` as optional review lenses. The profiles are not an automatic rule engine and do not replace project-specific requirements or the selected reviewer personas.
+
 ## Persona Selection
 
 Read `references/review-personas.md`. Use the smallest useful reviewer set. Do not spawn sub-agents unless the user explicitly requested/allowed parallel agent work. If sub-agents are allowed, each reviewer is read-only and must return evidence-backed findings.

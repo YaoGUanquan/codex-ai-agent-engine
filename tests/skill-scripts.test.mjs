@@ -129,6 +129,48 @@ test('Ponytail-inspired minimality guidance is present in source and mirror skil
   }
 })
 
+test('OCR-inspired review guidance is present in source and mirror skills', () => {
+  const reviewSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-review')
+  const reviewMirror = readSkillBody('.agents/skills', 'ae-review')
+  assert.equal(reviewMirror, reviewSource, 'ae-review mirror should match plugin source')
+
+  for (const expectation of [
+    /## Diff Review Discipline/,
+    /from:<ref>/,
+    /full:<path>/,
+    /manual position check/i,
+    /contradiction check/i,
+    /code-review-rule-profiles\.md/,
+  ]) {
+    assert.match(reviewSource, expectation, `ae-review should include ${expectation}`)
+  }
+
+  const profileSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-review/references/code-review-rule-profiles.md'), 'utf8')
+  const profileMirror = readFileSync(resolve(repoRoot, '.agents/skills/ae-review/references/code-review-rule-profiles.md'), 'utf8')
+  assert.equal(profileMirror, profileSource, 'ae-review rule profile mirror should match plugin source')
+
+  for (const expectation of [
+    /## Java \/ JVM/,
+    /## TypeScript \/ JavaScript \/ React/,
+    /## package\.json/,
+    /## JSON \/ YAML \/ Config/,
+  ]) {
+    assert.match(profileSource, expectation, `rule profiles should include ${expectation}`)
+  }
+
+  const auditSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-skill-audit')
+  const auditMirror = readSkillBody('.agents/skills', 'ae-skill-audit')
+  assert.equal(auditMirror, auditSource, 'ae-skill-audit mirror should match plugin source')
+  assert.match(auditSource, /Deterministic Engineering/i)
+  assert.match(auditSource, /license compatibility/i)
+
+  const auditTemplateSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-skill-audit/references/audit-template.md'), 'utf8')
+  const auditTemplateMirror = readFileSync(resolve(repoRoot, '.agents/skills/ae-skill-audit/references/audit-template.md'), 'utf8')
+  assert.equal(auditTemplateMirror, auditTemplateSource, 'ae-skill-audit template mirror should match plugin source')
+  assert.match(auditTemplateSource, /## Deterministic Engineering Patterns/)
+  assert.match(auditTemplateSource, /## License Compatibility/)
+})
+
 test('check-install-smoke reports ok and verifies new skills', () => {
   const result = runNodeScript('scripts/check-install-smoke.mjs')
   assert.equal(result.status, 'ok')

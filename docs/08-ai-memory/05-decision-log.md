@@ -74,3 +74,11 @@
 - Context: Ponytail's strongest transferable method is a concrete shortest-correct decision ladder and deletion-oriented review taxonomy. Its runtime adapters and always-on activation model do not fit AE's explicit skill entrypoints.
 - Impact: `ae-work` gains a Minimality Gate, `ae-review` gains a Complexity Lane with `delete`, `stdlib`, `native`, `yagni`, and `shrink`, `ae-plan` checks simplest viable routes, and `ae-task-loop` requires smallest plausible fix hypotheses. A regression test locks the behavior into plugin source and mirror.
 - Re-evaluate when: AE gains first-class runtime hooks, the complexity lane becomes noisy in normal reviews, or enough deliberate simplification markers accumulate to justify a dedicated debt-ledger workflow.
+
+## 2026-06-19: Adapt Open Code Review mechanics without importing runtime
+
+- Date: 2026-06-19
+- Decision: Use `alibaba/open-code-review` as a reference for deterministic review mechanics, but keep AE Codex-native and do not import OCR CLI, LLM provider configuration, telemetry/session viewer, CI workflow, prompt/rule text, Go source, or plugin command behavior by default.
+- Context: OCR's strongest transferable ideas are constrained file/review scope, rule-profile attention, position checking, and reflection/contradiction filtering. Direct runtime integration would duplicate `ae-review` and add a second LLM/review backend.
+- Impact: `ae-review` gains `Diff Review Discipline`, manual position checks, contradiction checks, and optional code review rule profiles. `ae-skill-audit` gains deterministic engineering and license compatibility audit dimensions. A regression test locks the behavior into plugin source and mirror.
+- Re-evaluate when: AE has a formal finding schema, users explicitly request OCR CLI integration, or review-scope/position-validation tooling has a clear JSON contract and validation path.

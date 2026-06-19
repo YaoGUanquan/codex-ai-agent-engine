@@ -76,3 +76,16 @@
   5. Preserve boundaries: do not remove validation, security, accessibility, data-loss handling, or explicit user requirements in the name of smaller code.
 - Validation: Run `node --test --test-name-pattern "Ponytail-inspired minimality guidance" tests/skill-scripts.test.mjs`, `node --test tests/skill-scripts.test.mjs`, `npm.cmd run check`, and `node scripts/check-skill-mirror.mjs`.
 - Known risks: Minimality language can be misread as "delete safeguards"; always phrase it as smallest correct implementation, not shortest code.
+
+## OCR-style review guidance adaptation
+
+- Workflow: Adapt external AI review tools into AE review/audit guidance by separating deterministic review mechanics from runtime integration.
+- Use case: A user asks whether a code review agent such as `alibaba/open-code-review` can optimize AE review skills.
+- Steps:
+  1. Use `ae-skill-audit` to classify the external source, license, harnesses, runtime assumptions, and deterministic engineering patterns.
+  2. Improve existing skills before adding new entrypoints: `ae-review` for diff discipline and rule profiles; `ae-skill-audit` for audit classification.
+  3. Keep diff discipline conditional on diff-like scopes; preserve `full` and `full:<path>` review behavior.
+  4. Add manual position checks and contradiction checks as review discipline, not as an automated line validator unless a later schema exists.
+  5. Keep source and `.agents/skills` mirror synchronized and protect the behavior with focused tests.
+- Validation: Run `npm.cmd test -- --test-name-pattern "OCR-inspired review guidance"`, `node scripts/check-skill-mirror.mjs`, `node scripts/check-ae-artifacts.mjs`, and `npm.cmd run check`.
+- Known risks: OCR's CLI, provider configuration, telemetry/session viewer, CI examples, and prompt/rule files are runtime-specific or source-derived. Do not copy or require them unless the user explicitly requests a separate integration.

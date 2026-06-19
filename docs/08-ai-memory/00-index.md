@@ -26,3 +26,4 @@
 ## 2026-06-19 Addendum
 
 - `10-minimality-review.md`: Ponytail-inspired minimality gate and complexity review adaptation boundaries.
+- `11-ocr-review-guidance.md`: OCR-inspired diff review discipline, rule profiles, deterministic engineering audit, and prompt pattern boundaries.
