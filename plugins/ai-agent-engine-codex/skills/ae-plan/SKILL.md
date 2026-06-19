@@ -30,6 +30,8 @@ If any item is materially unclear, ask one focused question or route to `ae-brai
 
 For tasks with multiple plausible designs, compare 2-3 approaches before selecting one. Keep the comparison short: fit, trade-off, risk, and why the recommended approach wins. When only one viable approach exists, state why the alternatives collapse instead of pretending there was a meaningful choice.
 
+For implementation-heavy plans, include the simplest viable route in that comparison: standard library, framework/native platform capability, existing dependency, deletion/configuration-only change, or the smallest new code path. New dependencies, abstractions, broad refactors, or extra files need a current requirement or repository pattern that justifies owning them now.
+
 For high-risk plans, add a deliberate planning pass before implementation units:
 
 - list the top 3 decision drivers,
@@ -71,6 +73,7 @@ Before finalizing, check and fix the plan inline:
 - every acceptance criterion maps to at least one implementation unit or validation step,
 - high-risk plans include pre-mortem failures and layered validation,
 - rollback and recovery signals are credible for the changed area,
+- proposed dependencies, abstractions, wrappers, and files are justified by current requirements rather than speculative future flexibility,
 - the plan is still focused enough for one execution pass; otherwise split it.
 
 ## Rules

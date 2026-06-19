@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { chmodSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
@@ -88,6 +88,45 @@ test('renderYaml supports Spec Kit inspired workflow metadata', () => {
   assert.match(constitutionYaml, /project governance/)
   assert.match(tasksYaml, /display_name: "AE Tasks"/)
   assert.match(tasksYaml, /dependency-ordered/)
+})
+
+test('Ponytail-inspired minimality guidance is present in source and mirror skills', () => {
+  const expectedBySkill = {
+    'ae-work': [
+      /## Minimality Gate/,
+      /Prefer standard library, framework, database, browser, shell, or platform-native capabilities over custom code\./,
+      /Do not leave open-ended "later" notes\./,
+    ],
+    'ae-review': [
+      /## Complexity Lane/,
+      /`delete`/,
+      /`stdlib`/,
+      /`native`/,
+      /`yagni`/,
+      /`shrink`/,
+      /expected impact/,
+      /Do not flag narrow tests, trust-boundary validation, security controls, accessibility basics, or explicit user requirements as bloat\./,
+    ],
+    'ae-plan': [
+      /simplest viable route/,
+      /New dependencies, abstractions, broad refactors, or extra files need a current requirement or repository pattern/,
+      /speculative future flexibility/,
+    ],
+    'ae-task-loop': [
+      /smallest plausible change/,
+      /Broaden scope only when the latest evidence invalidates the smaller fix\./,
+      /Do not remove validation, trust-boundary checks, security controls, or explicit user requirements merely to make the fix smaller\./,
+    ],
+  }
+
+  for (const [skillName, expectations] of Object.entries(expectedBySkill)) {
+    const sourceBody = readSkillBody('plugins/ai-agent-engine-codex/skills', skillName)
+    const mirrorBody = readSkillBody('.agents/skills', skillName)
+    assert.equal(mirrorBody, sourceBody, `${skillName} mirror should match plugin source`)
+    for (const expectation of expectations) {
+      assert.match(sourceBody, expectation, `${skillName} should include ${expectation}`)
+    }
+  }
 })
 
 test('check-install-smoke reports ok and verifies new skills', () => {
@@ -1035,4 +1074,8 @@ function runNodeScriptRaw(command) {
   )
 
   return result.stdout
+}
+
+function readSkillBody(root, skillName) {
+  return readFileSync(resolve(repoRoot, root, skillName, 'SKILL.md'), 'utf8')
 }
