@@ -43,6 +43,20 @@ For significant code or plan reviews, apply two lanes even when you are not spaw
 
 The lanes may be evaluated by one agent, but their conclusions must stay distinguishable in the review notes or final summary when they disagree.
 
+## Complexity Lane
+
+When the user asks for over-engineering, minimality, deletion, bloat, dependency, or simplification review, or when a significant implementation appears structurally larger than the requirement, add a complexity lane. This lane is secondary to correctness, security, data-loss, contract, and validation findings unless the user explicitly requested a complexity-only report.
+
+Use these tags for concrete findings:
+
+- `delete`: dead code, speculative feature, placeholder flexibility, or unreachable branch; replacement is removal.
+- `stdlib`: custom code duplicates standard library or framework behavior; name the standard replacement.
+- `native`: code or dependency duplicates a platform, browser, database, shell, or framework-native capability; name the native capability.
+- `yagni`: abstraction, interface, factory, flag, configuration point, or wrapper has no current second use or explicit requirement.
+- `shrink`: same behavior can be expressed materially smaller without losing clarity, validation, or edge-case correctness.
+
+Complexity findings must include location, evidence, what to cut or replace, the concrete replacement, and expected impact. Do not flag narrow tests, trust-boundary validation, security controls, accessibility basics, or explicit user requirements as bloat. Suppress stylistic preferences that do not reduce owned behavior or maintenance risk.
+
 ## Findings Standard
 
 Read `references/review-output-template.md`.

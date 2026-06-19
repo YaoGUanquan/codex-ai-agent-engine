@@ -22,3 +22,7 @@
 ## 维护规则
 
 开始任务时先读本索引，再按主题读取相关文件。任务结束时判断是否产生新的稳定知识；没有则说明本次无需更新 AI 记忆库。
+
+## 2026-06-19 Addendum
+
+- `10-minimality-review.md`: Ponytail-inspired minimality gate and complexity review adaptation boundaries.

@@ -60,6 +60,17 @@ If `.codex/ae-skill-profiles.yaml` contains `multi_agent.enabled: auto` or `mult
 - Never force a minimum of three workers. Use no more than the safe units in the current wave and no more than `multi_agent.max_workers`.
 - If `read_parallel_eligibility.blockers` or `write_parallel_eligibility.blockers` are non-empty for the lane you intend to use, fall back to serial execution or report the blocker instead of guessing.
 
+## Minimality Gate
+
+Before editing behavior, choose the smallest correct implementation that satisfies the request and repository constraints:
+
+- First ask whether the requested behavior needs new code at all; if configuration, documentation, deletion, or an existing path already satisfies it, use that route.
+- Prefer standard library, framework, database, browser, shell, or platform-native capabilities over custom code.
+- Prefer an already-installed dependency over a new dependency when it clearly fits the local stack.
+- Add a new dependency, abstraction, interface, wrapper, flag, or configuration point only when the current requirement or repository pattern justifies owning it now.
+- Keep the patch as small as behavior allows, but never remove trust-boundary validation, security controls, accessibility basics, data-loss prevention, explicit user requirements, or the narrow validation needed for non-trivial logic.
+- When deliberately choosing a simple implementation with a known ceiling, record the ceiling and the trigger for revisiting it in the plan, final response, or a scoped code comment. Do not leave open-ended "later" notes.
+
 ## Execution Rules
 
 - Read the plan and referenced files first.
@@ -82,7 +93,8 @@ If `.codex/ae-skill-profiles.yaml` contains `multi_agent.enabled: auto` or `mult
 Before final validation, inspect the files changed in this task for AI-generated cleanup risks:
 
 - fallback-like code that silently swallows errors, returns fabricated defaults, or hides missing integration work,
-- dead code, duplicate helpers, unused flags, speculative abstractions, or placeholder branches,
+- dead code, duplicate helpers, unused flags, speculative abstractions, single-use wrappers, or placeholder branches,
+- avoidable new dependencies, hand-rolled standard-library behavior, or code replacing a native platform capability,
 - broad formatting churn unrelated to the task,
 - tests that assert implementation details without protecting the requested behavior,
 - comments or names that describe intent inaccurately after the edit.

@@ -66,3 +66,11 @@
 - Context: Spec Kit has useful governance and spec-driven workflow patterns, but importing Specify CLI or `.specify/` would create a second workflow root and dependency model.
 - Impact: Add `ae-constitution` and `ae-tasks`, strengthen requirement clarification and PRD quality gates, expand review/work cross-artifact checks, and add skill governance checks for mirror, metadata, and path-safety consistency. Active OfficeCLI skills are removed from the catalog.
 - Re-evaluate when: AE adds a first-class runtime orchestrator, task artifacts become too heavy for common work, or Codex gains native spec/constitution workflow support.
+
+## 2026-06-19: Adapt Ponytail minimality patterns without importing runtime
+
+- Date: 2026-06-19
+- Decision: Use `DietrichGebert/ponytail` as a reference for minimality gates and complexity review tags, but keep AE Codex-native and do not import Ponytail skills, hooks, mode persistence, statusline behavior, MCP, benchmark display, or persona mode.
+- Context: Ponytail's strongest transferable method is a concrete shortest-correct decision ladder and deletion-oriented review taxonomy. Its runtime adapters and always-on activation model do not fit AE's explicit skill entrypoints.
+- Impact: `ae-work` gains a Minimality Gate, `ae-review` gains a Complexity Lane with `delete`, `stdlib`, `native`, `yagni`, and `shrink`, `ae-plan` checks simplest viable routes, and `ae-task-loop` requires smallest plausible fix hypotheses. A regression test locks the behavior into plugin source and mirror.
+- Re-evaluate when: AE gains first-class runtime hooks, the complexity lane becomes noisy in normal reviews, or enough deliberate simplification markers accumulate to justify a dedicated debt-ledger workflow.

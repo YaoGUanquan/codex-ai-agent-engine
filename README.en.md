@@ -7,6 +7,7 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 > It also draws on selected development-skill ideas from https://github.com/openai/plugins and https://github.com/obra/superpowers.<br>
 > It also draws on external skill repository governance, continuous learning, verification-loop, and Codex adaptation boundary ideas from https://github.com/affaan-m/everything-claude-code.<br>
 > It also adapts selected Spec Kit workflow ideas from https://github.com/github/spec-kit without vendoring its runtime.<br>
+> It also adapts selected minimality and over-engineering review ideas from https://github.com/DietrichGebert/ponytail without importing its runtime, hooks, or persona mode.<br>
 > It is not a direct OpenCode runtime port. It uses Codex skills, project-local plugin files, and local scripts.
 
 中文文档: [README.md](README.md)
@@ -63,12 +64,12 @@ node scripts/ae-tools.mjs help
 - `ae-ideate`: generate solution directions, tradeoffs, risks, and next questions.
 - `ae-brainstorm`: clarify requirements and capture acceptance criteria.
 - `ae-lfg`: run the full flow from requirements to verified delivery.
-- `ae-plan`: create implementation plans without editing product code.
+- `ae-plan`: create implementation plans without editing product code, including simplest-viable-route checks for implementation-heavy work.
 - `ae-constitution`: create or update durable project governance for plans and reviews.
 - `ae-tasks`: turn approved plans into dependency-ordered implementation task artifacts.
-- `ae-work`: execute plans after Git/worktree safety checks.
+- `ae-work`: execute plans after Git/worktree safety checks, using a Minimality Gate before behavior edits.
 - `ae-refactor`: plan behavior-preserving refactors.
-- `ae-review`: review code or documents with severity-ordered findings first.
+- `ae-review`: review code or documents with severity-ordered findings first; complexity reviews can use delete, stdlib, native, yagni, and shrink tags.
 - `ae-doc-humanize`: rewrite structured or stiff notes into readable documents.
 - `ae-doc-structure`: turn messy notes into requirements, plans, handoffs, or checklists.
 - `ae-frontend-design`: build a usable first frontend version.
@@ -76,6 +77,7 @@ node scripts/ae-tools.mjs help
 - `ae-backend`: implement API, service, data, and permission behavior from repository contracts.
 - `ae-debug`: investigate build failures, runtime errors, UI issues, and API incidents systematically.
 - `ae-tdd`: run a red-green-refactor loop when behavior is precise enough for test-first work.
+- `ae-task-loop`: iterate on exploratory fixes with smallest plausible fix hypotheses before broadening scope.
 - `ae-test-browser`: validate UI flows in a real browser.
 - `ae-computer-use-guard`: constrain Codex Computer Use screenshots, context, stage checkpoints, hooks gates, and expert profiles.
 - `ae-imagegen-prompt`: turn visual ideas into image-generation prompts with reference roles, generation budgets, and storyboard assets; prompt-only work does not require hooks.
@@ -168,6 +170,7 @@ This repository keeps a clear Codex-native boundary:
 - `https://github.com/obra/superpowers` informs parts of the planning, debugging, TDD, verification, and delivery-gate workflow design.
 - `https://github.com/openai/plugins` informs parts of the frontend, backend, web-app, and skill-packaging design.
 - `https://github.com/github/spec-kit` informs constitution, requirement checklist, task breakdown, and cross-artifact analysis patterns.
+- `https://github.com/DietrichGebert/ponytail` informs minimality gates, complexity review tags, and deliberate simplification tracking. AE adapts the method only; it does not vendor Ponytail runtime hooks, mode persistence, statusline behavior, MCP, or benchmark display.
 
 Those repositories are reference inputs. This project rewrites the relevant parts into local `ae-*` skills and helper scripts instead of reusing their runtimes.
 

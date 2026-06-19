@@ -63,3 +63,16 @@
   6. Verify with `node scripts/ae-tools.mjs task-analyze --mode plan --plan docs/ae/plans/<your-plan>.md`.
 - Validation: Run `npm.cmd test`, `npm.cmd run check`, `node scripts/check-install-smoke.mjs`, and targeted task-analyze tests for the config matrix.
 - Known risks: `task-analyze` reports policy and waves; actual sub-agent spawning remains an orchestration decision and must respect blockers.
+
+## Minimality and complexity review adaptation
+
+- Workflow: Adapt external minimality patterns into AE skill guidance without importing runtime hooks or persona modes.
+- Use case: A user asks to optimize AE skills using a repository such as `DietrichGebert/ponytail`.
+- Steps:
+  1. Use `ae-skill-audit` to classify external patterns as portable workflow guidance or platform-specific runtime behavior.
+  2. Improve existing AE skills before creating new skills: `ae-work` for pre-edit minimality, `ae-review` for complexity findings, `ae-plan` for simplest-route alternatives, and `ae-task-loop` for smallest-fix iterations.
+  3. Keep plugin source and `.agents/skills` mirror paired in every edit.
+  4. Use TDD when locking guidance into tests; the regression test should verify both source and mirror.
+  5. Preserve boundaries: do not remove validation, security, accessibility, data-loss handling, or explicit user requirements in the name of smaller code.
+- Validation: Run `node --test --test-name-pattern "Ponytail-inspired minimality guidance" tests/skill-scripts.test.mjs`, `node --test tests/skill-scripts.test.mjs`, `npm.cmd run check`, and `node scripts/check-skill-mirror.mjs`.
+- Known risks: Minimality language can be misread as "delete safeguards"; always phrase it as smallest correct implementation, not shortest code.

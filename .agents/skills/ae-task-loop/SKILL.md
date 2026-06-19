@@ -12,6 +12,7 @@ Iterate on an exploratory task until fixed, verified, or clearly blocked.
 - Lock success criteria before the loop starts.
 - Reproduce or inspect current state before changing anything.
 - Each loop runs: verify, decide, fix or rebuild, verify again.
+- Each fix hypothesis should be the smallest plausible change that can satisfy the current failing criterion; broaden only after evidence rules out smaller fixes.
 - Do not ask new scope questions during the loop unless the original goal is invalid or unsafe.
 - Stop after a clear pass, three consecutive no-progress rounds, or an agreed iteration limit.
 
@@ -25,9 +26,10 @@ Iterate on an exploratory task until fixed, verified, or clearly blocked.
 2. Establish objective success criteria and validation commands.
 3. Run initial verification to capture the current state.
 4. If already passing, report evidence and stop.
-5. Apply the smallest change likely to satisfy failing criteria.
+5. State the smallest plausible fix hypothesis, then apply only the change needed to test that hypothesis.
 6. Re-run verification and update loop state.
-7. Continue until pass, blocked, or iteration limit.
+7. Broaden scope only when the latest evidence invalidates the smaller fix.
+8. Continue until pass, blocked, or iteration limit.
 
 ## Loop State
 
@@ -46,4 +48,5 @@ For long loops, write progress under `docs/00-process/active/<task>/progress.md`
 
 - Do not change success criteria mid-loop to match the implementation.
 - Do not hide unverifiable criteria; mark them explicitly.
+- Do not remove validation, trust-boundary checks, security controls, or explicit user requirements merely to make the fix smaller.
 - Do not perform Git write operations unless separately requested and authorized.
