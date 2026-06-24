@@ -4,6 +4,7 @@ status: completed
 date: 2026-06-19
 title: claude-code-best-practice-adaptation
 origin: docs/ae/prds/2026-06-19-003-claude-code-best-practice-adaptation-prd.md
+originFingerprint: sha256:551d57dd927a7e346d19b8bac4be0b6ca0e74d72168598f87eee8bc5f3270635
 supersededBy: docs/ae/plans/2026-06-19-004-claude-code-best-practice-detailed-execution-plan.md
 ---
 

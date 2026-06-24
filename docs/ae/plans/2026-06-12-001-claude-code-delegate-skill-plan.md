@@ -4,6 +4,7 @@ status: completed
 date: 2026-06-12
 title: claude-code-delegate-skill
 origin: docs/ae/brainstorms/2026-06-12-claude-code-delegate-skill-requirements.md
+originFingerprint: sha256:858b9fe343ec5e249fccaa309a761b9a15d5ebaf861f35dc21dc3fcd629dd4df
 ---
 
 # Plan: Claude Code Delegate Skill

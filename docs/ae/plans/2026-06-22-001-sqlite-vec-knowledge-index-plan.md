@@ -4,6 +4,7 @@ status: drafted
 date: 2026-06-22
 title: sqlite-vec knowledge index
 origin: docs/ae/prds/2026-06-22-001-project-knowledge-vector-index-prd.md
+originFingerprint: sha256:b1cf02eb2623f10f29606771891ef7a3b5f5230c4c4b2d748a33055d13d4919d
 executionStatus: archived-for-later
 archive: docs/00-process/archive/2026-06/sqlite-vec-knowledge-index/README.md
 ---

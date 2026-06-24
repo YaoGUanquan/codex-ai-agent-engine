@@ -4,6 +4,7 @@ status: ready
 date: 2026-06-03
 title: computer-use-hooks-gate
 origin: inline user follow-up after 2G/4-core relay default
+originFingerprint: sha256:9e4f1e7400bcf9c6a8e9775c4abbd5fca06e924054823e7b9850fac614f92767
 ---
 
 # Plan: Computer Use Hooks Gate

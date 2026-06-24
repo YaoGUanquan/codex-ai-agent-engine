@@ -95,7 +95,7 @@
 - Workflow: Adapt Claude Code best-practice repositories by rewriting portable process contracts into existing AE skills.
 - Use case: A user asks whether a Claude Code workflow repository can optimize this Codex-native AE project.
 - Steps:
-  1. Use `ae-skill-audit` to record source freshness, inspected files, license, runtime assumptions, and deterministic mechanisms.
+  1. Use `ae-skill-audit` to record source freshness with `git ls-remote` when available, `observedCommit`, ref source, inspected files, license, runtime assumptions, and deterministic mechanisms.
   2. Prefer existing skills before creating new entrypoints: audit, creator, agent template, delegation, plan, review, and memory skills usually cover the adaptation path.
   3. Rewrite only portable gates, routing rules, diagnostics, and evidence contracts; reject hooks, settings, schedulers, slash commands, permission presets, sounds, and auto-registered agents unless Codex has an equivalent enforcement point.
   4. Treat Claude output as untrusted advice until Codex verifies it against repository facts and validation output.
