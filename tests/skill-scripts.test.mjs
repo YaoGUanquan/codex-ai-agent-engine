@@ -169,6 +169,15 @@ test('OCR-inspired review guidance is present in source and mirror skills', () =
   assert.equal(auditTemplateMirror, auditTemplateSource, 'ae-skill-audit template mirror should match plugin source')
   assert.match(auditTemplateSource, /## Deterministic Engineering Patterns/)
   assert.match(auditTemplateSource, /## License Compatibility/)
+  assert.match(auditTemplateSource, /Source URL:/)
+  assert.match(auditTemplateSource, /git ls-remote/)
+  assert.match(auditTemplateSource, /Observed commit:/)
+  assert.match(auditTemplateSource, /Ref source:/)
+  assert.match(auditTemplateSource, /Commit status: current \/ commitMismatch \/ unreachable-short-hash/)
+  assert.match(auditTemplateSource, /Inspected files:/)
+  assert.match(auditTemplateSource, /portable method/)
+  assert.match(auditTemplateSource, /local deterministic mechanism/)
+  assert.match(auditTemplateSource, /runtime-specific behavior/)
 })
 
 test('Claude Code best practice adaptation guidance is present in source and mirror skills', () => {
@@ -176,7 +185,13 @@ test('Claude Code best practice adaptation guidance is present in source and mir
     'ae-skill-audit': [
       /Runtime Boundary Filter/i,
       /source freshness/i,
+      /git ls-remote/,
+      /observedCommit/,
+      /refSource/,
       /inspected files/i,
+      /unreachable-short-hash/,
+      /portable method/i,
+      /local deterministic mechanism/i,
       /runtime-specific behavior/i,
       /license/i,
     ],
@@ -223,6 +238,61 @@ test('Claude Code best practice adaptation guidance is present in source and mir
     assert.equal(mirrorBody, sourceBody, `${skillName} mirror should match plugin source`)
     for (const expectation of expectations) {
       assert.match(sourceBody, expectation, `${skillName} should include ${expectation}`)
+    }
+  }
+})
+
+test('PRD and plan artifact contracts are present in source and mirror skills', () => {
+  const expectationsByFile = [
+    ['plugins/ai-agent-engine-codex/skills/ae-prd/SKILL.md', '.agents/skills/ae-prd/SKILL.md', [
+      /format: human-readable-requirements/,
+      /sharded: false/,
+      /AI Parse Contract/,
+      /stable requirement IDs/i,
+      /originFingerprint/,
+      /Consistency Check/i,
+    ]],
+    [
+      'plugins/ai-agent-engine-codex/skills/ae-brainstorm/references/requirements-capture.md',
+      '.agents/skills/ae-brainstorm/references/requirements-capture.md',
+      [
+        /format: human-readable-requirements/,
+        /canonicalKind: requirements/,
+        /stableIdsRequired: true/,
+        /R1/,
+        /NFR1/,
+        /D1/,
+        /requirementsCount/,
+      ],
+    ],
+    ['plugins/ai-agent-engine-codex/skills/ae-plan/SKILL.md', '.agents/skills/ae-plan/SKILL.md', [
+      /format: human-readable-plan/,
+      /sharded: false/,
+      /canonicalKind: plan/,
+      /originFingerprint/,
+      /source requirement ID/i,
+      /forbidden files/i,
+    ]],
+    [
+      'plugins/ai-agent-engine-codex/skills/ae-plan/references/plan-template.md',
+      '.agents/skills/ae-plan/references/plan-template.md',
+      [
+        /format: human-readable-plan/,
+        /canonicalKind: plan/,
+        /stableIdsRequired: true/,
+        /implementationUnitCount/,
+        /sourceRequirementsCovered/,
+        /origin.*originFingerprint/s,
+      ],
+    ],
+  ]
+
+  for (const [sourcePath, mirrorPath, expectations] of expectationsByFile) {
+    const source = readFileSync(resolve(repoRoot, sourcePath), 'utf8')
+    const mirror = readFileSync(resolve(repoRoot, mirrorPath), 'utf8')
+    assert.equal(mirror, source, `${mirrorPath} should match ${sourcePath}`)
+    for (const expectation of expectations) {
+      assert.match(source, expectation, `${sourcePath} should include ${expectation}`)
     }
   }
 })
@@ -532,6 +602,152 @@ test('check-ae-artifacts rejects invalid managed frontmatter', () => {
     assert.notEqual(result.status, 0)
     assert.match(result.stderr, /status/)
     assert.match(result.stderr, /prd/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('check-ae-artifacts compatibility mode allows legacy pre-contract prd and plan', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-artifacts-'))
+  try {
+    writeAeArtifact(tempRoot, 'docs/ae/prds/legacy-prd.md', [
+      '---',
+      'type: prd',
+      'status: drafted',
+      'date: 2026-06-23',
+      'topic: legacy',
+      '---',
+      '# Legacy PRD',
+      '',
+    ])
+    writeAeArtifact(tempRoot, 'docs/ae/plans/legacy-plan.md', [
+      '---',
+      'type: plan',
+      'status: drafted',
+      'date: 2026-06-23',
+      'title: legacy',
+      '---',
+      '# Legacy Plan',
+      '',
+    ])
+
+    const result = runAeArtifactCheck(tempRoot)
+    assert.equal(result.status, 0, result.stderr)
+    assert.match(result.stdout, /"status": "ok"/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('check-ae-artifacts compatibility mode rejects new contract artifact missing fields', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-artifacts-'))
+  try {
+    writeAeArtifact(tempRoot, 'docs/ae/plans/new-plan.md', [
+      '---',
+      'type: plan',
+      'status: drafted',
+      'date: 2026-06-24',
+      'title: missing contract',
+      '---',
+      '# New Plan',
+      '',
+    ])
+
+    const result = runAeArtifactCheck(tempRoot)
+    assert.notEqual(result.status, 0)
+    assert.match(result.stderr, /format/)
+    assert.match(result.stderr, /sharded/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('check-ae-artifacts strict mode rejects legacy artifact missing contract fields', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-artifacts-'))
+  try {
+    writeAeArtifact(tempRoot, 'docs/ae/prds/legacy-prd.md', [
+      '---',
+      'type: prd',
+      'status: drafted',
+      'date: 2026-06-23',
+      'topic: legacy',
+      '---',
+      '# Legacy PRD',
+      '',
+    ])
+
+    const result = runAeArtifactCheck(tempRoot, ['--strict'])
+    assert.notEqual(result.status, 0)
+    assert.equal(JSON.parse(result.stderr).strict, true)
+    assert.match(result.stderr, /format/)
+    assert.match(result.stderr, /sharded/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('check-ae-artifacts rejects partial origin lineage in compatibility and strict modes', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-artifacts-'))
+  try {
+    writeAeArtifact(tempRoot, 'docs/ae/prds/partial-origin.md', [
+      '---',
+      'type: prd',
+      'status: drafted',
+      'date: 2026-06-23',
+      'topic: partial origin',
+      'origin: docs/source.md',
+      '---',
+      '# Partial Origin',
+      '',
+    ])
+
+    const compatibility = runAeArtifactCheck(tempRoot)
+    assert.notEqual(compatibility.status, 0)
+    assert.match(compatibility.stderr, /originFingerprint/)
+
+    const strict = runAeArtifactCheck(tempRoot, ['--strict'])
+    assert.notEqual(strict.status, 0)
+    assert.match(strict.stderr, /originFingerprint/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('check-ae-artifacts accepts valid new contract prd and plan artifacts', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-artifacts-'))
+  try {
+    writeAeArtifact(tempRoot, 'docs/ae/prds/new-prd.md', [
+      '---',
+      'type: prd',
+      'status: drafted',
+      'date: 2026-06-24',
+      'topic: new prd',
+      'format: human-readable-requirements',
+      'sharded: false',
+      'origin: docs/source.md',
+      'originFingerprint: sha256:abc123',
+      '---',
+      '# New PRD',
+      '',
+    ])
+    writeAeArtifact(tempRoot, 'docs/ae/plans/new-plan.md', [
+      '---',
+      'type: plan',
+      'status: drafted',
+      'date: 2026-06-24',
+      'title: new plan',
+      'format: human-readable-plan',
+      'sharded: false',
+      'origin: docs/ae/prds/new-prd.md',
+      'originFingerprint: sha256:def456',
+      '---',
+      '# New Plan',
+      '',
+    ])
+
+    const result = runAeArtifactCheck(tempRoot, ['--strict'])
+    assert.equal(result.status, 0, result.stderr)
+    assert.match(result.stdout, /"status": "ok"/)
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }
@@ -1199,6 +1415,20 @@ function runNodeScriptRaw(command) {
   )
 
   return result.stdout
+}
+
+function runAeArtifactCheck(tempRoot, extraArgs = []) {
+  return spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'check-ae-artifacts.mjs'), '--target', tempRoot, ...extraArgs], {
+    cwd: repoRoot,
+    encoding: 'utf8',
+    stdio: 'pipe',
+  })
+}
+
+function writeAeArtifact(tempRoot, relativePath, lines) {
+  const fullPath = join(tempRoot, relativePath)
+  mkdirSync(resolve(fullPath, '..'), { recursive: true })
+  writeFileSync(fullPath, lines.join('\n'), 'utf8')
 }
 
 function readSkillBody(root, skillName) {

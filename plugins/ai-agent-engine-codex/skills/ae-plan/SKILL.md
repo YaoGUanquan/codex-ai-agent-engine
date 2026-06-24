@@ -43,7 +43,7 @@ High-risk includes auth, permissions, public API contracts, migrations, data del
 
 ## Workflow
 
-1. If the input references a requirements file, read it fully and treat it as the source of truth.
+1. If the input references a requirements file, read it fully and treat it as the source of truth. Carry its problem frame, stable requirement IDs, acceptance criteria, scope boundary, decisions, assumptions, and deferred questions into plan coverage.
 2. If no requirements file exists, gather enough context from the repo and user request to plan safely.
 3. Run the Plan Readiness Gate.
 4. For design-heavy work, compare 2-3 materially different approaches and record the chosen approach.
@@ -54,6 +54,35 @@ High-risk includes auth, permissions, public API contracts, migrations, data del
 9. Run Plan Self-Review before presenting the plan.
 10. Write the plan to `docs/ae/plans/` before presenting next-step options.
 11. Recommend ae-review domain:document for significant plans, then ae-work when the user wants execution.
+
+## Artifact Contract
+
+Plan artifacts are implementation data documents for humans and downstream AI workflow. Use `references/plan-template.md` as the canonical structure.
+
+Required frontmatter for new plans:
+
+```yaml
+---
+type: plan
+status: drafted
+date: YYYY-MM-DD
+title: kebab-case-title
+origin: docs/ae/prds/YYYY-MM-DD-topic-prd.md
+originFingerprint: YYYY-MM-DD-topic
+depth: standard
+format: human-readable-plan
+sharded: false
+---
+```
+
+Rules:
+
+- Include `origin` and `originFingerprint` together when a source artifact exists; remove both when there is no source artifact.
+- Include `depth: standard` or `depth: deep` for non-lightweight plans; omit `depth` for lightweight plans.
+- Use `sharded: true` only when multiple modules require separate plan shards or the user explicitly asks for sharding.
+- Include an `AI Parse Contract` section with `canonicalKind: plan`, `humanEquivalent: true`, `stableIdsRequired: true`, and `noImplicitScope: true`.
+- Every implementation unit uses a stable `U*` ID, lists requirement IDs covered, acceptance criteria covered, dependencies, files, forbidden files, validation, rollback signals, and deferred implementation notes.
+- The plan must not introduce product behavior absent from the source requirements; record such gaps as open questions instead.
 
 When the task may benefit from multi-agent execution, make the plan dependency-aware even if multi-agent config is currently disabled:
 
@@ -85,6 +114,7 @@ Before finalizing, check and fix the plan inline:
 - assumptions are explicit and do not masquerade as requirements,
 - alternatives and decision records explain why the selected approach is preferable,
 - every acceptance criterion maps to at least one implementation unit or validation step,
+- every source requirement ID maps to at least one implementation unit or is explicitly deferred,
 - high-risk plans include pre-mortem failures and layered validation,
 - rollback and recovery signals are credible for the changed area,
 - proposed dependencies, abstractions, wrappers, and files are justified by current requirements rather than speculative future flexibility,
