@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { chmodSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
@@ -72,6 +72,23 @@ test('check-skill-language-metadata reports ok', () => {
   const result = runNodeScript('scripts/check-skill-language-metadata.mjs')
   assert.equal(result.status, 'ok')
   assert.equal(result.skillCount, result.metadataCount)
+})
+
+test('check-skill-contract reports ok without external dependencies', () => {
+  const result = runNodeScript('scripts/check-skill-contract.mjs')
+  assert.equal(result.status, 'ok')
+  assert.equal(result.skillCount, result.checkedSkills)
+  assert.equal(result.errors.length, 0)
+})
+
+test('skill roots contain only ae-* skill directories', () => {
+  for (const root of ['plugins/ai-agent-engine-codex/skills', '.agents/skills']) {
+    const invalidEntries = readdirSync(resolve(repoRoot, root), { withFileTypes: true })
+      .filter((entry) => !entry.isDirectory() || !entry.name.startsWith('ae-'))
+      .map((entry) => entry.name)
+
+    assert.deepEqual(invalidEntries, [], `${root} should contain only ae-* skill directories`)
+  }
 })
 
 test('OfficeCLI skills are removed from active metadata', () => {
@@ -474,6 +491,7 @@ test('package check script omits OfficeCLI checks', () => {
   assert.doesNotMatch(checkScript, /node scripts\/check-officecli-available\.mjs/)
   assert.doesNotMatch(checkScript, /node scripts\/check-officecli-smoke\.mjs/)
   assert.match(checkScript, /node scripts\/check-ae-artifacts\.mjs/)
+  assert.match(checkScript, /node scripts\/check-skill-contract\.mjs/)
   assert.match(checkScript, /node scripts\/ae-tools\.mjs ae-graph-build --root scripts/)
   assert.match(checkScript, /node scripts\/ae-tools\.mjs ae-graph-query --root scripts --path ae-tools\.mjs/)
 })
