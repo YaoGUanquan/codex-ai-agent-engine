@@ -7,6 +7,13 @@
 - License:
 - Supported harnesses:
 - Primary purpose:
+- Source URL:
+- Freshness method: `git ls-remote <repo-url> HEAD` / local clone / unavailable
+- Ref source: HEAD / branch / tag / user-supplied commit
+- Observed commit:
+- User supplied ref or short hash:
+- Commit status: current / commitMismatch / unreachable-short-hash / offline-unverified
+- Inspected files:
 
 ## License Compatibility
 
@@ -27,7 +34,7 @@
 
 ## Portable Patterns
 
-List patterns that can be expressed as Codex-native skill workflow, validation, documentation, or local script behavior.
+List portable method candidates that can be expressed as Codex-native skill workflow, validation, documentation, or local script behavior.
 
 ## Platform-Specific Patterns
 
@@ -36,6 +43,22 @@ List patterns that depend on unavailable runtime behavior, such as hook enforcem
 ## Deterministic Engineering Patterns
 
 List portable workflow mechanics that constrain agent behavior without depending on a specific runtime, such as deterministic file selection, schema validation, routing contracts, evidence capture, reflection or filtering passes, dry-run previews, bounded tool access, or structured output checks.
+
+## Runtime Boundary Classification
+
+| Finding | Category | Evidence | AE action |
+| --- | --- | --- | --- |
+|  | portable method |  | improve existing skill / create skill / reference / reject |
+|  | local deterministic mechanism |  | script or validation candidate |
+|  | runtime-specific behavior |  | reject or rewrite as process contract |
+
+## Source Freshness Notes
+
+- `git ls-remote` output or reason unavailable:
+- Local checkout commit if used:
+- Remote/local commit mismatch:
+- Short hash resolution:
+- Files inspected for the conclusion:
 
 ## AE Fit
 

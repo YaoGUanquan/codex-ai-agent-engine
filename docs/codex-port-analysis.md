@@ -2,7 +2,8 @@
 
 Date: 2026-05-11
 Source: https://gitee.com/jiangqiang1996/ai-agent-engine
-Observed source commit: 597b409eb3a53f78aa86861783e282ae6ffedcb5
+Observed source commit: b50ca004a6b4300f4ad5d8d281bcb17d4be1b392
+Observed source ref: remote HEAD verified by upstream audit on 2026-06-24.
 
 ## Conclusion
 

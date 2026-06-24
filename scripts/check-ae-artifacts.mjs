@@ -7,11 +7,17 @@ const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
 const args = process.argv.slice(2)
 const targetRoot = resolve(readArg('--target') || repoRoot)
 const artifactRoot = resolve(targetRoot, 'docs', 'ae')
+const strict = args.includes('--strict')
 
 const allowedTypes = new Set(['prd', 'prd-shard', 'plan', 'plan-shard', 'design', 'design-shard', 'work', 'review'])
 const allowedStatuses = new Set(['drafted', 'ready', 'review-passed', 'review-needs-fix', 'blocked', 'aborted', 'active', 'completed'])
 const prdStatuses = new Set(['drafted', 'review-passed', 'completed'])
 const planStatuses = new Set(['drafted', 'ready', 'active', 'completed'])
+const contractStartDate = '2026-06-24'
+const requiredFormats = new Map([
+  ['prd', 'human-readable-requirements'],
+  ['plan', 'human-readable-plan'],
+])
 const errors = []
 let checked = 0
 
@@ -31,6 +37,7 @@ if (errors.length > 0) {
   console.error(JSON.stringify({
     status: 'failed',
     targetRoot,
+    strict,
     checked,
     errors,
   }, null, 2))
@@ -40,6 +47,7 @@ if (errors.length > 0) {
 console.log(JSON.stringify({
   status: 'ok',
   targetRoot,
+  strict,
   checked,
 }, null, 2))
 
@@ -53,6 +61,7 @@ function validateFrontmatter(path, data) {
   if (data.origin && looksLikePath(data.origin) && !isRepositoryRelativePath(data.origin)) {
     errors.push({ path, field: 'origin', message: 'origin must be a repository-relative path' })
   }
+  validateOriginPair(path, data)
   if (data.supersededBy && !isRepositoryRelativePath(data.supersededBy)) {
     errors.push({ path, field: 'supersededBy', message: 'supersededBy must be a repository-relative path' })
   }
@@ -66,12 +75,55 @@ function validateFrontmatter(path, data) {
     if (!data.title) errors.push({ path, field: 'title', message: 'plan requires title' })
     if (!planStatuses.has(data.status)) errors.push({ path, field: 'status', message: 'plan status must be drafted, ready, active, or completed' })
   }
+  validateArtifactContract(path, data)
   if (String(data.type || '').endsWith('-shard')) {
     if (!data.parent || !isRepositoryRelativePath(data.parent)) {
       errors.push({ path, field: 'parent', message: 'shard artifacts require repository-relative parent' })
     }
     if (!data.module) errors.push({ path, field: 'module', message: 'shard artifacts require module' })
   }
+}
+
+function validateArtifactContract(path, data) {
+  if (!requiredFormats.has(data.type)) return
+  if (!strict && !isNewContractManaged(data)) return
+
+  const expectedFormat = requiredFormats.get(data.type)
+  if (!hasField(data, 'format')) {
+    errors.push({ path, field: 'format', message: `${data.type} requires format: ${expectedFormat}` })
+  } else if (data.format !== expectedFormat) {
+    errors.push({ path, field: 'format', message: `${data.type} format must be ${expectedFormat}` })
+  }
+
+  if (!hasField(data, 'sharded')) {
+    errors.push({ path, field: 'sharded', message: `${data.type} requires sharded: true or false` })
+  } else if (typeof data.sharded !== 'boolean') {
+    errors.push({ path, field: 'sharded', message: `${data.type} sharded must be boolean true or false` })
+  }
+}
+
+function validateOriginPair(path, data) {
+  const hasOrigin = hasField(data, 'origin')
+  const hasOriginFingerprint = hasField(data, 'originFingerprint')
+  if (hasOrigin !== hasOriginFingerprint) {
+    errors.push({ path, field: hasOrigin ? 'originFingerprint' : 'origin', message: 'origin and originFingerprint must be provided together' })
+    return
+  }
+  if (hasOrigin && (data.origin === '' || data.originFingerprint === '')) {
+    errors.push({ path, field: 'origin', message: 'origin and originFingerprint must be non-empty when provided' })
+  }
+}
+
+function isNewContractManaged(data) {
+  return hasField(data, 'format') || hasField(data, 'sharded') || isOnOrAfterContractStart(data.date)
+}
+
+function isOnOrAfterContractStart(value) {
+  return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && value >= contractStartDate
+}
+
+function hasField(data, key) {
+  return Object.prototype.hasOwnProperty.call(data, key)
 }
 
 function parseFrontmatter(content) {

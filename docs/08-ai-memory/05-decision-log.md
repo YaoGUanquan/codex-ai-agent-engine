@@ -90,3 +90,11 @@
 - Context: The repository is useful for source freshness, extension routing, delegation boundaries, second-model review, and memory placement. Its runtime assumptions are Claude Code-specific and do not map directly to Codex project-local skills.
 - Impact: `ae-skill-audit`, `ae-skill-creator`, `ae-agent-creator`, `ae-claude-code`, `ae-plan`, `ae-review`, and `ae-save-experience` gain explicit routing and trust-boundary guidance. `claude-delegate` reports diagnostics when a successful run produces empty stdout and stderr. The implementation landed on `main` in commit `3e7f01a`.
 - Re-evaluate when: Codex exposes stable project hooks, schedulers, permission profiles, or an agent registry that can enforce these behaviors natively.
+
+## 2026-06-24: Refresh upstream AE audit baseline and artifact contracts
+
+- Date: 2026-06-24
+- Decision: Treat upstream `jiangqiang1996/ai-agent-engine` commit `b50ca004a6b4300f4ad5d8d281bcb17d4be1b392` as the current audit baseline and adapt only Codex-native artifact/audit logic.
+- Context: User identified a newer upstream commit than the local catalog. The portable parts are human-readable but machine-parseable PRD/plan contracts, source freshness checks, and runtime-boundary classification.
+- Impact: PRD/plan skills now require `format`, `sharded`, AI parse contracts, stable IDs, and origin/fingerprint pairing. `ae-skill-audit` now records `git ls-remote`, `observedCommit`, ref source, inspected files, commit mismatch or unreachable short hash, and classifies portable method, local deterministic mechanism, and runtime-specific behavior.
+- Re-evaluate when: strict artifact validation can be enabled by default after historical PRD/plan artifacts are migrated.

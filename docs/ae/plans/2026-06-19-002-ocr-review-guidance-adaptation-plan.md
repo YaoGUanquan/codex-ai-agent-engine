@@ -4,6 +4,7 @@ status: completed
 date: 2026-06-19
 title: ocr-review-guidance-adaptation
 origin: docs/ae/prds/2026-06-19-002-ocr-review-guidance-adaptation-prd.md
+originFingerprint: sha256:23f3c3d2e022525344df796e24ce734f84673a7aa2b4141a30d6a91185d3c3af
 ---
 
 # OCR Review Guidance Adaptation Implementation Plan
