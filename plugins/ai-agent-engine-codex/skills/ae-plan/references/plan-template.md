@@ -14,11 +14,21 @@ date: YYYY-MM-DD
 title: <short-topic>
 origin: <optional requirements path>
 originFingerprint: <optional fingerprint>
+depth: <standard|deep>
+format: human-readable-plan
+sharded: false
 ---
 
 # Plan: <title>
 
 ## Source
+
+## AI Parse Contract
+
+- canonicalKind: plan
+- humanEquivalent: true
+- stableIdsRequired: true
+- noImplicitScope: true
 
 ## Scope
 
@@ -81,6 +91,13 @@ originFingerprint: <optional fingerprint>
 - Rollback signals:
 - Deferred to implementation:
 
+## Consistency Check
+
+- implementationUnitCount:
+- sourceRequirementsCovered:
+- sourceRequirementsDeferred:
+- openQuestionsCount:
+
 ## Validation Plan
 
 - Unit:
@@ -105,5 +122,7 @@ originFingerprint: <optional fingerprint>
 ```
 
 All paths must be repository-relative. Do not write code in the plan.
+
+Remove `origin` and `originFingerprint` together when there is no source artifact. If either field is present, both must be present and `origin` must be repository-relative. Omit `depth` for lightweight plans; use `standard` or `deep` for larger plans. Use `sharded: true` only when multiple modules require separate plan shards or the user explicitly asks for sharding.
 
 For multi-agent readiness, every implementation unit must keep `Depends on:` explicit. Use `none` for independent units or comma-separated unit IDs such as `U1, U2`. Use `Forbidden files:` to name shared files, lockfiles, generated outputs, or public contracts that a delegated worker must not edit. `task-analyze` parses `Files:` as owned files and `Forbidden files:` as a separate forbidden boundary, so do not duplicate forbidden paths under `Files:`.
