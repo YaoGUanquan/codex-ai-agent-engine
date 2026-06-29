@@ -272,6 +272,16 @@
       "script": "node scripts/ae-tools.mjs review-contract --kind code --mode report-only --targets code,document [--write-evidence]"
     },
     {
+      "name": "task-brief",
+      "purpose": "Extract one AE implementation unit from a plan into a file artifact for low-context handoff.",
+      "script": "node scripts/ae-tools.mjs task-brief --plan <path> --unit U1 [--out <path>]"
+    },
+    {
+      "name": "review-package",
+      "purpose": "Write a task or branch review bundle with commit list, diff stat, and contextual diff into an evidence artifact.",
+      "script": "node scripts/ae-tools.mjs review-package --base <ref> --head <ref> [--out <path>]"
+    },
+    {
       "name": "evidence",
       "purpose": "Read or write lightweight AE evidence ledger records under docs/ae/evidence.",
       "script": "node scripts/ae-tools.mjs evidence read"

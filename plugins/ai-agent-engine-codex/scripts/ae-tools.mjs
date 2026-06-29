@@ -60,6 +60,12 @@ function main() {
       case 'task-analyze':
         printJson(taskAnalyze(process.cwd(), args))
         break
+      case 'task-brief':
+        printJson(taskBrief(process.cwd(), args))
+        break
+      case 'review-package':
+        printJson(reviewPackage(process.cwd(), args))
+        break
       case 'gate':
         printJson(gate(process.cwd(), args))
         break
@@ -90,7 +96,7 @@ function main() {
         printJson(graphQuery(process.cwd(), args))
         break
       default:
-        throw new Error(`Unknown command: ${command}\nAvailable: help, init, recovery, task-analyze, gate, swagger, claude-delegate, review-contract, evidence, markitdown, static-server, ae-graph-build, ae-graph-query`)
+        throw new Error(`Unknown command: ${command}\nAvailable: help, init, recovery, task-analyze, task-brief, review-package, gate, swagger, claude-delegate, review-contract, evidence, markitdown, static-server, ae-graph-build, ae-graph-query`)
     }
   } catch (error) {
     console.error(formatError(error))
@@ -972,6 +978,78 @@ function taskAnalyze(worktree, args) {
     ...multiAgent.warnings,
     ...(grouped.length === 0 ? ['No matching source files found; manual scoping required.'] : []),
   ], { multiAgent, source_mode: 'scan' })
+}
+
+function taskBrief(worktree, args) {
+  const opts = parseOptions(args)
+  const plan = opts.plan || opts._[0]
+  const unitId = String(opts.unit || opts['unit-id'] || opts._[1] || '').trim()
+  if (!plan) throw new Error('task-brief requires --plan <path>')
+  if (!unitId) throw new Error('task-brief requires --unit <id>')
+
+  const planPath = safeResolve(worktree, plan)
+  const unit = extractPlanUnit(readText(planPath), unitId)
+  if (!unit) throw new Error(`task-brief could not find unit ${unitId} in ${plan}`)
+
+  const outRel = opts.out ? normalizeArtifactOutputPath(String(opts.out), 'task-brief') : defaultTaskBriefArtifactPath(unitId)
+  const outPath = safeResolve(worktree, outRel)
+  mkdirSync(dirname(outPath), { recursive: true })
+  writeFileSync(outPath, `${unit.body.trimEnd()}\n`, 'utf8')
+
+  return {
+    status: 'ok',
+    plan,
+    unit: unit.id,
+    heading: unit.heading,
+    artifact: {
+      path: outRel,
+      bytes: statSync(outPath).size,
+      lineCount: unit.body.trimEnd().split(/\r?\n/).length,
+    },
+  }
+}
+
+function reviewPackage(worktree, args) {
+  const opts = parseOptions(args)
+  const base = String(opts.base || opts._[0] || '').trim()
+  const head = String(opts.head || opts._[1] || '').trim()
+  if (!base) throw new Error('review-package requires --base <ref>')
+  if (!head) throw new Error('review-package requires --head <ref>')
+
+  verifyGitRef(worktree, base, 'base')
+  verifyGitRef(worktree, head, 'head')
+
+  const outRel = opts.out ? normalizeArtifactOutputPath(String(opts.out), 'review-package') : defaultReviewPackageArtifactPath(worktree, base, head)
+  const outPath = safeResolve(worktree, outRel)
+  mkdirSync(dirname(outPath), { recursive: true })
+
+  const commitLog = runGitRequired(worktree, ['log', '--oneline', `${base}..${head}`])
+  const diffStat = runGitRequired(worktree, ['diff', '--stat', `${base}..${head}`])
+  const diffBody = runGitRequired(worktree, ['diff', '-U10', `${base}..${head}`])
+  const content = [
+    `# Review package: ${base}..${head}`,
+    '',
+    '## Commits',
+    commitLog || '(no commits)',
+    '',
+    '## Files changed',
+    diffStat || '(no file changes)',
+    '',
+    '## Diff',
+    diffBody || '(no diff)',
+    '',
+  ].join('\n')
+  writeFileSync(outPath, content, 'utf8')
+
+  return {
+    status: 'ok',
+    base,
+    head,
+    artifact: {
+      path: outRel,
+      bytes: statSync(outPath).size,
+    },
+  }
 }
 
 function gate(worktree, args) {
@@ -2056,6 +2134,60 @@ function buildTaskOutput(units, warnings = [], options = {}) {
   }
 }
 
+function extractPlanUnit(text, unitId) {
+  const normalized = text.replace(/\r\n/g, '\n')
+  const canonicalUnitId = String(unitId).trim().toUpperCase()
+  const headingPattern = /^###\s+(U\d+|单元\s*\d+|Unit\s*\d+)\s*[-:：]?\s*([^\n\r]*)/gim
+  const headings = [...normalized.matchAll(headingPattern)]
+  for (const [index, match] of headings.entries()) {
+    const id = /^U\d+/i.test(match[1]) ? match[1].toUpperCase() : `U${index + 1}`
+    if (id !== canonicalUnitId || match.index === undefined) continue
+    const next = headings[index + 1]
+    const bodyStart = match.index
+    const sectionEnd = next?.index ?? findNextMajorSection(normalized, match.index + match[0].length)
+    return {
+      id,
+      heading: (match[2] || `Unit ${index + 1}`).trim(),
+      body: normalized.slice(bodyStart, sectionEnd).trimEnd(),
+    }
+  }
+  return null
+}
+
+function normalizeArtifactOutputPath(input, kind) {
+  const normalized = normalizeRelPath(String(input))
+  if (!normalized) throw new Error(`${kind} output path is invalid: ${input}`)
+  return normalized
+}
+
+function defaultTaskBriefArtifactPath(unitId) {
+  return `docs/ae/evidence/artifacts/task-brief/${safeName(unitId)}-${timestamp()}.md`
+}
+
+function defaultReviewPackageArtifactPath(worktree, base, head) {
+  const baseShort = runGitRequired(worktree, ['rev-parse', '--short', base]).trim() || safeName(base).slice(0, 7)
+  const headShort = runGitRequired(worktree, ['rev-parse', '--short', head]).trim() || safeName(head).slice(0, 7)
+  return `docs/ae/evidence/artifacts/review-package/review-${baseShort}..${headShort}-${timestamp()}.diff`
+}
+
+function verifyGitRef(worktree, ref, label) {
+  runGitRequired(worktree, ['rev-parse', '--verify', '--quiet', ref], `${label} ref is invalid: ${ref}`)
+}
+
+function runGitRequired(worktree, args, message = null) {
+  const result = spawnSync('git', args, {
+    cwd: worktree,
+    encoding: 'utf8',
+    stdio: 'pipe',
+    timeout: 10000,
+  })
+  if (result.status !== 0) {
+    const output = [result.stdout, result.stderr].filter(Boolean).join('\n').trim()
+    throw new Error(message || output || `git ${args.join(' ')} failed with exit code ${result.status}`)
+  }
+  return result.stdout.trimEnd()
+}
+
 function loadMultiAgentConfig(worktree) {
   const profilePath = join(worktree, '.codex', 'ae-skill-profiles.yaml')
   const warnings = []
@@ -2455,6 +2587,10 @@ function parseOptions(args) {
     }
   }
   return opts
+}
+
+function escapeRegex(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 function arrayOpt(value) {
