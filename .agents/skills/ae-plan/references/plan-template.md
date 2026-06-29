@@ -75,6 +75,12 @@ sharded: false
 - Failure scenario 3:
 - Mitigations:
 
+## Global Constraints
+
+- Constraint 1:
+- Constraint 2:
+- Constraint 3:
+
 ## Implementation Units
 
 ### U1 - <unit name>

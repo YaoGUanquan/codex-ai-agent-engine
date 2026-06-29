@@ -74,6 +74,13 @@ Read `references/review-output-template.md`.
 
 Findings must include severity, file/line when applicable, evidence, impact, and fix. Suppress vague style advice unless it creates a concrete risk. Pre-existing unrelated issues must be labeled as such and separated from regressions.
 
+For task-scoped implementation reviews, return the task gate in a deterministic shape that `ae-work` can act on without reinterpretation:
+
+- `specVerdict`: whether the scoped task satisfies the required behavior from the brief or plan unit,
+- `qualityVerdict`: whether the scoped implementation quality is acceptable for the touched code,
+- `cannotVerifyFromDiff[]`: requirements or claims that need controller-side verification outside the diff,
+- `blockingFindings[]`: blocking defects that must be fixed before the task is treated as complete.
+
 Review order:
 
 - Check correctness and requirement alignment first.

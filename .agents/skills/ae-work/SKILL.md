@@ -74,6 +74,10 @@ Before editing behavior, choose the smallest correct implementation that satisfi
 ## Execution Rules
 
 - Read the plan and referenced files first.
+- Before executing the first implementation unit from a plan, run one pre-flight conflict scan across the plan:
+  - compare units for shared files or contradictory ownership,
+  - compare unit intent against any explicit `Global Constraints`,
+  - flag plan instructions that would obviously fail later review gates.
 - If the plan references a constitution, checklist, or task artifact, read it before editing and treat unresolved blockers as pre-implementation blockers.
 - Execute one implementation unit or one small checkpoint at a time.
 - Keep changes scoped to the assigned unit or task.
@@ -87,6 +91,7 @@ Before editing behavior, choose the smallest correct implementation that satisfi
 - Prefer ae-debug for investigation-heavy failures and ae-tdd when the user wants or the change benefits from red-green-refactor discipline.
 - Do not bundle opportunistic refactors, formatting churn, dependency upgrades, or unrelated test rewrites into the task.
 - If verification cannot be run, name the exact blocker and the residual risk.
+- When resuming a multi-step task after interruption or context compaction, read the active task ledger under `docs/00-process/active/<task>/ledger.jsonl` when present and reconcile it with `git log` before deciding what still needs execution.
 
 ## Cleanup Gate
 

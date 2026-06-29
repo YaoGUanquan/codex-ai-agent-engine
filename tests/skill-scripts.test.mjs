@@ -855,6 +855,172 @@ test('review-contract selects reviewers and writes evidence ledger records', () 
   }
 })
 
+test('task-brief extracts a single AE implementation unit into an evidence artifact', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-brief-'))
+  try {
+    mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
+    writeFileSync(join(tempRoot, 'docs', 'ae', 'plans', 'plan.md'), [
+      '## Implementation Units',
+      '',
+      '### U1 - First unit',
+      '',
+      '- Goal: first',
+      '- Files:',
+      '  - `src/one.js`',
+      '',
+      '### U2 - Second unit',
+      '',
+      '- Goal: second',
+      '- Files:',
+      '  - `src/two.js`',
+      '',
+    ].join('\n'), 'utf8')
+
+    const result = runNodeScriptJson([
+      'scripts/ae-tools.mjs',
+      'task-brief',
+      '--plan',
+      'docs/ae/plans/plan.md',
+      '--unit',
+      'U2',
+    ], tempRoot)
+
+    assert.equal(result.status, 'ok')
+    assert.equal(result.unit, 'U2')
+    assert.equal(result.plan, 'docs/ae/plans/plan.md')
+    assert.match(result.artifact.path, /^docs\/ae\/evidence\/artifacts\/task-brief\//)
+    const artifactBody = readFileSync(join(tempRoot, result.artifact.path), 'utf8')
+    assert.match(artifactBody, /### U2 - Second unit/)
+    assert.doesNotMatch(artifactBody, /### U1 - First unit/)
+    assert.match(artifactBody, /`src\/two\.js`/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('task-brief accepts Unit-style headings that task-analyze already supports', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-brief-unit-'))
+  try {
+    mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
+    writeFileSync(join(tempRoot, 'docs', 'ae', 'plans', 'plan.md'), [
+      '## Implementation Units',
+      '',
+      '### Unit 1: First unit',
+      '',
+      '- Goal: first',
+      '- Files:',
+      '  - `src/one.js`',
+      '',
+      '### Unit 2: Second unit',
+      '',
+      '- Goal: second',
+      '- Files:',
+      '  - `src/two.js`',
+      '',
+    ].join('\n'), 'utf8')
+
+    const result = runNodeScriptJson([
+      'scripts/ae-tools.mjs',
+      'task-brief',
+      '--plan',
+      'docs/ae/plans/plan.md',
+      '--unit',
+      'U2',
+    ], tempRoot)
+
+    assert.equal(result.status, 'ok')
+    assert.equal(result.unit, 'U2')
+    const artifactBody = readFileSync(join(tempRoot, result.artifact.path), 'utf8')
+    assert.match(artifactBody, /### Unit 2: Second unit/)
+    assert.doesNotMatch(artifactBody, /### Unit 1: First unit/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('task-brief accepts localized 单元 headings that task-analyze already supports', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-brief-cn-'))
+  try {
+    mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
+    writeFileSync(join(tempRoot, 'docs', 'ae', 'plans', 'plan.md'), [
+      '## Implementation Units',
+      '',
+      '### 单元 1：第一项',
+      '',
+      '- Goal: first',
+      '- Files:',
+      '  - `src/one.js`',
+      '',
+      '### 单元 2：第二项',
+      '',
+      '- Goal: second',
+      '- Files:',
+      '  - `src/two.js`',
+      '',
+    ].join('\n'), 'utf8')
+
+    const result = runNodeScriptJson([
+      'scripts/ae-tools.mjs',
+      'task-brief',
+      '--plan',
+      'docs/ae/plans/plan.md',
+      '--unit',
+      'U2',
+    ], tempRoot)
+
+    assert.equal(result.status, 'ok')
+    assert.equal(result.unit, 'U2')
+    const artifactBody = readFileSync(join(tempRoot, result.artifact.path), 'utf8')
+    assert.match(artifactBody, /### 单元 2：第二项/)
+    assert.doesNotMatch(artifactBody, /### 单元 1：第一项/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('review-package writes commit list stat summary and diff into an evidence artifact', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-review-package-'))
+  try {
+    runGit(['init'], tempRoot)
+    runGit(['config', 'user.name', 'Codex Test'], tempRoot)
+    runGit(['config', 'user.email', 'codex@example.com'], tempRoot)
+
+    writeFileSync(join(tempRoot, 'sample.txt'), 'one\n', 'utf8')
+    runGit(['add', 'sample.txt'], tempRoot)
+    runGit(['commit', '-m', 'initial'], tempRoot)
+    const base = runGit(['rev-parse', 'HEAD'], tempRoot).stdout.trim()
+
+    writeFileSync(join(tempRoot, 'sample.txt'), 'one\ntwo\n', 'utf8')
+    runGit(['add', 'sample.txt'], tempRoot)
+    runGit(['commit', '-m', 'update sample'], tempRoot)
+    const head = runGit(['rev-parse', 'HEAD'], tempRoot).stdout.trim()
+
+    const result = runNodeScriptJson([
+      'scripts/ae-tools.mjs',
+      'review-package',
+      '--base',
+      base,
+      '--head',
+      head,
+    ], tempRoot)
+
+    assert.equal(result.status, 'ok')
+    assert.equal(result.base, base)
+    assert.equal(result.head, head)
+    assert.match(result.artifact.path, /^docs\/ae\/evidence\/artifacts\/review-package\//)
+    const artifactBody = readFileSync(join(tempRoot, result.artifact.path), 'utf8')
+    assert.match(artifactBody, new RegExp(`# Review package: ${base}\\.\\.${head}`))
+    assert.match(artifactBody, /## Commits/)
+    assert.match(artifactBody, /update sample/)
+    assert.match(artifactBody, /## Files changed/)
+    assert.match(artifactBody, /sample\.txt/)
+    assert.match(artifactBody, /## Diff/)
+    assert.match(artifactBody, /\+two/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
 test('markitdown converts JSON arrays and CSV files to Markdown tables', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-markitdown-'))
   try {
@@ -1376,6 +1542,21 @@ test('task-analyze keeps comma-separated dependency ids with trailing punctuatio
   }
 })
 
+test('AE plan template includes Global Constraints while keeping implementation units', () => {
+  const template = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-plan/references/plan-template.md'), 'utf8')
+  assert.match(template, /## Global Constraints/)
+  assert.match(template, /## Implementation Units/)
+  assert.match(template, /### U1 - <unit name>/)
+})
+
+test('AE review output template defines task review verdict fields', () => {
+  const template = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-review/references/review-output-template.md'), 'utf8')
+  assert.match(template, /specVerdict/i)
+  assert.match(template, /qualityVerdict/i)
+  assert.match(template, /cannotVerifyFromDiff/i)
+  assert.match(template, /blockingFindings/i)
+})
+
 function runNodeScript(relativePath) {
   const scriptPath = resolve(repoRoot, relativePath)
   const result = spawnSync(process.execPath, [scriptPath], {
@@ -1416,6 +1597,26 @@ function runNodeScriptJson(args, cwd = repoRoot, env = {}) {
   )
 
   return JSON.parse(result.stdout)
+}
+
+function runGit(args, cwd) {
+  const result = spawnSync('git', args, {
+    cwd,
+    encoding: 'utf8',
+    stdio: 'pipe',
+  })
+
+  assert.equal(
+    result.status,
+    0,
+    [
+      `Command failed: git ${args.join(' ')}`,
+      result.stdout?.trim() || '',
+      result.stderr?.trim() || '',
+    ].filter(Boolean).join('\n'),
+  )
+
+  return result
 }
 
 function runNodeScriptRaw(command) {
