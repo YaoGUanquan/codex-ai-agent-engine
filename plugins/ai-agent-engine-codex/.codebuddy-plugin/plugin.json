@@ -1,0 +1,23 @@
+{
+  "name": "ai-agent-engine-codex",
+  "version": "0.3.0",
+  "description": "AE engineering workflow skills for requirements, planning, governance, tasks, implementation, review, validation, and handoff.",
+  "author": {
+    "name": "AI Agent Engine for Codex maintainers",
+    "email": "n/a",
+    "url": "https://github.com/YaoGUanquan"
+  },
+  "homepage": "https://github.com/YaoGUanquan/codex-ai-agent-engine",
+  "repository": "https://github.com/YaoGUanquan/codex-ai-agent-engine.git",
+  "license": "GPL-2.0-only",
+  "keywords": [
+    "codebuddy",
+    "engineering-workflow",
+    "ai-agent-engine",
+    "planning",
+    "review",
+    "validation"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
+}

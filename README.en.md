@@ -9,6 +9,7 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 > It also adapts selected Spec Kit workflow ideas from https://github.com/github/spec-kit without vendoring its runtime.<br>
 > It also adapts selected minimality and over-engineering review ideas from https://github.com/DietrichGebert/ponytail without importing its runtime, hooks, or persona mode.<br>
 > It is not a direct OpenCode runtime port. It uses Codex skills, project-local plugin files, and local scripts.
+> CodeBuddy compatibility is maintained on the long-lived `codebuddy` branch. That branch adds `.codebuddy-plugin/plugin.json` so CodeBuddy can discover the same `skills/` directory without merging the branch back to `main`.
 
 中文文档: [README.md](README.md)
 
@@ -141,6 +142,8 @@ The installer writes these paths inside the target project:
 - `scripts/ae-tools.mjs`
 - `scripts/update-ae-codex.mjs`
 - `scripts/set-ae-language.mjs`
+
+On the `codebuddy` branch, the copied plugin also contains `plugins/ai-agent-engine-codex/.codebuddy-plugin/plugin.json`. CodeBuddy users can point a local CodeBuddy marketplace entry at `./plugins/ai-agent-engine-codex`; this branch keeps CodeBuddy packaging separate from `main`.
 
 ## Initialize Project Docs And Memory
 
@@ -351,6 +354,7 @@ Copy-Item scripts\ae-tools.mjs D:\codes\your-project\scripts\ae-tools.mjs
 ```text
 .agents/                         # Project-local self-install for this repo
 plugins/ai-agent-engine-codex/   # Codex plugin package
+plugins/ai-agent-engine-codex/.codebuddy-plugin/plugin.json
 scripts/ae-tools.mjs             # Root helper wrapper
 scripts/install-project.mjs      # Project-level installer
 scripts/update-ae-codex.mjs      # Target-project updater

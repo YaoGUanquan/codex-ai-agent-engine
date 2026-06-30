@@ -4,6 +4,8 @@
 
 仓库 URL 占位：`https://github.com/YaoGUanquan/codex-ai-agent-engine`
 
+CodeBuddy compatibility note: use the long-lived `codebuddy` branch for CodeBuddy installs. That branch adds `plugins/ai-agent-engine-codex/.codebuddy-plugin/plugin.json`, and CodeBuddy-specific updates are not intended to merge back into `main`.
+
 参考项目：https://gitee.com/jiangqiang1996/ai-agent-engine
 
 本 Codex 插件参考了上面这个 Gitee AI Agent Engine 项目的工作流设计和能力模型。它不会安装或运行上游 OpenCode runtime 插件。

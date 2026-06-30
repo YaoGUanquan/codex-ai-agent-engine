@@ -8,6 +8,8 @@ Reference project: https://gitee.com/jiangqiang1996/ai-agent-engine
 
 This Codex plugin references the workflow design and capability model of the Gitee AI Agent Engine project above. It does not install or run the upstream OpenCode runtime plugin.
 
+CodeBuddy compatibility is maintained on the long-lived `codebuddy` branch. Use that branch when installing for CodeBuddy; it adds `plugins/ai-agent-engine-codex/.codebuddy-plugin/plugin.json` and is not intended to merge back into `main`.
+
 ## Recommended: Project-Level Install
 
 Install only into the current project. Do not write global Codex configuration.
@@ -107,6 +109,12 @@ node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-
 ```
 
 The updater preserves the existing installed metadata language when possible; if it cannot detect one, it defaults to bilingual metadata. To override it, add `--lang en`, `--lang zh-CN`, or `--lang bilingual`.
+
+For a CodeBuddy-targeted install, keep using the `codebuddy` branch instead:
+
+```bash
+node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-agent-engine.git --branch codebuddy
+```
 
 ## Configure Multi-Agent Auto Mode
 

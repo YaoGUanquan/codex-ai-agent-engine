@@ -50,6 +50,7 @@ try {
     'plugins/ai-agent-engine-codex/skills/ae-computer-use-guard/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-imagegen-prompt/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-video-edit-computer/SKILL.md',
+    'plugins/ai-agent-engine-codex/.codebuddy-plugin/plugin.json',
     '.agents/skills/ae-prd/agents/openai.yaml',
     '.agents/skills/ae-work-report/agents/openai.yaml',
     '.agents/skills/ae-task-loop/agents/openai.yaml',
@@ -77,6 +78,16 @@ try {
   for (const relPath of expectedPaths) {
     const fullPath = resolve(targetRoot, relPath)
     if (!existsSync(fullPath)) throw new Error(`Missing installed path: ${relative(targetRoot, fullPath)}`)
+  }
+  const codebuddyManifest = JSON.parse(readFileSync(resolve(targetRoot, 'plugins', 'ai-agent-engine-codex', '.codebuddy-plugin', 'plugin.json'), 'utf8'))
+  if (codebuddyManifest.name !== 'ai-agent-engine-codex') {
+    throw new Error('Installed CodeBuddy manifest does not preserve the plugin name')
+  }
+  if (codebuddyManifest.skills !== './skills/') {
+    throw new Error('Installed CodeBuddy manifest does not point to the plugin skills directory')
+  }
+  if (codebuddyManifest.mcpServers !== './.mcp.json') {
+    throw new Error('Installed CodeBuddy manifest does not point to the plugin MCP configuration')
   }
   if (!existsSync(existingTemplatePath)) {
     throw new Error('Install removed a pre-existing user docs/ae/templates file')
