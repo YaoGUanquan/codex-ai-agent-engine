@@ -106,6 +106,17 @@ Before final validation, inspect the files changed in this task for AI-generated
 
 Fix only deterministic issues inside the current task scope. Do not expand cleanup into unrelated refactors. If a suspicious pattern may be intentional, record it as residual risk or route to ae-review instead of rewriting product behavior.
 
+## Claim-Evidence Mapping
+
+When a task changes docs, README, installation behavior, capability claims, or skill behavior, record what proves each changed claim before shipping:
+
+- evidence path, validation command, or explicit assumption; when useful, also cite the inspected file or observed external ref;
+- whether the claim affects Memory, Knowledge, Guardrail, Delegation, or Distribution;
+- whether unsupported runtime behavior was rejected or rewritten as a process contract;
+- whether any correction or retraction belongs under `docs/ae/integrity/`.
+
+If a changed claim cannot be tied to evidence, downgrade it to an assumption, remove it, or route it to ae-review. Do not claim success from a generated file alone.
+
 ## Shipping
 
 Read `references/shipping-workflow.md` before final response.

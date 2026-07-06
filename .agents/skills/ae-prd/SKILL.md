@@ -52,6 +52,15 @@ PRD artifacts are requirement data documents for humans and downstream AI workfl
 - Include a consistency check with requirement, non-functional requirement, decision, and open-question counts.
 - Use `sharded: true` only when multiple modules require separate shard files or the user explicitly asks for sharding.
 
+## Evidence Expectations
+
+When a PRD includes capability, benchmark, installation, or behavior claims, separate assumptions from evidence:
+
+- state the evidence path, command, observed external ref, or inspected file that supports the claim;
+- mark stale, second-hand, or user-supplied claims as assumptions until verified;
+- name the expected validation surface for each claim that could affect public docs, skill behavior, install behavior, or runtime support;
+- do not promote inferred implementation details into requirements unless the user explicitly chooses them.
+
 ## Readiness Gate
 
 Before routing to planning, confirm:

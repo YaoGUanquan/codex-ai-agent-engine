@@ -68,6 +68,20 @@ Use these tags for concrete findings:
 
 Complexity findings must include location, evidence, what to cut or replace, the concrete replacement, and expected impact. Do not flag narrow tests, trust-boundary validation, security controls, accessibility basics, or explicit user requirements as bloat. Suppress stylistic preferences that do not reduce owned behavior or maintenance risk.
 
+## Claim-Integrity Lane
+
+When reviewing documentation, skill instructions, installer docs, benchmark notes, external-audit reports, or delivery evidence, add a claim-integrity lane. This lane checks whether each material claim has current evidence and whether unsupported runtime behavior is being presented as enforced behavior.
+
+Flag findings for:
+
+- capability, benchmark, install, or behavior claims without an evidence path or validation command;
+- a stale or unverifiable number, commit, version, star count, benchmark result, or external fact;
+- unsupported runtime behavior such as hooks, slash commands, global config propagation, automatic agents, or MCP auto-loading;
+- source-derived text or code whose license boundary is missing or incompatible;
+- corrections or retractions that should be recorded under `docs/ae/integrity/`.
+
+Claim-integrity findings must name the claim, the source path, the missing or contradictory evidence, and the fix: add evidence, mark as an assumption, rewrite as a process contract, or remove the claim.
+
 ## Findings Standard
 
 Read `references/review-output-template.md`.
