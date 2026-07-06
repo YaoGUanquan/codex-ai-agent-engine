@@ -1,0 +1,19 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": null,
+  "validation_commands": [
+    ".\\mvnw.cmd -pl axon-chat -am -Dtest=ExamGenericGradingServiceImplTest,ExamGenericGradingControllerTest,ExamGenericGradingJsonQueueTaskTest -Dsurefire.failIfNoSpecifiedTests=false -Djacoco.skip=true test"
+  ],
+  "review_status": "self_reviewed",
+  "worktree_decision": "current_branch",
+  "git_operations": [],
+  "blockers": [],
+  "warnings": [
+    "plan path not provided"
+  ],
+  "notes": null,
+  "generated_at": "2026-06-23T10:28:00.293Z"
+}

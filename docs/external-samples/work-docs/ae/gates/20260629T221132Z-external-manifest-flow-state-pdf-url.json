@@ -1,0 +1,18 @@
+{
+  "workflow": "work",
+  "checkpoint": "follow-up",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": "docs/ae/plans/2026-06-29-003-external-manifest-to-assignment-grading-plan.md",
+  "change": "external generic manifest assignment grading now resolves paper pool pdf url from exam_generic_grading_flow_state.paper_pool_pdf_url first, then falls back to source_exam_id paper pool lookup",
+  "validation_commands": [
+    "mvn -pl axon-common -Dtest=ExamAssignmentGradingServiceImplTest#createTaskFromExternalGenericManifest_usesFlowStatePaperPoolPdfUrlFirst test",
+    "mvn -pl axon-common -DskipTests compile",
+    "mvn -pl axon-chat -am -DskipTests compile"
+  ],
+  "known_validation_issue": "mvn -pl axon-common -Dtest=ExamAssignmentGradingServiceImplTest test failed during testCompile with broad existing test source symbol resolution errors; targeted regression test and production compiles passed",
+  "review_status": "self-reviewed",
+  "git_operations": [],
+  "blockers": [],
+  "generated_at": "2026-06-29T22:11:32+08:00"
+}

@@ -1,0 +1,17 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": "docs/00-process/archive/2026-06/2026-06-22-generic-grading-auto-json-type/2026-06-22-generic-grading-auto-json-type-plan.md",
+  "validation_commands": [
+    "Select-String checks for API docs, AI memory, archived plan"
+  ],
+  "review_status": "not_run",
+  "worktree_decision": "current-branch",
+  "git_operations": [],
+  "blockers": [],
+  "warnings": [],
+  "notes": null,
+  "generated_at": "2026-06-22T07:50:59.016Z"
+}

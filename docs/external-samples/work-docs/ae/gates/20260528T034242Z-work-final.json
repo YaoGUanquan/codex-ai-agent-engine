@@ -1,0 +1,17 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": "docs/00-process/active/2026-05-28-preparation-statistics-teaching-group-fallback-plan.md",
+  "validation_commands": [
+    "mvn -pl axon-common -Dtest=PreparationStatisticsServiceImplTeachingGroupFallbackTest,PreparationStatisticsMapperFallbackSqlTest test -q; python XML parse; mvn -pl axon-common -DskipTests compile -q"
+  ],
+  "review_status": "self-reviewed",
+  "worktree_decision": "user-requested-dev522",
+  "git_operations": [],
+  "blockers": [],
+  "warnings": [],
+  "notes": null,
+  "generated_at": "2026-05-28T03:42:42.738Z"
+}

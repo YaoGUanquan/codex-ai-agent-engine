@@ -1,0 +1,19 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": null,
+  "validation_commands": [
+    "git diff --check; rg -n promptRequirementsId docs/00-process/archive/2026-06/manual-manifest-prompt-requirements-id docs/04-api docs/08-ai-memory docs/01-history docs/ae/experience"
+  ],
+  "review_status": "approve",
+  "worktree_decision": "not_created",
+  "git_operations": [],
+  "blockers": [],
+  "warnings": [
+    "plan path not provided"
+  ],
+  "notes": null,
+  "generated_at": "2026-06-06T05:44:12.035Z"
+}

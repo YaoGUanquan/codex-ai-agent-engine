@@ -1,0 +1,19 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": null,
+  "validation_commands": [
+    "axon-common targeted class tests passed; axon-chat compile passed"
+  ],
+  "review_status": "self_review_passed",
+  "worktree_decision": "current-branch",
+  "git_operations": [],
+  "blockers": [],
+  "warnings": [
+    "plan path not provided"
+  ],
+  "notes": null,
+  "generated_at": "2026-06-12T10:48:59.015Z"
+}

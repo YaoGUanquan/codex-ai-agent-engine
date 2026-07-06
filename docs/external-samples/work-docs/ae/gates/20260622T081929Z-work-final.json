@@ -1,0 +1,19 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": null,
+  "validation_commands": [
+    "mvn -pl axon-common -Dtest=ExamAssignmentGradingModeEnumTest,ExamAssignmentGradingServiceImplTest#createTask_usesMultipartTextFieldsOnly,ExamAssignmentGradingServiceImplTest#createTask_appliesSingleNoNameMode,ExamAssignmentGradingServiceImplTest#createTaskWithManualManifest_usesCreatedManifestIdOnly test; mvn -pl axon-chat -am -Dtest=ExamAssignmentGradingControllerTest#listGradingModes_returnsFrontendOptions -Dsurefire.failIfNoSpecifiedTests=false test"
+  ],
+  "review_status": "self-reviewed",
+  "worktree_decision": "reused-current-branch",
+  "git_operations": [],
+  "blockers": [],
+  "warnings": [
+    "plan path not provided"
+  ],
+  "notes": null,
+  "generated_at": "2026-06-22T08:19:29.791Z"
+}

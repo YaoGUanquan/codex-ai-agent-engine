@@ -1,0 +1,19 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": null,
+  "validation_commands": [
+    "mvn -pl axon-common -am -Dtest=ExamGenericGradingFlowStateServiceImplTest,ExamGenericGradingServiceImplTest,ExamThirdPartyPollDecisionResolverTest,ExamThirdPartyInvokeFailureSummaryTest,ExamRecognitionTaskStatusResolverTest -Dsurefire.failIfNoSpecifiedTests=false test -q; mvn -pl axon-chat -am -Dtest=ExamGenericGradingTaskQueueTaskTest -Dsurefire.failIfNoSpecifiedTests=false test -q; mvn -pl axon-chat -am -DskipTests compile -q; git show --check HEAD; git diff --check"
+  ],
+  "review_status": "self-reviewed",
+  "worktree_decision": "current-branch",
+  "git_operations": [],
+  "blockers": [],
+  "warnings": [
+    "plan path not provided"
+  ],
+  "notes": null,
+  "generated_at": "2026-06-26T02:00:28.709Z"
+}
