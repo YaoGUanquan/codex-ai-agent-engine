@@ -46,6 +46,18 @@ Reject direct ports of runtime-specific behavior unless the current Codex enviro
 
 Freshness failures are audit findings, not blockers by themselves. If `git ls-remote` is unavailable, record `freshnessMethod: unavailable` and the reason. If a requested short hash is not reachable from the inspected ref, record the mismatch and avoid claiming the inspected files are the latest source.
 
+## Evidence And Claim Provenance
+
+When an external repository is used to justify an AE change, record claim provenance before recommending adaptation:
+
+- the claim being reused or challenged;
+- the inspected source file, commit, and section that supports it;
+- whether the proof is direct evidence, a local inference, or an assumption;
+- whether the idea needs an AE evidence ledger, review finding, validation command, or integrity note after implementation;
+- unsupported runtime assumptions such as hooks, plugin marketplaces, automatic agents, or MCP behavior that Codex cannot enforce here.
+
+Do not present popularity metrics, benchmark numbers, installation support, or runtime behavior as current facts without fresh observation. If a claim cannot be re-derived from the inspected source or a command, label it as unverified.
+
 ## Fit Criteria
 
 Good candidates:
@@ -82,6 +94,7 @@ Return a concise decision report:
 - source freshness evidence,
 - adaptable patterns,
 - deterministic engineering patterns,
+- claim provenance and evidence ledger notes,
 - classification table for portable method, local deterministic mechanism, and runtime-specific behavior,
 - existing AE skills to improve,
 - new skill candidates,

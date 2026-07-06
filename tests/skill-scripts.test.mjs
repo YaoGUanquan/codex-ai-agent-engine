@@ -259,6 +259,78 @@ test('Claude Code best practice adaptation guidance is present in source and mir
   }
 })
 
+test('agent skill audit optimization guidance is present in references and mirrored skills', () => {
+  const fiveLayerReference = readFileSync(resolve(repoRoot, 'docs/ae/references/codex-five-layer-architecture.md'), 'utf8')
+  for (const expectation of [
+    /Memory Layer/,
+    /Knowledge Layer/,
+    /Guardrail Layer/,
+    /Delegation Layer/,
+    /Distribution Layer/,
+    /Unsupported runtime assumptions/,
+  ]) {
+    assert.match(fiveLayerReference, expectation, `five-layer reference should include ${expectation}`)
+  }
+
+  const invariantReference = readFileSync(resolve(repoRoot, 'docs/ae/references/agent-engineering-invariants.md'), 'utf8')
+  for (const expectation of [
+    /Surface assumptions before editing/,
+    /Choose the simplest sufficient route/,
+    /Keep edits surgical/,
+    /Define verifiable goals/,
+    /Claim evidence before confidence/,
+  ]) {
+    assert.match(invariantReference, expectation, `engineering invariants should include ${expectation}`)
+  }
+
+  const integrityReadme = readFileSync(resolve(repoRoot, 'docs/ae/integrity/README.md'), 'utf8')
+  assert.match(integrityReadme, /claim corrections/i)
+  assert.match(integrityReadme, /retractions/i)
+  assert.match(integrityReadme, /methodology fixes/i)
+
+  const expectedBySkill = {
+    'ae-skill-audit': [
+      /claim provenance/i,
+      /evidence ledger/i,
+      /unsupported runtime assumptions/i,
+    ],
+    'ae-prd': [
+      /Evidence Expectations/i,
+      /capability, benchmark, installation, or behavior claims/i,
+      /separate assumptions from evidence/i,
+    ],
+    'ae-plan': [
+      /Five-Layer Ownership/i,
+      /Memory, Knowledge, Guardrail, Delegation, or Distribution/i,
+      /claim-evidence/i,
+    ],
+    'ae-work': [
+      /Claim-Evidence Mapping/i,
+      /docs, README, installation behavior, capability claims, or skill behavior/i,
+      /evidence path, validation command, or explicit assumption/i,
+    ],
+    'ae-review': [
+      /Claim-Integrity Lane/i,
+      /unsupported runtime behavior/i,
+      /stale or unverifiable number/i,
+    ],
+    'ae-save-experience': [
+      /Integrity Ledger Routing/i,
+      /docs\/ae\/integrity/i,
+      /Do not bury retractions/i,
+    ],
+  }
+
+  for (const [skillName, expectations] of Object.entries(expectedBySkill)) {
+    const sourceBody = readSkillBody('plugins/ai-agent-engine-codex/skills', skillName)
+    const mirrorBody = readSkillBody('.agents/skills', skillName)
+    assert.equal(mirrorBody, sourceBody, `${skillName} mirror should match plugin source`)
+    for (const expectation of expectations) {
+      assert.match(sourceBody, expectation, `${skillName} should include ${expectation}`)
+    }
+  }
+})
+
 test('PRD and plan artifact contracts are present in source and mirror skills', () => {
   const expectationsByFile = [
     ['plugins/ai-agent-engine-codex/skills/ae-prd/SKILL.md', '.agents/skills/ae-prd/SKILL.md', [
