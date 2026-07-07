@@ -74,8 +74,8 @@ node scripts/ae-tools.mjs help
 - `ae-doc-humanize`: rewrite structured or stiff notes into readable documents.
 - `ae-doc-structure`: turn messy notes into requirements, plans, handoffs, or checklists.
 - `ae-frontend-design`: design and implement frontend UI.
-- `ae-web-app`: implement web frontend or light full-stack flows with four-question routing and the repository stack.
-- `ae-web-forge`: independent frontend/web routing entrypoint that selects existing AE skills and closes with browser acceptance.
+- `ae-web-forge`: unified frontend/web routing entrypoint that selects existing AE skills and closes with browser acceptance.
+- `ae-web-app`: implement Web app interaction, API, and light full-stack flows after `ae-web-forge` routing.
 - `ae-backend`: implement API, service, data, and permission behavior from repository contracts.
 - `ae-debug`: investigate build failures, runtime errors, UI issues, and API incidents systematically.
 - `ae-tdd`: run a red-green-refactor loop when behavior is precise enough for test-first work.
@@ -99,6 +99,12 @@ The helper CLI is available through:
 
 ```bash
 node scripts/ae-tools.mjs help
+```
+
+Validate design contracts:
+
+```bash
+node scripts/check-design-contract.mjs
 ```
 
 Additional helper commands:
@@ -382,6 +388,7 @@ From this repo:
 npm run check
 node --check scripts/ae-tools.mjs
 node --check plugins/ai-agent-engine-codex/scripts/ae-tools.mjs
+node scripts/check-design-contract.mjs
 node scripts/ae-tools.mjs help
 node scripts/ae-tools.mjs ae-graph-build --root scripts
 ```

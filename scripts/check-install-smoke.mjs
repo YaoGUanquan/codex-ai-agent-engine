@@ -77,6 +77,7 @@ try {
     'docs/ae/templates/computer-use-hooks/pre-tool-use-computer-budget.example.py',
     'scripts/ae-tools.mjs',
     'scripts/set-ae-language.mjs',
+    'scripts/check-design-contract.mjs',
   ]
   for (const relPath of expectedPaths) {
     const fullPath = resolve(targetRoot, relPath)
@@ -115,6 +116,10 @@ try {
     throw new Error('Installed recovery command did not inspect the target project root')
   }
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'claude'], { cwd: targetRoot })
+  const designContractResult = JSON.parse(run(process.execPath, [resolve(targetRoot, 'scripts', 'check-design-contract.mjs')], { cwd: targetRoot }).stdout)
+  if (designContractResult.status !== 'ok' || designContractResult.checked !== 0) {
+    throw new Error('Installed check-design-contract command did not return stable no-design JSON')
+  }
   const claudeCheckResult = JSON.parse(run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'claude-delegate', '--check'], { cwd: targetRoot }).stdout)
   if (!['ok', 'skip'].includes(claudeCheckResult.status) || typeof claudeCheckResult.available !== 'boolean') {
     throw new Error('Installed claude-delegate check did not return stable availability JSON')
@@ -264,7 +269,7 @@ try {
     verifiedLocalToolPolicy: 'video_requires_ffmpeg_ffprobe_checks',
     verifiedMultiAgentPolicy: 'multi_agent_auto_analysis_by_default',
     verifiedSkillGovernancePolicy: 'source_mirror_metadata_and_path_safety',
-    verifiedCommands: ['recovery', 'claude-delegate', 'markitdown', 'static-server'],
+    verifiedCommands: ['recovery', 'claude-delegate', 'markitdown', 'static-server', 'check-design-contract'],
   }, null, 2))
 } finally {
   cleanupTarget()

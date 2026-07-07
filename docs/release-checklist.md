@@ -6,6 +6,7 @@ Use this before publishing a GitHub release.
 
 ```bash
 npm run check
+node scripts/check-design-contract.mjs
 node scripts/ae-tools.mjs help
 node scripts/ae-tools.mjs ae-graph-build --root scripts
 node scripts/ae-tools.mjs ae-graph-query --root scripts --path ae-tools.mjs
@@ -24,6 +25,7 @@ $tmp = Join-Path (Get-Location) '.tmp-install-smoke'
 New-Item -ItemType Directory -Force -Path $tmp | Out-Null
 node scripts\install-project.mjs --target $tmp
 node (Join-Path $tmp 'scripts\ae-tools.mjs') help
+node (Join-Path $tmp 'scripts\check-design-contract.mjs')
 Get-Content (Join-Path $tmp '.agents\skills\ae-help\agents\openai.yaml') -Encoding UTF8
 node (Join-Path $tmp 'scripts\set-ae-language.mjs') --lang zh-CN
 node (Join-Path $tmp 'scripts\set-ae-language.mjs') --lang en
@@ -47,6 +49,7 @@ The installed template should include `multi_agent.enabled: auto`, `mode: sugges
 ```bash
 node scripts/check-skill-mirror.mjs
 node scripts/check-skill-language-metadata.mjs
+node scripts/check-design-contract.mjs
 node scripts/ae-tools.mjs help constitution
 node scripts/ae-tools.mjs help tasks
 ```

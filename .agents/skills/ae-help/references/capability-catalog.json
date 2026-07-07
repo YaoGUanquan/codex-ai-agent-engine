@@ -129,14 +129,14 @@
     {
       "name": "ae-web-app",
       "entry": "/ae-web-app",
-      "target": "Web 应用开发",
-      "purpose": "基于四问题路由和现有仓库技术栈实现前端或轻量全栈 Web 流程，并结合浏览器验收与交付检查。"
+      "target": "Web 应用实现",
+      "purpose": "实现由 ae-web-forge 统一路由后的前端或轻量全栈 Web 流程，并结合现有仓库技术栈、浏览器验收与交付检查。"
     },
     {
       "name": "ae-web-forge",
       "entry": "/ae-web-forge",
       "target": "统一前端/Web 路由",
-      "purpose": "作为独立入口执行前端/Web 路由，选择 ae-frontend-design、ae-web-app 和 ae-test-browser 等 Codex-native skills，并限制最多 3 轮返工。"
+      "purpose": "作为统一入口执行前端/Web 四问题路由，选择 ae-frontend-design、ae-web-app 和 ae-test-browser 等 Codex-native skills，并限制最多 3 轮返工。"
     },
     {
       "name": "ae-backend",
@@ -263,6 +263,11 @@
       "name": "check-ae-artifacts",
       "purpose": "检查 docs/ae 中 PRD、计划和其他 AE 产物 frontmatter 的基本合规性。",
       "script": "node scripts/check-ae-artifacts.mjs [--target <project>]"
+    },
+    {
+      "name": "check-design-contract",
+      "purpose": "检查 docs/ae/designs/**/design.md 设计契约的 frontmatter、必需章节、稳定 ID、显式省略维度、映射表和一致性字段。",
+      "script": "node scripts/check-design-contract.mjs [--target <project>]"
     },
     {
       "name": "ae-graph-build",

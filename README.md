@@ -73,8 +73,8 @@ node scripts/ae-tools.mjs help
 - `ae-doc-humanize`：把结构化或生硬内容改写成更易读的文档。
 - `ae-doc-structure`：把散乱内容整理成需求、计划、交接或检查清单。
 - `ae-frontend-design`：前端设计与界面实现。
-- `ae-web-app`：基于四问题路由和现有仓库技术栈实现 Web 前端或轻量全栈流程。
-- `ae-web-forge`：独立的前端/Web 路由入口，选择现有 AE skill 并以浏览器验收收尾。
+- `ae-web-forge`：统一前端/Web 路由入口，选择现有 AE skill 并以浏览器验收收尾。
+- `ae-web-app`：实现由 `ae-web-forge` 路由后的 Web 应用、交互、API 和轻量全栈流程。
 - `ae-backend`：基于仓库契约实现接口、服务、数据和权限逻辑。
 - `ae-debug`：系统化排查构建失败、运行时异常、UI 问题和接口故障。
 - `ae-tdd`：围绕明确行为执行红绿重构式测试驱动开发。
@@ -97,6 +97,12 @@ node scripts/ae-tools.mjs help
 
 ```bash
 node scripts/ae-tools.mjs help
+```
+
+设计契约校验：
+
+```bash
+node scripts/check-design-contract.mjs
 ```
 
 浅层依赖图辅助命令：
@@ -379,6 +385,7 @@ docs/ai-memory/                  # init 后的兼容说明入口
 npm run check
 node --check scripts/ae-tools.mjs
 node --check plugins/ai-agent-engine-codex/scripts/ae-tools.mjs
+node scripts/check-design-contract.mjs
 node scripts/ae-tools.mjs help
 node scripts/ae-tools.mjs ae-graph-build --root scripts
 ```
