@@ -824,6 +824,31 @@ test('renderYaml supports PRD, work report, and task loop metadata', () => {
   }
 })
 
+test('Codex skill discoverability docs keep slash command boundary explicit', () => {
+  const readme = readFileSync(resolve(repoRoot, 'README.md'), 'utf8')
+  const readmeEn = readFileSync(resolve(repoRoot, 'README.en.md'), 'utf8')
+  const releaseChecklist = readFileSync(resolve(repoRoot, 'docs/release-checklist.md'), 'utf8')
+  const helpSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-help/SKILL.md'), 'utf8')
+  const helpMirror = readFileSync(resolve(repoRoot, '.agents/skills/ae-help/SKILL.md'), 'utf8')
+  const catalogSource = JSON.parse(readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-help/references/capability-catalog.json'), 'utf8'))
+  const catalogMirror = JSON.parse(readFileSync(resolve(repoRoot, '.agents/skills/ae-help/references/capability-catalog.json'), 'utf8'))
+
+  assert.equal(helpMirror, helpSource, 'ae-help mirror should match plugin source')
+  assert.deepEqual(catalogMirror.codexPort, catalogSource.codexPort, 'capability catalog mirror should match source boundary')
+  assert.deepEqual(catalogMirror.notes, catalogSource.notes, 'capability catalog mirror notes should match source')
+
+  for (const content of [readme, readmeEn, releaseChecklist, helpSource, JSON.stringify(catalogSource)]) {
+    assert.match(content, /skill-backed discoverability|skill discoverability|skill 搜索|已启用 skills/i)
+    assert.match(content, /OpenCode.*config\.command|config\.command.*OpenCode/i)
+    assert.doesNotMatch(content, /AE automatically registers Codex slash commands/i)
+    assert.doesNotMatch(content, /自动注册 Codex slash command/)
+  }
+
+  assert.match(releaseChecklist, /fresh Codex App thread|新 Codex App thread|新 Codex 线程/i)
+  assert.match(releaseChecklist, /\$ae-plan/)
+  assert.match(releaseChecklist, /\$ae-prd/)
+})
+
 test('swagger parses local YAML and resolves local schema refs', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-swagger-'))
   try {

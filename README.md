@@ -181,7 +181,7 @@ node scripts/ae-tools.mjs init
 
 ## 日常使用
 
-Codex 不会自动注册 OpenCode 风格的 slash command。更可靠的方式是在请求中直接写 skill 名称：
+Codex 不提供 OpenCode `config.command` 风格的动态 slash command 注册。当前项目通过 Codex skills 暴露 AE 入口：可以显式写 `$ae-plan`、`$ae-review` 这类 skill 名称，也可以用自然语言触发；在支持的 Codex App 版本中，已启用的 skills 也可能出现在 `/` 命令或 skill 搜索列表中。不要把这种 skill-backed discoverability 理解为本仓库实现了 OpenCode 式命令注入。
 
 ```text
 使用 ae-help 查看当前 AE 能力。
@@ -385,8 +385,9 @@ docs/ai-memory/                  # init 后的兼容说明入口
 
 ## 重要边界
 
-- `/ae-*` 是兼容标签，不是自动注册的 Codex slash command。
-- 可靠触发方式是直接说：`使用 ae-work ...`、`使用 ae-review ...`、`使用 ae-plan ...`。
+- `/ae-*` 是兼容标签，不是本仓库注册出的 Codex 命令。
+- 可靠触发方式是直接说：`使用 ae-work ...`、`使用 ae-review ...`、`使用 ae-plan ...`，或在支持的 Codex App 版本中通过 `/` / skill 搜索选择已启用的 AE skill。
+- slash 列表可见性属于 Codex skill discoverability，需要在当前 Codex App 中手工验证；本仓库不声明 OpenCode `config.command` 等价能力。
 - 当前 MVP 还没有真实 MCP server，`.mcp.json` 有意保持为空。
 - 本地 JSON/YAML OpenAPI 可在常见结构下无额外依赖解析；复杂 YAML 仍受轻量 parser 边界限制。
 - `ae-graph-build` 和 `ae-graph-query` 是浅层只读脚本，不是完整 OpenCode 图谱工具。

@@ -144,6 +144,12 @@ Deferred intentionally:
 - The boundary remains: this project does not implement automatic Codex command registration or OpenCode-style slash command injection. Runtime slash-list visibility must be phrased as Codex skill discoverability and verified in the active Codex app.
 - Source artifacts: `docs/ae/prds/2026-07-07-002-codex-skill-slash-discoverability-prd.md` and `docs/ae/plans/2026-07-07-006-codex-skill-slash-discoverability-plan.md`.
 
+## 2026-07-07 Codex Skill Discoverability Docs Update
+
+- Updated README, release checklist, `ae-help`, and capability catalog wording to distinguish supported Codex skill-backed discoverability from unsupported OpenCode `config.command` registration.
+- Added a manual release verification step: in a fresh Codex App thread, search `/` for `ae-plan` and `ae-prd`, and verify explicit `$ae-plan` / `$ae-prd` invocation guidance remains available.
+- Kept the non-portable runtime boundary intact: no command registry, MCP auto-loading, hooks, global config propagation, or always-on agent registry was added.
+
 ## Recommended Next Phase
 
 1. Convert `ae-tools.mjs` into a real MCP server only after the script surface stabilizes.

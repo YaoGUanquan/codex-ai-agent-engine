@@ -15,6 +15,17 @@ Use this phrasing in future docs and plans:
 - Plan: `docs/ae/plans/2026-07-07-006-codex-skill-slash-discoverability-plan.md`
 - Port analysis note: `docs/codex-port-analysis.md`
 
+## 2026-07-07 Documentation Update
+
+README, release checklist, `ae-help`, and capability catalog wording now describe the supported boundary:
+
+- reliable invocation remains explicit skill naming, `$ae-*`, or natural-language requests;
+- enabled skills may appear in `/` or skill search surfaces depending on the active Codex App;
+- runtime slash-list behavior requires manual fresh-thread verification;
+- the project still does not implement OpenCode `config.command` parity.
+
+Regression coverage lives in `tests/skill-scripts.test.mjs` under the Codex skill discoverability boundary test.
+
 ## Reusable Workflow
 
 When optimizing AE skill entrypoints:

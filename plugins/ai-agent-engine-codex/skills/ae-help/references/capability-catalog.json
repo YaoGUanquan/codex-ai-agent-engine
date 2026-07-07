@@ -8,7 +8,7 @@
   "codexPort": {
     "name": "ai-agent-engine-codex",
     "goal": "在 Codex 中提供 AE 风格的软件工程工作流入口。",
-    "runtimeBoundary": "Codex 使用 skill 承载工作流；/ae-* 是兼容标签，不是 OpenCode 式自动 slash command。"
+    "runtimeBoundary": "Codex 使用 skill 承载工作流；/ae-* 是兼容标签，不是 OpenCode config.command 式动态 slash command。已启用 skill 是否出现在 / 或 skill 搜索中取决于当前 Codex App。"
   },
   "skills": [
     {
@@ -337,9 +337,9 @@
     "graphs": "docs/ae/graphs"
   },
   "notes": [
-    "/ae-* 是兼容标签；Codex 中可靠触发方式是 skill 名称，例如“用 ae-work 执行这个计划”。",
+    "/ae-* 是兼容标签；Codex 中可靠触发方式是 skill 名称、显式 $ae-* 调用或自然语言请求，例如“用 ae-work 执行这个计划”。支持的 Codex App 版本也可能在 / 或 skill 搜索中显示已启用 skills。",
     "涉及 Git 写入、网络、依赖安装、数据库写入、生产环境或破坏性操作时，必须按 Codex 审批规则执行。",
-    "OpenCode 的自动 slash command、agent registry、session navigation 和全局规则注入不是 Codex 原生能力。",
+    "OpenCode 的 config.command 动态 slash command、agent registry、session navigation 和全局规则注入不是当前 Codex 项目级插件能力。",
     "ae-graph-build / ae-graph-query now provide a shallow JSON graph with freshness evidence; this still does not port the full OpenCode graph schema, SQLite storage, sharding, or preview UI.",
     "ae-merge-branch 暂不作为 Codex skill 暴露；Git merge 类写操作需等待 ae-work 的 Git 证据链和授权边界进一步增强。",
     "ae-chrome-devtools 不照搬动态 MCP 注册；Codex 中通过现有 Browser、Playwright 或 DevTools 可用工具路由，并由 ae-test-browser 记录证据。",
