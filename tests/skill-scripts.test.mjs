@@ -1024,6 +1024,52 @@ test('check-ae-artifacts compatibility mode allows legacy pre-contract prd and p
   }
 })
 
+test('check-ae-artifacts compatibility mode allows historical target-project statuses', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-artifacts-'))
+  try {
+    writeAeArtifact(tempRoot, 'docs/ae/prds/implemented-prd.md', [
+      '---',
+      'type: prd',
+      'status: implemented',
+      'date: 2026-06-30',
+      'topic: implemented legacy prd',
+      'format: human-readable-requirements',
+      'sharded: false',
+      '---',
+      '# Implemented Legacy PRD',
+      '',
+    ])
+    writeAeArtifact(tempRoot, 'docs/ae/plans/paused-plan.md', [
+      '---',
+      'type: plan',
+      'status: archived-paused',
+      'date: 2026-06-29',
+      'title: paused legacy plan',
+      'format: human-readable-plan',
+      'sharded: false',
+      '---',
+      '# Paused Legacy Plan',
+      '',
+    ])
+    writeAeArtifact(tempRoot, 'docs/ae/plans/reviewed-plan.md', [
+      '---',
+      'type: plan',
+      'status: reviewed',
+      'date: 2026-06-09',
+      'title: reviewed legacy plan',
+      '---',
+      '# Reviewed Legacy Plan',
+      '',
+    ])
+
+    const result = runAeArtifactCheck(tempRoot)
+    assert.equal(result.status, 0, result.stderr)
+    assert.match(result.stdout, /"status": "ok"/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
 test('check-ae-artifacts compatibility mode rejects new contract artifact missing fields', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-artifacts-'))
   try {
@@ -1071,7 +1117,7 @@ test('check-ae-artifacts strict mode rejects legacy artifact missing contract fi
   }
 })
 
-test('check-ae-artifacts rejects partial origin lineage in compatibility and strict modes', () => {
+test('check-ae-artifacts compatibility mode allows legacy partial origin lineage', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-artifacts-'))
   try {
     writeAeArtifact(tempRoot, 'docs/ae/prds/partial-origin.md', [
@@ -1080,6 +1126,45 @@ test('check-ae-artifacts rejects partial origin lineage in compatibility and str
       'status: drafted',
       'date: 2026-06-23',
       'topic: partial origin',
+      'origin: docs/source.md',
+      '---',
+      '# Partial Origin',
+      '',
+    ])
+    writeAeArtifact(tempRoot, 'docs/ae/prds/partial-fingerprint.md', [
+      '---',
+      'type: prd',
+      'status: drafted',
+      'date: 2026-06-23',
+      'topic: partial fingerprint',
+      'originFingerprint: legacy-fingerprint',
+      '---',
+      '# Partial Fingerprint',
+      '',
+    ])
+
+    const compatibility = runAeArtifactCheck(tempRoot)
+    assert.equal(compatibility.status, 0, compatibility.stderr)
+
+    const strict = runAeArtifactCheck(tempRoot, ['--strict'])
+    assert.notEqual(strict.status, 0)
+    assert.match(strict.stderr, /originFingerprint/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('check-ae-artifacts rejects new partial origin lineage in compatibility and strict modes', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-artifacts-'))
+  try {
+    writeAeArtifact(tempRoot, 'docs/ae/prds/partial-origin.md', [
+      '---',
+      'type: prd',
+      'status: drafted',
+      'date: 2026-06-24',
+      'topic: partial origin',
+      'format: human-readable-requirements',
+      'sharded: false',
       'origin: docs/source.md',
       '---',
       '# Partial Origin',
