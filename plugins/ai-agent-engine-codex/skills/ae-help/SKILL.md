@@ -15,7 +15,8 @@ List and explain the Codex-native AI Agent Engine entrypoints in the local displ
 
 ## Boundaries
 
-- Do not claim OpenCode slash commands are installed in Codex.
-- Explain that `/ae-*` names are compatibility labels; in Codex the reliable trigger is the installed skill name or an explicit request such as "use ae-work" / "使用 ae-work".
+- Do not claim OpenCode `config.command` slash commands are installed in Codex.
+- Explain that `/ae-*` names are compatibility labels. In Codex, reliable triggers are installed skill names, explicit `$ae-*` invocation, natural-language requests such as "use ae-work" / "使用 ae-work", and any enabled-skill search surfaces exposed by the active Codex App.
+- When mentioning `/` visibility, phrase it as Codex skill-backed discoverability that must be verified in the active app, not as command registration implemented by this project.
 - For migration questions, read `references/codex-port-notes.md`.
 - For artifact path questions, read `references/artifact-contract.md`.

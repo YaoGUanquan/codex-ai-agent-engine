@@ -184,7 +184,7 @@ Those repositories are reference inputs. This project rewrites the relevant part
 
 ## Daily Usage
 
-Codex does not auto-register OpenCode-style slash commands. Use the skill name in the request:
+Codex does not provide OpenCode `config.command`-style dynamic slash command registration. This project exposes AE entrypoints as Codex skills: you can invoke names such as `$ae-plan` and `$ae-review` explicitly, or use natural-language requests; in supported Codex App versions, enabled skills may also appear in the `/` command or skill search list. Treat that as skill-backed discoverability, not as OpenCode-style command injection implemented by this repository.
 
 ```text
 Use ae-help to show the current AE capabilities.
@@ -371,8 +371,9 @@ docs/ai-memory/                  # Compatibility pointer after init
 
 ## Important Boundaries
 
-- `/ae-*` names are compatibility labels, not auto-registered Codex slash commands.
-- Reliable trigger style is: `Use ae-work ...`, `Use ae-review ...`, `Use ae-plan ...`.
+- `/ae-*` names are compatibility labels, not Codex commands registered by this repository.
+- Reliable trigger style is: `Use ae-work ...`, `Use ae-review ...`, `Use ae-plan ...`, or selecting an enabled AE skill through `/` / skill search in Codex App versions that surface enabled skills there.
+- Slash-list visibility is Codex skill discoverability and must be verified in the active Codex App; this repository does not claim OpenCode `config.command` parity.
 - This MVP does not provide a real MCP server yet. `.mcp.json` is intentionally empty.
 - Local JSON/YAML OpenAPI parsing works without extra dependencies for common spec structures; complex YAML remains bounded by the lightweight parser.
 - `ae-graph-build` and `ae-graph-query` are shallow read-only scripts, not the full OpenCode graph tool.

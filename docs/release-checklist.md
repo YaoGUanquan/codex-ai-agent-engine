@@ -56,7 +56,17 @@ node scripts/ae-tools.mjs help tasks
 
 The active catalog should include `ae-constitution` and `ae-tasks`, and should not include removed OfficeCLI skills.
 
-6. Confirm no reference clone is present:
+6. Manually verify Codex skill discoverability in a fresh Codex App thread:
+
+```text
+Open a fresh Codex thread in a project where AE is installed.
+Type `/` and search for `ae-plan` and `ae-prd`.
+Verify explicit `$ae-plan` and `$ae-prd` skill invocation guidance remains available.
+```
+
+This confirms the active Codex App behavior only. Do not record this as OpenCode `config.command`-style slash command registration.
+
+7. Confirm no reference clone is present:
 
 ```bash
 ls upstream-ai-agent-engine
@@ -64,7 +74,7 @@ ls upstream-ai-agent-engine
 
 This should fail or show no directory.
 
-7. Commit and tag:
+8. Commit and tag:
 
 ```bash
 git add .
