@@ -191,6 +191,23 @@ Codex 不会自动注册 OpenCode 风格的 slash command。更可靠的方式�
 使用 ae-review mode:report-only 审查当前变更。
 ```
 
+多视角碰撞示例：
+
+```text
+使用 ae-brainstorm，对下面这段观点运行 Perspective Collision Pass，不要急着给结论。
+
+请输出：
+1. 批评者、务实者、创新者、系统视角的 perspective matrix
+2. 事实分歧、价值分歧、假设分歧
+3. 最有价值的 collision insights
+4. blind spots
+5. thinking preservation zone
+6. 1-2 个 deepening directions
+
+观点：
+AI 编程让缺陷静默问题倒逼“验证工程”成为新学科；短期链路压缩和长期总量爆发之间存在投资取舍；“停止思考”和“消灭编程快感”是同一现象的不同价值判断，需要主动设计思考保留区。
+```
+
 解析 OpenAPI：
 
 ```bash
