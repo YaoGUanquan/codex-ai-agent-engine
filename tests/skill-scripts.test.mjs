@@ -811,7 +811,7 @@ test('package check script omits OfficeCLI checks', () => {
 
 test('renderYaml supports PRD, work report, and task loop metadata', () => {
   const skills = [
-    ['ae-prd', 'AE PRD'],
+    ['ae-prd', 'AE PRD (ae-prd)'],
     ['ae-work-report', 'AE Work Report'],
     ['ae-task-loop', 'AE Task Loop'],
     ['ae-constitution', 'AE Constitution'],
@@ -820,7 +820,35 @@ test('renderYaml supports PRD, work report, and task loop metadata', () => {
 
   for (const [skillName, englishLabel] of skills) {
     const yaml = renderYaml(skillMetadata[skillName], 'en')
-    assert.match(yaml, new RegExp(`display_name: "${englishLabel}"`))
+    assert.ok(yaml.includes(`display_name: "${englishLabel}"`))
+  }
+})
+
+test('core AE workflow metadata carries stable skill trigger signals', () => {
+  const coreSkills = [
+    'ae-brainstorm',
+    'ae-lfg',
+    'ae-plan',
+    'ae-prd',
+    'ae-review',
+    'ae-work',
+  ]
+
+  for (const skillName of coreSkills) {
+    const item = skillMetadata[skillName]
+    const englishYaml = renderYaml(item, 'en')
+    const bilingualYaml = renderYaml(item, 'bilingual')
+    const sourceSkill = readSkillBody('plugins/ai-agent-engine-codex/skills', skillName)
+    const mirrorSkill = readSkillBody('.agents/skills', skillName)
+
+    assert.match(englishYaml, new RegExp(`display_name: ".*${skillName}`))
+    assert.match(englishYaml, new RegExp(`short_description: ".*${skillName}`))
+    assert.match(englishYaml, new RegExp(`default_prompt: "Use \\$${skillName}`))
+    assert.match(bilingualYaml, new RegExp(`default_prompt: ".*\\$${skillName}`))
+    assert.equal(mirrorSkill, sourceSkill, `${skillName} mirror should match plugin source`)
+    assert.match(sourceSkill, new RegExp(`/${skillName}`))
+    assert.match(sourceSkill, new RegExp(`\\$${skillName}`))
+    assert.match(sourceSkill, new RegExp(`use ${skillName}`, 'i'))
   }
 })
 
