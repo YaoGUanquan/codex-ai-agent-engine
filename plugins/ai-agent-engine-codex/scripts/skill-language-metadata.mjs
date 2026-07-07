@@ -57,6 +57,13 @@ export const skillMetadata = {
     promptEn: 'Use $ae-doc-structure to turn these notes into a structured artifact.',
     promptZh: '使用 $ae-doc-structure 把这些内容整理成结构化文档。',
   },
+  'ae-design': {
+    display: { en: 'AE Design', zh: 'AE 设计契约' },
+    en: 'Design contract stage between PRD and implementation plan',
+    zh: '在 PRD 和计划之间沉淀可审查的设计契约',
+    promptEn: 'Use $ae-design to create a design contract for this requirement.',
+    promptZh: '使用 $ae-design 为这个需求创建设计契约。',
+  },
   'ae-frontend-design': {
     display: { en: 'AE Frontend Design', zh: 'AE 前端设计' },
     en: 'Design and implement frontend UI with browser validation',
@@ -231,6 +238,13 @@ export const skillMetadata = {
     zh: '通过四问题路由构建或扩展 Web 应用并完成浏览器验收',
     promptEn: 'Use $ae-web-app to route and implement this web app flow.',
     promptZh: '使用 $ae-web-app 路由并实现这个 Web 应用流程。',
+  },
+  'ae-web-forge': {
+    display: { en: 'AE Web Forge', zh: 'AE Web Forge' },
+    en: 'Unified frontend/web routing with browser acceptance',
+    zh: '统一前端/Web 路由并以浏览器验收收尾',
+    promptEn: 'Use $ae-web-forge to route and execute this frontend or web task.',
+    promptZh: '使用 $ae-web-forge 路由并执行这个前端或 Web 任务。',
   },
   'ae-work': {
     display: { en: 'AE Work', zh: 'AE 计划执行' },

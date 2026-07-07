@@ -40,7 +40,9 @@ try {
     'plugins/ai-agent-engine-codex/skills/ae-task-loop/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-constitution/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-tasks/SKILL.md',
+    'plugins/ai-agent-engine-codex/skills/ae-design/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-web-app/SKILL.md',
+    'plugins/ai-agent-engine-codex/skills/ae-web-forge/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-backend/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-debug/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-tdd/SKILL.md',
@@ -55,7 +57,9 @@ try {
     '.agents/skills/ae-task-loop/agents/openai.yaml',
     '.agents/skills/ae-constitution/agents/openai.yaml',
     '.agents/skills/ae-tasks/agents/openai.yaml',
+    '.agents/skills/ae-design/agents/openai.yaml',
     '.agents/skills/ae-web-app/agents/openai.yaml',
+    '.agents/skills/ae-web-forge/agents/openai.yaml',
     '.agents/skills/ae-backend/agents/openai.yaml',
     '.agents/skills/ae-debug/agents/openai.yaml',
     '.agents/skills/ae-tdd/agents/openai.yaml',
@@ -98,7 +102,9 @@ try {
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'loop'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'constitution'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'tasks'], { cwd: targetRoot })
+  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'design'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'web'], { cwd: targetRoot })
+  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'forge'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'backend'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'debug'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'tdd'], { cwd: targetRoot })
@@ -119,6 +125,8 @@ try {
     ['ae-task-loop', 'AE Task Loop'],
     ['ae-constitution', 'AE Constitution'],
     ['ae-tasks', 'AE Tasks'],
+    ['ae-design', 'AE 设计契约 / AE Design'],
+    ['ae-web-forge', 'AE Web Forge'],
     ['ae-claude-code', 'AE Claude Code'],
     ['ae-markitdown', 'AE Markitdown'],
     ['ae-static-server', 'AE 静态服务器 / AE Static Server'],
@@ -187,7 +195,9 @@ try {
     ['ae-task-loop', 'AE Task Loop'],
     ['ae-constitution', 'AE Constitution'],
     ['ae-tasks', 'AE Tasks'],
+    ['ae-design', 'AE Design'],
     ['ae-web-app', 'AE Web App'],
+    ['ae-web-forge', 'AE Web Forge'],
     ['ae-claude-code', 'AE Claude Code'],
     ['ae-markitdown', 'AE Markitdown'],
     ['ae-static-server', 'AE Static Server'],
@@ -209,7 +219,9 @@ try {
     ['ae-task-loop', 'AE 任务循环'],
     ['ae-constitution', 'AE Constitution'],
     ['ae-tasks', 'AE Tasks'],
+    ['ae-design', 'AE 设计契约'],
     ['ae-web-app', 'AE Web 应用开发'],
+    ['ae-web-forge', 'AE Web Forge'],
     ['ae-claude-code', 'AE Claude Code'],
     ['ae-markitdown', 'AE Markitdown'],
     ['ae-static-server', 'AE 静态服务器'],
@@ -233,7 +245,9 @@ try {
       'ae-task-loop',
       'ae-constitution',
       'ae-tasks',
+      'ae-design',
       'ae-web-app',
+      'ae-web-forge',
       'ae-backend',
       'ae-debug',
       'ae-tdd',

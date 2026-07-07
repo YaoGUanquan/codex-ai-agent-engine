@@ -54,6 +54,13 @@
       "artifactPath": "docs/ae/prds"
     },
     {
+      "name": "ae-design",
+      "entry": "/ae-design",
+      "target": "设计契约",
+      "purpose": "在 PRD 和实现计划之间沉淀架构、API、数据、UI/UX、测试、安全、观测和非功能设计契约。",
+      "artifactPath": "docs/ae/designs"
+    },
+    {
       "name": "ae-lfg",
       "entry": "/ae-lfg",
       "target": "默认全流程",
@@ -124,6 +131,12 @@
       "entry": "/ae-web-app",
       "target": "Web 应用开发",
       "purpose": "基于四问题路由和现有仓库技术栈实现前端或轻量全栈 Web 流程，并结合浏览器验收与交付检查。"
+    },
+    {
+      "name": "ae-web-forge",
+      "entry": "/ae-web-forge",
+      "target": "统一前端/Web 路由",
+      "purpose": "作为独立入口执行前端/Web 路由，选择 ae-frontend-design、ae-web-app 和 ae-test-browser 等 Codex-native skills，并限制最多 3 轮返工。"
     },
     {
       "name": "ae-backend",
@@ -311,6 +324,7 @@
     "aiMemory": "docs/08-ai-memory",
     "aiMemoryCompat": "docs/ai-memory",
     "prds": "docs/ae/prds",
+    "designs": "docs/ae/designs",
     "workReports": "docs/ae/work-reports",
     "constitution": "docs/ae/constitution.md",
     "tasks": "docs/ae/tasks",

@@ -1,6 +1,6 @@
 # AI Agent Engine for Codex
 
-AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style engineering workflows into a Codex workspace. It packages Codex skills and local helper scripts for requirement clarification, planning, implementation, review, validation, Swagger/OpenAPI inspection, handoff, and experience capture.
+AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style engineering workflows into a Codex workspace. It packages Codex skills and local helper scripts for requirement clarification, design contracts, planning, implementation, review, validation, frontend/web routing, Swagger/OpenAPI inspection, handoff, and experience capture.
 
 > Reference project: https://gitee.com/jiangqiang1996/ai-agent-engine<br>
 > This repository references the workflow design and capability model of the Gitee AI Agent Engine project above.<br>
@@ -63,6 +63,7 @@ node scripts/ae-tools.mjs help
 - `ae-init`: initialize project docs, archive rules, UTF-8 rules, and durable AI memory.
 - `ae-ideate`: generate solution directions, tradeoffs, risks, and next questions.
 - `ae-brainstorm`: clarify requirements with multi-perspective collision insights and capture acceptance criteria.
+- `ae-design`: create a design contract between PRD and plan for architecture, API, data, UI/UX, tests, and non-functional constraints.
 - `ae-lfg`: run the full flow from requirements to verified delivery.
 - `ae-plan`: create implementation plans without editing product code, including simplest-viable-route checks for implementation-heavy work.
 - `ae-constitution`: create or update durable project governance for plans and reviews.
@@ -74,6 +75,7 @@ node scripts/ae-tools.mjs help
 - `ae-doc-structure`: turn messy notes into requirements, plans, handoffs, or checklists.
 - `ae-frontend-design`: design and implement frontend UI.
 - `ae-web-app`: implement web frontend or light full-stack flows with four-question routing and the repository stack.
+- `ae-web-forge`: independent frontend/web routing entrypoint that selects existing AE skills and closes with browser acceptance.
 - `ae-backend`: implement API, service, data, and permission behavior from repository contracts.
 - `ae-debug`: investigate build failures, runtime errors, UI issues, and API incidents systematically.
 - `ae-tdd`: run a red-green-refactor loop when behavior is precise enough for test-first work.

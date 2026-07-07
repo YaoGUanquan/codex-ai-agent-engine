@@ -491,6 +491,90 @@ test('upstream brainstorm and web workflow modernization is reflected in source 
   assert.doesNotMatch(readme, /`ae-frontend-design`：交付可用的前端初版。/)
 })
 
+test('design and web forge skill contracts are present in source, mirror, metadata, and docs', () => {
+  const designSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-design')
+  const designMirror = readSkillBody('.agents/skills', 'ae-design')
+  assert.equal(designMirror, designSource, 'ae-design mirror should match plugin source')
+  for (const expectation of [
+    /docs\/ae\/designs/,
+    /PRD input/i,
+    /old design input/i,
+    /bare-description fallback/i,
+    /risk-based dimension triggers/i,
+    /explicit omitted dimensions/i,
+    /ADR-XXX/,
+    /EP-XXX/,
+    /T-XXX/,
+    /TC-XXX/,
+    /ST-XXX/,
+    /cross-dimension mapping/i,
+    /ae-review domain:document/i,
+    /does not implement code/i,
+  ]) {
+    assert.match(designSource, expectation, `ae-design should include ${expectation}`)
+  }
+
+  const designTemplateSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-design/references/design-contract-template.md'), 'utf8')
+  const designTemplateMirror = readFileSync(resolve(repoRoot, '.agents/skills/ae-design/references/design-contract-template.md'), 'utf8')
+  assert.equal(designTemplateMirror, designTemplateSource, 'ae-design template mirror should match plugin source')
+  for (const expectation of [
+    /AI Parse Contract/,
+    /Split Manifest/,
+    /Implementation Constraints/,
+    /Mapping Tables/,
+    /Consistency Check/,
+  ]) {
+    assert.match(designTemplateSource, expectation, `ae-design template should include ${expectation}`)
+  }
+
+  const forgeSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-web-forge')
+  const forgeMirror = readSkillBody('.agents/skills', 'ae-web-forge')
+  assert.equal(forgeMirror, forgeSource, 'ae-web-forge mirror should match plugin source')
+  for (const expectation of [
+    /target existence check/i,
+    /Q1.*existing route/is,
+    /Q2.*design input/is,
+    /Q3.*backend|Q3.*API/is,
+    /Q4.*visual baseline/is,
+    /ae-frontend-design/,
+    /ae-web-app/,
+    /ae-test-browser/,
+    /max 3 rework loops/i,
+    /Do not claim OpenCode sub-agent registry/i,
+    /dynamic Chrome MCP/i,
+    /slash command behavior/i,
+  ]) {
+    assert.match(forgeSource, expectation, `ae-web-forge should include ${expectation}`)
+  }
+
+  const expectedMetadata = [
+    ['ae-design', /Design contract/, /设计契约/],
+    ['ae-web-forge', /frontend\/web routing/i, /前端.*Web.*路由/],
+  ]
+  for (const [skillName, enExpectation, zhExpectation] of expectedMetadata) {
+    assert.match(skillMetadata[skillName].en, enExpectation, `${skillName} should have English metadata`)
+    assert.match(skillMetadata[skillName].zh, zhExpectation, `${skillName} should have Chinese metadata`)
+  }
+
+  for (const catalogPath of [
+    'plugins/ai-agent-engine-codex/skills/ae-help/references/capability-catalog.json',
+    '.agents/skills/ae-help/references/capability-catalog.json',
+  ]) {
+    const catalog = JSON.parse(readFileSync(resolve(repoRoot, catalogPath), 'utf8'))
+    const skillNames = catalog.skills.map((skill) => skill.name)
+    assert.ok(skillNames.includes('ae-design'), `${catalogPath} should include ae-design`)
+    assert.ok(skillNames.includes('ae-web-forge'), `${catalogPath} should include ae-web-forge`)
+    assert.equal(catalog.artifactPaths.designs, 'docs/ae/designs')
+  }
+
+  const readme = readFileSync(resolve(repoRoot, 'README.md'), 'utf8')
+  const readmeEn = readFileSync(resolve(repoRoot, 'README.en.md'), 'utf8')
+  assert.match(readme, /`ae-design`：.*设计契约/)
+  assert.match(readme, /`ae-web-forge`：.*Web.*路由/)
+  assert.match(readmeEn, /`ae-design`: .*design contract/i)
+  assert.match(readmeEn, /`ae-web-forge`: .*frontend\/web routing/i)
+})
+
 test('check-install-smoke reports ok and verifies new skills', () => {
   const result = runNodeScript('scripts/check-install-smoke.mjs')
   assert.equal(result.status, 'ok')
@@ -502,7 +586,9 @@ test('check-install-smoke reports ok and verifies new skills', () => {
     'ae-task-loop',
     'ae-constitution',
     'ae-tasks',
+    'ae-design',
     'ae-web-app',
+    'ae-web-forge',
     'ae-backend',
     'ae-debug',
     'ae-tdd',
