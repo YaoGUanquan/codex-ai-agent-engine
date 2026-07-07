@@ -103,3 +103,16 @@
 - Validation: Run targeted adaptation tests, `node scripts/check-skill-mirror.mjs`, `node scripts/check-ae-artifacts.mjs`, and `npm.cmd run check`.
 - Known risks: External Claude examples can imply runtime behavior Codex cannot enforce. Record rejected runtime assumptions instead of importing them.
 - Landed example: commit `3e7f01a` adapted `shanraisshan/claude-code-best-practice` by updating existing AE skills, adding no-output delegation diagnostics, preserving source/mirror sync, and archiving process evidence under `docs/00-process/archive/2026-06/claude-code-best-practice-audit/`.
+
+## Skill optimization framework audit
+
+- Workflow: Treat SkillOpt-like self-evolution frameworks as audit input first, not as a runtime to install.
+- Use case: A user asks whether a framework that trains, sleeps, replays, evolves, or self-improves skills should optimize this AE project.
+- Steps:
+  1. Use `ae-skill-audit` and record source freshness, inspected files, license, runtime assumptions, and evidence boundaries.
+  2. Evaluate trajectory source, bounded edit shape, held-out validation gate, rejected-update handling, staging/adoption policy, and AE validation mapping.
+  3. Reject ungated live mutation and auto-adoption without review unless AE has an equivalent validated runtime safety boundary.
+  4. Adapt useful ideas as AE-native process contracts, template fields, or future plans; do not copy external prompt/source text.
+  5. If implementation proceeds, update plugin source and `.agents/skills` mirror together, then archive process evidence.
+- Validation: Run `node --test --test-name-pattern "SkillOpt audit filter guidance" tests/skill-scripts.test.mjs`, `node scripts/check-skill-mirror.mjs`, `node scripts/check-skill-contract.mjs`, `node scripts/check-ae-artifacts.mjs`, and `git diff --check`.
+- Known risks: Optimizer demos can hide benchmark leakage, synthetic-only trajectories, broad prompt rewrites, or unsupported runtime harness behavior. Do not create `ae-skill-optimize` until AE has a local replay suite and a gate that rejects harmful skill edits before live files change.

@@ -130,3 +130,11 @@
 - Context: Keeping Q1-Q4 routing in both skills created a predictable long-term ambiguity, and `ae-design` had a template contract without machine validation.
 - Impact: README, metadata, catalog, tests, and skill docs now describe one routing owner. Package checks now include `node scripts/check-design-contract.mjs`, which validates design frontmatter, required sections, stable IDs, explicit omitted dimensions, mapping tables, and consistency fields.
 - Re-evaluate when: design contracts need semantic cross-reference validation across mapping table row values, or users consistently bypass `ae-web-forge` for broad Web intake.
+
+## 2026-07-07: Treat SkillOpt-style self-evolution as audit discipline before runtime
+
+- Date: 2026-07-07
+- Decision: For SkillOpt-like skill optimization frameworks, strengthen `ae-skill-audit` first with a Skill Optimization Pattern Filter. Do not install SkillOpt, create `ae-skill-optimize`, or enable automatic live skill mutation until AE has a held-out replay suite and a validated staged adoption contract.
+- Context: SkillOpt's portable value is its trajectory-driven bounded edit loop, validation gate, rejected-update feedback, and staged proposal discipline. The current AE project has mirror, contract, artifact, and claim checks, but does not yet have a task replay benchmark that can safely accept or reject automatically generated skill edits.
+- Impact: External audits now check trajectory source, bounded edit shape, validation gate, rejected-update handling, staging/adoption policy, and AE validation mapping before recommending any local skill change. Audit reports can adapt useful optimization mechanics as process contracts or template fields while rejecting unsupported runtime import and auto-adoption.
+- Re-evaluate when: repeated audits need the same staged replay workflow, `docs/ae` gains a local held-out task suite, or a future `ae-skill-optimize` plan can prove harmful edits are rejected before live skill files change.

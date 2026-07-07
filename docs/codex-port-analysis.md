@@ -130,6 +130,13 @@ Deferred intentionally:
 - Repositioned `ae-web-app` as the implementation skill for Web app interaction, API, state, persistence, and light full-stack flows after routing.
 - Added `check-design-contract` as a standalone checker for `docs/ae/designs/**/design.md` frontmatter, required sections, stable IDs, explicit omitted dimensions, mapping tables, and consistency fields.
 
+## 2026-07-07 SkillOpt Audit Filter
+
+- Treated Microsoft SkillOpt as reference input for audit discipline, not as a runtime dependency or automatic skill-evolution engine.
+- Strengthened `ae-skill-audit` with a Skill Optimization Pattern Filter covering trajectory source, bounded edit shape, validation gate, rejected-update handling, staging/adoption, and AE validation mapping.
+- Extended `ae-skill-audit/references/audit-template.md` with matching evidence fields so future audits can separate safe process adaptation from unsupported live mutation.
+- Deferred `ae-skill-optimize`, replay datasets, SkillOpt install, and automatic adoption until AE has a local held-out task suite and a validated accept/reject gate.
+
 ## Recommended Next Phase
 
 1. Convert `ae-tools.mjs` into a real MCP server only after the script surface stabilizes.
