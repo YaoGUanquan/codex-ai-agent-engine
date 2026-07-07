@@ -4,4 +4,3 @@ interface:
   default_prompt: "使用 $ae-design 为这个需求创建设计契约。 / Use $ae-design to create a design contract for this requirement."
 policy:
   allow_implicit_invocation: true
-
