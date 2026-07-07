@@ -18,6 +18,7 @@ const targetScripts = resolve(targetRoot, 'scripts')
 const targetWrapper = resolve(targetScripts, 'ae-tools.mjs')
 const targetUpdater = resolve(targetScripts, 'update-ae-codex.mjs')
 const targetLanguageSetter = resolve(targetScripts, 'set-ae-language.mjs')
+const targetArtifactChecker = resolve(targetScripts, 'check-ae-artifacts.mjs')
 const targetDesignContractChecker = resolve(targetScripts, 'check-design-contract.mjs')
 const sourceTemplates = resolve(repoRoot, 'docs', 'ae', 'templates')
 const targetTemplates = resolve(targetRoot, 'docs', 'ae', 'templates')
@@ -71,6 +72,7 @@ for (const name of removedScriptNames) {
 writeFileSync(targetWrapper, "#!/usr/bin/env node\nimport '../plugins/ai-agent-engine-codex/scripts/ae-tools.mjs'\n", 'utf8')
 writeFileSync(targetUpdater, "#!/usr/bin/env node\nimport '../plugins/ai-agent-engine-codex/scripts/update-project.mjs'\n", 'utf8')
 writeFileSync(targetLanguageSetter, "#!/usr/bin/env node\nimport '../plugins/ai-agent-engine-codex/scripts/set-language.mjs'\n", 'utf8')
+writeFileSync(targetArtifactChecker, "#!/usr/bin/env node\nimport '../plugins/ai-agent-engine-codex/scripts/check-ae-artifacts.mjs'\n", 'utf8')
 writeFileSync(targetDesignContractChecker, "#!/usr/bin/env node\nimport '../plugins/ai-agent-engine-codex/scripts/check-design-contract.mjs'\n", 'utf8')
 
 runLanguageSetter(lang)
@@ -89,6 +91,7 @@ console.log(JSON.stringify({
   wrapper: toPosix(relative(targetRoot, targetWrapper)),
   updater: toPosix(relative(targetRoot, targetUpdater)),
   languageSetter: toPosix(relative(targetRoot, targetLanguageSetter)),
+  artifactChecker: toPosix(relative(targetRoot, targetArtifactChecker)),
   designContractChecker: toPosix(relative(targetRoot, targetDesignContractChecker)),
   lang,
 }, null, 2))

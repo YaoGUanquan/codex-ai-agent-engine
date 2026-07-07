@@ -52,6 +52,7 @@ try {
     'plugins/ai-agent-engine-codex/skills/ae-computer-use-guard/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-imagegen-prompt/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-video-edit-computer/SKILL.md',
+    'plugins/ai-agent-engine-codex/scripts/check-ae-artifacts.mjs',
     '.agents/skills/ae-prd/agents/openai.yaml',
     '.agents/skills/ae-work-report/agents/openai.yaml',
     '.agents/skills/ae-task-loop/agents/openai.yaml',
@@ -77,6 +78,7 @@ try {
     'docs/ae/templates/computer-use-hooks/pre-tool-use-computer-budget.example.py',
     'scripts/ae-tools.mjs',
     'scripts/set-ae-language.mjs',
+    'scripts/check-ae-artifacts.mjs',
     'scripts/check-design-contract.mjs',
   ]
   for (const relPath of expectedPaths) {
@@ -116,6 +118,10 @@ try {
     throw new Error('Installed recovery command did not inspect the target project root')
   }
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'claude'], { cwd: targetRoot })
+  const artifactResult = JSON.parse(run(process.execPath, [resolve(targetRoot, 'scripts', 'check-ae-artifacts.mjs')], { cwd: targetRoot }).stdout)
+  if (artifactResult.status !== 'ok' || artifactResult.targetRoot !== targetRoot) {
+    throw new Error('Installed check-ae-artifacts command did not inspect the target project root')
+  }
   const designContractResult = JSON.parse(run(process.execPath, [resolve(targetRoot, 'scripts', 'check-design-contract.mjs')], { cwd: targetRoot }).stdout)
   if (designContractResult.status !== 'ok' || designContractResult.checked !== 0) {
     throw new Error('Installed check-design-contract command did not return stable no-design JSON')
@@ -269,7 +275,7 @@ try {
     verifiedLocalToolPolicy: 'video_requires_ffmpeg_ffprobe_checks',
     verifiedMultiAgentPolicy: 'multi_agent_auto_analysis_by_default',
     verifiedSkillGovernancePolicy: 'source_mirror_metadata_and_path_safety',
-    verifiedCommands: ['recovery', 'claude-delegate', 'markitdown', 'static-server', 'check-design-contract'],
+    verifiedCommands: ['recovery', 'claude-delegate', 'markitdown', 'static-server', 'check-ae-artifacts', 'check-design-contract'],
   }, null, 2))
 } finally {
   cleanupTarget()
