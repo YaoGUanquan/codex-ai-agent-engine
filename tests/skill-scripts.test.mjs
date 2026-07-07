@@ -332,6 +332,46 @@ test('agent skill audit optimization guidance is present in references and mirro
   }
 })
 
+test('SkillOpt audit filter guidance is present in source and mirror skills', () => {
+  const auditSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-skill-audit')
+  const auditMirror = readSkillBody('.agents/skills', 'ae-skill-audit')
+  assert.equal(auditMirror, auditSource, 'ae-skill-audit mirror should match plugin source')
+
+  for (const expectation of [
+    /Skill Optimization Pattern Filter/,
+    /trajectory source/i,
+    /bounded edit shape/i,
+    /validation gate/i,
+    /rejected-update handling/i,
+    /staging and adoption/i,
+    /AE validation mapping/i,
+    /ungated live mutation/i,
+    /auto-adoption without review/i,
+  ]) {
+    assert.match(auditSource, expectation, `ae-skill-audit should include ${expectation}`)
+  }
+
+  const auditTemplateSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-skill-audit/references/audit-template.md'), 'utf8')
+  const auditTemplateMirror = readFileSync(resolve(repoRoot, '.agents/skills/ae-skill-audit/references/audit-template.md'), 'utf8')
+  assert.equal(auditTemplateMirror, auditTemplateSource, 'ae-skill-audit template mirror should match plugin source')
+
+  for (const expectation of [
+    /## Skill Optimization Pattern Filter/,
+    /Optimization claim:/,
+    /Trajectory source: real sessions \/ synthetic tasks \/ benchmark split \/ user task file \/ unverifiable demo/,
+    /Held-out validation or gate:/,
+    /Gate metric and accept rule:/,
+    /Candidate edit shape: add \/ replace \/ delete \/ full rewrite \/ memory append \/ live mutation/,
+    /Rejected update handling:/,
+    /Staging and adoption policy:/,
+    /AE validation mapping: mirror check \/ skill contract check \/ claim check \/ gate proof \/ future replay suite/,
+    /Direct adoption blockers:/,
+    /Safe AE rewrite:/,
+  ]) {
+    assert.match(auditTemplateSource, expectation, `audit template should include ${expectation}`)
+  }
+})
+
 test('PRD and plan artifact contracts are present in source and mirror skills', () => {
   const expectationsByFile = [
     ['plugins/ai-agent-engine-codex/skills/ae-prd/SKILL.md', '.agents/skills/ae-prd/SKILL.md', [

@@ -44,6 +44,21 @@ List patterns that depend on unavailable runtime behavior, such as hook enforcem
 
 List portable workflow mechanics that constrain agent behavior without depending on a specific runtime, such as deterministic file selection, schema validation, routing contracts, evidence capture, reflection or filtering passes, dry-run previews, bounded tool access, or structured output checks.
 
+## Skill Optimization Pattern Filter
+
+- Optimization claim:
+- Trajectory source: real sessions / synthetic tasks / benchmark split / user task file / unverifiable demo
+- Train or replay evidence:
+- Held-out validation or gate:
+- Gate metric and accept rule:
+- Candidate edit shape: add / replace / delete / full rewrite / memory append / live mutation
+- Edit budget or protected region:
+- Rejected update handling:
+- Staging and adoption policy:
+- AE validation mapping: mirror check / skill contract check / claim check / gate proof / future replay suite
+- Direct adoption blockers:
+- Safe AE rewrite:
+
 ## Runtime Boundary Classification
 
 | Finding | Category | Evidence | AE action |
