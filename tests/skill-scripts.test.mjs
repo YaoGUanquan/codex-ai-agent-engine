@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { chmodSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
@@ -13,8 +13,8 @@ const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
 test('renderYaml emits Chinese metadata for ae-web-app', () => {
   const yaml = renderYaml(skillMetadata['ae-web-app'], 'zh-CN')
   assert.match(yaml, /display_name: "AE Web 应用开发"/)
-  assert.match(yaml, /short_description: "基于现有仓库技术栈构建或扩展 Web 应用"/)
-  assert.match(yaml, /default_prompt: "使用 \$ae-web-app 实现这个 Web 应用流程。"/)
+  assert.match(yaml, /short_description: "通过四问题路由构建或扩展 Web 应用并完成浏览器验收"/)
+  assert.match(yaml, /default_prompt: "使用 \$ae-web-app 路由并实现这个 Web 应用流程。"/)
 })
 
 test('renderYaml emits bilingual metadata for ae-help', () => {
@@ -384,6 +384,111 @@ test('PRD and plan artifact contracts are present in source and mirror skills', 
       assert.match(source, expectation, `${sourcePath} should include ${expectation}`)
     }
   }
+})
+
+test('upstream PRD reference sync keeps required references and source freshness current', () => {
+  const expectedUpstreamCommit = 'f0cb655ca76fc5e32b5179e155c84f857a9ec289'
+  const referencePaths = [
+    'plugins/ai-agent-engine-codex/skills/ae-prd/references/requirements-capture.md',
+    '.agents/skills/ae-prd/references/requirements-capture.md',
+    'plugins/ai-agent-engine-codex/skills/ae-prd/references/handoff.md',
+    '.agents/skills/ae-prd/references/handoff.md',
+  ]
+
+  for (const referencePath of referencePaths) {
+    assert.ok(existsSync(resolve(repoRoot, referencePath)), `${referencePath} should exist`)
+  }
+
+  const sourceRequirements = readFileSync(resolve(repoRoot, referencePaths[0]), 'utf8')
+  const mirrorRequirements = readFileSync(resolve(repoRoot, referencePaths[1]), 'utf8')
+  assert.equal(mirrorRequirements, sourceRequirements, 'ae-prd requirements capture mirror should match plugin source')
+  for (const expectation of [
+    /canonicalKind: requirements/,
+    /format: human-readable-requirements/,
+    /stableIdsRequired: true/,
+    /requirementsCount/,
+    /Do not include implementation details/i,
+  ]) {
+    assert.match(sourceRequirements, expectation, `requirements capture should include ${expectation}`)
+  }
+
+  const sourceHandoff = readFileSync(resolve(repoRoot, referencePaths[2]), 'utf8')
+  const mirrorHandoff = readFileSync(resolve(repoRoot, referencePaths[3]), 'utf8')
+  assert.equal(mirrorHandoff, sourceHandoff, 'ae-prd handoff mirror should match plugin source')
+  assert.match(sourceHandoff, /Codex-native handoff/i)
+  assert.match(sourceHandoff, /ae-plan/)
+  assert.doesNotMatch(sourceHandoff, /opencode/i)
+
+  for (const catalogPath of [
+    'plugins/ai-agent-engine-codex/skills/ae-help/references/capability-catalog.json',
+    '.agents/skills/ae-help/references/capability-catalog.json',
+  ]) {
+    const catalog = JSON.parse(readFileSync(resolve(repoRoot, catalogPath), 'utf8'))
+    assert.equal(catalog.source.observedCommit, expectedUpstreamCommit, `${catalogPath} should record observed upstream HEAD`)
+  }
+})
+
+test('upstream brainstorm and web workflow modernization is reflected in source and mirror skills', () => {
+  const brainstormSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-brainstorm')
+  const brainstormMirror = readSkillBody('.agents/skills', 'ae-brainstorm')
+  assert.equal(brainstormMirror, brainstormSource, 'ae-brainstorm mirror should match plugin source')
+  for (const expectation of [
+    /Perspective Collision Pass/i,
+    /perspective matrix/i,
+    /fact disagreement/i,
+    /value disagreement/i,
+    /assumption disagreement/i,
+    /collision insights/i,
+    /blind spots/i,
+    /thinking preservation zone/i,
+    /deepening directions/i,
+  ]) {
+    assert.match(brainstormSource, expectation, `ae-brainstorm should include ${expectation}`)
+  }
+
+  const frontendSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-frontend-design')
+  const frontendMirror = readSkillBody('.agents/skills', 'ae-frontend-design')
+  assert.equal(frontendMirror, frontendSource, 'ae-frontend-design mirror should match plugin source')
+  assert.match(frontendSource, /Frontend Design And UI Implementation/i)
+  assert.match(frontendSource, /design input/i)
+  assert.match(frontendSource, /visual baseline/i)
+  assert.doesNotMatch(frontendSource, /Build the first usable frontend version\./)
+
+  const webSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-web-app')
+  const webMirror = readSkillBody('.agents/skills', 'ae-web-app')
+  assert.equal(webMirror, webSource, 'ae-web-app mirror should match plugin source')
+  for (const expectation of [
+    /Four-Question Web Routing/i,
+    /Q1.*second-development/is,
+    /Q2.*design input/is,
+    /Q3.*interaction.*API/is,
+    /Q4.*visual baseline/is,
+    /ae-test-browser/,
+    /Do not claim OpenCode sub-agent registry/i,
+  ]) {
+    assert.match(webSource, expectation, `ae-web-app should include ${expectation}`)
+  }
+
+  const metadata = skillMetadata['ae-frontend-design']
+  assert.equal(metadata.display.zh, 'AE 前端设计')
+  assert.match(metadata.en, /Design and implement frontend UI/)
+  assert.match(metadata.zh, /前端设计与界面实现/)
+  assert.doesNotMatch(metadata.zh, /首版|初版/)
+
+  for (const catalogPath of [
+    'plugins/ai-agent-engine-codex/skills/ae-help/references/capability-catalog.json',
+    '.agents/skills/ae-help/references/capability-catalog.json',
+  ]) {
+    const catalogText = readFileSync(resolve(repoRoot, catalogPath), 'utf8')
+    assert.match(catalogText, /前端设计与界面实现/)
+    assert.match(catalogText, /四问题路由/)
+    assert.doesNotMatch(catalogText, /前端初版/)
+  }
+
+  const readme = readFileSync(resolve(repoRoot, 'README.md'), 'utf8')
+  assert.match(readme, /`ae-frontend-design`：前端设计与界面实现/)
+  assert.match(readme, /`ae-web-app`：基于四问题路由/)
+  assert.doesNotMatch(readme, /`ae-frontend-design`：交付可用的前端初版。/)
 })
 
 test('check-install-smoke reports ok and verifies new skills', () => {

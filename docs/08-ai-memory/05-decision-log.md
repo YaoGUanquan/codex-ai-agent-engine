@@ -98,3 +98,19 @@
 - Context: User identified a newer upstream commit than the local catalog. The portable parts are human-readable but machine-parseable PRD/plan contracts, source freshness checks, and runtime-boundary classification.
 - Impact: PRD/plan skills now require `format`, `sharded`, AI parse contracts, stable IDs, and origin/fingerprint pairing. `ae-skill-audit` now records `git ls-remote`, `observedCommit`, ref source, inspected files, commit mismatch or unreachable short hash, and classifies portable method, local deterministic mechanism, and runtime-specific behavior.
 - Re-evaluate when: strict artifact validation can be enabled by default after historical PRD/plan artifacts are migrated.
+
+## 2026-07-07: Refresh upstream AE baseline and repair PRD reference completeness
+
+- Date: 2026-07-07
+- Decision: Treat upstream `jiangqiang1996/ai-agent-engine` commit `760cc5b548d3f82c5db764fc01b98d7874867b95` as the current observed baseline for future audits, while syncing only Codex-native PRD reference completeness in this pass.
+- Context: A fresh `git ls-remote` showed the upstream `master` HEAD had advanced. Local `ae-prd` referenced `references/requirements-capture.md`, but plugin source and `.agents` mirror did not include that file.
+- Impact: `ae-prd` now has mirrored `requirements-capture.md` and `handoff.md` references, and source metadata records the observed upstream HEAD. Broader upstream `ae-review` and `ae-work` runtime changes remain deferred until they are rewritten against Codex-available tools.
+- Re-evaluate when: adapting upstream review dispatch, worktree handoff, or plan deepening contracts.
+
+## 2026-07-07: Adapt upstream brainstorm collision and formal web routing
+
+- Date: 2026-07-07
+- Decision: Treat upstream `jiangqiang1996/ai-agent-engine` commit `f0cb655ca76fc5e32b5179e155c84f857a9ec289` as the current observed baseline for this modernization pass, and adapt only portable brainstorm and web workflow methods.
+- Context: Upstream now exposes multi-perspective brainstorm synthesis and a formal `ae-web-forge` style web routing model. Local Codex skills still described frontend work as an initial version and did not encode collision insights or four-question web routing.
+- Impact: `ae-brainstorm` now records perspective matrices, disagreement types, collision insights, blind spots, thinking preservation zones, and deepening directions when useful. `ae-frontend-design` is repositioned as frontend design and UI implementation. `ae-web-app` owns Codex-native four-question routing while browser acceptance remains in `ae-test-browser`.
+- Re-evaluate when: adding a dedicated `ae-design` design-contract skill or creating a separate `ae-web-forge` entrypoint becomes more valuable than strengthening existing skill boundaries.

@@ -17,8 +17,8 @@ export const skillMetadata = {
   },
   'ae-brainstorm': {
     display: { en: 'AE Brainstorm', zh: 'AE 需求澄清' },
-    en: 'Clarify requirements and capture acceptance criteria',
-    zh: '澄清需求并沉淀验收标准',
+    en: 'Clarify requirements with collision insights and acceptance criteria',
+    zh: '通过碰撞洞见澄清需求并沉淀验收标准',
     promptEn: 'Use $ae-brainstorm to clarify this feature idea before planning.',
     promptZh: '使用 $ae-brainstorm 在计划前澄清这个功能想法。',
   },
@@ -58,11 +58,11 @@ export const skillMetadata = {
     promptZh: '使用 $ae-doc-structure 把这些内容整理成结构化文档。',
   },
   'ae-frontend-design': {
-    display: { en: 'AE Frontend Design', zh: 'AE 前端初版' },
-    en: 'Build a usable first frontend version with browser validation',
-    zh: '按现有前端栈交付可用的首版界面体验',
-    promptEn: 'Use $ae-frontend-design to build a usable first frontend version.',
-    promptZh: '使用 $ae-frontend-design 为这个功能做一个可用的前端初版。',
+    display: { en: 'AE Frontend Design', zh: 'AE 前端设计' },
+    en: 'Design and implement frontend UI with browser validation',
+    zh: '按现有前端栈执行前端设计与界面实现',
+    promptEn: 'Use $ae-frontend-design to design and implement this frontend UI.',
+    promptZh: '使用 $ae-frontend-design 为这个功能做前端设计与界面实现。',
   },
   'ae-handoff': {
     display: { en: 'AE Handoff', zh: 'AE 会话交接' },
@@ -227,10 +227,10 @@ export const skillMetadata = {
   },
   'ae-web-app': {
     display: { en: 'AE Web App', zh: 'AE Web 应用开发' },
-    en: 'Build or extend a web application using the existing repository stack',
-    zh: '基于现有仓库技术栈构建或扩展 Web 应用',
-    promptEn: 'Use $ae-web-app to implement this web app flow.',
-    promptZh: '使用 $ae-web-app 实现这个 Web 应用流程。',
+    en: 'Build or extend web apps with four-question routing and browser validation',
+    zh: '通过四问题路由构建或扩展 Web 应用并完成浏览器验收',
+    promptEn: 'Use $ae-web-app to route and implement this web app flow.',
+    promptZh: '使用 $ae-web-app 路由并实现这个 Web 应用流程。',
   },
   'ae-work': {
     display: { en: 'AE Work', zh: 'AE 计划执行' },

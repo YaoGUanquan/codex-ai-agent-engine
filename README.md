@@ -61,7 +61,7 @@ node scripts/ae-tools.mjs help
 - `ae-help`：查看当前 AE 能力和边界。
 - `ae-init`：初始化项目文档、归档规则、UTF-8 规则和长期 AI 记忆库。
 - `ae-ideate`：生成方案方向、取舍、风险和下一步问题。
-- `ae-brainstorm`：澄清需求并沉淀验收标准。
+- `ae-brainstorm`：通过多视角碰撞澄清需求并沉淀验收标准。
 - `ae-lfg`：从需求到已验证交付的完整流程。
 - `ae-plan`：创建实现计划，不修改业务代码。
 - `ae-constitution`：创建或更新可被计划和审查检查的项目治理原则。
@@ -71,8 +71,8 @@ node scripts/ae-tools.mjs help
 - `ae-review`：按严重度优先审查代码或文档。
 - `ae-doc-humanize`：把结构化或生硬内容改写成更易读的文档。
 - `ae-doc-structure`：把散乱内容整理成需求、计划、交接或检查清单。
-- `ae-frontend-design`：交付可用的前端初版。
-- `ae-web-app`：基于现有仓库技术栈实现 Web 前端或轻量全栈流程。
+- `ae-frontend-design`：前端设计与界面实现。
+- `ae-web-app`：基于四问题路由和现有仓库技术栈实现 Web 前端或轻量全栈流程。
 - `ae-backend`：基于仓库契约实现接口、服务、数据和权限逻辑。
 - `ae-debug`：系统化排查构建失败、运行时异常、UI 问题和接口故障。
 - `ae-tdd`：围绕明确行为执行红绿重构式测试驱动开发。

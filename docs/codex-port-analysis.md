@@ -2,8 +2,8 @@
 
 Date: 2026-05-11
 Source: https://gitee.com/jiangqiang1996/ai-agent-engine
-Observed source commit: b50ca004a6b4300f4ad5d8d281bcb17d4be1b392
-Observed source ref: remote HEAD verified by upstream audit on 2026-06-24.
+Observed source commit: f0cb655ca76fc5e32b5179e155c84f857a9ec289
+Observed source ref: remote HEAD verified by upstream audit on 2026-07-07.
 
 ## Conclusion
 
@@ -102,6 +102,19 @@ Deferred intentionally:
 - Ran `node --check` on `scripts/ae-tools.mjs`.
 - Ran help, recovery, scan task analysis, final gate, blocked gate, and Swagger JSON detail smoke tests.
 - Ran `cmd /c npm run check` after adding the skill mirror, language metadata checks, install smoke checks, and default bilingual metadata behavior.
+
+## 2026-07-07 Freshness Update
+
+- Remote HEAD was rechecked with `git ls-remote https://gitee.com/jiangqiang1996/ai-agent-engine.git HEAD`.
+- Observed commit changed from `b50ca004a6b4300f4ad5d8d281bcb17d4be1b392` to `760cc5b548d3f82c5db764fc01b98d7874867b95`.
+- The current Codex port does not claim full upstream parity. The first synced item from this refresh is PRD reference completeness for `ae-prd`.
+
+## 2026-07-07 Frontend And Brainstorm Refresh
+
+- Remote `master` was rechecked with `git ls-remote https://gitee.com/jiangqiang1996/ai-agent-engine.git refs/heads/master`.
+- Observed commit advanced from `760cc5b548d3f82c5db764fc01b98d7874867b95` to `f0cb655ca76fc5e32b5179e155c84f857a9ec289`.
+- Portable methods adapted in this pass: multi-perspective brainstorm collision synthesis, frontend skill repositioning away from "first version" language, and Codex-native four-question web routing.
+- Runtime-specific behavior still rejected: OpenCode sub-agent registry, dynamic browser MCP registration, and slash-command enforcement.
 
 ## Recommended Next Phase
 

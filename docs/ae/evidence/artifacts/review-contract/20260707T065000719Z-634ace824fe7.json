@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "20260707T065000719Z-634ace824fe7",
+  "evidenceKind": "review-contract",
+  "payload": {
+    "kind": "code",
+    "mode": "report-only",
+    "reviewers": [
+      "correctness-reviewer",
+      "testing-reviewer",
+      "standards-reviewer",
+      "maintainability-reviewer",
+      "coherence-reviewer",
+      "feasibility-reviewer",
+      "evidence-reviewer"
+    ],
+    "targetCoverage": {
+      "code": {
+        "status": "covered",
+        "reviewers": [
+          "correctness-reviewer",
+          "testing-reviewer",
+          "maintainability-reviewer"
+        ]
+      },
+      "document": {
+        "status": "covered",
+        "reviewers": [
+          "coherence-reviewer",
+          "feasibility-reviewer",
+          "evidence-reviewer"
+        ]
+      }
+    },
+    "inputs": {
+      "kind": "code",
+      "mode": "report-only",
+      "targets": "code,document",
+      "write-evidence": true
+    }
+  },
+  "timestamps": {
+    "writtenAt": "2026-07-07T06:50:00.724Z"
+  },
+  "git": {
+    "available": true,
+    "head": "a084eda2a3dc9dfe24ae06c2934e99b93b2bf647",
+    "branch": "codex/claim-checker-dry-run",
+    "statusHash": "30e536bed426accd55f50fe3dce2d73e07e1e92d2e1abfce420f973c8c28d214",
+    "dirty": true
+  },
+  "hashes": {
+    "previousRecordHash": null,
+    "payloadHash": "634ace824fe74da479248c908787b53119f2662d0fbeed3ea3598b6db83ba43e",
+    "recordHash": "3e45b8821f30f6aeb5be23abef39a0489fb1f50f37d01d39d85fef296f68f6b0"
+  }
+}
