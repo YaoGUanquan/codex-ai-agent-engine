@@ -62,7 +62,7 @@ node scripts/ae-tools.mjs help
 - `ae-help`: list installed AE capabilities and boundaries.
 - `ae-init`: initialize project docs, archive rules, UTF-8 rules, and durable AI memory.
 - `ae-ideate`: generate solution directions, tradeoffs, risks, and next questions.
-- `ae-brainstorm`: clarify requirements and capture acceptance criteria.
+- `ae-brainstorm`: clarify requirements with multi-perspective collision insights and capture acceptance criteria.
 - `ae-lfg`: run the full flow from requirements to verified delivery.
 - `ae-plan`: create implementation plans without editing product code, including simplest-viable-route checks for implementation-heavy work.
 - `ae-constitution`: create or update durable project governance for plans and reviews.
@@ -72,8 +72,8 @@ node scripts/ae-tools.mjs help
 - `ae-review`: review code or documents with severity-ordered findings first; complexity reviews can use delete, stdlib, native, yagni, and shrink tags.
 - `ae-doc-humanize`: rewrite structured or stiff notes into readable documents.
 - `ae-doc-structure`: turn messy notes into requirements, plans, handoffs, or checklists.
-- `ae-frontend-design`: build a usable first frontend version.
-- `ae-web-app`: implement a web frontend or light full-stack web flow using the repository stack.
+- `ae-frontend-design`: design and implement frontend UI.
+- `ae-web-app`: implement web frontend or light full-stack flows with four-question routing and the repository stack.
 - `ae-backend`: implement API, service, data, and permission behavior from repository contracts.
 - `ae-debug`: investigate build failures, runtime errors, UI issues, and API incidents systematically.
 - `ae-tdd`: run a red-green-refactor loop when behavior is precise enough for test-first work.

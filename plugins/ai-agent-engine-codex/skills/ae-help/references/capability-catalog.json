@@ -2,7 +2,7 @@
   "source": {
     "name": "AI Agent Engine",
     "url": "https://gitee.com/jiangqiang1996/ai-agent-engine",
-    "observedCommit": "b50ca004a6b4300f4ad5d8d281bcb17d4be1b392",
+    "observedCommit": "f0cb655ca76fc5e32b5179e155c84f857a9ec289",
     "license": "GPL-2.0-only"
   },
   "codexPort": {
@@ -36,7 +36,7 @@
       "name": "ae-brainstorm",
       "entry": "/ae-brainstorm",
       "target": "需求澄清",
-      "purpose": "澄清需求、范围、验收标准和开放问题，必要时沉淀需求文档。",
+      "purpose": "澄清需求、范围、碰撞洞见、验收标准和开放问题，必要时沉淀需求文档。",
       "artifactPath": "docs/ae/brainstorms"
     },
     {
@@ -116,14 +116,14 @@
     {
       "name": "ae-frontend-design",
       "entry": "/ae-frontend-design",
-      "target": "前端初版",
-      "purpose": "按现有前端栈和设计约束交付可用的前端初版体验。"
+      "target": "前端设计",
+      "purpose": "按现有前端栈、设计输入和视觉基准执行前端设计与界面实现。"
     },
     {
       "name": "ae-web-app",
       "entry": "/ae-web-app",
       "target": "Web 应用开发",
-      "purpose": "基于现有仓库技术栈实现前端或轻量全栈 Web 流程，并结合浏览器验收与交付检查。"
+      "purpose": "基于四问题路由和现有仓库技术栈实现前端或轻量全栈 Web 流程，并结合浏览器验收与交付检查。"
     },
     {
       "name": "ae-backend",
