@@ -137,6 +137,13 @@ Deferred intentionally:
 - Extended `ae-skill-audit/references/audit-template.md` with matching evidence fields so future audits can separate safe process adaptation from unsupported live mutation.
 - Deferred `ae-skill-optimize`, replay datasets, SkillOpt install, and automatic adoption until AE has a local held-out task suite and a validated accept/reject gate.
 
+## 2026-07-07 Codex Skill Slash Discoverability Planning
+
+- Captured a PRD and plan for improving Codex-native skill-backed discoverability without claiming OpenCode `config.command` parity.
+- The chosen direction is metadata, skill-description, documentation, release-checklist, and regression-test improvement for core AE skills such as `ae-prd`, `ae-plan`, `ae-brainstorm`, `ae-work`, `ae-review`, and `ae-lfg`.
+- The boundary remains: this project does not implement automatic Codex command registration or OpenCode-style slash command injection. Runtime slash-list visibility must be phrased as Codex skill discoverability and verified in the active Codex app.
+- Source artifacts: `docs/ae/prds/2026-07-07-002-codex-skill-slash-discoverability-prd.md` and `docs/ae/plans/2026-07-07-006-codex-skill-slash-discoverability-plan.md`.
+
 ## Recommended Next Phase
 
 1. Convert `ae-tools.mjs` into a real MCP server only after the script surface stabilizes.
