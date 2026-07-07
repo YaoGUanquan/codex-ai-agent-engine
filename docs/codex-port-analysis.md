@@ -159,6 +159,14 @@ Deferred intentionally:
 - Final validation: `npm test`, `npm run check`, and `git diff --check` passed.
 - Runtime UI boundary remains unchanged: actual `/` or skill-search visibility must be manually verified in the active Codex App and is not equivalent to OpenCode `config.command` registration.
 
+## 2026-07-07 Installed Command Wrapper Follow-Up
+
+- External target-project testing found one real catalog/install mismatch: `ae-tools help` advertised `node scripts/check-ae-artifacts.mjs [--target <project>]`, but installed projects did not receive that wrapper and the plugin did not package a matching script implementation.
+- The fix uses the same distribution shape as `check-design-contract`: packaged implementation under `plugins/ai-agent-engine-codex/scripts/check-ae-artifacts.mjs`, root and installed-project wrappers under `scripts/check-ae-artifacts.mjs`.
+- `scripts/install-project.mjs` now writes the installed wrapper, and `scripts/check-install-smoke.mjs` verifies both path presence and target-project execution.
+- Regression coverage now treats `check-ae-artifacts` as an installed helper command in `verifiedCommands`.
+- This does not add a Codex slash command or a new skill. It only makes a documented helper command executable after project installation/update.
+
 ## Recommended Next Phase
 
 1. Convert `ae-tools.mjs` into a real MCP server only after the script surface stabilizes.

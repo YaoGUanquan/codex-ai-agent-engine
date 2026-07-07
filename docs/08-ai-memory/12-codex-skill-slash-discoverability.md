@@ -67,6 +67,20 @@ When optimizing AE skill entrypoints:
 5. Validate with `node scripts/check-skill-mirror.mjs`, `node scripts/check-skill-language-metadata.mjs`, `node scripts/check-skill-contract.mjs`, `node scripts/check-install-smoke.mjs`, and `node scripts/check-ae-artifacts.mjs`.
 6. Record manual fresh Codex thread verification separately because local file checks cannot prove the current app slash UI behavior.
 
+## 2026-07-07 Installed Command Contract Patch
+
+External testing after an AE update found that `ae-tools help` advertised `node scripts/check-ae-artifacts.mjs [--target <project>]`, but installed target projects did not receive that wrapper. Direct execution failed with `MODULE_NOT_FOUND`.
+
+Durable rule: a command advertised in `plugins/ai-agent-engine-codex/skills/ae-help/references/capability-catalog.json` as `node scripts/<name>.mjs` must be installable and executable from a target project. The minimum proof is `scripts/check-install-smoke.mjs` asserting the installed path and executing the target-project wrapper.
+
+For standalone helper scripts, use this distribution pattern:
+
+1. Keep packaged implementation under `plugins/ai-agent-engine-codex/scripts/<name>.mjs`.
+2. Keep root `scripts/<name>.mjs` as a wrapper importing the packaged implementation.
+3. Have `scripts/install-project.mjs` generate the same wrapper in target projects.
+4. Add the command to `scripts/check-install-smoke.mjs` `expectedPaths`, execute it from the installed target root, and include it in `verifiedCommands`.
+5. Add plugin script syntax coverage to `npm run check`.
+
 ## Boundary
 
 Do not implement deprecated prompt shims as the primary path for AE workflow entrypoints. Do not add MCP auto-loading, hooks, global config propagation, or always-on agent registries to simulate command registration.
@@ -76,4 +90,6 @@ Do not implement deprecated prompt shims as the primary path for AE workflow ent
 - PRD: `docs/ae/prds/2026-07-07-002-codex-skill-slash-discoverability-prd.md`
 - Plan: `docs/ae/plans/2026-07-07-006-codex-skill-slash-discoverability-plan.md`
 - Experience: `docs/ae/experience/2026-07-07-codex-skill-slash-discoverability.md`
+- Installed command wrapper experience: `docs/ae/experience/2026-07-07-check-ae-artifacts-install-wrapper.md`
 - Process archive: `docs/00-process/archive/2026-07/codex-skill-slash-discoverability/progress.md`
+- Installed command wrapper archive: `docs/00-process/archive/2026-07/check-ae-artifacts-install-wrapper/progress.md`

@@ -628,6 +628,7 @@ test('check-install-smoke reports ok and verifies new skills', () => {
   assert.equal(result.status, 'ok')
   assert.ok(result.verifiedCommands.includes('recovery'))
   assert.ok(result.verifiedCommands.includes('claude-delegate'))
+  assert.ok(result.verifiedCommands.includes('check-ae-artifacts'))
   assert.ok(result.verifiedCommands.includes('check-design-contract'))
   assert.deepEqual(result.verifiedSkills, [
     'ae-prd',
