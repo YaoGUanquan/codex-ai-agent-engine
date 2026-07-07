@@ -234,10 +234,10 @@ export const skillMetadata = {
   },
   'ae-web-app': {
     display: { en: 'AE Web App', zh: 'AE Web 应用开发' },
-    en: 'Build or extend web apps with four-question routing and browser validation',
-    zh: '通过四问题路由构建或扩展 Web 应用并完成浏览器验收',
-    promptEn: 'Use $ae-web-app to route and implement this web app flow.',
-    promptZh: '使用 $ae-web-app 路由并实现这个 Web 应用流程。',
+    en: 'Implement Web app flows selected by ae-web-forge with browser validation',
+    zh: '实现由 ae-web-forge 路由后的 Web 应用流程并完成浏览器验收',
+    promptEn: 'Use $ae-web-app to implement this web app flow.',
+    promptZh: '使用 $ae-web-app 实现这个 Web 应用流程。',
   },
   'ae-web-forge': {
     display: { en: 'AE Web Forge', zh: 'AE Web Forge' },

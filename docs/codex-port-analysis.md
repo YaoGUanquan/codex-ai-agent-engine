@@ -113,7 +113,7 @@ Deferred intentionally:
 
 - Remote `master` was rechecked with `git ls-remote https://gitee.com/jiangqiang1996/ai-agent-engine.git refs/heads/master`.
 - Observed commit advanced from `760cc5b548d3f82c5db764fc01b98d7874867b95` to `f0cb655ca76fc5e32b5179e155c84f857a9ec289`.
-- Portable methods adapted in this pass: multi-perspective brainstorm collision synthesis, frontend skill repositioning away from "first version" language, and Codex-native four-question web routing.
+- Portable methods adapted in this pass: multi-perspective brainstorm collision synthesis, frontend skill repositioning away from "first version" language, and Codex-native four-question web routing through `ae-web-forge`.
 - Runtime-specific behavior still rejected: OpenCode sub-agent registry, dynamic browser MCP registration, and slash-command enforcement.
 
 ## 2026-07-07 Design And Web Forge Entry Points
@@ -123,6 +123,12 @@ Deferred intentionally:
 - Design artifacts use `docs/ae/designs`, not upstream `ae/designs`.
 - Browser acceptance remains routed through `ae-test-browser`, Browser, Playwright, or available local tooling; no dynamic Chrome MCP registration is claimed.
 - Capability catalog, language metadata, README content, install smoke checks, and regression tests now cover both entrypoints.
+
+## 2026-07-07 Routing And Design Contract Follow-Up
+
+- Resolved the `ae-web-forge` / `ae-web-app` overlap by making `ae-web-forge` the unified frontend/Web Q1-Q4 routing entrypoint.
+- Repositioned `ae-web-app` as the implementation skill for Web app interaction, API, state, persistence, and light full-stack flows after routing.
+- Added `check-design-contract` as a standalone checker for `docs/ae/designs/**/design.md` frontmatter, required sections, stable IDs, explicit omitted dimensions, mapping tables, and consistency fields.
 
 ## Recommended Next Phase
 

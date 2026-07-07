@@ -122,3 +122,11 @@
 - Context: Upstream includes richer design-contract and web-forge flows, but its OpenCode-specific paths, sub-agent registry, dynamic Chrome MCP registration, and slash command behavior are not portable to this Codex plugin.
 - Impact: `ae-design` writes design contracts under `docs/ae/designs` with stable IDs, risk-triggered dimensions, explicit omitted dimensions, mapping tables, and document review closure. `ae-web-forge` routes to existing `ae-frontend-design`, `ae-web-app`, `ae-test-browser`, `ae-backend`, and `ae-sql` rather than claiming unavailable `@ui-*` agents.
 - Re-evaluate when: a deterministic design validator is added, Codex exposes stable native sub-agent/runtime contracts, or frontend routing duplication between `ae-web-app` and `ae-web-forge` becomes confusing in real use.
+
+## 2026-07-07: Make ae-web-forge the unified Web routing entrypoint and add design contract checks
+
+- Date: 2026-07-07
+- Decision: `ae-web-forge` owns frontend/Web Q1-Q4 routing. `ae-web-app` is the implementation skill for routed Web app flows. Add `check-design-contract` as the deterministic checker for `docs/ae/designs/**/design.md`.
+- Context: Keeping Q1-Q4 routing in both skills created a predictable long-term ambiguity, and `ae-design` had a template contract without machine validation.
+- Impact: README, metadata, catalog, tests, and skill docs now describe one routing owner. Package checks now include `node scripts/check-design-contract.mjs`, which validates design frontmatter, required sections, stable IDs, explicit omitted dimensions, mapping tables, and consistency fields.
+- Re-evaluate when: design contracts need semantic cross-reference validation across mapping table row values, or users consistently bypass `ae-web-forge` for broad Web intake.

@@ -10,11 +10,12 @@ import { renderYaml, skillMetadata } from '../plugins/ai-agent-engine-codex/scri
 
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
 
-test('renderYaml emits Chinese metadata for ae-web-app', () => {
+test('renderYaml emits implementation metadata for ae-web-app', () => {
   const yaml = renderYaml(skillMetadata['ae-web-app'], 'zh-CN')
   assert.match(yaml, /display_name: "AE Web 应用开发"/)
-  assert.match(yaml, /short_description: "通过四问题路由构建或扩展 Web 应用并完成浏览器验收"/)
-  assert.match(yaml, /default_prompt: "使用 \$ae-web-app 路由并实现这个 Web 应用流程。"/)
+  assert.match(skillMetadata['ae-web-app'].en, /Implement Web app flows selected by ae-web-forge/)
+  assert.doesNotMatch(skillMetadata['ae-web-app'].en, /four-question routing/i)
+  assert.match(yaml, /default_prompt: "使用 \$ae-web-app 实现这个 Web 应用流程。"/)
 })
 
 test('renderYaml emits bilingual metadata for ae-help', () => {
@@ -458,16 +459,19 @@ test('upstream brainstorm and web workflow modernization is reflected in source 
   const webMirror = readSkillBody('.agents/skills', 'ae-web-app')
   assert.equal(webMirror, webSource, 'ae-web-app mirror should match plugin source')
   for (const expectation of [
-    /Four-Question Web Routing/i,
-    /Q1.*second-development/is,
-    /Q2.*design input/is,
-    /Q3.*interaction.*API/is,
-    /Q4.*visual baseline/is,
+    /implementation skill/i,
+    /selected by `ae-web-forge`/i,
+    /state, forms, API calls, auth, persistence, or error handling/i,
     /ae-test-browser/,
     /Do not claim OpenCode sub-agent registry/i,
   ]) {
     assert.match(webSource, expectation, `ae-web-app should include ${expectation}`)
   }
+  assert.doesNotMatch(webSource, /## Four-Question Web Routing/i)
+  assert.doesNotMatch(webSource, /Q1.*second-development/is)
+  assert.doesNotMatch(webSource, /Q2.*design input/is)
+  assert.doesNotMatch(webSource, /Q3.*interaction.*API/is)
+  assert.doesNotMatch(webSource, /Q4.*visual baseline/is)
 
   const metadata = skillMetadata['ae-frontend-design']
   assert.equal(metadata.display.zh, 'AE 前端设计')
@@ -482,12 +486,16 @@ test('upstream brainstorm and web workflow modernization is reflected in source 
     const catalogText = readFileSync(resolve(repoRoot, catalogPath), 'utf8')
     assert.match(catalogText, /前端设计与界面实现/)
     assert.match(catalogText, /四问题路由/)
+    assert.match(catalogText, /ae-web-forge.*统一前端\/Web 路由/s)
+    assert.match(catalogText, /ae-web-app.*Web 应用实现/s)
     assert.doesNotMatch(catalogText, /前端初版/)
   }
 
   const readme = readFileSync(resolve(repoRoot, 'README.md'), 'utf8')
   assert.match(readme, /`ae-frontend-design`：前端设计与界面实现/)
-  assert.match(readme, /`ae-web-app`：基于四问题路由/)
+  assert.match(readme, /`ae-web-forge`：统一前端\/Web 路由入口/)
+  assert.match(readme, /`ae-web-app`：实现由 `ae-web-forge` 路由后的 Web 应用/)
+  assert.doesNotMatch(readme, /`ae-web-app`：基于四问题路由/)
   assert.doesNotMatch(readme, /`ae-frontend-design`：交付可用的前端初版。/)
 })
 
@@ -580,6 +588,7 @@ test('check-install-smoke reports ok and verifies new skills', () => {
   assert.equal(result.status, 'ok')
   assert.ok(result.verifiedCommands.includes('recovery'))
   assert.ok(result.verifiedCommands.includes('claude-delegate'))
+  assert.ok(result.verifiedCommands.includes('check-design-contract'))
   assert.deepEqual(result.verifiedSkills, [
     'ae-prd',
     'ae-work-report',
@@ -754,6 +763,7 @@ test('package check script omits OfficeCLI checks', () => {
   assert.doesNotMatch(checkScript, /node scripts\/check-officecli-available\.mjs/)
   assert.doesNotMatch(checkScript, /node scripts\/check-officecli-smoke\.mjs/)
   assert.match(checkScript, /node scripts\/check-ae-artifacts\.mjs/)
+  assert.match(checkScript, /node scripts\/check-design-contract\.mjs/)
   assert.match(checkScript, /node scripts\/check-skill-contract\.mjs/)
   assert.match(checkScript, /node scripts\/ae-tools\.mjs ae-graph-build --root scripts/)
   assert.match(checkScript, /node scripts\/ae-tools\.mjs ae-graph-query --root scripts --path ae-tools\.mjs/)
@@ -1029,6 +1039,70 @@ test('check-ae-artifacts accepts valid new contract prd and plan artifacts', () 
     const result = runAeArtifactCheck(tempRoot, ['--strict'])
     assert.equal(result.status, 0, result.stderr)
     assert.match(result.stdout, /"status": "ok"/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('check-design-contract passes when no design artifacts exist', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-design-contract-'))
+  try {
+    mkdirSync(join(tempRoot, 'docs', 'ae'), { recursive: true })
+    const result = runDesignContractCheck(tempRoot)
+    assert.equal(result.status, 0, result.stderr)
+    const output = JSON.parse(result.stdout)
+    assert.equal(output.status, 'ok')
+    assert.equal(output.checked, 0)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('check-design-contract accepts a valid design contract', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-design-contract-'))
+  try {
+    writeAeArtifact(tempRoot, 'docs/ae/designs/sample-2026-07-07/design.md', validDesignContractLines())
+    const result = runDesignContractCheck(tempRoot)
+    assert.equal(result.status, 0, result.stderr)
+    const output = JSON.parse(result.stdout)
+    assert.equal(output.status, 'ok')
+    assert.equal(output.checked, 1)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('check-design-contract rejects malformed design contracts with structured errors', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-design-contract-'))
+  try {
+    writeAeArtifact(tempRoot, 'docs/ae/designs/bad-2026-07-07/design.md', [
+      '---',
+      'type: design',
+      'status: drafted',
+      'date: 2026-07-07',
+      'title: bad design',
+      'format: human-readable-design',
+      'sharded: false',
+      '---',
+      '# Design: bad design',
+      '',
+      '## Overview',
+      '',
+      '## Decisions',
+      '',
+      '### ADR-001 - First decision',
+      '',
+      '### ADR-001 - Duplicate decision',
+      '',
+    ])
+
+    const result = runDesignContractCheck(tempRoot)
+    assert.notEqual(result.status, 0)
+    const output = JSON.parse(result.stderr)
+    assert.equal(output.status, 'failed')
+    assert.equal(output.checked, 1)
+    assert.ok(output.errors.some((error) => error.field === 'section' && /AI Parse Contract/.test(error.message)))
+    assert.ok(output.errors.some((error) => error.field === 'stableId' && /ADR-001/.test(error.message)))
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }
@@ -1907,6 +1981,14 @@ function runAeArtifactCheck(tempRoot, extraArgs = []) {
   })
 }
 
+function runDesignContractCheck(tempRoot, extraArgs = []) {
+  return spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'check-design-contract.mjs'), '--target', tempRoot, ...extraArgs], {
+    cwd: repoRoot,
+    encoding: 'utf8',
+    stdio: 'pipe',
+  })
+}
+
 function writeAeArtifact(tempRoot, relativePath, lines) {
   const fullPath = join(tempRoot, relativePath)
   mkdirSync(resolve(fullPath, '..'), { recursive: true })
@@ -1915,4 +1997,110 @@ function writeAeArtifact(tempRoot, relativePath, lines) {
 
 function readSkillBody(root, skillName) {
   return readFileSync(resolve(repoRoot, root, skillName, 'SKILL.md'), 'utf8')
+}
+
+function validDesignContractLines() {
+  return [
+    '---',
+    'type: design',
+    'status: drafted',
+    'date: 2026-07-07',
+    'title: sample design',
+    'format: human-readable-design',
+    'sharded: false',
+    '---',
+    '',
+    '# Design: sample design',
+    '',
+    '## Source',
+    '',
+    '## AI Parse Contract',
+    '',
+    '- canonicalKind: design',
+    '- humanEquivalent: true',
+    '- stableIdsRequired: true',
+    '- noImplicitScope: true',
+    '',
+    '## Split Manifest',
+    '',
+    '- mode: unified',
+    '- root: docs/ae/designs/sample-2026-07-07',
+    '- files:',
+    '  - design.md',
+    '',
+    '## Overview',
+    '',
+    '- Goal: sample',
+    '- Required dimensions: overview, architecture, test-cases',
+    '- Explicit omitted dimensions: api: explicitly-omitted - no public API change; database: explicitly-omitted - no persistence change',
+    '',
+    '## Implementation Constraints',
+    '',
+    '- Repository paths: scripts/check-design-contract.mjs',
+    '- Runtime/build commands: node scripts/check-design-contract.mjs',
+    '',
+    '## Decisions',
+    '',
+    '### ADR-001 - Keep validation local',
+    '',
+    '- Decision: Use a local script.',
+    '- Drivers: No external dependency.',
+    '',
+    '## Mapping Tables',
+    '',
+    '### api-field-to-database-column-mapping',
+    '',
+    '| EP ID | API field | T ID | Data field | Notes |',
+    '| --- | --- | --- | --- | --- |',
+    '| EP-001 | n/a | T-001 | n/a | No API/database mapping. |',
+    '',
+    '### api-error-to-ui-state-mapping',
+    '',
+    '| EP ID | Error/status | ST ID | UI state | User-visible behavior |',
+    '| --- | --- | --- | --- | --- |',
+    '| EP-001 | n/a | ST-001 | n/a | No UI error state. |',
+    '',
+    '### test-case-to-contract-coverage',
+    '',
+    '| TC ID | Scenario | Covered IDs | Verification signal |',
+    '| --- | --- | --- | --- |',
+    '| TC-001 | Valid contract | ADR-001 | checker exits 0 |',
+    '',
+    '### ui-component-to-api-endpoint-mapping',
+    '',
+    '| Component/route | ST ID | EP ID | Data dependency |',
+    '| --- | --- | --- | --- |',
+    '| n/a | ST-001 | EP-001 | none |',
+    '',
+    '## Architecture',
+    '',
+    '## API',
+    '',
+    '## Database',
+    '',
+    '## UI/UX',
+    '',
+    '## Test Cases',
+    '',
+    '### TC-001 - Valid contract passes',
+    '',
+    '- Priority: P1',
+    '- Covered IDs: ADR-001, EP-001, T-001, ST-001',
+    '',
+    '## Security',
+    '',
+    '## Observability',
+    '',
+    '## Non-Functional',
+    '',
+    '## Consistency Check',
+    '',
+    '- requiredDimensionsCovered: true',
+    '- omittedDimensionsJustified: true',
+    '- stableIdsUnique: true',
+    '- mappingTablesComplete: true',
+    '- sourceScopePreserved: true',
+    '- reviewStatus: not-run',
+    '',
+  ]
 }

@@ -40,7 +40,7 @@ Does not apply to:
 
 - Rule: Every active skill in `plugins/ai-agent-engine-codex/skills` must have a matching `.agents/skills` mirror, `agents/openai.yaml`, language metadata, help catalog entry when user-facing, and install smoke coverage when it is a core entrypoint.
 - Rationale: Codex discovers and displays project-local skills through both source and installed mirror paths.
-- Review check: `node scripts/check-skill-mirror.mjs`, `node scripts/check-skill-language-metadata.mjs`, and `node scripts/check-install-smoke.mjs` must pass after catalog changes.
+- Review check: `node scripts/check-skill-mirror.mjs`, `node scripts/check-skill-language-metadata.mjs`, and `node scripts/check-install-smoke.mjs` must pass after catalog changes. Design contract changes must also run `node scripts/check-design-contract.mjs`.
 - Violation examples: Adding a skill only under plugin source; forgetting `skill-language-metadata.mjs`; help output listing a deleted skill.
 
 ### Principle 3 - Requirements Before Implementation
@@ -85,7 +85,7 @@ Does not apply to:
 - Governance artifact: `docs/ae/constitution.md`.
 - Related templates: `docs/ae/templates/constitution-template.md` and `docs/ae/templates/requirements-quality-checklist.md`.
 - Related skills: `ae-constitution`, `ae-brainstorm`, `ae-prd`, `ae-plan`, `ae-tasks`, `ae-work`, and `ae-review`.
-- Related checks: `scripts/check-skill-mirror.mjs`, `scripts/check-skill-language-metadata.mjs`, `scripts/check-install-smoke.mjs`, `scripts/check-ae-artifacts.mjs`, and `npm.cmd run check`.
+- Related checks: `scripts/check-skill-mirror.mjs`, `scripts/check-skill-language-metadata.mjs`, `scripts/check-install-smoke.mjs`, `scripts/check-ae-artifacts.mjs`, `scripts/check-design-contract.mjs`, and `npm.cmd run check`.
 
 ## Amendment Process
 
