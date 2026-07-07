@@ -1,6 +1,6 @@
 ---
 type: prd
-status: drafted
+status: completed
 date: 2026-07-07
 topic: codex-skill-slash-discoverability
 format: human-readable-requirements
@@ -129,3 +129,30 @@ The desired outcome is to improve AE workflow entrypoint discoverability in Code
 - nonFunctionalRequirementsCount: 3
 - decisionsCount: 3
 - openQuestionsCount: 3
+
+## Completion Notes
+
+- Completed on 2026-07-07 with commits `60d05c2` and `67896d0`.
+- R1 was completed by strengthening the six core workflow entrypoints `ae-prd`, `ae-plan`, `ae-brainstorm`, `ae-work`, `ae-review`, and `ae-lfg` so their source and mirror metadata carry stable skill names and direct `$ae-*` prompts. Their `SKILL.md` frontmatter descriptions now also include explicit `ae-*`, `/ae-*`, `$ae-*`, and `use ae-*` trigger forms.
+- R2 and R4 were completed by updating README/help/catalog wording to distinguish Codex skill-backed discoverability from unsupported OpenCode `config.command` registration.
+- R3 was completed for repository distribution by preserving source/mirror `agents/openai.yaml` metadata through the existing install/update validation path.
+- R5 was completed by adding regression coverage in `tests/skill-scripts.test.mjs` for core workflow trigger signals and slash-command boundary wording.
+- NFR1 and NFR2 were preserved: no new runtime dependency, MCP server, hook, global config write, or command registry was added.
+- NFR3 is locally verified by deterministic checks; the manual fresh Codex App `/` or skill-search observation remains external runtime evidence, not a repository guarantee.
+
+## Completion Evidence
+
+- PRD: `docs/ae/prds/2026-07-07-002-codex-skill-slash-discoverability-prd.md`
+- Plan: `docs/ae/plans/2026-07-07-006-codex-skill-slash-discoverability-plan.md`
+- Final pushed commit: `67896d0 feat: strengthen AE skill trigger metadata`
+- Prior documentation commit: `60d05c2 docs: clarify Codex skill discoverability`
+- Gate: `docs/ae/gates/20260707T095627Z-work-final.json`
+- Validation:
+  - `npm test`
+  - `npm run check`
+  - `git diff --check`
+
+## Residual Runtime Evidence
+
+- Manual Codex App verification is still required before claiming that `/` search visibly lists `ae-plan`, `ae-prd`, or other AE skills in a specific app/session.
+- The stable product claim remains: AE improves Codex skill-backed discoverability through metadata and descriptions; it does not implement OpenCode-style slash command registration.

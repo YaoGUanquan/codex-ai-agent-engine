@@ -26,6 +26,36 @@ README, release checklist, `ae-help`, and capability catalog wording now describ
 
 Regression coverage lives in `tests/skill-scripts.test.mjs` under the Codex skill discoverability boundary test.
 
+## 2026-07-07 Trigger Metadata Completion
+
+Final implementation landed on `main` at `67896d0 feat: strengthen AE skill trigger metadata`.
+
+The six core workflow entrypoints now carry stable trigger signals in both source and mirror forms:
+
+- `ae-brainstorm`
+- `ae-lfg`
+- `ae-plan`
+- `ae-prd`
+- `ae-review`
+- `ae-work`
+
+For these skills:
+
+- `SKILL.md` frontmatter includes `ae-*`, `/ae-*`, `$ae-*`, and `use ae-*` trigger forms.
+- `agents/openai.yaml` display names and short descriptions include the stable `ae-*` skill name.
+- `plugins/ai-agent-engine-codex/scripts/skill-language-metadata.mjs` remains the canonical generator source for language metadata.
+- `tests/skill-scripts.test.mjs` includes regression coverage named `core AE workflow metadata carries stable skill trigger signals`.
+
+Final validation before push:
+
+```powershell
+npm test
+npm run check
+git diff --check
+```
+
+All passed on 2026-07-07.
+
 ## Reusable Workflow
 
 When optimizing AE skill entrypoints:
@@ -40,3 +70,10 @@ When optimizing AE skill entrypoints:
 ## Boundary
 
 Do not implement deprecated prompt shims as the primary path for AE workflow entrypoints. Do not add MCP auto-loading, hooks, global config propagation, or always-on agent registries to simulate command registration.
+
+## Archive
+
+- PRD: `docs/ae/prds/2026-07-07-002-codex-skill-slash-discoverability-prd.md`
+- Plan: `docs/ae/plans/2026-07-07-006-codex-skill-slash-discoverability-plan.md`
+- Experience: `docs/ae/experience/2026-07-07-codex-skill-slash-discoverability.md`
+- Process archive: `docs/00-process/archive/2026-07/codex-skill-slash-discoverability/progress.md`

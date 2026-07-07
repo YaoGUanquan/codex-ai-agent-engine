@@ -150,6 +150,15 @@ Deferred intentionally:
 - Added a manual release verification step: in a fresh Codex App thread, search `/` for `ae-plan` and `ae-prd`, and verify explicit `$ae-plan` / `$ae-prd` invocation guidance remains available.
 - Kept the non-portable runtime boundary intact: no command registry, MCP auto-loading, hooks, global config propagation, or always-on agent registry was added.
 
+## 2026-07-07 Core Skill Trigger Metadata Completion
+
+- Strengthened source and mirror metadata for `ae-prd`, `ae-plan`, `ae-brainstorm`, `ae-work`, `ae-review`, and `ae-lfg`.
+- Each core entrypoint now has stable `ae-*` names in generated UI metadata plus explicit `ae-*`, `/ae-*`, `$ae-*`, and `use ae-*` trigger forms in `SKILL.md` descriptions.
+- Added regression coverage in `tests/skill-scripts.test.mjs` to keep these trigger signals from drifting.
+- Final pushed commit: `67896d0 feat: strengthen AE skill trigger metadata`.
+- Final validation: `npm test`, `npm run check`, and `git diff --check` passed.
+- Runtime UI boundary remains unchanged: actual `/` or skill-search visibility must be manually verified in the active Codex App and is not equivalent to OpenCode `config.command` registration.
+
 ## Recommended Next Phase
 
 1. Convert `ae-tools.mjs` into a real MCP server only after the script surface stabilizes.

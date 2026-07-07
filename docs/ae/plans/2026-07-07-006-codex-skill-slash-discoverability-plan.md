@@ -1,6 +1,6 @@
 ---
 type: plan
-status: drafted
+status: completed
 date: 2026-07-07
 title: codex-skill-slash-discoverability
 origin: docs/ae/prds/2026-07-07-002-codex-skill-slash-discoverability-prd.md
@@ -306,3 +306,41 @@ Implement a documentation and metadata improvement that makes core AE skills eas
 ## Handoff
 
 Recommended next workflow: `ae-review domain:document docs/ae/prds/2026-07-07-002-codex-skill-slash-discoverability-prd.md docs/ae/plans/2026-07-07-006-codex-skill-slash-discoverability-plan.md`, then `ae-work docs/ae/plans/2026-07-07-006-codex-skill-slash-discoverability-plan.md` if the document review passes.
+
+## Completion Result
+
+- Status: completed.
+- Final pushed commit: `67896d0 feat: strengthen AE skill trigger metadata`.
+- Previous documentation commit: `60d05c2 docs: clarify Codex skill discoverability`.
+- Final gate: `docs/ae/gates/20260707T095627Z-work-final.json`.
+
+## Unit Completion
+
+- U1 - Strengthen Core Skill Metadata: completed.
+  - Updated `plugins/ai-agent-engine-codex/scripts/skill-language-metadata.mjs`.
+  - Regenerated and synchronized source/mirror `agents/openai.yaml` for the six core workflow skills.
+  - Core display names and short descriptions now carry stable `ae-*` names.
+- U2 - Clarify Skill Trigger Descriptions: completed.
+  - Updated source and mirror `SKILL.md` frontmatter for `ae-prd`, `ae-plan`, `ae-brainstorm`, `ae-work`, `ae-review`, and `ae-lfg`.
+  - Descriptions now include `ae-*`, `/ae-*`, `$ae-*`, and `use ae-*` forms without claiming command registration.
+- U3 - Update Documentation And Help Catalog Boundaries: completed in commit `60d05c2`.
+  - README, release checklist, `ae-help`, capability catalog, port analysis, and long-term memory now distinguish skill-backed discoverability from OpenCode `config.command` parity.
+- U4 - Add Regression Tests And Claim Checks: completed.
+  - Added `core AE workflow metadata carries stable skill trigger signals` to `tests/skill-scripts.test.mjs`.
+  - Existing boundary test continues to reject unsupported slash-command registration claims.
+
+## Final Validation
+
+- Passed: `npm test` with 71 tests.
+- Passed: `npm run check`.
+- Passed: `git diff --check`.
+- Passed as part of `npm run check`:
+  - `node scripts/check-skill-mirror.mjs`
+  - `node scripts/check-skill-language-metadata.mjs`
+  - `node scripts/check-skill-contract.mjs`
+  - `node scripts/check-install-smoke.mjs`
+  - `node scripts/check-ae-artifacts.mjs`
+
+## Remaining Manual Check
+
+Local repository validation cannot prove the active Codex App slash/search UI. Before release notes claim observed UI behavior, open a fresh Codex App thread, type `/`, search `ae-plan` and `ae-prd`, and record what the active app actually shows.
