@@ -11,6 +11,7 @@ const strict = args.includes('--strict')
 
 const allowedTypes = new Set(['prd', 'prd-shard', 'plan', 'plan-shard', 'design', 'design-shard', 'work', 'review'])
 const allowedStatuses = new Set(['drafted', 'ready', 'review-passed', 'review-needs-fix', 'blocked', 'aborted', 'active', 'completed'])
+const legacyStatuses = new Set(['implemented', 'archived-paused', 'reviewed'])
 const prdStatuses = new Set(['drafted', 'review-passed', 'completed'])
 const planStatuses = new Set(['drafted', 'ready', 'active', 'completed'])
 const contractStartDate = '2026-06-24'
@@ -55,7 +56,7 @@ function validateFrontmatter(path, data) {
   if (!allowedTypes.has(data.type)) {
     errors.push({ path, field: 'type', message: `type must be one of ${Array.from(allowedTypes).join(', ')}` })
   }
-  if (!allowedStatuses.has(data.status)) {
+  if (!isAllowedStatus(data.status)) {
     errors.push({ path, field: 'status', message: `status is not valid for ${data.type || 'artifact'}` })
   }
   if (data.origin && looksLikePath(data.origin) && !isRepositoryRelativePath(data.origin)) {
@@ -68,12 +69,12 @@ function validateFrontmatter(path, data) {
   if (data.type === 'prd') {
     if (!data.date) errors.push({ path, field: 'date', message: 'prd requires date' })
     if (!data.topic) errors.push({ path, field: 'topic', message: 'prd requires topic' })
-    if (!prdStatuses.has(data.status)) errors.push({ path, field: 'status', message: 'prd status must be drafted, review-passed, or completed' })
+    if (!isAllowedPrdStatus(data.status)) errors.push({ path, field: 'status', message: 'prd status must be drafted, review-passed, or completed' })
   }
   if (data.type === 'plan') {
     if (!data.date) errors.push({ path, field: 'date', message: 'plan requires date' })
     if (!data.title) errors.push({ path, field: 'title', message: 'plan requires title' })
-    if (!planStatuses.has(data.status)) errors.push({ path, field: 'status', message: 'plan status must be drafted, ready, active, or completed' })
+    if (!isAllowedPlanStatus(data.status)) errors.push({ path, field: 'status', message: 'plan status must be drafted, ready, active, or completed' })
   }
   validateArtifactContract(path, data)
   if (String(data.type || '').endsWith('-shard')) {
@@ -82,6 +83,18 @@ function validateFrontmatter(path, data) {
     }
     if (!data.module) errors.push({ path, field: 'module', message: 'shard artifacts require module' })
   }
+}
+
+function isAllowedStatus(status) {
+  return allowedStatuses.has(status) || (!strict && legacyStatuses.has(status))
+}
+
+function isAllowedPrdStatus(status) {
+  return prdStatuses.has(status) || (!strict && legacyStatuses.has(status))
+}
+
+function isAllowedPlanStatus(status) {
+  return planStatuses.has(status) || (!strict && legacyStatuses.has(status))
 }
 
 function validateArtifactContract(path, data) {
@@ -103,6 +116,8 @@ function validateArtifactContract(path, data) {
 }
 
 function validateOriginPair(path, data) {
+  if (!strict && !isNewContractManaged(data)) return
+
   const hasOrigin = hasField(data, 'origin')
   const hasOriginFingerprint = hasField(data, 'originFingerprint')
   if (hasOrigin !== hasOriginFingerprint) {
