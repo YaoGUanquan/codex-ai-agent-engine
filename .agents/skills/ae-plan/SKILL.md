@@ -1,6 +1,6 @@
 ---
 name: ae-plan
-description: Use when the user asks for AE plan, /ae-plan, technical plan, implementation plan, design plan, break down requirements, plan before coding, or convert a requirements artifact into implementation units. This skill writes plans and must not implement code.
+description: Use when the user asks for ae-plan, /ae-plan, $ae-plan, "use ae-plan", AE plan, technical plan, implementation plan, design plan, break down requirements, plan before coding, or convert a requirements artifact into implementation units. This skill writes plans and must not implement code.
 ---
 
 # AE Plan

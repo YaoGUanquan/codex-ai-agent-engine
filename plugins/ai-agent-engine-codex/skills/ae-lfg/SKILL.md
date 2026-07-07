@@ -1,6 +1,6 @@
 ---
 name: ae-lfg
-description: Use when the user explicitly asks for AE LFG, /ae-lfg, AI Agent Engine full workflow, or wants a software task taken from requirement clarification through plan, implementation, review, validation, and delivery evidence. Use for multi-step engineering work where planning before coding is required.
+description: Use when the user explicitly asks for ae-lfg, /ae-lfg, $ae-lfg, "use ae-lfg", AE LFG, AI Agent Engine full workflow, or wants a software task taken from requirement clarification through plan, implementation, review, validation, and delivery evidence. Use for multi-step engineering work where planning before coding is required.
 ---
 
 # AE LFG

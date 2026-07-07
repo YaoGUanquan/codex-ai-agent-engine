@@ -1,6 +1,6 @@
 ---
 name: ae-prd
-description: Use when the user asks for AE PRD, /ae-prd, product requirement definition, requirement document creation, WHAT-before-HOW clarification, or a durable requirement artifact before planning.
+description: Use when the user asks for ae-prd, /ae-prd, $ae-prd, "use ae-prd", AE PRD, product requirement definition, requirement document creation, WHAT-before-HOW clarification, or a durable requirement artifact before planning.
 ---
 
 # AE PRD

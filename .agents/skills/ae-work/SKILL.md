@@ -1,6 +1,6 @@
 ---
 name: ae-work
-description: Use when the user asks for AE work, /ae-work, execute an AE plan, implement this plan, or perform a tightly scoped engineering change with validation and delivery evidence. This skill may edit files, but only after Git/worktree safety checks.
+description: Use when the user asks for ae-work, /ae-work, $ae-work, "use ae-work", AE work, execute an AE plan, implement this plan, or perform a tightly scoped engineering change with validation and delivery evidence. This skill may edit files, but only after Git/worktree safety checks.
 ---
 
 # AE Work

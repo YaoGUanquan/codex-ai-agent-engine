@@ -1,6 +1,6 @@
 ---
 name: ae-brainstorm
-description: Use when the user wants AE-style requirement clarification, /ae-brainstorm, feature brainstorming, multi-perspective option collision, scope definition, acceptance criteria, or has a fuzzy software idea that should become a durable requirements artifact before planning.
+description: Use when the user asks for ae-brainstorm, /ae-brainstorm, $ae-brainstorm, "use ae-brainstorm", AE-style requirement clarification, feature brainstorming, multi-perspective option collision, scope definition, acceptance criteria, or a fuzzy software idea that should become a durable requirements artifact before planning.
 ---
 
 # AE Brainstorm

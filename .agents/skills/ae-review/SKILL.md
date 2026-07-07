@@ -1,6 +1,6 @@
 ---
 name: ae-review
-description: Use when the user asks for AE review, /ae-review, layered review, report-only review, autofix review, domain:code, domain:document, review a plan, review requirements, review current changes, or inspect risks before delivery. Findings must be primary.
+description: Use when the user asks for ae-review, /ae-review, $ae-review, "use ae-review", AE review, layered review, report-only review, autofix review, domain:code, domain:document, review a plan, review requirements, review current changes, or inspect risks before delivery. Findings must be primary.
 ---
 
 # AE Review
