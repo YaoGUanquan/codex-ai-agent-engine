@@ -4,4 +4,3 @@ interface:
   default_prompt: "使用 $ae-web-forge 路由并执行这个前端或 Web 任务。 / Use $ae-web-forge to route and execute this frontend or web task."
 policy:
   allow_implicit_invocation: true
-
