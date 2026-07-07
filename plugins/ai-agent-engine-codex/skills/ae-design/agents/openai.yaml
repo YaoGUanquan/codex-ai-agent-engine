@@ -1,0 +1,7 @@
+interface:
+  display_name: "AE 设计契约 / AE Design"
+  short_description: "在 PRD 和计划之间创建可审查的设计契约 / Create a reviewable design contract between PRD and plan"
+  default_prompt: "使用 $ae-design 为这个需求创建设计契约。 / Use $ae-design to create a design contract for this requirement."
+policy:
+  allow_implicit_invocation: true
+

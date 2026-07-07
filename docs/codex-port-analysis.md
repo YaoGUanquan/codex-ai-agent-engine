@@ -73,7 +73,7 @@ node scripts/ae-tools.mjs ae-graph-query [--root <path>] (--path <file>|--keywor
 Implemented now:
 
 - Codex plugin scaffold.
-- Thirty-one Codex skills with UI metadata in both plugin source and `.agents/skills` mirror.
+- Forty Codex skills with UI metadata in both plugin source and `.agents/skills` mirror.
 - Capability catalog and migration references.
 - Help, recovery, task analysis, gate, OpenAPI JSON/YAML smoke paths, and shallow dependency graph scan/query helpers.
 - Project-local installer and updater with bilingual skill-list metadata as the default.
@@ -115,6 +115,14 @@ Deferred intentionally:
 - Observed commit advanced from `760cc5b548d3f82c5db764fc01b98d7874867b95` to `f0cb655ca76fc5e32b5179e155c84f857a9ec289`.
 - Portable methods adapted in this pass: multi-perspective brainstorm collision synthesis, frontend skill repositioning away from "first version" language, and Codex-native four-question web routing.
 - Runtime-specific behavior still rejected: OpenCode sub-agent registry, dynamic browser MCP registration, and slash-command enforcement.
+
+## 2026-07-07 Design And Web Forge Entry Points
+
+- Added `ae-design` as a Codex-native design contract stage between PRD and plan.
+- Added `ae-web-forge` as an independent frontend/Web routing entrypoint that selects existing Codex skills instead of OpenCode `@ui-*` agents.
+- Design artifacts use `docs/ae/designs`, not upstream `ae/designs`.
+- Browser acceptance remains routed through `ae-test-browser`, Browser, Playwright, or available local tooling; no dynamic Chrome MCP registration is claimed.
+- Capability catalog, language metadata, README content, install smoke checks, and regression tests now cover both entrypoints.
 
 ## Recommended Next Phase
 

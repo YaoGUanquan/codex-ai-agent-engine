@@ -114,3 +114,11 @@
 - Context: Upstream now exposes multi-perspective brainstorm synthesis and a formal `ae-web-forge` style web routing model. Local Codex skills still described frontend work as an initial version and did not encode collision insights or four-question web routing.
 - Impact: `ae-brainstorm` now records perspective matrices, disagreement types, collision insights, blind spots, thinking preservation zones, and deepening directions when useful. `ae-frontend-design` is repositioned as frontend design and UI implementation. `ae-web-app` owns Codex-native four-question routing while browser acceptance remains in `ae-test-browser`.
 - Re-evaluate when: adding a dedicated `ae-design` design-contract skill or creating a separate `ae-web-forge` entrypoint becomes more valuable than strengthening existing skill boundaries.
+
+## 2026-07-07: Add Codex-native ae-design and ae-web-forge entrypoints
+
+- Date: 2026-07-07
+- Decision: Add `ae-design` as a PRD-to-plan design contract skill and `ae-web-forge` as an independent frontend/Web routing entrypoint, while keeping both rewritten for Codex-native skills and artifact roots.
+- Context: Upstream includes richer design-contract and web-forge flows, but its OpenCode-specific paths, sub-agent registry, dynamic Chrome MCP registration, and slash command behavior are not portable to this Codex plugin.
+- Impact: `ae-design` writes design contracts under `docs/ae/designs` with stable IDs, risk-triggered dimensions, explicit omitted dimensions, mapping tables, and document review closure. `ae-web-forge` routes to existing `ae-frontend-design`, `ae-web-app`, `ae-test-browser`, `ae-backend`, and `ae-sql` rather than claiming unavailable `@ui-*` agents.
+- Re-evaluate when: a deterministic design validator is added, Codex exposes stable native sub-agent/runtime contracts, or frontend routing duplication between `ae-web-app` and `ae-web-forge` becomes confusing in real use.
