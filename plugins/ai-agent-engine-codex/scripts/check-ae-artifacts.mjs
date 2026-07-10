@@ -9,7 +9,7 @@ const targetRoot = resolve(readArg('--target') || repoRoot)
 const artifactRoot = resolve(targetRoot, 'docs', 'ae')
 const strict = args.includes('--strict')
 
-const allowedTypes = new Set(['prd', 'prd-shard', 'plan', 'plan-shard', 'design', 'design-shard', 'work', 'review'])
+const allowedTypes = new Set(['prd', 'prd-shard', 'plan', 'plan-shard', 'design', 'design-shard', 'work', 'review', 'experience'])
 const allowedStatuses = new Set(['drafted', 'ready', 'review-passed', 'review-needs-fix', 'blocked', 'aborted', 'active', 'completed'])
 const legacyStatuses = new Set(['implemented', 'archived-paused', 'reviewed'])
 const prdStatuses = new Set(['drafted', 'review-passed', 'completed'])
@@ -56,7 +56,7 @@ function validateFrontmatter(path, data) {
   if (!allowedTypes.has(data.type)) {
     errors.push({ path, field: 'type', message: `type must be one of ${Array.from(allowedTypes).join(', ')}` })
   }
-  if (!isAllowedStatus(data.status)) {
+  if (data.type !== 'experience' && !isAllowedStatus(data.status)) {
     errors.push({ path, field: 'status', message: `status is not valid for ${data.type || 'artifact'}` })
   }
   if (data.origin && looksLikePath(data.origin) && !isRepositoryRelativePath(data.origin)) {
