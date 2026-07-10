@@ -1311,6 +1311,9 @@ test('graph-build reports shallow local dependencies', () => {
     assert.equal(result.freshness.canUseAsEvidence, true)
     assert.equal(typeof result.freshness.fingerprint, 'string')
     assert.equal(result.store.path, 'docs/ae/graphs/graph.json')
+    assert.equal(result.store.schemaVersion, 1)
+    assert.equal(result.store.written, false)
+    assert.equal(existsSync(join(tempRoot, 'docs', 'ae', 'graphs', 'graph.json')), false)
     assert.ok(result.nodes.some((node) => node.path === 'src/main.js'))
     assert.ok(result.edges.some((edge) => edge.from === 'src/main.js' && edge.to === 'src/helper.js' && edge.type === 'imports'))
     assert.ok(result.externalDependencies.some((dep) => dep.from === 'src/main.js' && dep.dependency === 'node:fs'))
@@ -1330,11 +1333,22 @@ test('graph-query filters shallow graph by path', () => {
     assert.equal(result.status, 'ok')
     assert.equal(result.freshness.status, 'fresh')
     assert.equal(result.store.path, 'docs/ae/graphs/graph.json')
+    assert.equal(result.store.schemaVersion, 1)
+    assert.equal(result.store.written, false)
+    assert.equal(existsSync(join(tempRoot, 'docs', 'ae', 'graphs', 'graph.json')), false)
     assert.deepEqual(result.matchedNodes.map((node) => node.path), ['src/main.js'])
     assert.ok(result.relatedEdges.some((edge) => edge.to === 'src/helper.js'))
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }
+})
+
+test('graph helper documentation states that graph snapshots are not persisted', () => {
+  const readme = readFileSync(resolve(repoRoot, 'README.md'), 'utf8')
+  const readmeEn = readFileSync(resolve(repoRoot, 'README.en.md'), 'utf8')
+
+  assert.match(readme, /不会写入 `docs\/ae\/graphs\/graph\.json`/)
+  assert.match(readmeEn, /do not write `docs\/ae\/graphs\/graph\.json`/i)
 })
 
 test('review-contract selects reviewers and writes evidence ledger records', () => {

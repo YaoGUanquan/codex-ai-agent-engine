@@ -114,7 +114,7 @@ node scripts/ae-tools.mjs ae-graph-build --root scripts
 node scripts/ae-tools.mjs ae-graph-query --root scripts --path ae-tools.mjs
 ```
 
-`ae-graph-build` and `ae-graph-query` are shallow, read-only dependency graph helpers. They scan source files and emit JSON for quick dependency previews. They do not write `.ae/graph.db`, maintain graph freshness, shard a graph schema, or render a preview page.
+`ae-graph-build` and `ae-graph-query` are shallow, read-only dependency graph helpers. They scan source files and emit JSON for quick dependency previews. They do not write `docs/ae/graphs/graph.json` or `.ae/graph.db`, maintain graph freshness, shard a graph schema, or render a preview page.
 
 ## Project-Level Installation
 
@@ -376,7 +376,7 @@ docs/ai-memory/                  # Compatibility pointer after init
 - Slash-list visibility is Codex skill discoverability and must be verified in the active Codex App; this repository does not claim OpenCode `config.command` parity.
 - This MVP does not provide a real MCP server yet. `.mcp.json` is intentionally empty.
 - Local JSON/YAML OpenAPI parsing works without extra dependencies for common spec structures; complex YAML remains bounded by the lightweight parser.
-- `ae-graph-build` and `ae-graph-query` are shallow read-only scripts, not the full OpenCode graph tool.
+- `ae-graph-build` and `ae-graph-query` are shallow read-only scripts; they do not persist `docs/ae/graphs/graph.json` and are not the full OpenCode graph tool.
 - `ae-merge-branch` is intentionally deferred until `ae-work` has stronger Git evidence and authorization boundaries.
 - Chrome DevTools behavior is routed through existing Browser, Playwright, or available DevTools tools in `ae-test-browser`; this project does not dynamically register OpenCode MCP tools.
 - Git writes, destructive filesystem actions, network fetches, dependency installs, database writes, and browser setup must use Codex's explicit approval model.

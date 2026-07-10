@@ -1555,9 +1555,11 @@ function graphBuild(worktree, args) {
   const root = opts.root ? safeResolve(worktree, opts.root) : worktree
   const files = collectSourceFiles(root).slice(0, Number(opts.limit || 500))
   const graph = buildShallowGraph(root, files)
-  const store = truthy(opts['no-write'])
-    ? { path: 'docs/ae/graphs/graph.json', schemaVersion: 1, written: false }
-    : writeGraphStore(worktree, root, graph)
+  const store = {
+    path: 'docs/ae/graphs/graph.json',
+    schemaVersion: 1,
+    written: false,
+  }
   const result = {
     status: 'ok',
     mode: 'shallow-dependency-graph',
@@ -1620,26 +1622,6 @@ function graphFreshness(worktree, root, graph) {
     fingerprint: stableHash(input),
     basis: ['current filesystem scan completed during this command'],
     git: input.git,
-  }
-}
-
-function writeGraphStore(worktree, root, graph) {
-  const relPath = 'docs/ae/graphs/graph.json'
-  const target = safeResolve(worktree, relPath)
-  mkdirSync(dirname(target), { recursive: true })
-  const snapshot = {
-    schemaVersion: 1,
-    generatedAt: new Date().toISOString(),
-    root: toPosix(relative(worktree, root)) || '.',
-    freshness: graphFreshness(worktree, root, graph),
-    nodes: graph.nodes,
-    edges: graph.edges,
-    externalDependencies: graph.externalDependencies,
-  }
-  writeFileSync(target, `${JSON.stringify(snapshot, null, 2)}\n`, 'utf8')
-  return {
-    path: relPath,
-    schemaVersion: 1,
   }
 }
 

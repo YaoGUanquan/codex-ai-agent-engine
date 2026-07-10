@@ -1,6 +1,6 @@
 ---
 type: plan
-status: ready
+status: completed
 date: 2026-07-10
 title: graph-helper-read-only-contract
 origin: docs/ae/prds/2026-07-10-001-graph-helper-read-only-contract-prd.md
@@ -366,3 +366,12 @@ Remove the graph snapshot write path, add regression tests for default build/que
 ## Handoff
 
 Run `node scripts/ae-tools.mjs task-analyze --mode plan --plan docs/ae/plans/2026-07-10-001-graph-helper-read-only-contract-plan.md`, perform the AE pre-edit Git gate, then execute U1-U4 serially. No subagents are required or authorized.
+
+## Completion Result
+
+- U1: completed with an observed 3/3 red state for runtime and documentation regressions.
+- U2: completed; graph commands are in-memory-only and `writeGraphStore` was removed.
+- U3: completed; Chinese and English README contracts name the non-persisted snapshot path.
+- U4: completed; focused tests pass 3/3, full tests pass 74/74, full checks pass, code review approves, and the final gate reports `pass`.
+- Process archive: `docs/00-process/archive/2026-07/graph-helper-read-only-contract/progress.md`.
+- Final gate: `docs/ae/gates/20260710T015903Z-work-final.json`.

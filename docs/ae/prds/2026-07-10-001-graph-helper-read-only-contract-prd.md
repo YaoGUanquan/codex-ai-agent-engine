@@ -1,6 +1,6 @@
 ---
 type: prd
-status: drafted
+status: completed
 date: 2026-07-10
 topic: graph-helper-read-only-contract
 format: human-readable-requirements
@@ -124,3 +124,11 @@ Reason: documentation-only mitigation leaves the default behavior unsafe and con
 - Scope excludes persistence and unrelated graph logic.
 - Assumptions are separated from confirmed documentation and code facts.
 - No unresolved product decision blocks a one-plan repair.
+
+## Completion Evidence
+
+- R1 and R2: default build/query filesystem assertions pass in temporary worktrees.
+- R3: graph responses retain `store.path`, `store.schemaVersion`, and `store.written: false`; the full repository check also exercises `--no-write` compatibility.
+- R4: Chinese and English README claims are protected by a focused regression test.
+- NFR1 and NFR2: no dependency or persistence option was added; `npm.cmd test` passes 74/74 and `npm.cmd run check` passes.
+- Final gate: `docs/ae/gates/20260710T015903Z-work-final.json`.
