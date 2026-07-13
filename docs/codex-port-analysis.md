@@ -2,8 +2,8 @@
 
 Date: 2026-05-11
 Source: https://gitee.com/jiangqiang1996/ai-agent-engine
-Observed source commit: f0cb655ca76fc5e32b5179e155c84f857a9ec289
-Observed source ref: remote HEAD verified by upstream audit on 2026-07-07.
+Observed source commit: 00d7e9ca7594945ac26a46fffc43ccd679cd461b
+Observed source ref: remote master verified by upstream audit on 2026-07-13.
 
 ## Conclusion
 
@@ -158,6 +158,13 @@ Deferred intentionally:
 - Final pushed commit: `67896d0 feat: strengthen AE skill trigger metadata`.
 - Final validation: `npm test`, `npm run check`, and `git diff --check` passed.
 - Runtime UI boundary remains unchanged: actual `/` or skill-search visibility must be manually verified in the active Codex App and is not equivalent to OpenCode `config.command` registration.
+
+## 2026-07-13 Workflow Optimization Refresh
+
+- Remote `master` was rechecked with `git ls-remote https://gitee.com/jiangqiang1996/ai-agent-engine.git refs/heads/master` at `00d7e9ca7594945ac26a46fffc43ccd679cd461b`.
+- The capability catalog now assigns every skill one presentation tier (`core`, `docs`, `tools`, or `meta`) so help output is grouped without changing skill routing or permissions.
+- Codex-native adaptations in this pass strengthen design-contract semantic validation and the `ae-task-loop` completion contract.
+- OpenCode sessions, hooks, dynamic MCP registration, async bash, media fallback, graph telemetry, and designer-agent runtime remain explicitly unsupported.
 
 ## 2026-07-07 Installed Command Wrapper Follow-Up
 

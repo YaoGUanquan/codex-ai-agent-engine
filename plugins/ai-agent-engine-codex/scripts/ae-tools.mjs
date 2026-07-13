@@ -106,6 +106,15 @@ function main() {
 
 function printHelp(query) {
   const catalog = readJson(catalogPath)
+  const tiers = [
+    { id: 'core', label: '核心工程流程' },
+    { id: 'docs', label: '文档处理' },
+    { id: 'tools', label: '辅助工具' },
+    { id: 'meta', label: '维护与配置' },
+  ]
+  const supportedTiers = new Set(tiers.map((tier) => tier.id))
+  const invalidSkill = catalog.skills.find((skill) => !supportedTiers.has(skill.tier))
+  if (invalidSkill) throw new Error(`capability catalog skill ${invalidSkill.name} has unsupported tier: ${invalidSkill.tier || '<missing>'}`)
   const q = query.toLowerCase()
   const skills = catalog.skills.filter((skill) => {
     if (!q) return true
@@ -124,14 +133,20 @@ function printHelp(query) {
   if (skills.length > 0) {
     lines.push('')
     lines.push('## 入口')
-    lines.push('')
-    for (const skill of skills) {
-      const entry = skill.entry || `/${skill.name}`
-      const target = skill.target ? `${skill.target}: ` : ''
-      lines.push(`- ${target}${entry} (${skill.name})`)
-      lines.push(`  说明: ${skill.purpose}`)
-      if (skill.script) lines.push(`  脚本: ${skill.script}`)
-      if (skill.artifactPath) lines.push(`  产物路径: ${skill.artifactPath}`)
+    for (const tier of tiers) {
+      const tierSkills = skills.filter((skill) => skill.tier === tier.id)
+      if (tierSkills.length === 0) continue
+      lines.push('')
+      lines.push(`### ${tier.label} (${tier.id})`)
+      lines.push('')
+      for (const skill of tierSkills) {
+        const entry = skill.entry || `/${skill.name}`
+        const target = skill.target ? `${skill.target}: ` : ''
+        lines.push(`- ${target}${entry} (${skill.name})`)
+        lines.push(`  说明: ${skill.purpose}`)
+        if (skill.script) lines.push(`  脚本: ${skill.script}`)
+        if (skill.artifactPath) lines.push(`  产物路径: ${skill.artifactPath}`)
+      }
     }
   }
   if (skills.length === 0 && commands.length === 0) {

@@ -138,3 +138,11 @@
 - Context: SkillOpt's portable value is its trajectory-driven bounded edit loop, validation gate, rejected-update feedback, and staged proposal discipline. The current AE project has mirror, contract, artifact, and claim checks, but does not yet have a task replay benchmark that can safely accept or reject automatically generated skill edits.
 - Impact: External audits now check trajectory source, bounded edit shape, validation gate, rejected-update handling, staging/adoption policy, and AE validation mapping before recommending any local skill change. Audit reports can adapt useful optimization mechanics as process contracts or template fields while rejecting unsupported runtime import and auto-adoption.
 - Re-evaluate when: repeated audits need the same staged replay workflow, `docs/ae` gains a local held-out task suite, or a future `ae-skill-optimize` plan can prove harmful edits are rejected before live skill files change.
+
+## 2026-07-13: Adapt tiered help and workflow completion guards from upstream
+
+- Date: 2026-07-13
+- Decision: Treat upstream commit `00d7e9ca7594945ac26a46fffc43ccd679cd461b` as the current observed baseline and adapt only capability presentation tiers, deterministic design-contract semantics, and task-loop completion guards.
+- Context: The upstream delta contains useful catalog organization and workflow contracts alongside OpenCode-only sessions, hooks, dynamic MCP, async execution, media fallback, graph telemetry, and agent registries.
+- Impact: AE help groups skills by explicit `core`, `docs`, `tools`, and `meta` metadata without changing routing. Design and task-loop improvements remain Codex-native process and validation contracts.
+- Re-evaluate when: Codex exposes a stable headless registry test surface or a real project artifact requires a broader design declaration grammar.

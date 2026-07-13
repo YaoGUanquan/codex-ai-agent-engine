@@ -53,6 +53,8 @@ The design is ready for `ae-plan` only when:
 
 - required dimensions are present or explicitly justified as omitted;
 - stable IDs are unique and referenced by the mapping tables;
+- every stable ID used by a mapping table is declared by a canonical `### ADR|EP|T|TC|ST-XXX` heading in `design.md` or a listed sibling Markdown shard;
+- every Split Manifest file is an existing Markdown file inside the current design directory;
 - cross-dimension mapping does not contradict the dimension sections;
 - no P0/P1 document review finding remains unresolved.
 
