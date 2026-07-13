@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
-import { isAbsolute, relative, resolve } from 'node:path'
+import { dirname, isAbsolute, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const repoRoot = resolve(fileURLToPath(new URL('../../..', import.meta.url)))
@@ -109,6 +109,106 @@ function validateDesign(file) {
   validateExplicitOmittedDimensions(relPath, sections.get('Overview') || '')
   validateConsistencyFields(relPath, sections.get('Consistency Check') || '')
   validateStableIds(relPath, content)
+  const manifestFiles = validateSplitManifest(relPath, file, sections.get('Split Manifest') || '')
+  validateStableReferences(relPath, file, content, sections, manifestFiles)
+}
+
+function validateSplitManifest(path, designFile, sectionBody) {
+  const designDir = dirname(designFile)
+  const entries = extractManifestFiles(sectionBody)
+  const validFiles = []
+  if (entries.length === 0) {
+    errors.push({ path, field: 'splitManifest', message: 'Split Manifest must list at least design.md' })
+    return validFiles
+  }
+
+  for (const entry of entries) {
+    const normalized = unquote(entry).replace(/\\/g, '/')
+    if (!normalized || isAbsolute(normalized) || /^[a-zA-Z]:[\\/]/.test(normalized)) {
+      errors.push({ path, field: 'splitManifest', message: `Split Manifest file must be repository-relative: ${entry}` })
+      continue
+    }
+    const candidate = normalized.includes('/') ? resolve(targetRoot, normalized) : resolve(designDir, normalized)
+    const relativeToDesign = relative(designDir, candidate)
+    if (relativeToDesign === '..' || relativeToDesign.startsWith(`..${sep}`) || isAbsolute(relativeToDesign)) {
+      errors.push({ path, field: 'splitManifest', message: `Split Manifest file must stay inside the design directory: ${entry}` })
+      continue
+    }
+    if (!candidate.toLowerCase().endsWith('.md')) {
+      errors.push({ path, field: 'splitManifest', message: `Split Manifest file must be Markdown: ${entry}` })
+      continue
+    }
+    if (!existsSync(candidate) || !statSync(candidate).isFile()) {
+      errors.push({ path, field: 'splitManifest', message: `Split Manifest file does not exist: ${entry}` })
+      continue
+    }
+    validFiles.push(candidate)
+  }
+  if (!validFiles.some((candidate) => resolve(candidate) === resolve(designFile))) {
+    errors.push({ path, field: 'splitManifest', message: 'Split Manifest must list design.md' })
+  }
+  return [...new Set(validFiles)]
+}
+
+function extractManifestFiles(sectionBody) {
+  const entries = []
+  const lines = sectionBody.replace(/\r\n/g, '\n').split('\n')
+  let filesIndent = null
+  for (const line of lines) {
+    const filesMatch = /^(\s*)-\s+files\s*:\s*$/i.exec(line)
+    if (filesMatch) {
+      filesIndent = filesMatch[1].length
+      continue
+    }
+    if (filesIndent === null) continue
+    if (!line.trim()) continue
+    const entryMatch = /^(\s*)-\s+(.+?)\s*$/.exec(line)
+    if (!entryMatch || entryMatch[1].length <= filesIndent) break
+    entries.push(entryMatch[2])
+  }
+  return entries
+}
+
+function validateStableReferences(path, designFile, designContent, sections, manifestFiles) {
+  const declarations = extractOwnedDeclarations(designContent)
+  const declarationPattern = /^#{3,6}\s+((?:ADR|EP|T|TC|ST)-\d{3})\b/gm
+  for (const manifestFile of manifestFiles) {
+    if (resolve(manifestFile) === resolve(designFile)) continue
+    const content = readFileSync(manifestFile, 'utf8')
+    for (const match of content.matchAll(declarationPattern)) declarations.add(match[1])
+  }
+
+  const references = new Set()
+  for (const section of requiredMappingSections) {
+    for (const match of (sections.get(section) || '').matchAll(stableIdPattern)) references.add(match[0])
+  }
+  for (const reference of references) {
+    if (!declarations.has(reference)) {
+      errors.push({ path, field: 'stableReference', message: `mapping table references undeclared stable ID: ${reference}` })
+    }
+  }
+}
+
+function extractOwnedDeclarations(content) {
+  const owners = {
+    ADR: 'Decisions',
+    EP: 'API',
+    T: 'Database',
+    ST: 'UI/UX',
+    TC: 'Test Cases',
+  }
+  const declarations = new Set()
+  let parentSection = null
+  for (const line of content.replace(/\r\n/g, '\n').split('\n')) {
+    const parentMatch = /^##\s+(.+?)\s*$/.exec(line)
+    if (parentMatch) {
+      parentSection = parentMatch[1].trim()
+      continue
+    }
+    const declarationMatch = /^#{3,6}\s+((ADR|EP|T|TC|ST)-\d{3})\b/.exec(line)
+    if (declarationMatch && owners[declarationMatch[2]] === parentSection) declarations.add(declarationMatch[1])
+  }
+  return declarations
 }
 
 function validateExplicitOmittedDimensions(path, overview) {
@@ -191,6 +291,14 @@ function parseScalar(value) {
   if (value === 'null') return null
   if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) return value.slice(1, -1)
   return value
+}
+
+function unquote(value) {
+  const trimmed = value.trim()
+  if ((trimmed.startsWith('`') && trimmed.endsWith('`')) || (trimmed.startsWith('"') && trimmed.endsWith('"')) || (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
+    return trimmed.slice(1, -1)
+  }
+  return trimmed
 }
 
 function walk(root) {

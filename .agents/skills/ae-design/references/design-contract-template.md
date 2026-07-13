@@ -97,9 +97,15 @@ sharded: false
 
 ## API
 
+### EP-XXX - <endpoint or API contract>
+
 ## Database
 
+### T-XXX - <table or durable data structure>
+
 ## UI/UX
+
+### ST-XXX - <UI state machine or state>
 
 ## Test Cases
 
@@ -131,5 +137,7 @@ Rules:
 
 - Use repository-relative paths.
 - Keep stable IDs unchanged across design revisions; mark old IDs superseded instead of reusing them.
+- Declare every stable ID referenced by a mapping table with a canonical `### ADR|EP|T|TC|ST-XXX` heading in `design.md` or a Markdown shard listed in the Split Manifest. A mapping-table cell is a reference, not a declaration.
 - If a dimension is omitted, list it in Overview with `explicitly-omitted` and the reason.
 - If a dimension is split into a sibling file, keep the overview, implementation constraints, decisions, mapping tables, and consistency check in `design.md`.
+- Every Split Manifest file must be an existing Markdown file inside the current design directory. Use either a sibling filename or its repository-relative path.
