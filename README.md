@@ -13,6 +13,8 @@ English: [README.en.md](README.en.md)
 
 OpenCode branch integration: [README.opencode.md](README.opencode.md)
 
+> 分支策略：`codex/opencode-mode` 是专门用于 OpenCode 开发和维护的长期分支，与 `main` 独立维护，后续不会合并回 `main`。这与 `codebuddy` 分支的独立维护方式一致；Codex 主版本以 `main` 为准。
+
 ## 适用场景
 
 当你希望一个 Codex 项目自带可复用工程流程时，可以使用本插件：
@@ -326,7 +328,7 @@ New-Item -ItemType Directory -Force -Path .codex | Out-Null
 Copy-Item docs\ae\templates\ae-skill-profiles.example.yaml .codex\ae-skill-profiles.yaml
 ```
 
-如需允许写入型子代理自动并行，必须额外显式设置 `mode: auto` 和 `allow_write_agents: true`。即便如此，`task-analyze` 仍会要求计划依赖清晰、文件不冲突、并满足 Git 清洁状态等前置条件。合并到主分支后，其他项目应先运行更新命令，再复制或编辑 `.codex/ae-skill-profiles.yaml`，最后用实际计划验证：
+如需允许写入型子代理自动并行，必须额外显式设置 `mode: auto` 和 `allow_write_agents: true`。即便如此，`task-analyze` 仍会要求计划依赖清晰、文件不冲突、并满足 Git 清洁状态等前置条件。使用 `main` 分支版本时，其他项目应先运行更新命令，再复制或编辑 `.codex/ae-skill-profiles.yaml`，最后用实际计划验证：
 
 ```bash
 node scripts/ae-tools.mjs task-analyze --mode plan --plan docs/ae/plans/<your-plan>.md

@@ -12,6 +12,8 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 
 中文文档: [README.md](README.md)
 
+> Branch policy: `codex/opencode-mode` is a dedicated long-lived branch for OpenCode development and maintenance. It is maintained independently and will not be merged back into `main`, following the same policy as the `codebuddy` branch. The Codex mainline remains on `main`.
+
 ## When To Use It
 
 Use this plugin when you want a Codex project to keep repeatable engineering workflows close to the repository:
@@ -310,7 +312,7 @@ New-Item -ItemType Directory -Force -Path .codex | Out-Null
 Copy-Item docs\ae\templates\ae-skill-profiles.example.yaml .codex\ae-skill-profiles.yaml
 ```
 
-Read-only review lanes use `read_parallel_eligibility`; write workers use `write_parallel_eligibility`. Write-agent auto parallelism requires additional explicit opt-in with `mode: auto` and `allow_write_agents: true`. Even then, `task-analyze` only reports config readiness; the orchestrating agent must complete the Git Pre-Edit Gate before any write-worker spawn. After merging this branch to `main`, other projects should update first, copy or edit `.codex/ae-skill-profiles.yaml`, then verify against a real plan:
+Read-only review lanes use `read_parallel_eligibility`; write workers use `write_parallel_eligibility`. Write-agent auto parallelism requires additional explicit opt-in with `mode: auto` and `allow_write_agents: true`. Even then, `task-analyze` only reports config readiness; the orchestrating agent must complete the Git Pre-Edit Gate before any write-worker spawn. When using the `main` branch version, other projects should update first, copy or edit `.codex/ae-skill-profiles.yaml`, then verify against a real plan:
 
 ```bash
 node scripts/ae-tools.mjs task-analyze --mode plan --plan docs/ae/plans/<your-plan>.md
