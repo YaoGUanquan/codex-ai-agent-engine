@@ -8,6 +8,33 @@ Engine workflow assets.
 > will not be merged back into `main`, following the same policy as the
 > `codebuddy` branch. The Codex mainline remains on `main`.
 
+## Quick Install And Use
+
+Clone this branch outside the target project and install the OpenCode project
+files into that project:
+
+```bash
+git clone --depth 1 --branch codex/opencode-mode https://github.com/YaoGUanquan/codex-ai-agent-engine.git /tmp/ae-opencode
+node /tmp/ae-opencode/scripts/install-project.mjs --target /path/to/your/project
+cd /path/to/your/project
+node scripts/check-opencode.mjs
+opencode
+```
+
+On Windows PowerShell:
+
+```powershell
+git clone --depth 1 --branch codex/opencode-mode https://github.com/YaoGUanquan/codex-ai-agent-engine.git "$env:TEMP\ae-opencode"
+node "$env:TEMP\ae-opencode\scripts\install-project.mjs" --target "D:\codes\your-project"
+Set-Location "D:\codes\your-project"
+node scripts\check-opencode.mjs
+opencode
+```
+
+Use `/ae-help` to list the available workflows. Common commands include
+`/ae-brainstorm`, `/ae-plan`, `/ae-work`, and `/ae-review`. Restart OpenCode
+after installing or updating project-local skills and commands.
+
 ## Included
 
 - `opencode.json` with the OpenCode schema and `ae-*` skill permissions.

@@ -14,6 +14,75 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 
 > Branch policy: `codex/opencode-mode` is a dedicated long-lived branch for OpenCode development and maintenance. It is maintained independently and will not be merged back into `main`, following the same policy as the `codebuddy` branch. The Codex mainline remains on `main`.
 
+## OpenCode And CodeBuddy Installation
+
+This repository maintains separate runtime paths: OpenCode uses the
+`codex/opencode-mode` branch, while CodeBuddy uses the `codebuddy` branch. Both
+branches are maintained independently and are not merged back into `main`.
+
+### Install And Use With OpenCode
+
+Clone the OpenCode branch outside the target project, then run its project-level installer:
+
+```bash
+git clone --depth 1 --branch codex/opencode-mode https://github.com/YaoGUanquan/codex-ai-agent-engine.git /tmp/ae-opencode
+node /tmp/ae-opencode/scripts/install-project.mjs --target /path/to/your/project
+cd /path/to/your/project
+node scripts/check-opencode.mjs
+opencode
+```
+
+Windows PowerShell:
+
+```powershell
+git clone --depth 1 --branch codex/opencode-mode https://github.com/YaoGUanquan/codex-ai-agent-engine.git "$env:TEMP\ae-opencode"
+node "$env:TEMP\ae-opencode\scripts\install-project.mjs" --target "D:\codes\your-project"
+Set-Location "D:\codes\your-project"
+node scripts\check-opencode.mjs
+opencode
+```
+
+After installation, use `/ae-help` in OpenCode or invoke the workflows directly:
+
+```text
+/ae-brainstorm clarify this request
+/ae-plan create an implementation plan for the approved requirements
+/ae-work execute docs/ae/plans/<plan>.md
+/ae-review review the current changes
+```
+
+See [README.opencode.md](README.opencode.md) for the full OpenCode guide.
+
+### Install And Use With CodeBuddy
+
+CodeBuddy uses the dedicated `codebuddy` branch. Clone it, then point
+CodeBuddy's local plugin or marketplace configuration at the plugin directory:
+
+```bash
+git clone --depth 1 --branch codebuddy https://github.com/YaoGUanquan/codex-ai-agent-engine.git /path/to/ae-codebuddy
+```
+
+Plugin directory:
+
+```text
+/path/to/ae-codebuddy/plugins/ai-agent-engine-codex
+```
+
+CodeBuddy discovers the `skills/` directory through
+`plugins/ai-agent-engine-codex/.codebuddy-plugin/plugin.json`. Add that local
+plugin path in CodeBuddy, reload the plugin, and use natural-language requests
+or skill names:
+
+```text
+Use ae-help to list the current AE capabilities.
+Use ae-plan to create an implementation plan for this request.
+Use ae-work to execute the plan.
+Use ae-review to review the current changes.
+```
+
+The local plugin path is configured in the CodeBuddy client and is not written
+automatically by this repository's scripts.
+
 ## When To Use It
 
 Use this plugin when you want a Codex project to keep repeatable engineering workflows close to the repository:
