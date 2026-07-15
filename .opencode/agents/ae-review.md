@@ -1,6 +1,7 @@
 ---
 description: Read-only AE reviewer for code and documentation
 mode: subagent
+steps: 15
 permission:
   "*": deny
   read: allow
