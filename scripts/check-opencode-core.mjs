@@ -72,6 +72,7 @@ function validateSkillPermission(config) {
 
 function validateReviewerContract(path, frontmatter) {
   if (frontmatter.mode !== 'subagent') fail('ae-review must be a subagent')
+  if (frontmatter.steps !== '15') fail('ae-review must cap the subagent at 15 steps')
   const content = readFileSync(path, 'utf8')
   const requiredRules = [
     /^  "\*": deny$/m,

@@ -10,6 +10,7 @@ Engine workflow assets.
 - `.opencode/agents/ae-review.md` for a read-only review subagent.
 - `.agents/skills/` as the shared OpenCode-compatible skill directory.
 - `scripts/check-opencode.mjs` for deterministic integration checks.
+- `scripts/check-opencode-upstream.mjs` for repeatable Gitee upstream comparison.
 
 OpenCode discovers project skills from `.agents/skills`, so no Codex plugin
 manifest is required for the OpenCode runtime. The existing Codex manifest and
@@ -57,3 +58,21 @@ npm run check
 
 The check validates the OpenCode config, core command frontmatter, review agent
 frontmatter, and the OpenCode skill naming/description constraints.
+
+## Upstream refresh
+
+The branch tracks the upstream Gitee project as a reference source. Inspect a
+local upstream checkout and classify changes before adapting them:
+
+```bash
+node scripts/check-opencode-upstream.mjs \
+  --source /path/to/ai-agent-engine \
+  --since b6df46e
+```
+
+The current reference was checked at `ff97284db2855e0048820843dd6416fb0f00ab72`.
+The upstream review-agent step cap from `a2a0229` is applied locally as
+`steps: 15`. The latest Office skill design-system update from `ff97284` is
+recorded as deferred because this branch does not ship the upstream
+`ae-officecli` runtime/tool boundary; copying those skills alone would expose
+unusable commands.
