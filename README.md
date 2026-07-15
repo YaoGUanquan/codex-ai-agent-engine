@@ -15,6 +15,71 @@ OpenCode branch integration: [README.opencode.md](README.opencode.md)
 
 > 分支策略：`codex/opencode-mode` 是专门用于 OpenCode 开发和维护的长期分支，与 `main` 独立维护，后续不会合并回 `main`。这与 `codebuddy` 分支的独立维护方式一致；Codex 主版本以 `main` 为准。
 
+## OpenCode 和 CodeBuddy 安装
+
+本仓库按运行时分别维护两条兼容路径：OpenCode 使用
+`codex/opencode-mode` 分支，CodeBuddy 使用 `codebuddy` 分支。两条分支都独立维护，不合并回 `main`。
+
+### OpenCode 安装和使用
+
+在目标项目外获取 OpenCode 专用分支，然后运行项目级安装脚本：
+
+```bash
+git clone --depth 1 --branch codex/opencode-mode https://github.com/YaoGUanquan/codex-ai-agent-engine.git /tmp/ae-opencode
+node /tmp/ae-opencode/scripts/install-project.mjs --target /path/to/your/project
+cd /path/to/your/project
+node scripts/check-opencode.mjs
+opencode
+```
+
+Windows PowerShell：
+
+```powershell
+git clone --depth 1 --branch codex/opencode-mode https://github.com/YaoGUanquan/codex-ai-agent-engine.git "$env:TEMP\ae-opencode"
+node "$env:TEMP\ae-opencode\scripts\install-project.mjs" --target "D:\codes\your-project"
+Set-Location "D:\codes\your-project"
+node scripts\check-opencode.mjs
+opencode
+```
+
+安装完成后，在 OpenCode 中使用 `/ae-help` 查看入口，或直接使用：
+
+```text
+/ae-brainstorm 澄清这个需求
+/ae-plan 为已确认需求生成实现计划
+/ae-work 执行 docs/ae/plans/<plan>.md
+/ae-review 审查当前变更
+```
+
+详细说明见 [README.opencode.md](README.opencode.md)。
+
+### CodeBuddy 安装和使用
+
+CodeBuddy 使用专用的 `codebuddy` 分支。获取分支后，在 CodeBuddy 的本地插件或 marketplace 配置中指向插件目录：
+
+```bash
+git clone --depth 1 --branch codebuddy https://github.com/YaoGUanquan/codex-ai-agent-engine.git /path/to/ae-codebuddy
+```
+
+插件目录：
+
+```text
+/path/to/ae-codebuddy/plugins/ai-agent-engine-codex
+```
+
+CodeBuddy 通过该目录下的
+`plugins/ai-agent-engine-codex/.codebuddy-plugin/plugin.json` 发现
+`skills/`。在 CodeBuddy 中添加本地插件路径并重新加载插件后，直接使用自然语言或 skill 名称：
+
+```text
+使用 ae-help 查看当前 AE 能力
+使用 ae-plan 为这个需求生成实现计划
+使用 ae-work 执行这个计划
+使用 ae-review 审查当前变更
+```
+
+CodeBuddy 的本地插件路径配置属于 CodeBuddy 客户端设置，不由本仓库脚本自动写入。详细的 Codex 安装说明仍见下方“项目级安装”章节。
+
 ## 适用场景
 
 当你希望一个 Codex 项目自带可复用工程流程时，可以使用本插件：
