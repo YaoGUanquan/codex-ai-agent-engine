@@ -3,6 +3,11 @@
 This branch adds a project-local OpenCode integration to the shared AI Agent
 Engine workflow assets.
 
+> Branch policy: `codex/opencode-mode` is a dedicated long-lived branch for
+> OpenCode development and maintenance. It is maintained independently and
+> will not be merged back into `main`, following the same policy as the
+> `codebuddy` branch. The Codex mainline remains on `main`.
+
 ## Included
 
 - `opencode.json` with the OpenCode schema and `ae-*` skill permissions.

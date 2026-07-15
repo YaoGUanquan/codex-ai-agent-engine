@@ -3,6 +3,10 @@
 This directory contains the project-local OpenCode integration for AI Agent
 Engine.
 
+This integration belongs to the dedicated `codex/opencode-mode` branch. The
+branch is maintained independently for OpenCode development and will not be
+merged back into `main`, following the same policy as the `codebuddy` branch.
+
 - `commands/` exposes the core AE workflows as native `/ae-*` commands.
 - `agents/` contains narrowly scoped OpenCode agents.
 - `../opencode.json` allows the `ae-*` skills to be loaded by OpenCode.
