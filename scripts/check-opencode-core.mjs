@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { opencodeExcludedSkillNames, opencodeExcludedSkills } from '../plugins/ai-agent-engine-codex/scripts/opencode-skill-policy.mjs'
 
 const targetRoot = resolve(readArg('--target') || process.cwd())
 const requiredCommands = [
@@ -38,6 +39,10 @@ validateReviewerContract(agentPath, reviewerFrontmatter)
 
 const skills = listDirectories(skillRoot)
 if (skills.length === 0) fail('No OpenCode-compatible skills found under .agents/skills')
+const excludedSkillsPresent = skills.filter((name) => opencodeExcludedSkills.has(name))
+if (excludedSkillsPresent.length > 0) {
+  fail(`Codex-only skills must not be installed for OpenCode: ${excludedSkillsPresent.join(', ')}`)
+}
 for (const name of skills) {
   const skillPath = resolve(skillRoot, name, 'SKILL.md')
   assertFile(skillPath, `.agents/skills/${name}/SKILL.md`)
@@ -55,6 +60,7 @@ console.log(JSON.stringify({
   targetRoot,
   commandCount: requiredCommands.length,
   skillCount: skills.length,
+  excludedSkills: opencodeExcludedSkillNames,
   readOnlyAgent: 'ae-review',
   skillPermission: config.permission?.skill ? 'explicit' : 'default',
 }, null, 2))

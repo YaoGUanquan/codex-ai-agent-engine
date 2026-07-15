@@ -3,6 +3,7 @@ import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statS
 import { dirname, resolve, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawnSync } from 'node:child_process'
+import { opencodeExcludedSkillNames } from '../plugins/ai-agent-engine-codex/scripts/opencode-skill-policy.mjs'
 
 const __filename = fileURLToPath(import.meta.url)
 const repoRoot = resolve(dirname(__filename), '..')
@@ -28,7 +29,13 @@ const sourceOpenCodeConfig = resolve(repoRoot, 'opencode.json')
 const targetOpenCodeConfig = resolve(targetRoot, 'opencode.json')
 const sourceTemplates = resolve(repoRoot, 'docs', 'ae', 'templates')
 const targetTemplates = resolve(targetRoot, 'docs', 'ae', 'templates')
-const removedSkillNames = ['ae-officecli', 'ae-docx', 'ae-xlsx', 'ae-pptx']
+const removedSkillNames = [
+  'ae-officecli',
+  'ae-docx',
+  'ae-xlsx',
+  'ae-pptx',
+  ...opencodeExcludedSkillNames,
+]
 const removedScriptNames = ['check-officecli-available.mjs', 'check-officecli-smoke.mjs']
 const lang = readArg('--lang') || readInstalledLang(targetRoot) || 'bilingual'
 const supportedLangs = new Set(['en', 'zh-CN', 'bilingual'])
@@ -52,6 +59,7 @@ for (const name of removedSkillNames) {
 }
 const sourceSkills = resolve(sourcePlugin, 'skills')
 for (const name of listDirs(sourceSkills)) {
+  if (opencodeExcludedSkillNames.includes(name)) continue
   const dst = resolve(targetAgentsSkills, name)
   if (existsSync(dst)) rmSync(dst, { recursive: true, force: true })
   cpSync(resolve(sourceSkills, name), dst, { recursive: true })
@@ -117,6 +125,7 @@ console.log(JSON.stringify({
   openCode: toPosix(relative(targetRoot, targetOpenCode)),
   openCodeConfig: toPosix(relative(targetRoot, targetOpenCodeConfig)),
   openCodeChecker: toPosix(relative(targetRoot, targetOpenCodeChecker)),
+  openCodeExcludedSkills: opencodeExcludedSkillNames,
   lang,
 }, null, 2))
 

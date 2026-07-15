@@ -67,12 +67,36 @@ test('check-skill-mirror reports ok', () => {
   const result = runNodeScript('scripts/check-skill-mirror.mjs')
   assert.equal(result.status, 'ok')
   assert.ok(result.fileCount > 0)
+  assert.deepEqual(result.excludedSkills, [
+    'ae-computer-use-guard',
+    'ae-imagegen-prompt',
+    'ae-video-edit-computer',
+  ])
+})
+
+test('check-skill-mirror rejects an excluded OpenCode skill in the mirror', () => {
+  const skillDir = resolve(repoRoot, '.agents', 'skills', 'ae-computer-use-guard')
+  mkdirSync(skillDir, { recursive: true })
+  writeFileSync(resolve(skillDir, 'SKILL.md'), '# stale Codex-only skill\n', 'utf8')
+  try {
+    const result = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'check-skill-mirror.mjs')], {
+      cwd: repoRoot,
+      encoding: 'utf8',
+      stdio: 'pipe',
+    })
+    assert.notEqual(result.status, 0)
+    const detail = JSON.parse(result.stderr)
+    assert.deepEqual(detail.excludedInMirror, ['ae-computer-use-guard/SKILL.md'])
+  } finally {
+    rmSync(skillDir, { recursive: true, force: true })
+  }
 })
 
 test('check-skill-language-metadata reports ok', () => {
   const result = runNodeScript('scripts/check-skill-language-metadata.mjs')
   assert.equal(result.status, 'ok')
   assert.equal(result.skillCount, result.metadataCount)
+  assert.equal(result.openCodeSkillCount, result.skillCount - 3)
 })
 
 test('check-skill-contract reports ok without external dependencies', () => {
@@ -664,9 +688,6 @@ test('check-install-smoke reports ok and verifies new skills', () => {
     'ae-claude-code',
     'ae-markitdown',
     'ae-static-server',
-    'ae-computer-use-guard',
-    'ae-imagegen-prompt',
-    'ae-video-edit-computer',
   ])
 })
 

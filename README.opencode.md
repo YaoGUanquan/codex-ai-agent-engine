@@ -8,13 +8,16 @@ Engine workflow assets.
 - `opencode.json` with the OpenCode schema and `ae-*` skill permissions.
 - `.opencode/commands/ae-*.md` for the core native slash commands.
 - `.opencode/agents/ae-review.md` for a read-only review subagent.
-- `.agents/skills/` as the shared OpenCode-compatible skill directory.
+- `.agents/skills/` as the OpenCode-compatible skill directory.
 - `scripts/check-opencode.mjs` for deterministic integration checks.
 - `scripts/check-opencode-upstream.mjs` for repeatable Gitee upstream comparison.
 
 OpenCode discovers project skills from `.agents/skills`, so no Codex plugin
 manifest is required for the OpenCode runtime. The existing Codex manifest and
 `agents/openai.yaml` files remain available for the compatible Codex path.
+The OpenCode directory intentionally excludes `ae-computer-use-guard`,
+`ae-imagegen-prompt`, and `ae-video-edit-computer`; these remain in the Codex
+plugin source only.
 
 ## Usage
 
