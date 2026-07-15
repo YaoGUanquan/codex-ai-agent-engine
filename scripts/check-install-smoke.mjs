@@ -1,344 +1,166 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { relative, resolve } from 'node:path'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { randomUUID } from 'node:crypto'
-import { opencodeExcludedSkillNames } from '../plugins/ai-agent-engine-codex/scripts/opencode-skill-policy.mjs'
 
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
-const targetRoot = resolve(repoRoot, '.tmp-install-smoke-checks', randomUUID())
-
-ensureInsideRepo(targetRoot)
-cleanupTarget()
-mkdirSync(targetRoot, { recursive: true })
+const targetRoot = mkdtempSync(resolve(tmpdir(), 'ae-opencode-install-'))
+const installer = resolve(repoRoot, 'scripts', 'install-project.mjs')
+const runtimeRoot = resolve(targetRoot, '.opencode', 'ai-agent-engine')
+const bridgePath = resolve(targetRoot, '.opencode', 'plugins', 'ae-server.js')
+const excluded = ['ae-pdf', 'ae-docx', 'ae-xlsx', 'ae-pptx', 'ae-officecli']
+const parityManifest = JSON.parse(readFileSync(resolve(repoRoot, 'docs', 'ae', 'parity', 'opencode-upstream-a144f785-manifest.json'), 'utf8'))
+const sourceSentinel = resolve(repoRoot, `.install-secret-sentinel-${randomUUID()}`)
 
 try {
-  const existingTemplateDir = resolve(targetRoot, 'docs', 'ae', 'templates')
-  const existingTemplatePath = resolve(existingTemplateDir, 'user-template.md')
-  const existingOpenCodeConfigPath = resolve(targetRoot, 'opencode.json')
-  mkdirSync(existingTemplateDir, { recursive: true })
-  writeFileSync(existingTemplatePath, 'user-owned template\n', 'utf8')
-  writeFileSync(existingOpenCodeConfigPath, '{\n  "$schema": "https://opencode.ai/config.json",\n  "model": "example/model"\n}\n', 'utf8')
-  const staleSkillDirs = ['ae-officecli', 'ae-docx', 'ae-xlsx', 'ae-pptx', ...opencodeExcludedSkillNames]
-  for (const skillName of staleSkillDirs) {
-    const staleSkillDir = resolve(targetRoot, '.agents', 'skills', skillName)
-    mkdirSync(staleSkillDir, { recursive: true })
-    writeFileSync(resolve(staleSkillDir, 'SKILL.md'), `# stale ${skillName}\n`, 'utf8')
+  writeFileSync(sourceSentinel, 'must not be distributed', 'utf8')
+  mkdirSync(resolve(targetRoot, '.opencode', 'plugins'), { recursive: true })
+  writeFileSync(bridgePath, 'export default "foreign bridge"\n', 'utf8')
+  const refused = runInstall({}, false)
+  if (refused.status === 0) throw new Error('Installer overwrote an unrecognized bridge')
+  if (readFileSync(bridgePath, 'utf8') !== 'export default "foreign bridge"\n') {
+    throw new Error('Installer changed an unrecognized bridge')
   }
-  const staleScriptPaths = [
-    resolve(targetRoot, 'scripts', 'check-officecli-available.mjs'),
-    resolve(targetRoot, 'scripts', 'check-officecli-smoke.mjs'),
-  ]
-  for (const staleScriptPath of staleScriptPaths) {
-    mkdirSync(resolve(staleScriptPath, '..'), { recursive: true })
-    writeFileSync(staleScriptPath, '// stale officecli script\n', 'utf8')
+  rmSync(bridgePath, { force: true })
+
+  mkdirSync(runtimeRoot, { recursive: true })
+  const foreignRuntimeMarker = resolve(runtimeRoot, 'foreign-runtime.txt')
+  writeFileSync(foreignRuntimeMarker, 'must not be replaced', 'utf8')
+  const foreignRuntimeRefused = runInstall({}, false)
+  if (foreignRuntimeRefused.status === 0) throw new Error('Installer replaced an unrecognized runtime directory')
+  if (!existsSync(foreignRuntimeMarker)) throw new Error('Installer changed an unrecognized runtime directory')
+  rmSync(runtimeRoot, { recursive: true, force: true })
+
+  runInstall()
+
+  const entryPath = resolve(runtimeRoot, 'dist', 'src', 'index.js')
+  if (!existsSync(entryPath)) throw new Error('Installed runtime entry is missing')
+  if (!existsSync(bridgePath)) throw new Error('Installed OpenCode bridge is missing')
+  if (!readFileSync(bridgePath, 'utf8').includes("../ai-agent-engine/dist/src/index.js")) {
+    throw new Error('Installed bridge does not target the project-local runtime')
   }
 
-  run(process.execPath, [resolve(repoRoot, 'scripts', 'install-project.mjs'), '--target', targetRoot])
-
-  const expectedPaths = [
-    'plugins/ai-agent-engine-codex/skills/ae-prd/SKILL.md',
-    'plugins/ai-agent-engine-codex/skills/ae-work-report/SKILL.md',
-    'plugins/ai-agent-engine-codex/skills/ae-task-loop/SKILL.md',
-    'plugins/ai-agent-engine-codex/skills/ae-constitution/SKILL.md',
-    'plugins/ai-agent-engine-codex/skills/ae-tasks/SKILL.md',
-    'plugins/ai-agent-engine-codex/skills/ae-design/SKILL.md',
-    'plugins/ai-agent-engine-codex/skills/ae-web-app/SKILL.md',
-    'plugins/ai-agent-engine-codex/skills/ae-web-forge/SKILL.md',
-    'plugins/ai-agent-engine-codex/skills/ae-backend/SKILL.md',
-    'plugins/ai-agent-engine-codex/skills/ae-debug/SKILL.md',
-    'plugins/ai-agent-engine-codex/skills/ae-tdd/SKILL.md',
-    'plugins/ai-agent-engine-codex/skills/ae-claude-code/SKILL.md',
-    'plugins/ai-agent-engine-codex/skills/ae-markitdown/SKILL.md',
-    'plugins/ai-agent-engine-codex/skills/ae-static-server/SKILL.md',
-    'plugins/ai-agent-engine-codex/skills/ae-computer-use-guard/SKILL.md',
-    'plugins/ai-agent-engine-codex/skills/ae-imagegen-prompt/SKILL.md',
-    'plugins/ai-agent-engine-codex/skills/ae-video-edit-computer/SKILL.md',
-    'plugins/ai-agent-engine-codex/scripts/check-ae-artifacts.mjs',
-    '.agents/skills/ae-prd/agents/openai.yaml',
-    '.agents/skills/ae-work-report/agents/openai.yaml',
-    '.agents/skills/ae-task-loop/agents/openai.yaml',
-    '.agents/skills/ae-constitution/agents/openai.yaml',
-    '.agents/skills/ae-tasks/agents/openai.yaml',
-    '.agents/skills/ae-design/agents/openai.yaml',
-    '.agents/skills/ae-web-app/agents/openai.yaml',
-    '.agents/skills/ae-web-forge/agents/openai.yaml',
-    '.agents/skills/ae-backend/agents/openai.yaml',
-    '.agents/skills/ae-debug/agents/openai.yaml',
-    '.agents/skills/ae-tdd/agents/openai.yaml',
-    '.agents/skills/ae-claude-code/agents/openai.yaml',
-    '.agents/skills/ae-markitdown/agents/openai.yaml',
-    '.agents/skills/ae-static-server/agents/openai.yaml',
-    '.agents/skills/ae-computer-use-guard/agents/openai.yaml',
-    '.agents/skills/ae-imagegen-prompt/agents/openai.yaml',
-    '.agents/skills/ae-video-edit-computer/agents/openai.yaml',
-    'docs/ae/templates/ae-skill-profiles.example.yaml',
-    'docs/ae/templates/constitution-template.md',
-    'docs/ae/templates/requirements-quality-checklist.md',
-    'docs/ae/templates/computer-use-hooks/README.md',
-    'docs/ae/templates/computer-use-hooks/hooks.example.json',
-    'docs/ae/templates/computer-use-hooks/pre-tool-use-computer-budget.example.py',
-    'scripts/ae-tools.mjs',
-    'scripts/set-ae-language.mjs',
-    'scripts/check-ae-artifacts.mjs',
-    'scripts/check-design-contract.mjs',
-    'scripts/check-opencode.mjs',
-    'opencode.json',
-    '.opencode/commands/ae-help.md',
-    '.opencode/commands/ae-lfg.md',
-    '.opencode/agents/ae-review.md',
-  ]
-  for (const relPath of expectedPaths.filter((path) => !opencodeExcludedSkillNames.some((name) => path.startsWith(`.agents/skills/${name}/`)))) {
-    const fullPath = resolve(targetRoot, relPath)
-    if (!existsSync(fullPath)) throw new Error(`Missing installed path: ${relative(targetRoot, fullPath)}`)
+  const packageJson = readFileSync(resolve(runtimeRoot, 'package.json'), 'utf8')
+  if (existsSync(resolve(runtimeRoot, sourceSentinel.split(/[\\/]/).at(-1)))) {
+    throw new Error('Installer copied a non-distribution source file')
   }
-  if (!existsSync(existingTemplatePath)) {
-    throw new Error('Install removed a pre-existing user docs/ae/templates file')
+  for (const name of excluded) {
+    if (existsSync(resolve(runtimeRoot, 'src', 'assets', 'skills', name))) {
+      throw new Error(`Installed runtime contains excluded skill: ${name}`)
+    }
+    if (packageJson.includes(name)) throw new Error(`Installed package advertises excluded capability: ${name}`)
   }
-  const existingOpenCodeConfig = readFileSync(existingOpenCodeConfigPath, 'utf8')
-  if (!existingOpenCodeConfig.includes('example/model') || existingOpenCodeConfig.includes('ae-*')) {
-    throw new Error('Install overwrote a pre-existing OpenCode config')
+  for (const dependency of ['@officecli/sdk', 'pdf-lib', 'pdf-parse', 'pdfjs-dist', '@napi-rs/canvas']) {
+    if (packageJson.includes(dependency)) throw new Error(`Installed package contains excluded dependency: ${dependency}`)
   }
-  for (const skillName of staleSkillDirs) {
-    const staleSkillDir = resolve(targetRoot, '.agents', 'skills', skillName)
-    if (existsSync(staleSkillDir)) {
-      throw new Error(`Install left removed OfficeCLI skill in target mirror: ${skillName}`)
+  const installedPaths = collectPaths(runtimeRoot)
+  for (const fragment of parityManifest.excludedPathFragments) {
+    if (installedPaths.some((path) => path.includes(fragment.toLowerCase()))) {
+      throw new Error(`Installed runtime path contains excluded fragment: ${fragment}`)
     }
   }
-  for (const staleScriptPath of staleScriptPaths) {
-    if (existsSync(staleScriptPath)) {
-      throw new Error(`Install left removed OfficeCLI script in target project: ${relative(targetRoot, staleScriptPath)}`)
-    }
-  }
-  for (const skillName of opencodeExcludedSkillNames) {
-    if (existsSync(resolve(targetRoot, '.agents', 'skills', skillName))) {
-      throw new Error(`OpenCode install left Codex-only skill in target mirror: ${skillName}`)
-    }
-    if (!existsSync(resolve(targetRoot, 'plugins', 'ai-agent-engine-codex', 'skills', skillName, 'SKILL.md'))) {
-      throw new Error(`Install removed Codex plugin skill source: ${skillName}`)
-    }
+  for (const toolName of parityManifest.expectedTools) {
+    const toolPath = resolve(runtimeRoot, 'src', 'tools', `${toolName}.tool.ts`)
+    if (!existsSync(toolPath)) throw new Error(`Installed runtime is missing manifest tool: ${toolName}`)
   }
 
-  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'prd'], { cwd: targetRoot })
-  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'report'], { cwd: targetRoot })
-  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'loop'], { cwd: targetRoot })
-  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'constitution'], { cwd: targetRoot })
-  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'tasks'], { cwd: targetRoot })
-  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'design'], { cwd: targetRoot })
-  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'web'], { cwd: targetRoot })
-  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'forge'], { cwd: targetRoot })
-  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'backend'], { cwd: targetRoot })
-  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'debug'], { cwd: targetRoot })
-  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'tdd'], { cwd: targetRoot })
-  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'markitdown'], { cwd: targetRoot })
-  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'static'], { cwd: targetRoot })
-  const recoveryResult = JSON.parse(run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'recovery'], { cwd: targetRoot }).stdout)
-  if (recoveryResult.exists !== true || recoveryResult.worktree !== targetRoot) {
-    throw new Error('Installed recovery command did not inspect the target project root')
-  }
-  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'claude'], { cwd: targetRoot })
-  const artifactResult = JSON.parse(run(process.execPath, [resolve(targetRoot, 'scripts', 'check-ae-artifacts.mjs')], { cwd: targetRoot }).stdout)
-  if (artifactResult.status !== 'ok' || artifactResult.targetRoot !== targetRoot) {
-    throw new Error('Installed check-ae-artifacts command did not inspect the target project root')
-  }
-  const designContractResult = JSON.parse(run(process.execPath, [resolve(targetRoot, 'scripts', 'check-design-contract.mjs')], { cwd: targetRoot }).stdout)
-  if (designContractResult.status !== 'ok' || designContractResult.checked !== 0) {
-    throw new Error('Installed check-design-contract command did not return stable no-design JSON')
-  }
-  const openCodeResult = JSON.parse(run(process.execPath, [resolve(targetRoot, 'scripts', 'check-opencode.mjs')], { cwd: targetRoot }).stdout)
-  if (openCodeResult.status !== 'ok' || openCodeResult.commandCount !== 9 || openCodeResult.skillCount < 1) {
-    throw new Error('Installed OpenCode integration did not pass its contract check')
-  }
-  const claudeCheckResult = JSON.parse(run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'claude-delegate', '--check'], { cwd: targetRoot }).stdout)
-  if (!['ok', 'skip'].includes(claudeCheckResult.status) || typeof claudeCheckResult.available !== 'boolean') {
-    throw new Error('Installed claude-delegate check did not return stable availability JSON')
-  }
-  const expectedBilingualLabels = [
-    ['ae-prd', 'AE PRD'],
-    ['ae-work-report', 'AE Work Report'],
-    ['ae-task-loop', 'AE Task Loop'],
-    ['ae-constitution', 'AE Constitution'],
-    ['ae-tasks', 'AE Tasks'],
-    ['ae-design', 'AE 设计契约 / AE Design'],
-    ['ae-web-forge', 'AE Web Forge'],
-    ['ae-claude-code', 'AE Claude Code'],
-    ['ae-markitdown', 'AE Markitdown'],
-    ['ae-static-server', 'AE 静态服务器 / AE Static Server'],
-    ['ae-computer-use-guard', 'AE 电脑控制约束 / AE Computer Use Guard'],
-    ['ae-imagegen-prompt', 'AE 图片生成提示词 / AE Imagegen Prompt'],
-    ['ae-video-edit-computer', 'AE 电脑剪辑视频 / AE Video Edit Computer'],
-  ]
-  for (const [skillName, expectedLabel] of expectedBilingualLabels.filter(([skillName]) => !opencodeExcludedSkillNames.includes(skillName))) {
-    const yaml = readFileSync(resolve(targetRoot, '.agents', 'skills', skillName, 'agents', 'openai.yaml'), 'utf8')
-    if (!yaml.includes(expectedLabel)) {
-      throw new Error(`Initial bilingual install did not preserve ${skillName} label`)
-    }
+  const markerPath = resolve(runtimeRoot, 'rollback-marker.txt')
+  const originalBridge = readFileSync(bridgePath, 'utf8')
+  writeFileSync(markerPath, 'previous runtime', 'utf8')
+  const invalidEntry = runInstall({ AE_INSTALL_CORRUPT_STAGED_ENTRY: '1' }, false)
+  if (invalidEntry.status === 0) throw new Error('Installer activated a plugin entry that fails to load')
+  if (!existsSync(markerPath)) throw new Error('Plugin load validation failure did not preserve the previous runtime')
+  if (readFileSync(bridgePath, 'utf8') !== originalBridge) {
+    throw new Error('Plugin load validation failure changed the previous bridge')
   }
 
-  const profileTemplate = readFileSync(resolve(targetRoot, 'docs', 'ae', 'templates', 'ae-skill-profiles.example.yaml'), 'utf8')
-  if (!profileTemplate.includes('server_profile: low_resource')) {
-    throw new Error('Installed profile template does not default to low_resource')
-  }
-  if (!profileTemplate.includes('2G/4-core relay')) {
-    throw new Error('Installed profile template does not explain the 2G/4-core relay default')
-  }
-  if (!profileTemplate.includes('hook_guard:')) {
-    throw new Error('Installed profile template does not include hook_guard defaults')
-  }
-  if (!profileTemplate.includes('deny_computer_use_when_missing: true')) {
-    throw new Error('Installed profile template does not block Computer Use when hooks are missing')
-  }
-  if (!profileTemplate.includes('local_tool_guard:')) {
-    throw new Error('Installed profile template does not include local_tool_guard defaults')
-  }
-  if (!profileTemplate.includes('ffmpeg') || !profileTemplate.includes('ffprobe')) {
-    throw new Error('Installed profile template does not list ffmpeg/ffprobe local tool defaults')
-  }
-  if (!profileTemplate.includes('multi_agent:')) {
-    throw new Error('Installed profile template does not include multi_agent defaults')
-  }
-  if (!profileTemplate.includes('enabled: auto # auto analyzes safe parallelism')) {
-    throw new Error('Installed profile template does not set multi_agent to auto analysis by default')
-  }
-  if (!profileTemplate.includes('max_workers: 3')) {
-    throw new Error('Installed profile template does not document multi_agent max_workers default')
-  }
-  if (!profileTemplate.includes('skill_governance:')) {
-    throw new Error('Installed profile template does not include skill governance defaults')
-  }
-  if (!profileTemplate.includes('forbid_path_traversal: true')) {
-    throw new Error('Installed profile template does not include path traversal governance defaults')
+  const failed = runInstall({ AE_INSTALL_FAIL_AFTER_ACTIVATION: '1' }, false)
+  if (failed.status === 0) throw new Error('Injected activation failure unexpectedly succeeded')
+  if (!existsSync(markerPath)) throw new Error('Failed update did not restore the previous runtime')
+  if (readFileSync(bridgePath, 'utf8') !== originalBridge) {
+    throw new Error('Failed update changed the previous bridge')
   }
 
-  for (const skillName of opencodeExcludedSkillNames) {
-    const staleSkillDir = resolve(targetRoot, '.agents', 'skills', skillName)
-    mkdirSync(staleSkillDir, { recursive: true })
-    writeFileSync(resolve(staleSkillDir, 'SKILL.md'), `stale ${skillName}\n`, 'utf8')
+  const uninstallScript = resolve(runtimeRoot, 'scripts', 'uninstall.js')
+  const detected = run(process.execPath, [uninstallScript, '--detect'], { cwd: targetRoot })
+  const detection = JSON.parse(detected.stdout)
+  if (detection.project?.installed !== true) throw new Error('Uninstall detection missed the project runtime')
+  writeFileSync(bridgePath, 'export default "foreign bridge"\n', 'utf8')
+  const foreignUninstall = run(process.execPath, [uninstallScript, '--scope', 'project', '--yes'], { cwd: targetRoot }, false)
+  if (foreignUninstall.status === 0) throw new Error('Uninstaller removed an unrecognized bridge')
+  if (!existsSync(runtimeRoot)) throw new Error('Uninstaller removed the owned runtime while refusing a foreign bridge')
+  if (readFileSync(bridgePath, 'utf8') !== 'export default "foreign bridge"\n') {
+    throw new Error('Uninstaller changed an unrecognized bridge')
   }
-
-  const hooksReadme = readFileSync(resolve(targetRoot, 'docs', 'ae', 'templates', 'computer-use-hooks', 'README.md'), 'utf8')
-  if (!hooksReadme.includes('Computer Use') || !hooksReadme.includes('ffmpeg')) {
-    throw new Error('Installed hooks README does not explain Computer Use and local media tool policy')
+  writeFileSync(bridgePath, originalBridge, 'utf8')
+  const failedUninstall = run(
+    process.execPath,
+    [uninstallScript, '--scope', 'project', '--yes'],
+    { cwd: targetRoot, env: { ...process.env, AE_UNINSTALL_FAIL_BRIDGE_REMOVE: '1' } },
+    false,
+  )
+  if (failedUninstall.status === 0) throw new Error('Injected bridge removal failure unexpectedly succeeded')
+  if (!existsSync(runtimeRoot)) throw new Error('Failed uninstall did not restore the owned runtime')
+  if (readFileSync(bridgePath, 'utf8') !== originalBridge) {
+    throw new Error('Failed uninstall did not restore the owned bridge')
   }
-  const hooksJson = JSON.parse(readFileSync(resolve(targetRoot, 'docs', 'ae', 'templates', 'computer-use-hooks', 'hooks.example.json'), 'utf8'))
-  if (hooksJson.policy?.computer_use_requires_hooks !== true) {
-    throw new Error('Installed hooks example does not require hooks for Computer Use')
+  const pendingCleanup = run(
+    process.execPath,
+    [uninstallScript, '--scope', 'project', '--yes'],
+    { cwd: targetRoot, env: { ...process.env, AE_UNINSTALL_FAIL_RUNTIME_REMOVE: '1' } },
+  )
+  const pendingResult = JSON.parse(pendingCleanup.stdout)
+  if (!pendingResult.cleanupPending || !existsSync(pendingResult.cleanupPending)) {
+    throw new Error('Runtime cleanup failure did not report the pending removal directory')
   }
-  if (hooksJson.policy?.deny_computer_use_when_missing !== true) {
-    throw new Error('Installed hooks example does not deny Computer Use when hooks are missing')
+  if (existsSync(runtimeRoot) || existsSync(bridgePath)) {
+    throw new Error('Committed uninstall left active runtime files behind')
   }
-
-  run(process.execPath, [resolve(targetRoot, 'scripts', 'set-ae-language.mjs'), '--lang', 'en'], { cwd: targetRoot })
-  for (const skillName of opencodeExcludedSkillNames) {
-    if (existsSync(resolve(targetRoot, '.agents', 'skills', skillName))) {
-      throw new Error(`Language switch recreated OpenCode-excluded skill: ${skillName}`)
-    }
-  }
-  const expectedEnglishLabels = [
-    ['ae-prd', 'AE PRD'],
-    ['ae-work-report', 'AE Work Report'],
-    ['ae-task-loop', 'AE Task Loop'],
-    ['ae-constitution', 'AE Constitution'],
-    ['ae-tasks', 'AE Tasks'],
-    ['ae-design', 'AE Design'],
-    ['ae-web-app', 'AE Web App'],
-    ['ae-web-forge', 'AE Web Forge'],
-    ['ae-claude-code', 'AE Claude Code'],
-    ['ae-markitdown', 'AE Markitdown'],
-    ['ae-static-server', 'AE Static Server'],
-    ['ae-computer-use-guard', 'AE Computer Use Guard'],
-    ['ae-imagegen-prompt', 'AE Imagegen Prompt'],
-    ['ae-video-edit-computer', 'AE Video Edit Computer'],
-  ]
-  for (const [skillName, expectedLabel] of expectedEnglishLabels.filter(([skillName]) => !opencodeExcludedSkillNames.includes(skillName))) {
-    const yaml = readFileSync(resolve(targetRoot, '.agents', 'skills', skillName, 'agents', 'openai.yaml'), 'utf8')
-    if (!yaml.includes(expectedLabel)) {
-      throw new Error(`Installed language switch did not update ${skillName} metadata to English`)
-    }
-  }
-
-  run(process.execPath, [resolve(targetRoot, 'scripts', 'set-ae-language.mjs'), '--lang', 'zh-CN'], { cwd: targetRoot })
-  const expectedChineseLabels = [
-    ['ae-prd', 'AE PRD'],
-    ['ae-work-report', 'AE 工作总结'],
-    ['ae-task-loop', 'AE 任务循环'],
-    ['ae-constitution', 'AE Constitution'],
-    ['ae-tasks', 'AE Tasks'],
-    ['ae-design', 'AE 设计契约'],
-    ['ae-web-app', 'AE Web 应用开发'],
-    ['ae-web-forge', 'AE Web Forge'],
-    ['ae-claude-code', 'AE Claude Code'],
-    ['ae-markitdown', 'AE Markitdown'],
-    ['ae-static-server', 'AE 静态服务器'],
-    ['ae-computer-use-guard', 'AE 电脑控制约束'],
-    ['ae-imagegen-prompt', 'AE 图片生成提示词'],
-    ['ae-video-edit-computer', 'AE 电脑剪辑视频'],
-  ]
-  for (const [skillName, expectedLabel] of expectedChineseLabels.filter(([skillName]) => !opencodeExcludedSkillNames.includes(skillName))) {
-    const yaml = readFileSync(resolve(targetRoot, '.agents', 'skills', skillName, 'agents', 'openai.yaml'), 'utf8')
-    if (!yaml.includes(expectedLabel)) {
-      throw new Error(`Installed language switch did not update ${skillName} metadata to zh-CN`)
-    }
-  }
+  renameSync(pendingResult.cleanupPending, runtimeRoot)
+  writeFileSync(bridgePath, originalBridge, 'utf8')
+  run(process.execPath, [uninstallScript, '--scope', 'project', '--yes'], { cwd: targetRoot })
+  if (existsSync(runtimeRoot) || existsSync(bridgePath)) throw new Error('Project uninstall left runtime files behind')
 
   console.log(JSON.stringify({
     status: 'ok',
-    targetRoot: relative(repoRoot, targetRoot),
-    verifiedSkills: [
-      'ae-prd',
-      'ae-work-report',
-      'ae-task-loop',
-      'ae-constitution',
-      'ae-tasks',
-      'ae-design',
-      'ae-web-app',
-      'ae-web-forge',
-      'ae-backend',
-      'ae-debug',
-      'ae-tdd',
-      'ae-claude-code',
-      'ae-markitdown',
-      'ae-static-server',
-      'ae-computer-use-guard',
-      'ae-imagegen-prompt',
-      'ae-video-edit-computer',
-    ].filter((skillName) => !opencodeExcludedSkillNames.includes(skillName)),
-    verifiedLanguageModes: ['bilingual', 'en', 'zh-CN'],
-    verifiedDefaultProfile: 'beginner+low_resource_2g4core_relay',
-    verifiedHookPolicy: 'computer_use_requires_hooks',
-    verifiedLocalToolPolicy: 'video_requires_ffmpeg_ffprobe_checks',
-    verifiedMultiAgentPolicy: 'multi_agent_auto_analysis_by_default',
-    verifiedSkillGovernancePolicy: 'source_mirror_metadata_and_path_safety',
-    verifiedCommands: ['recovery', 'claude-delegate', 'markitdown', 'static-server', 'check-ae-artifacts', 'check-design-contract'],
+    verified: ['distribution-allowlist', 'manifest-tool-surface', 'excluded-path-fragments', 'foreign-bridge-refusal', 'foreign-runtime-refusal', 'foreign-uninstall-refusal', 'uninstall-rollback', 'uninstall-cleanup-reporting', 'staged-plugin-load', 'project-local-build', 'bridge-activation', 'office-pdf-exclusion', 'activation-rollback', 'project-uninstall'],
   }, null, 2))
 } finally {
-  cleanupTarget()
-}
-
-function cleanupTarget() {
-  if (!existsSync(targetRoot)) return
-  ensureInsideRepo(targetRoot)
+  rmSync(sourceSentinel, { force: true })
   rmSync(targetRoot, { recursive: true, force: true })
 }
 
-function ensureInsideRepo(path) {
-  const relativePath = relative(repoRoot, path)
-  if (relativePath.startsWith('..') || relativePath === '') {
-    throw new Error(`Refusing to operate outside repo root: ${path}`)
+function runInstall(extraEnv = {}, requireSuccess = true) {
+  const result = spawnSync(process.execPath, [installer, '--target', targetRoot], {
+    cwd: repoRoot,
+    encoding: 'utf8',
+    env: { ...process.env, AE_TALK_NORMAL_OFFLINE: '1', ...extraEnv },
+  })
+  if (requireSuccess && result.status !== 0) {
+    throw new Error([result.stdout, result.stderr].filter(Boolean).join('\n'))
   }
+  return result
 }
 
-function run(command, args, options = {}) {
+function run(command, args, options = {}, requireSuccess = true) {
   const result = spawnSync(command, args, {
     cwd: options.cwd || repoRoot,
     encoding: 'utf8',
-    stdio: 'pipe',
+    env: options.env || process.env,
   })
-  if (result.status === 0) return result
-  throw new Error([
-    `Command failed: ${command} ${args.join(' ')}`,
-    result.stdout?.trim() || '',
-    result.stderr?.trim() || '',
-  ].filter(Boolean).join('\n'))
+  if (requireSuccess && result.status !== 0) throw new Error([result.stdout, result.stderr].filter(Boolean).join('\n'))
+  return result
+}
+
+function collectPaths(root, base = root) {
+  return readdirSync(root, { withFileTypes: true }).flatMap((entry) => {
+    const path = resolve(root, entry.name)
+    const relativePath = path.slice(base.length + 1).replaceAll('\\', '/').toLowerCase()
+    return entry.isDirectory() && statSync(path).isDirectory()
+      ? [relativePath, ...collectPaths(path, base)]
+      : [relativePath]
+  })
 }

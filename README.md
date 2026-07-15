@@ -1,502 +1,194 @@
-# AI Agent Engine for Codex
+# AI Agent Engine for OpenCode
 
-AI Agent Engine for Codex 是一个面向 Codex 的项目级工程工作流插件。它把 AE 风格的需求澄清、设计契约、计划、执行、审查、验证、前端/Web 路由、Swagger/OpenAPI 摘要、交接和经验沉淀能力放到当前项目里，通过 Codex skills 和本地脚本运行。
+AI Agent Engine（AE）是项目级 OpenCode 工程工作流插件。此专用分支基于上游 `a144f785579698190635305fe10784b7deca9e03`，提供技能、命令、子代理、工具、完整项目图谱、媒体理解、动态 MCP、模型路由和内置规则。
 
-> 参考项目：https://gitee.com/jiangqiang1996/ai-agent-engine<br>
-> 本项目参考了上面这个 Gitee AI Agent Engine 项目的工作流设计和能力模型。<br>
-> 也参考了 https://github.com/openai/plugins 和 https://github.com/obra/superpowers 中部分开发技能设计。<br>
-> 也参考了 https://github.com/affaan-m/everything-claude-code 中关于外部 skill 仓库治理、持续学习、验证循环和 Codex 适配边界的设计。<br>
-> 也参考了 https://github.com/github/spec-kit 中关于 constitution、需求质量清单、任务拆解和跨产物分析的工作流设计，但不引入其 runtime。<br>
-> Codex 路径不是上游 OpenCode runtime 的直接移植；本分支另外提供 OpenCode 原生项目配置、命令和 agent 入口。
+本分支明确不提供 PDF、DOCX、XLSX、PPTX 和 OfficeCLI 能力。OpenCode plugin/SDK 兼容版本为 `1.18.1`。
 
-English: [README.en.md](README.en.md)
+AE 不要求业务项目采用本仓库结构。面向用户的运行时能力以 `src/` 下资产为真源，安装后的实际可用能力以 `/ae-help` 为准。
 
-OpenCode branch integration: [README.opencode.md](README.opencode.md)
+## 快速开始
 
-> 分支策略：`codex/opencode-mode` 是专门用于 OpenCode 开发和维护的长期分支，与 `main` 独立维护，后续不会合并回 `main`。这与 `codebuddy` 分支的独立维护方式一致；Codex 主版本以 `main` 为准。
+### 安装、更新与卸载
 
-## OpenCode 和 CodeBuddy 安装
-
-本仓库按运行时分别维护两条兼容路径：OpenCode 使用
-`codex/opencode-mode` 分支，CodeBuddy 使用 `codebuddy` 分支。两条分支都独立维护，不合并回 `main`。
-
-### OpenCode 安装和使用
-
-在目标项目外获取 OpenCode 专用分支，然后运行项目级安装脚本：
-
-```bash
-git clone --depth 1 --branch codex/opencode-mode https://github.com/YaoGUanquan/codex-ai-agent-engine.git /tmp/ae-opencode
-node /tmp/ae-opencode/scripts/install-project.mjs --target /path/to/your/project
-cd /path/to/your/project
-node scripts/check-opencode.mjs
-opencode
-```
-
-Windows PowerShell：
+从专用分支执行项目级安装：
 
 ```powershell
 git clone --depth 1 --branch codex/opencode-mode https://github.com/YaoGUanquan/codex-ai-agent-engine.git "$env:TEMP\ae-opencode"
 node "$env:TEMP\ae-opencode\scripts\install-project.mjs" --target "D:\codes\your-project"
-Set-Location "D:\codes\your-project"
-node scripts\check-opencode.mjs
-opencode
 ```
 
-安装完成后，在 OpenCode 中使用 `/ae-help` 查看入口，或直接使用：
+安装器在目标项目的 `.opencode/ai-agent-engine` 中完成锁定依赖安装和构建，验证成功后才激活 `.opencode/plugins/ae-server.js`。更新失败会恢复旧运行时和桥接文件。
+
+### 验证
+
+重启 opencode 后运行：
 
 ```text
-/ae-brainstorm 澄清这个需求
-/ae-plan 为已确认需求生成实现计划
-/ae-work 执行 docs/ae/plans/<plan>.md
-/ae-review 审查当前变更
+/ae-help
+/ae-help review
 ```
 
-详细说明见 [README.opencode.md](README.opencode.md)。
+能看到技能、命令、代理和模型路由，说明插件已加载。
 
-### CodeBuddy 安装和使用
+## 经典用法
 
-CodeBuddy 使用专用的 `codebuddy` 分支。获取分支后，在 CodeBuddy 的本地插件或 marketplace 配置中指向插件目录：
-
-```bash
-git clone --depth 1 --branch codebuddy https://github.com/YaoGUanquan/codex-ai-agent-engine.git /path/to/ae-codebuddy
-```
-
-插件目录：
+手动控制阶段：
 
 ```text
-/path/to/ae-codebuddy/plugins/ai-agent-engine-codex
+/ae-brainstorm 设计一个多租户数据隔离方案
+/ae-prd
+/ae-design
+/ae-review domain:document
+/ae-work
+/ae-review
 ```
 
-CodeBuddy 通过该目录下的
-`plugins/ai-agent-engine-codex/.codebuddy-plugin/plugin.json` 发现
-`skills/`。在 CodeBuddy 中添加本地插件路径并重新加载插件后，直接使用自然语言或 skill 名称：
+`/ae-brainstorm` 仅做多视角发散讨论与汇总，不产出文档；当讨论结果需要沉淀为正式需求文档时，由 `/ae-prd` 接续。`/ae-design` 在需求之后产出设计文档，包含架构、接口、数据模型、测试用例和实现单元，供 `/ae-work` 直接执行。
+
+只做代码或文档审查：
 
 ```text
-使用 ae-help 查看当前 AE 能力
-使用 ae-plan 为这个需求生成实现计划
-使用 ae-work 执行这个计划
-使用 ae-review 审查当前变更
+/ae-review mode:report-only
+/ae-review domain:document docs/ae/designs/example.md
 ```
 
-CodeBuddy 的本地插件路径配置属于 CodeBuddy 客户端设置，不由本仓库脚本自动写入。详细的 Codex 安装说明仍见下方“项目级安装”章节。
-
-## 适用场景
-
-当你希望一个 Codex 项目自带可复用工程流程时，可以使用本插件：
-
-- 在实现前澄清模糊需求；
-- 把需求拆成可执行计划；
-- 在 Git/worktree 安全检查后执行实现；
-- 以 findings 优先的方式审查代码或文档；
-- 把验证证据、交接说明和可复用经验保存在项目文档中；
-- 初始化项目说明、归档规则和长期 AI 记忆库。
-
-## 快速开始
-
-把插件安装到目标 Codex 项目：
-
-```bash
-node scripts/install-project.mjs --target /path/to/your/codex-project
-```
-
-Windows PowerShell：
-
-```powershell
-node scripts\install-project.mjs --target D:\codes\your-project
-```
-
-重启或重新打开目标项目的 Codex 对话，然后在目标项目根目录初始化 AE 文档、过程归档、UTF-8 规则和 AI 记忆库骨架：
-
-```bash
-node scripts/ae-tools.mjs init
-```
-
-常用初始化变体：
-
-```bash
-node scripts/ae-tools.mjs init --lang zh-CN
-node scripts/ae-tools.mjs init --lang bilingual
-node scripts/ae-tools.mjs init --dry-run
-```
-
-验证辅助命令：
-
-```bash
-node scripts/ae-tools.mjs help
-```
-
-## 能力清单
-
-- `ae-help`：查看当前 AE 能力和边界。
-- `ae-init`：初始化项目文档、归档规则、UTF-8 规则和长期 AI 记忆库。
-- `ae-ideate`：生成方案方向、取舍、风险和下一步问题。
-- `ae-brainstorm`：通过多视角碰撞澄清需求并沉淀验收标准。
-- `ae-design`：在 PRD 和计划之间沉淀架构、接口、数据、UI/UX、测试与非功能设计契约。
-- `ae-lfg`：从需求到已验证交付的完整流程。
-- `ae-plan`：创建实现计划，不修改业务代码。
-- `ae-constitution`：创建或更新可被计划和审查检查的项目治理原则。
-- `ae-tasks`：把已批准计划拆成带依赖顺序、文件路径和验证项的任务产物。
-- `ae-work`：在 Git/worktree 安全检查后执行计划。
-- `ae-refactor`：规划行为保持型重构。
-- `ae-review`：按严重度优先审查代码或文档。
-- `ae-doc-humanize`：把结构化或生硬内容改写成更易读的文档。
-- `ae-doc-structure`：把散乱内容整理成需求、计划、交接或检查清单。
-- `ae-frontend-design`：前端设计与界面实现。
-- `ae-web-forge`：统一前端/Web 路由入口，选择现有 AE skill 并以浏览器验收收尾。
-- `ae-web-app`：实现由 `ae-web-forge` 路由后的 Web 应用、交互、API 和轻量全栈流程。
-- `ae-backend`：基于仓库契约实现接口、服务、数据和权限逻辑。
-- `ae-debug`：系统化排查构建失败、运行时异常、UI 问题和接口故障。
-- `ae-tdd`：围绕明确行为执行红绿重构式测试驱动开发。
-- `ae-test-browser`：用真实浏览器验收 UI 流程。
-- `ae-computer-use-guard`：约束 Codex Computer Use 的截图、上下文、阶段检查点、hooks 门禁和专家配置。
-- `ae-imagegen-prompt`：把视觉想法优化成图片生成提示词，支持参考图角色、生成预算和视频分镜素材；提示词-only 不强制 hooks。
-- `ae-video-edit-computer`：用本地工具优先和受约束的 Computer Use 执行桌面视频剪辑流程；GUI 前检查 hooks，FFmpeg/ffprobe 阶段前检查本地工具。
-- `ae-sql`：生成、审查或执行 SQL，并保留安全边界。
-- `ae-swagger-parser`：摘要或过滤 Swagger/OpenAPI 规格。
-- `ae-handoff`：沉淀任务状态、证据、阻塞点和下一步。
-- `ae-prompt-optimize`：把模糊请求改写成可执行 Codex 提示词。
-- `ae-save-experience`：沉淀可复用项目经验。
-- `ae-skill-creator`：创建或更新 Codex skill。
-- `ae-skill-audit`：审计外部 agent/skill 仓库并提炼可适配的 AE 改进。
-- `ae-agent-creator`：创建 Codex 可用的代理提示和委派模板。
-- `ae-update`：更新项目本地 AE for Codex 安装。
-- `ae-language`：高级入口，切换项目本地 AE skill 显示语言。
-
-本地辅助命令入口：
-
-```bash
-node scripts/ae-tools.mjs help
-```
-
-设计契约校验：
-
-```bash
-node scripts/check-design-contract.mjs
-```
-
-浅层依赖图辅助命令：
-
-```bash
-node scripts/ae-tools.mjs ae-graph-build --root scripts
-node scripts/ae-tools.mjs ae-graph-query --root scripts --path ae-tools.mjs
-```
-
-`ae-graph-build` 和 `ae-graph-query` 是只读浅层依赖图脚本，用于快速预览源码文件、静态导入边和外部依赖。它们不会写入 `docs/ae/graphs/graph.json` 或 `.ae/graph.db`，也不提供完整图谱 schema、分片、freshness 或预览页。
-
-## 项目级安装
-
-推荐使用项目级安装。它只写入目标项目目录，不修改全局 Codex 配置。
-
-仓库发布后，可以在目标项目的 Codex 对话里让代理辅助安装：
+前端和浏览器验收：
 
 ```text
-Fetch and follow the project-level install instructions from https://raw.githubusercontent.com/YaoGUanquan/codex-ai-agent-engine/main/INSTALL.md
+/ae-chrome-devtools
+/ae-web-forge 实现登录页
+/ae-web-forge --inspect http://localhost:3000/login
 ```
 
-在本仓库中直接安装：
-
-```bash
-node scripts/install-project.mjs --target /path/to/your/codex-project
-```
-
-默认安装双语技能列表元数据。也可以显式切换为中文或英文：
-
-```bash
-node scripts/install-project.mjs --target /path/to/your/codex-project --lang zh-CN
-node scripts/install-project.mjs --target /path/to/your/codex-project --lang en
-```
-
-默认元数据语言为 `bilingual`。支持的元数据语言：`en`、`zh-CN`、`bilingual`。
-
-安装脚本只会写入目标项目内的这些路径：
-
-- `plugins/ai-agent-engine-codex/`
-- `.agents/plugins/marketplace.json`
-- `.agents/skills/ae-*`
-- `scripts/ae-tools.mjs`
-- `scripts/update-ae-codex.mjs`
-- `scripts/set-ae-language.mjs`
-
-## 初始化项目文档和记忆库
-
-安装完成后，在目标项目根目录执行：
-
-```bash
-node scripts/ae-tools.mjs init
-```
-
-这个命令会创建：
-
-- `AGENTS.md`：面向 Codex 的项目说明；
-- `docs/ae`：计划、审查、交接、经验等 AE 工作流产物；
-- `docs/00-process`：执行中的过程笔记、归档规则和过程模板；
-- `docs/08-ai-memory`：标准长期项目 AI 记忆库；
-- `docs/ai-memory`：兼容旧骨架的说明入口。
-
-默认不会覆盖已有文件。只有在使用 `--force` 且文件包含 AE init marker 时，才会覆盖受管文件。
-
-生成的文本文件统一按 UTF-8 写入。Windows 上 PowerShell 可能把合法 UTF-8 中文显示成乱码；改写文件前，先用显式 UTF-8 读取或 Git diff 验证。
-
-## 外部参考
-
-当前仓库保留了清晰的 Codex 边界：
-
-- `https://gitee.com/jiangqiang1996/ai-agent-engine` 主要提供 AE 风格工作流能力模型；
-- `https://github.com/obra/superpowers` 主要提供计划、调试、TDD、验证和交付门禁方面的方法论参考；
-- `https://github.com/openai/plugins` 主要提供前后端开发、Web 应用、平台技能打包方式和部分领域技能设计参考。
-- `https://github.com/github/spec-kit` 主要提供 constitution、需求质量清单、任务拆解和跨产物分析方面的方法论参考。
-
-这些外部项目都作为参考输入。本仓库不会直接复用它们的 runtime，而是把适合 Codex 的部分重写为本地 `ae-*` skills 和辅助脚本。
-
-## 日常使用
-
-Codex 不提供 OpenCode `config.command` 风格的动态 slash command 注册。当前项目通过 Codex skills 暴露 AE 入口：可以显式写 `$ae-plan`、`$ae-review` 这类 skill 名称，也可以用自然语言触发；在支持的 Codex App 版本中，已启用的 skills 也可能出现在 `/` 命令或 skill 搜索列表中。不要把这种 skill-backed discoverability 理解为本仓库实现了 OpenCode 式命令注入。
+解析 Swagger/OpenAPI：
 
 ```text
-使用 ae-help 查看当前 AE 能力。
-使用 ae-init 初始化 AGENTS.md、docs/ae、docs/00-process 和 docs/08-ai-memory。
-使用 ae-plan 为“带权限校验的文件上传功能”创建实现计划。
-使用 ae-work 执行 docs/ae/plans/2026-05-11-001-file-upload-plan.md。
-使用 ae-review mode:report-only 审查当前变更。
+/ae-swagger-parser ./openapi.json method:POST keyword:login mode:detail
 ```
 
-多视角碰撞示例：
+探索性修复：
 
 ```text
-使用 ae-brainstorm，对下面这段观点运行 Perspective Collision Pass，不要急着给结论。
-
-请输出：
-1. 批评者、务实者、创新者、系统视角的 perspective matrix
-2. 事实分歧、价值分歧、假设分歧
-3. 最有价值的 collision insights
-4. blind spots
-5. thinking preservation zone
-6. 1-2 个 deepening directions
-
-观点：
-AI 编程让缺陷静默问题倒逼“验证工程”成为新学科；短期链路压缩和长期总量爆发之间存在投资取舍；“停止思考”和“消灭编程快感”是同一现象的不同价值判断，需要主动设计思考保留区。
+/ae-task-loop 修复所有 TypeScript 编译错误
 ```
 
-解析 OpenAPI：
+## 常用入口
 
-```bash
-node scripts/ae-tools.mjs swagger openapi.json method:POST keyword:login mode:detail
-```
+| 目标 | 入口 |
+| --- | --- |
+| 查看当前能力 | `/ae-help` |
+| 多视角发散讨论 | `/ae-brainstorm` |
+| 需求澄清与需求文档 | `/ae-prd` |
+| 设计阶段（架构、接口、数据模型、实现单元） | `/ae-design` |
+| 计划执行 | `/ae-work` |
+| Worktree 继续执行 | `/ae-work-continue` |
+| 分支或 worktree 合并 | `/ae-merge-branch` |
+| 工作总结 | `/ae-work-report` |
+| 查看本人代码变更 | `/ae-my-code-changes` |
+| 代码或文档审查 | `/ae-review` |
+| 前端设计、还原、交互或验收 | `/ae-web-forge` |
+| chrome-devtools 浏览器能力 | `/ae-chrome-devtools` |
+| 接口测试 | `/ae-api-tester` |
+| Swagger/OpenAPI 摘要 | `/ae-swagger-parser` |
+| 图片转 Markdown 描述 | `/ae-image` |
+| 音频内容理解 | `/ae-audio` |
+| 视频内容理解 | `/ae-video` |
+| 幻灯片大纲生成 | `/ae-slides-outline` |
+| 项目关系图谱 | `/ae-graph-build`、`/ae-graph-query` |
+| 探索性修复 | `/ae-task-loop` |
+| 数据库操作 | `/ae-sql` |
+| 会话交接 | `/ae-handoff` |
+| 创建技能 | `/ae-skill-creator` |
+| 提示词优化 | `/ae-prompt-optimize` |
+| 创建代理 | `/ae-agent-creator` |
+| 安装或更新 AE 插件 | `/ae-install` |
+| 卸载 AE 插件 | `/ae-uninstall` |
 
-查看浅层依赖图：
+配置合并和模型场景路由见 [docs/builtin-config.md](docs/builtin-config.md)，分支安装边界见 [README.opencode.md](README.opencode.md)。
 
-```bash
-node scripts/ae-tools.mjs ae-graph-build --root scripts
-node scripts/ae-tools.mjs ae-graph-query --root scripts --path ae-tools.mjs
-```
+## 工作规则
 
-初始化当前项目的文档和记忆骨架：
+| 规则 | 说明 |
+| --- | --- |
+| 需求不清先澄清 | 复杂实现前先产出需求或设计，避免直接编码 |
+| 审查先定范围 | 代码、文档或通用混合范围按目标类型选择审查代理 |
+| 交付必须验证 | `/ae-work` 交付前检查验证、审查和 Git 授权证据 |
+| 浏览器先注册 MCP | 当前会话使用 chrome-devtools-mcp 工具前必须先通过 `/ae-chrome-devtools` 完成动态注册或连接状态确认 |
+| Git 写操作需授权 | 提交、拉取、重置、清理、变基、推送等都需要明确授权；`/ae-commit` 不等同于 push |
+| 远程写操作不默认提供 | 用户侧流程不提供 push、创建 PR、创建 Issue 或 Release 的可复制流程 |
 
-```bash
-node scripts/ae-tools.mjs init --lang zh-CN
-```
+## 资产快照
 
-恢复可能需要继续的过程产物：
+| 类型 | 当前快照 | 真源 |
+| --- | ---: | --- |
+| 技能 | 27 | `src/assets/skills/`、`src/schemas/ae-asset-schema.ts` |
+| 命令 | 34 | `src/services/command-registration.ts`、`src/assets/commands/` |
+| 代理 | 49 | `src/assets/agents/`、`src/services/agent-registration.ts` |
+| 工具 | 22 | `src/tools/` |
+| 规则 | 6 | `src/assets/rules/` |
+| 内置配置 | 1 | `src/assets/config/ae.jsonc` |
 
-```bash
-node scripts/ae-tools.mjs recovery
-```
+该表是文档快照，不替代 `/ae-help`。
 
-## 技能列表语言
+## 配置
 
-Codex 技能列表里显示的说明来自静态元数据。默认安装为双语元数据。它不能在已经打开的 Codex 对话中实时切换，但可以重写项目本地元数据，然后重启或重新打开项目对话。
+AE 默认注入两个远程 MCP：
 
-也可以像项目级安装一样，在目标项目的 Codex 对话里让代理辅助切换。
+| 名称 | 作用 |
+| --- | --- |
+| `context7` | 获取库/框架文档 |
+| `gh_grep` | 搜索真实 GitHub 代码示例 |
 
-切换为中文：
+可选配置入口：
 
-```text
-Fetch and follow the AE skill language switch instructions from https://raw.githubusercontent.com/YaoGUanquan/codex-ai-agent-engine/main/INSTALL.zh-CN.md and switch this project to zh-CN.
-```
+| 路径 | 作用 |
+| --- | --- |
+| `.opencode/ae.jsonc` | 当前项目覆盖 AE 内置配置 |
+| `~/.config/opencode/ae.jsonc` | 当前用户的全局默认配置 |
 
-切换为英文：
+示例：
 
-```text
-Fetch and follow the AE skill language switch instructions from https://raw.githubusercontent.com/YaoGUanquan/codex-ai-agent-engine/main/INSTALL.zh-CN.md and switch this project to en.
-```
-
-如需双语，把最后的 `zh-CN` 或 `en` 改成 `bilingual`。
-
-在已安装的目标项目中运行：
-
-```bash
-node scripts/set-ae-language.mjs --lang en
-node scripts/set-ae-language.mjs --lang zh-CN
-node scripts/set-ae-language.mjs --lang bilingual
-```
-
-在本仓库中给指定项目切换：
-
-```bash
-node scripts/set-language.mjs --target /path/to/your/codex-project --lang zh-CN
-```
-
-## 更新
-
-在已经安装过的目标项目中运行：
-
-```bash
-node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-agent-engine.git --branch main
-```
-
-更新脚本会尽量保留当前项目已经设置的语言；如果无法识别，默认使用双语元数据。也可以显式覆盖：
-
-```bash
-node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-agent-engine.git --branch main --lang bilingual
-```
-
-也可以让 Codex 代理执行：
-
-```text
-Fetch and follow the update instructions from https://raw.githubusercontent.com/YaoGUanquan/codex-ai-agent-engine/main/INSTALL.md
-```
-
-## 多 agent auto 配置
-
-`multi_agent.enabled` 支持三种值：
-
-- `auto`：默认值。`task-analyze` 会自动分析是否适合并行、输出 `execution_strategy`、`parallel_eligibility` 和 `parallel_waves`，但不会直接授权写入型子代理。
-- `true`：显式开启多 agent 分析，行为与 `auto` 一样仍需满足安全门禁。
-- `false`：硬关闭，强制串行。
-
-推荐先使用安全默认配置：
-
-```yaml
-multi_agent:
-  enabled: auto
-  mode: suggest
-  max_workers: 3
-  min_parallel_units: 2
-  require_clean_git: true
-  require_plan_dependencies: true
-  require_disjoint_files: true
-  allow_write_agents: false
-  review_lanes_parallel: true
-```
-
-更新脚本会复制最新模板到 `docs/ae/templates/ae-skill-profiles.example.yaml`，但不会自动覆盖项目本地运行配置。要在目标项目启用或调整本地配置：
-
-```bash
-mkdir -p .codex
-cp docs/ae/templates/ae-skill-profiles.example.yaml .codex/ae-skill-profiles.yaml
-```
-
-Windows PowerShell：
-
-```powershell
-New-Item -ItemType Directory -Force -Path .codex | Out-Null
-Copy-Item docs\ae\templates\ae-skill-profiles.example.yaml .codex\ae-skill-profiles.yaml
-```
-
-如需允许写入型子代理自动并行，必须额外显式设置 `mode: auto` 和 `allow_write_agents: true`。即便如此，`task-analyze` 仍会要求计划依赖清晰、文件不冲突、并满足 Git 清洁状态等前置条件。使用 `main` 分支版本时，其他项目应先运行更新命令，再复制或编辑 `.codex/ae-skill-profiles.yaml`，最后用实际计划验证：
-
-```bash
-node scripts/ae-tools.mjs task-analyze --mode plan --plan docs/ae/plans/<your-plan>.md
-```
-
-## 手动安装
-
-如果不想运行安装脚本，再使用手动安装。
-
-1. 将 `plugins/ai-agent-engine-codex/` 复制到目标项目的 `plugins/` 目录下。
-2. 将根入口脚本复制到目标项目：
-
-```bash
-mkdir -p scripts
-cp scripts/ae-tools.mjs /path/to/project/scripts/ae-tools.mjs
-```
-
-Windows PowerShell：
-
-```powershell
-New-Item -ItemType Directory -Force -Path D:\codes\your-project\scripts | Out-Null
-Copy-Item scripts\ae-tools.mjs D:\codes\your-project\scripts\ae-tools.mjs
-```
-
-3. 如果需要手动安装后继续切换技能列表语言，将 `scripts/set-language.mjs` 复制为目标项目的 `scripts/set-ae-language.mjs`。
-4. 将 `plugins/ai-agent-engine-codex/skills/*` 复制到目标项目的 `.agents/skills/`。
-5. 在目标项目 `.agents/plugins/marketplace.json` 中加入项目级插件记录：
-
-```json
+```jsonc
 {
-  "name": "ai-agent-engine-codex",
-  "source": {
-    "source": "local",
-    "path": "./plugins/ai-agent-engine-codex"
-  },
-  "policy": {
-    "installation": "INSTALLED_BY_DEFAULT",
-    "authentication": "ON_INSTALL"
-  },
-  "category": "Coding"
+  "$schema": "https://raw.giteeusercontent.com/jiangqiang1996/ai-agent-engine/raw/master/src/assets/config/ae.schema.json",
+  "modelScenarios": {
+    "quick": "provider/fast-model",
+    "standard": "provider/default-model",
+    "deep": "provider/strong-model",
+    "vision": "provider/vision-model"
+  }
 }
 ```
 
-## 仓库结构
+完整规则见 [docs/builtin-config.md](docs/builtin-config.md)。
 
-```text
-.agents/                         # 当前仓库自用的项目级安装示例
-plugins/ai-agent-engine-codex/   # Codex 插件主体
-scripts/ae-tools.mjs             # 根辅助命令入口
-scripts/install-project.mjs      # 项目级安装脚本
-scripts/update-ae-codex.mjs      # 目标项目更新脚本
-docs/codex-port-analysis.md      # OpenCode 到 Codex 的迁移分析
-docs/ae/                         # init 后的 AE 工作流产物
-docs/00-process/                 # init 后的过程笔记、模板和归档规则
-docs/08-ai-memory/               # init 后的标准长期 AI 记忆库
-docs/ai-memory/                  # init 后的兼容说明入口
-```
+## 开发
 
-## 重要边界
+本仓库是 AE opencode 插件源码仓库。`dist/` 是构建产物，`.opencode/plugins/` 是本仓库调试桥接目录，不代表业务项目必须具备的结构。
 
-- `/ae-*` 是兼容标签，不是本仓库注册出的 Codex 命令。
-- 可靠触发方式是直接说：`使用 ae-work ...`、`使用 ae-review ...`、`使用 ae-plan ...`，或在支持的 Codex App 版本中通过 `/` / skill 搜索选择已启用的 AE skill。
-- slash 列表可见性属于 Codex skill discoverability，需要在当前 Codex App 中手工验证；本仓库不声明 OpenCode `config.command` 等价能力。
-- 当前 MVP 还没有真实 MCP server，`.mcp.json` 有意保持为空。
-- 本地 JSON/YAML OpenAPI 可在常见结构下无额外依赖解析；复杂 YAML 仍受轻量 parser 边界限制。
-- `ae-graph-build` 和 `ae-graph-query` 是浅层只读脚本，不会持久化 `docs/ae/graphs/graph.json`，也不是完整 OpenCode 图谱工具。
-- `ae-merge-branch` 暂缓，等待 `ae-work` 的 Git 证据链、回滚说明和授权边界增强。
-- `ae-chrome-devtools` 不照搬动态 MCP 注册；浏览器验证通过 `ae-test-browser` 路由到 Codex Browser、Playwright 或当前会话已可用的 DevTools 工具。
-- Git 写操作、破坏性文件操作、网络请求、依赖安装、数据库写入、浏览器环境 setup 都必须遵循 Codex 显式授权机制。
+| 操作 | 命令 |
+| --- | --- |
+| 安装依赖 | `npm ci` |
+| 构建 | `npm run build` |
+| 测试 | `npm run test` |
+| 类型检查 | `npm run typecheck` |
 
-## 开发检查
+| 路径 | 作用 |
+| --- | --- |
+| `src/index.ts` | server 插件入口 |
+| `src/assets/skills/` | 技能提示词和参考文件 |
+| `src/assets/commands/` | Markdown 命令 |
+| `src/assets/agents/` | 子代理提示词 |
+| `src/assets/rules/` | 注入用户会话的规则 |
+| `src/tools/` | opencode 工具定义 |
+| `src/services/` | 注册、门禁、审查、配置和解析服务 |
+| `src/schemas/` | 资产常量和输入 schema |
 
-在本仓库运行：
+## 文档入口
 
-```bash
-npm run check
-node --check scripts/ae-tools.mjs
-node --check plugins/ai-agent-engine-codex/scripts/ae-tools.mjs
-node scripts/check-design-contract.mjs
-node scripts/ae-tools.mjs help
-node scripts/ae-tools.mjs ae-graph-build --root scripts
-```
-
-如果本机有 Codex skill validator，也建议验证 `plugins/ai-agent-engine-codex/skills/*` 和 `.agents/skills/*`。
-
-发布前可参考 [docs/release-checklist.md](docs/release-checklist.md)。
-
-## 发布到 GitHub
-
-先在 GitHub 创建一个空仓库，然后在当前目录执行：
-
-```bash
-node scripts/set-repository.mjs --repo https://github.com/YaoGUanquan/codex-ai-agent-engine
-git init
-git add .
-git commit -m "feat: add Codex AI Agent Engine plugin"
-git branch -M main
-git remote add origin https://github.com/YaoGUanquan/codex-ai-agent-engine.git
-git push -u origin main
-```
-
-## 许可和致谢
-
-见 [LICENSE](LICENSE) 和 [NOTICE.md](NOTICE.md)。
-
-本项目参考 AI Agent Engine，并在插件元数据和仓库授权中保留 `GPL-2.0-only`。
+| 入口 | 内容 |
+| --- | --- |
+| [docs/builtin-config.md](docs/builtin-config.md) | MCP、`ae.jsonc`、模型场景路由和覆盖规则 |
+| [README.opencode.md](README.opencode.md) | 项目级安装和分支边界 |
+| [运行时移植规格](docs/superpowers/specs/2026-07-15-opencode-runtime-parity-without-office-design.md) | 上游基线、排除项和验证设计 |
+| `/ae-help` | 当前运行时权威帮助 |

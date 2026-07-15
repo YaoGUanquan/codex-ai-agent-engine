@@ -1,137 +1,66 @@
 #!/usr/bin/env node
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { opencodeExcludedSkillNames, opencodeExcludedSkills } from '../plugins/ai-agent-engine-codex/scripts/opencode-skill-policy.mjs'
 
 const targetRoot = resolve(readArg('--target') || process.cwd())
-const requiredCommands = [
-  'ae-help',
-  'ae-brainstorm',
-  'ae-prd',
-  'ae-design',
-  'ae-plan',
-  'ae-tasks',
-  'ae-work',
-  'ae-review',
-  'ae-lfg',
-]
+const nestedRuntime = resolve(targetRoot, '.opencode', 'ai-agent-engine')
+const runtimeRoot = existsSync(resolve(nestedRuntime, 'package.json')) ? nestedRuntime : targetRoot
+const sourceRoot = resolve(runtimeRoot, 'src')
+const assetsRoot = resolve(sourceRoot, 'assets')
+const bridgePath = resolve(targetRoot, '.opencode', 'plugins', 'ae-server.js')
+const expectedSkills = ['ae-design', 'ae-work', 'ae-review', 'ae-image', 'ae-audio', 'ae-video', 'ae-graph-build', 'ae-graph-query']
+const expectedTools = ['ae-help.tool.ts', 'ae-image.tool.ts', 'ae-audio.tool.ts', 'ae-video.tool.ts', 'ae-graph-build.tool.ts', 'ae-graph-query.tool.ts', 'ae-chrome-devtools-mcp.tool.ts']
+const excluded = ['ae-pdf', 'ae-docx', 'ae-xlsx', 'ae-pptx', 'ae-officecli']
 
-const configPath = resolve(targetRoot, 'opencode.json')
-const commandRoot = resolve(targetRoot, '.opencode', 'commands')
-const agentPath = resolve(targetRoot, '.opencode', 'agents', 'ae-review.md')
-const skillRoot = resolve(targetRoot, '.agents', 'skills')
+assertFile(resolve(runtimeRoot, 'package.json'), 'runtime package.json')
+assertFile(resolve(sourceRoot, 'index.ts'), 'runtime src/index.ts')
+assertFile(resolve(runtimeRoot, 'dist', 'src', 'index.js'), 'built plugin entry')
+assertFile(bridgePath, '.opencode/plugins/ae-server.js')
 
-assertFile(configPath, 'opencode.json')
-const config = parseJson(configPath)
-if (config.$schema !== 'https://opencode.ai/config.json') {
-  fail('opencode.json must use the OpenCode config schema')
+const packageJson = JSON.parse(readFileSync(resolve(runtimeRoot, 'package.json'), 'utf8'))
+if (packageJson.name !== 'ai-agent-engine-opencode') fail('Unexpected OpenCode runtime package name')
+for (const dependency of ['@officecli/sdk', 'pdf-lib', 'pdf-parse', 'pdfjs-dist', '@napi-rs/canvas']) {
+  if (packageJson.dependencies?.[dependency]) fail(`Excluded dependency is installed: ${dependency}`)
 }
-validateSkillPermission(config)
 
-for (const name of requiredCommands) {
-  const path = resolve(commandRoot, `${name}.md`)
-  assertFile(path, `.opencode/commands/${name}.md`)
-  validateMarkdownFrontmatter(path, ['description', 'agent'])
-}
-assertFile(agentPath, '.opencode/agents/ae-review.md')
-const reviewerFrontmatter = validateMarkdownFrontmatter(agentPath, ['description', 'mode'])
-validateReviewerContract(agentPath, reviewerFrontmatter)
-
+const skillRoot = resolve(assetsRoot, 'skills')
 const skills = listDirectories(skillRoot)
-if (skills.length === 0) fail('No OpenCode-compatible skills found under .agents/skills')
-const excludedSkillsPresent = skills.filter((name) => opencodeExcludedSkills.has(name))
-if (excludedSkillsPresent.length > 0) {
-  fail(`Codex-only skills must not be installed for OpenCode: ${excludedSkillsPresent.join(', ')}`)
+for (const name of expectedSkills) assertFile(resolve(skillRoot, name, 'SKILL.md'), `skill ${name}`)
+for (const name of excluded) {
+  if (existsSync(resolve(skillRoot, name))) fail(`Excluded skill is present: ${name}`)
 }
-for (const name of skills) {
-  const skillPath = resolve(skillRoot, name, 'SKILL.md')
-  assertFile(skillPath, `.agents/skills/${name}/SKILL.md`)
-  const frontmatter = validateMarkdownFrontmatter(skillPath, ['name', 'description'])
-  if (frontmatter.name !== name) fail(`Skill name does not match directory: ${name}`)
-  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(frontmatter.name)) {
-    fail(`Invalid OpenCode skill name: ${frontmatter.name}`)
-  }
-  if (frontmatter.name.length > 64) fail(`OpenCode skill name is too long: ${frontmatter.name}`)
-  if (frontmatter.description.length > 1024) fail(`OpenCode skill description is too long: ${name}`)
+for (const name of expectedTools) assertFile(resolve(sourceRoot, 'tools', name), `tool ${name}`)
+
+const toolIndex = readFileSync(resolve(sourceRoot, 'tools', 'index.ts'), 'utf8')
+for (const name of excluded) {
+  if (toolIndex.includes(name)) fail(`Excluded tool is registered: ${name}`)
 }
 
 console.log(JSON.stringify({
   status: 'ok',
   targetRoot,
-  commandCount: requiredCommands.length,
+  runtimeRoot,
   skillCount: skills.length,
-  excludedSkills: opencodeExcludedSkillNames,
-  readOnlyAgent: 'ae-review',
-  skillPermission: config.permission?.skill ? 'explicit' : 'default',
+  commandCount: listMarkdownFiles(resolve(assetsRoot, 'commands')).length,
+  toolCount: listTypeScriptTools(resolve(sourceRoot, 'tools')).length,
+  bridge: '.opencode/plugins/ae-server.js',
+  excludedCapabilities: excluded,
 }, null, 2))
 
-function validateSkillPermission(config) {
-  const skill = config.permission?.skill
-  if (skill === undefined) return
-  if (skill === 'deny') fail('opencode.json denies all skills')
-  if (typeof skill === 'string') return
-  if (typeof skill !== 'object' || skill === null) fail('opencode.json has an invalid skill permission')
-  if (skill['ae-*'] === 'deny' || skill['*'] === 'deny' && skill['ae-*'] !== 'allow') {
-    fail('opencode.json denies the ae-* skill namespace')
-  }
-}
-
-function validateReviewerContract(path, frontmatter) {
-  if (frontmatter.mode !== 'subagent') fail('ae-review must be a subagent')
-  if (frontmatter.steps !== '15') fail('ae-review must cap the subagent at 15 steps')
-  const content = readFileSync(path, 'utf8')
-  const requiredRules = [
-    /^  "\*": deny$/m,
-    /^  read: allow$/m,
-    /^  glob: allow$/m,
-    /^  grep: allow$/m,
-    /^  list: allow$/m,
-    /^  skill: allow$/m,
-    /^  edit: deny$/m,
-    /^  task: deny$/m,
-    /^  external_directory: deny$/m,
-  ]
-  for (const rule of requiredRules) {
-    if (!rule.test(content)) fail(`ae-review permission contract is incomplete: ${path}`)
-  }
-}
-
 function listDirectories(path) {
-  return existsSync(path)
-    ? readdirSync(path).filter((name) => statSync(resolve(path, name)).isDirectory()).sort()
-    : []
+  return readdirSync(path).filter((name) => statSync(resolve(path, name)).isDirectory()).sort()
 }
 
-function validateMarkdownFrontmatter(path, required) {
-  const content = readFileSync(path, 'utf8')
-  if (!content.startsWith('---\n')) fail(`Missing YAML frontmatter: ${path}`)
-  const end = content.indexOf('\n---', 4)
-  if (end < 0) fail(`Unclosed YAML frontmatter: ${path}`)
-  const values = {}
-  for (const line of content.slice(4, end).split('\n')) {
-    const match = line.match(/^([A-Za-z][A-Za-z0-9_-]*):\s*(.*)$/)
-    if (match) values[match[1]] = stripQuotes(match[2].trim())
-  }
-  for (const key of required) {
-    if (!values[key]) fail(`Missing frontmatter field ${key}: ${path}`)
-  }
-  return values
+function listMarkdownFiles(path) {
+  return readdirSync(path).filter((name) => name.endsWith('.md'))
 }
 
-function stripQuotes(value) {
-  return value.replace(/^['"]|['"]$/g, '')
-}
-
-function parseJson(path) {
-  try {
-    return JSON.parse(readFileSync(path, 'utf8'))
-  } catch (error) {
-    fail(`Invalid JSON in ${path}: ${error.message}`)
-  }
+function listTypeScriptTools(path) {
+  return readdirSync(path).filter((name) => name.endsWith('.tool.ts'))
 }
 
 function assertFile(path, label) {
-  if (!existsSync(path)) fail(`Missing OpenCode integration file: ${label}`)
+  if (!existsSync(path)) fail(`Missing OpenCode runtime file: ${label}`)
 }
 
 function readArg(name) {
