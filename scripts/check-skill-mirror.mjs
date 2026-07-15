@@ -2,6 +2,7 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { opencodeExcludedSkillNames, opencodeExcludedSkills } from '../plugins/ai-agent-engine-codex/scripts/opencode-skill-policy.mjs'
 
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
 const sourceRoot = resolve(repoRoot, 'plugins', 'ai-agent-engine-codex', 'skills')
@@ -13,8 +14,9 @@ ensureInsideRepo(mirrorRoot, 'mirrorRoot')
 const sourceFiles = listFiles(sourceRoot)
 const mirrorFiles = listFiles(mirrorRoot)
 
-const missingInMirror = sourceFiles.filter((file) => !mirrorFiles.includes(file))
-const extraInMirror = mirrorFiles.filter((file) => !sourceFiles.includes(file))
+const missingInMirror = sourceFiles.filter((file) => !isOpenCodeExcludedFile(file) && !mirrorFiles.includes(file))
+const excludedInMirror = mirrorFiles.filter(isOpenCodeExcludedFile)
+const extraInMirror = mirrorFiles.filter((file) => !sourceFiles.includes(file) || isOpenCodeExcludedFile(file))
 const mismatched = []
 
 for (const relPath of sourceFiles) {
@@ -30,6 +32,9 @@ if (missingInMirror.length === 0 && extraInMirror.length === 0 && mismatched.len
     sourceRoot: relative(repoRoot, sourceRoot),
     mirrorRoot: relative(repoRoot, mirrorRoot),
     fileCount: sourceFiles.length,
+    mirrorFileCount: mirrorFiles.length,
+    excludedSkills: opencodeExcludedSkillNames,
+    excludedInMirror,
   }, null, 2))
   process.exit(0)
 }
@@ -40,6 +45,7 @@ console.error(JSON.stringify({
   mirrorRoot: relative(repoRoot, mirrorRoot),
   missingInMirror,
   extraInMirror,
+  excludedInMirror,
   mismatched,
 }, null, 2))
 process.exit(1)
@@ -66,6 +72,10 @@ function walk(root) {
 
 function normalize(content) {
   return content.replace(/\r\n/g, '\n')
+}
+
+function isOpenCodeExcludedFile(file) {
+  return opencodeExcludedSkills.has(file.split('/')[0])
 }
 
 function ensureInsideRepo(path, label) {

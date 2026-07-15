@@ -3,6 +3,7 @@ import { existsSync, readdirSync, statSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { skillMetadata } from '../plugins/ai-agent-engine-codex/scripts/skill-language-metadata.mjs'
+import { opencodeExcludedSkills } from '../plugins/ai-agent-engine-codex/scripts/opencode-skill-policy.mjs'
 
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
 const sourceRoot = resolve(repoRoot, 'plugins', 'ai-agent-engine-codex', 'skills')
@@ -16,7 +17,8 @@ const invalidMetadataSkills = metadataSkills.filter((name) => !/^[a-z0-9][a-z0-9
 const missingMetadata = sourceSkills.filter((name) => !metadataSkills.includes(name))
 const extraMetadata = metadataSkills.filter((name) => !sourceSkills.includes(name))
 const missingSourceYaml = sourceSkills.filter((name) => !existsSync(resolve(sourceRoot, name, 'agents', 'openai.yaml')))
-const missingMirrorYaml = sourceSkills.filter((name) => !existsSync(resolve(mirrorRoot, name, 'agents', 'openai.yaml')))
+const openCodeSkills = sourceSkills.filter((name) => !opencodeExcludedSkills.has(name))
+const missingMirrorYaml = openCodeSkills.filter((name) => !existsSync(resolve(mirrorRoot, name, 'agents', 'openai.yaml')))
 
 if (
   missingMetadata.length === 0 &&
@@ -30,6 +32,7 @@ if (
     status: 'ok',
     skillCount: sourceSkills.length,
     metadataCount: metadataSkills.length,
+    openCodeSkillCount: openCodeSkills.length,
   }, null, 2))
   process.exit(0)
 }

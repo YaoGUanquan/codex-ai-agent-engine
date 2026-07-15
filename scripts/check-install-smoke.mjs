@@ -4,6 +4,7 @@ import { relative, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { randomUUID } from 'node:crypto'
+import { opencodeExcludedSkillNames } from '../plugins/ai-agent-engine-codex/scripts/opencode-skill-policy.mjs'
 
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
 const targetRoot = resolve(repoRoot, '.tmp-install-smoke-checks', randomUUID())
@@ -19,7 +20,7 @@ try {
   mkdirSync(existingTemplateDir, { recursive: true })
   writeFileSync(existingTemplatePath, 'user-owned template\n', 'utf8')
   writeFileSync(existingOpenCodeConfigPath, '{\n  "$schema": "https://opencode.ai/config.json",\n  "model": "example/model"\n}\n', 'utf8')
-  const staleSkillDirs = ['ae-officecli', 'ae-docx', 'ae-xlsx', 'ae-pptx']
+  const staleSkillDirs = ['ae-officecli', 'ae-docx', 'ae-xlsx', 'ae-pptx', ...opencodeExcludedSkillNames]
   for (const skillName of staleSkillDirs) {
     const staleSkillDir = resolve(targetRoot, '.agents', 'skills', skillName)
     mkdirSync(staleSkillDir, { recursive: true })
@@ -88,7 +89,7 @@ try {
     '.opencode/commands/ae-lfg.md',
     '.opencode/agents/ae-review.md',
   ]
-  for (const relPath of expectedPaths) {
+  for (const relPath of expectedPaths.filter((path) => !opencodeExcludedSkillNames.some((name) => path.startsWith(`.agents/skills/${name}/`)))) {
     const fullPath = resolve(targetRoot, relPath)
     if (!existsSync(fullPath)) throw new Error(`Missing installed path: ${relative(targetRoot, fullPath)}`)
   }
@@ -108,6 +109,14 @@ try {
   for (const staleScriptPath of staleScriptPaths) {
     if (existsSync(staleScriptPath)) {
       throw new Error(`Install left removed OfficeCLI script in target project: ${relative(targetRoot, staleScriptPath)}`)
+    }
+  }
+  for (const skillName of opencodeExcludedSkillNames) {
+    if (existsSync(resolve(targetRoot, '.agents', 'skills', skillName))) {
+      throw new Error(`OpenCode install left Codex-only skill in target mirror: ${skillName}`)
+    }
+    if (!existsSync(resolve(targetRoot, 'plugins', 'ai-agent-engine-codex', 'skills', skillName, 'SKILL.md'))) {
+      throw new Error(`Install removed Codex plugin skill source: ${skillName}`)
     }
   }
 
@@ -160,7 +169,7 @@ try {
     ['ae-imagegen-prompt', 'AE 图片生成提示词 / AE Imagegen Prompt'],
     ['ae-video-edit-computer', 'AE 电脑剪辑视频 / AE Video Edit Computer'],
   ]
-  for (const [skillName, expectedLabel] of expectedBilingualLabels) {
+  for (const [skillName, expectedLabel] of expectedBilingualLabels.filter(([skillName]) => !opencodeExcludedSkillNames.includes(skillName))) {
     const yaml = readFileSync(resolve(targetRoot, '.agents', 'skills', skillName, 'agents', 'openai.yaml'), 'utf8')
     if (!yaml.includes(expectedLabel)) {
       throw new Error(`Initial bilingual install did not preserve ${skillName} label`)
@@ -202,6 +211,12 @@ try {
     throw new Error('Installed profile template does not include path traversal governance defaults')
   }
 
+  for (const skillName of opencodeExcludedSkillNames) {
+    const staleSkillDir = resolve(targetRoot, '.agents', 'skills', skillName)
+    mkdirSync(staleSkillDir, { recursive: true })
+    writeFileSync(resolve(staleSkillDir, 'SKILL.md'), `stale ${skillName}\n`, 'utf8')
+  }
+
   const hooksReadme = readFileSync(resolve(targetRoot, 'docs', 'ae', 'templates', 'computer-use-hooks', 'README.md'), 'utf8')
   if (!hooksReadme.includes('Computer Use') || !hooksReadme.includes('ffmpeg')) {
     throw new Error('Installed hooks README does not explain Computer Use and local media tool policy')
@@ -215,6 +230,11 @@ try {
   }
 
   run(process.execPath, [resolve(targetRoot, 'scripts', 'set-ae-language.mjs'), '--lang', 'en'], { cwd: targetRoot })
+  for (const skillName of opencodeExcludedSkillNames) {
+    if (existsSync(resolve(targetRoot, '.agents', 'skills', skillName))) {
+      throw new Error(`Language switch recreated OpenCode-excluded skill: ${skillName}`)
+    }
+  }
   const expectedEnglishLabels = [
     ['ae-prd', 'AE PRD'],
     ['ae-work-report', 'AE Work Report'],
@@ -231,7 +251,7 @@ try {
     ['ae-imagegen-prompt', 'AE Imagegen Prompt'],
     ['ae-video-edit-computer', 'AE Video Edit Computer'],
   ]
-  for (const [skillName, expectedLabel] of expectedEnglishLabels) {
+  for (const [skillName, expectedLabel] of expectedEnglishLabels.filter(([skillName]) => !opencodeExcludedSkillNames.includes(skillName))) {
     const yaml = readFileSync(resolve(targetRoot, '.agents', 'skills', skillName, 'agents', 'openai.yaml'), 'utf8')
     if (!yaml.includes(expectedLabel)) {
       throw new Error(`Installed language switch did not update ${skillName} metadata to English`)
@@ -255,7 +275,7 @@ try {
     ['ae-imagegen-prompt', 'AE 图片生成提示词'],
     ['ae-video-edit-computer', 'AE 电脑剪辑视频'],
   ]
-  for (const [skillName, expectedLabel] of expectedChineseLabels) {
+  for (const [skillName, expectedLabel] of expectedChineseLabels.filter(([skillName]) => !opencodeExcludedSkillNames.includes(skillName))) {
     const yaml = readFileSync(resolve(targetRoot, '.agents', 'skills', skillName, 'agents', 'openai.yaml'), 'utf8')
     if (!yaml.includes(expectedLabel)) {
       throw new Error(`Installed language switch did not update ${skillName} metadata to zh-CN`)
@@ -283,7 +303,7 @@ try {
       'ae-computer-use-guard',
       'ae-imagegen-prompt',
       'ae-video-edit-computer',
-    ],
+    ].filter((skillName) => !opencodeExcludedSkillNames.includes(skillName)),
     verifiedLanguageModes: ['bilingual', 'en', 'zh-CN'],
     verifiedDefaultProfile: 'beginner+low_resource_2g4core_relay',
     verifiedHookPolicy: 'computer_use_requires_hooks',

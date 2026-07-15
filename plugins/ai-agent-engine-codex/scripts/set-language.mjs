@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-import { existsSync, writeFileSync } from 'node:fs'
+import { existsSync, rmSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { renderYaml, skillMetadata, supportedLanguages } from './skill-language-metadata.mjs'
+import { isOpenCodeProject, opencodeExcludedSkillNames, opencodeExcludedSkills } from './opencode-skill-policy.mjs'
 
 const args = process.argv.slice(2)
 const lang = readArg('--lang') || args[0] || 'bilingual'
@@ -20,7 +21,15 @@ const roots = [
 let changed = 0
 for (const root of roots) {
   if (!existsSync(root)) continue
+  const isOpenCodeMirror = root === resolve(targetRoot, '.agents', 'skills') && isOpenCodeProject(targetRoot)
+  if (isOpenCodeMirror) {
+    for (const skill of opencodeExcludedSkillNames) {
+      const skillDir = resolve(root, skill)
+      if (existsSync(skillDir)) rmSync(skillDir, { recursive: true, force: true })
+    }
+  }
   for (const [skill, item] of Object.entries(skillMetadata)) {
+    if (isOpenCodeMirror && opencodeExcludedSkills.has(skill)) continue
     const file = resolve(root, skill, 'agents', 'openai.yaml')
     if (!existsSync(file)) continue
     writeFileSync(file, renderYaml(item, lang), 'utf8')
@@ -28,7 +37,13 @@ for (const root of roots) {
   }
 }
 
-console.log(JSON.stringify({ status: 'language-updated', lang, targetRoot, filesChanged: changed }, null, 2))
+console.log(JSON.stringify({
+  status: 'language-updated',
+  lang,
+  targetRoot,
+  filesChanged: changed,
+  openCodeExcludedSkills: isOpenCodeProject(targetRoot) ? [...opencodeExcludedSkills] : [],
+}, null, 2))
 
 function readArg(name) {
   const idx = args.indexOf(name)
