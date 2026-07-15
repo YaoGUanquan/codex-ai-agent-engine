@@ -20,6 +20,12 @@ const targetUpdater = resolve(targetScripts, 'update-ae-codex.mjs')
 const targetLanguageSetter = resolve(targetScripts, 'set-ae-language.mjs')
 const targetArtifactChecker = resolve(targetScripts, 'check-ae-artifacts.mjs')
 const targetDesignContractChecker = resolve(targetScripts, 'check-design-contract.mjs')
+const targetOpenCodeChecker = resolve(targetScripts, 'check-opencode.mjs')
+const targetOpenCodeCore = resolve(targetScripts, 'check-opencode-core.mjs')
+const sourceOpenCode = resolve(repoRoot, '.opencode')
+const targetOpenCode = resolve(targetRoot, '.opencode')
+const sourceOpenCodeConfig = resolve(repoRoot, 'opencode.json')
+const targetOpenCodeConfig = resolve(targetRoot, 'opencode.json')
 const sourceTemplates = resolve(repoRoot, 'docs', 'ae', 'templates')
 const targetTemplates = resolve(targetRoot, 'docs', 'ae', 'templates')
 const removedSkillNames = ['ae-officecli', 'ae-docx', 'ae-xlsx', 'ae-pptx']
@@ -74,6 +80,21 @@ writeFileSync(targetUpdater, "#!/usr/bin/env node\nimport '../plugins/ai-agent-e
 writeFileSync(targetLanguageSetter, "#!/usr/bin/env node\nimport '../plugins/ai-agent-engine-codex/scripts/set-language.mjs'\n", 'utf8')
 writeFileSync(targetArtifactChecker, "#!/usr/bin/env node\nimport '../plugins/ai-agent-engine-codex/scripts/check-ae-artifacts.mjs'\n", 'utf8')
 writeFileSync(targetDesignContractChecker, "#!/usr/bin/env node\nimport '../plugins/ai-agent-engine-codex/scripts/check-design-contract.mjs'\n", 'utf8')
+writeFileSync(targetOpenCodeChecker, "#!/usr/bin/env node\nimport '../plugins/ai-agent-engine-codex/scripts/check-opencode.mjs'\n", 'utf8')
+cpSync(resolve(repoRoot, 'scripts', 'check-opencode-core.mjs'), targetOpenCodeCore)
+
+if (existsSync(sourceOpenCode)) {
+  mkdirSync(targetOpenCode, { recursive: true })
+  for (const name of ['commands', 'agents']) {
+    const sourceDir = resolve(sourceOpenCode, name)
+    if (existsSync(sourceDir)) cpSync(sourceDir, resolve(targetOpenCode, name), { recursive: true, force: true })
+  }
+  const sourceReadme = resolve(sourceOpenCode, 'README.md')
+  if (existsSync(sourceReadme)) cpSync(sourceReadme, resolve(targetOpenCode, 'README.md'), { force: true })
+}
+if (existsSync(sourceOpenCodeConfig) && !existsSync(targetOpenCodeConfig)) {
+  cpSync(sourceOpenCodeConfig, targetOpenCodeConfig)
+}
 
 runLanguageSetter(lang)
 
@@ -93,6 +114,9 @@ console.log(JSON.stringify({
   languageSetter: toPosix(relative(targetRoot, targetLanguageSetter)),
   artifactChecker: toPosix(relative(targetRoot, targetArtifactChecker)),
   designContractChecker: toPosix(relative(targetRoot, targetDesignContractChecker)),
+  openCode: toPosix(relative(targetRoot, targetOpenCode)),
+  openCodeConfig: toPosix(relative(targetRoot, targetOpenCodeConfig)),
+  openCodeChecker: toPosix(relative(targetRoot, targetOpenCodeChecker)),
   lang,
 }, null, 2))
 

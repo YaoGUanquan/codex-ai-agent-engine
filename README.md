@@ -7,9 +7,11 @@ AI Agent Engine for Codex 是一个面向 Codex 的项目级工程工作流插�
 > 也参考了 https://github.com/openai/plugins 和 https://github.com/obra/superpowers 中部分开发技能设计。<br>
 > 也参考了 https://github.com/affaan-m/everything-claude-code 中关于外部 skill 仓库治理、持续学习、验证循环和 Codex 适配边界的设计。<br>
 > 也参考了 https://github.com/github/spec-kit 中关于 constitution、需求质量清单、任务拆解和跨产物分析的工作流设计，但不引入其 runtime。<br>
-> 这不是 OpenCode runtime 的直接移植，而是 Codex 原生 skill、项目级插件文件和本地脚本的实现方式。
+> Codex 路径不是上游 OpenCode runtime 的直接移植；本分支另外提供 OpenCode 原生项目配置、命令和 agent 入口。
 
 English: [README.en.md](README.en.md)
+
+OpenCode branch integration: [README.opencode.md](README.opencode.md)
 
 ## 适用场景
 

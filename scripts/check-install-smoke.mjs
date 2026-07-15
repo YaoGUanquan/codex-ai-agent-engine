@@ -15,8 +15,10 @@ mkdirSync(targetRoot, { recursive: true })
 try {
   const existingTemplateDir = resolve(targetRoot, 'docs', 'ae', 'templates')
   const existingTemplatePath = resolve(existingTemplateDir, 'user-template.md')
+  const existingOpenCodeConfigPath = resolve(targetRoot, 'opencode.json')
   mkdirSync(existingTemplateDir, { recursive: true })
   writeFileSync(existingTemplatePath, 'user-owned template\n', 'utf8')
+  writeFileSync(existingOpenCodeConfigPath, '{\n  "$schema": "https://opencode.ai/config.json",\n  "model": "example/model"\n}\n', 'utf8')
   const staleSkillDirs = ['ae-officecli', 'ae-docx', 'ae-xlsx', 'ae-pptx']
   for (const skillName of staleSkillDirs) {
     const staleSkillDir = resolve(targetRoot, '.agents', 'skills', skillName)
@@ -80,6 +82,11 @@ try {
     'scripts/set-ae-language.mjs',
     'scripts/check-ae-artifacts.mjs',
     'scripts/check-design-contract.mjs',
+    'scripts/check-opencode.mjs',
+    'opencode.json',
+    '.opencode/commands/ae-help.md',
+    '.opencode/commands/ae-lfg.md',
+    '.opencode/agents/ae-review.md',
   ]
   for (const relPath of expectedPaths) {
     const fullPath = resolve(targetRoot, relPath)
@@ -87,6 +94,10 @@ try {
   }
   if (!existsSync(existingTemplatePath)) {
     throw new Error('Install removed a pre-existing user docs/ae/templates file')
+  }
+  const existingOpenCodeConfig = readFileSync(existingOpenCodeConfigPath, 'utf8')
+  if (!existingOpenCodeConfig.includes('example/model') || existingOpenCodeConfig.includes('ae-*')) {
+    throw new Error('Install overwrote a pre-existing OpenCode config')
   }
   for (const skillName of staleSkillDirs) {
     const staleSkillDir = resolve(targetRoot, '.agents', 'skills', skillName)
@@ -125,6 +136,10 @@ try {
   const designContractResult = JSON.parse(run(process.execPath, [resolve(targetRoot, 'scripts', 'check-design-contract.mjs')], { cwd: targetRoot }).stdout)
   if (designContractResult.status !== 'ok' || designContractResult.checked !== 0) {
     throw new Error('Installed check-design-contract command did not return stable no-design JSON')
+  }
+  const openCodeResult = JSON.parse(run(process.execPath, [resolve(targetRoot, 'scripts', 'check-opencode.mjs')], { cwd: targetRoot }).stdout)
+  if (openCodeResult.status !== 'ok' || openCodeResult.commandCount !== 9 || openCodeResult.skillCount < 1) {
+    throw new Error('Installed OpenCode integration did not pass its contract check')
   }
   const claudeCheckResult = JSON.parse(run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'claude-delegate', '--check'], { cwd: targetRoot }).stdout)
   if (!['ok', 'skip'].includes(claudeCheckResult.status) || typeof claudeCheckResult.available !== 'boolean') {
