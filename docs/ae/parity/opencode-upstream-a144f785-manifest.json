@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "upstream": {
+    "repository": "https://gitee.com/jiangqiang1996/ai-agent-engine",
+    "commit": "a144f785579698190635305fe10784b7deca9e03",
+    "opencodeVersion": "1.18.1"
+  },
+  "retainedRoots": [
+    "src/index.ts",
+    "src/hooks",
+    "src/services",
+    "src/tools",
+    "src/schemas",
+    "src/utils",
+    "src/assets/agents",
+    "src/assets/commands",
+    "src/assets/config",
+    "src/assets/rules",
+    "src/assets/skills",
+    "scripts/postbuild.mjs",
+    "tests"
+  ],
+  "excludedPathFragments": [
+    "ae-pdf",
+    "ae-docx",
+    "ae-xlsx",
+    "ae-pptx",
+    "ae-officecli",
+    "officecli-service",
+    "pdf-service",
+    "pdf-to-image-service",
+    "pdf-markdown-converter",
+    "pdfjs-worker",
+    "document-output-path",
+    "document-path-security",
+    "document-tool-errors",
+    "file-backup"
+  ],
+  "expectedPluginHooks": [
+    "config",
+    "experimental.chat.system.transform",
+    "command.execute.before",
+    "chat.message",
+    "experimental.chat.messages.transform",
+    "tool.execute.after",
+    "event",
+    "tool"
+  ],
+  "expectedTools": [
+    "ae-recovery",
+    "ae-review-contract",
+    "ae-handoff",
+    "ae-worktree-handoff",
+    "ae-create-session",
+    "ae-help",
+    "ae-review-proof",
+    "ae-swagger-parser",
+    "ae-image",
+    "ae-audio",
+    "ae-video",
+    "ae-graph-build",
+    "ae-graph-query",
+    "ae-task-analyzer",
+    "ae-doc-extract",
+    "ae-domain-catalog",
+    "ae-chrome-devtools-mcp",
+    "ae-timer",
+    "ae-domain-dispatch-prepare",
+    "ae-domain-dispatch-aggregate",
+    "ae-async-bash",
+    "ae-brainstorm"
+  ]
+}

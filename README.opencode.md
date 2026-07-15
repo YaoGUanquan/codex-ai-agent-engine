@@ -1,113 +1,54 @@
 # AI Agent Engine for OpenCode
 
-This branch adds a project-local OpenCode integration to the shared AI Agent
-Engine workflow assets.
+`codex/opencode-mode` is the dedicated OpenCode branch. It is maintained independently and is not merged into `main` or `codebuddy`.
 
-> Branch policy: `codex/opencode-mode` is a dedicated long-lived branch for
-> OpenCode development and maintenance. It is maintained independently and
-> will not be merged back into `main`, following the same policy as the
-> `codebuddy` branch. The Codex mainline remains on `main`.
+## Runtime
 
-## Quick Install And Use
+This branch carries a project-local OpenCode plugin runtime based on upstream Gitee commit `a144f785579698190635305fe10784b7deca9e03`, with OpenCode plugin/SDK compatibility updated to `1.18.1`.
 
-Clone this branch outside the target project and install the OpenCode project
-files into that project:
+Included runtime capabilities:
 
-```bash
-git clone --depth 1 --branch codex/opencode-mode https://github.com/YaoGUanquan/codex-ai-agent-engine.git /tmp/ae-opencode
-node /tmp/ae-opencode/scripts/install-project.mjs --target /path/to/your/project
-cd /path/to/your/project
-node scripts/check-opencode.mjs
-opencode
-```
+- dynamic commands, agents, skills, rules, MCP registration, and model routing;
+- image, audio, and video understanding with media fallback hooks;
+- persistent project graph build/query, freshness, sharding, and preview assets;
+- browser DevTools MCP, sessions, handoff, API testing, Swagger, SQL, review, and engineering workflows.
 
-On Windows PowerShell:
+Intentionally excluded end to end:
+
+- PDF;
+- DOCX;
+- XLSX;
+- PPTX;
+- OfficeCLI.
+
+Excluded capabilities are absent from skills, schemas, tools, services, dependencies, command/help registration, and installed project runtimes.
+
+## Project Install
 
 ```powershell
 git clone --depth 1 --branch codex/opencode-mode https://github.com/YaoGUanquan/codex-ai-agent-engine.git "$env:TEMP\ae-opencode"
 node "$env:TEMP\ae-opencode\scripts\install-project.mjs" --target "D:\codes\your-project"
-Set-Location "D:\codes\your-project"
-node scripts\check-opencode.mjs
-opencode
 ```
 
-Use `/ae-help` to list the available workflows. Common commands include
-`/ae-brainstorm`, `/ae-plan`, `/ae-work`, and `/ae-review`. Restart OpenCode
-after installing or updating project-local skills and commands.
-
-## Included
-
-- `opencode.json` with the OpenCode schema and `ae-*` skill permissions.
-- `.opencode/commands/ae-*.md` for the core native slash commands.
-- `.opencode/agents/ae-review.md` for a read-only review subagent.
-- `.agents/skills/` as the OpenCode-compatible skill directory.
-- `scripts/check-opencode.mjs` for deterministic integration checks.
-- `scripts/check-opencode-upstream.mjs` for repeatable Gitee upstream comparison.
-
-OpenCode discovers project skills from `.agents/skills`, so no Codex plugin
-manifest is required for the OpenCode runtime. The existing Codex manifest and
-`agents/openai.yaml` files remain available for the compatible Codex path.
-The OpenCode directory intentionally excludes `ae-computer-use-guard`,
-`ae-imagegen-prompt`, and `ae-video-edit-computer`; these remain in the Codex
-plugin source only.
-
-## Usage
-
-From this project, start OpenCode and use commands such as:
+The installer copies source into a target-local staging directory, runs `npm ci --ignore-scripts` and the reviewed build, then activates:
 
 ```text
-/ae-help
-/ae-brainstorm clarify the request for a new import workflow
-/ae-prd define the import workflow requirements
-/ae-plan implement the approved import workflow
-/ae-work execute docs/ae/plans/<plan>.md
-/ae-review review the current changes
-/ae-lfg take this feature from requirements to verified delivery
+<project>/.opencode/ai-agent-engine
+<project>/.opencode/plugins/ae-server.js
 ```
 
-The command layer only selects the corresponding skill. The skill is the
-source of truth for artifact paths, validation, permissions, and workflow
-boundaries.
+The bridge is written last. A failed update restores the previous runtime and bridge. The installer does not write global OpenCode configuration and does not execute `git reset`, `git clean`, or `git pull`.
 
-## Install into another project
-
-Run the existing installer from this branch. It copies the shared skills,
-OpenCode commands, the read-only agent, the OpenCode config, and helper
-wrappers. Existing target `opencode.json` content is preserved.
-
-```bash
-node scripts/install-project.mjs --target /path/to/project
-node /path/to/project/scripts/check-opencode.mjs
-```
-
-On Windows, use the equivalent PowerShell paths. OpenCode must be restarted
-after installing or updating project-local skills and commands.
+Restart OpenCode after install or update, then run `/ae-help`.
 
 ## Verification
 
-```bash
-node scripts/check-opencode.mjs
+```powershell
+npm ci --ignore-scripts
+npm run build
 npm test
+npm run test:e2e
 npm run check
 ```
 
-The check validates the OpenCode config, core command frontmatter, review agent
-frontmatter, and the OpenCode skill naming/description constraints.
-
-## Upstream refresh
-
-The branch tracks the upstream Gitee project as a reference source. Inspect a
-local upstream checkout and classify changes before adapting them:
-
-```bash
-node scripts/check-opencode-upstream.mjs \
-  --source /path/to/ai-agent-engine \
-  --since b6df46e
-```
-
-The current reference was checked at `ff97284db2855e0048820843dd6416fb0f00ab72`.
-The upstream review-agent step cap from `a2a0229` is applied locally as
-`steps: 15`. The latest Office skill design-system update from `ff97284` is
-recorded as deferred because this branch does not ship the upstream
-`ae-officecli` runtime/tool boundary; copying those skills alone would expose
-unusable commands.
+`npm run check` includes project installation, exclusion, activation rollback, and uninstall smoke checks.

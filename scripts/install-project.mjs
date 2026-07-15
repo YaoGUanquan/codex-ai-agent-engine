@@ -1,180 +1,150 @@
 #!/usr/bin/env node
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs'
-import { dirname, resolve, relative } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { cpSync, existsSync, lstatSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
+import { dirname, isAbsolute, relative, resolve } from 'node:path'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { spawnSync } from 'node:child_process'
-import { opencodeExcludedSkillNames } from '../plugins/ai-agent-engine-codex/scripts/opencode-skill-policy.mjs'
 
-const __filename = fileURLToPath(import.meta.url)
-const repoRoot = resolve(dirname(__filename), '..')
+const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const args = process.argv.slice(2)
-const targetArg = readArg('--target') || process.cwd()
-const targetRoot = resolve(targetArg)
-const pluginName = 'ai-agent-engine-codex'
-const sourcePlugin = resolve(repoRoot, 'plugins', pluginName)
-const targetPlugin = resolve(targetRoot, 'plugins', pluginName)
-const targetAgentsSkills = resolve(targetRoot, '.agents', 'skills')
-const targetMarketplace = resolve(targetRoot, '.agents', 'plugins', 'marketplace.json')
-const targetScripts = resolve(targetRoot, 'scripts')
-const targetWrapper = resolve(targetScripts, 'ae-tools.mjs')
-const targetUpdater = resolve(targetScripts, 'update-ae-codex.mjs')
-const targetLanguageSetter = resolve(targetScripts, 'set-ae-language.mjs')
-const targetArtifactChecker = resolve(targetScripts, 'check-ae-artifacts.mjs')
-const targetDesignContractChecker = resolve(targetScripts, 'check-design-contract.mjs')
-const targetOpenCodeChecker = resolve(targetScripts, 'check-opencode.mjs')
-const targetOpenCodeCore = resolve(targetScripts, 'check-opencode-core.mjs')
-const sourceOpenCode = resolve(repoRoot, '.opencode')
-const targetOpenCode = resolve(targetRoot, '.opencode')
-const sourceOpenCodeConfig = resolve(repoRoot, 'opencode.json')
-const targetOpenCodeConfig = resolve(targetRoot, 'opencode.json')
-const sourceTemplates = resolve(repoRoot, 'docs', 'ae', 'templates')
-const targetTemplates = resolve(targetRoot, 'docs', 'ae', 'templates')
-const removedSkillNames = [
-  'ae-officecli',
-  'ae-docx',
-  'ae-xlsx',
-  'ae-pptx',
-  ...opencodeExcludedSkillNames,
+const targetRoot = resolve(readArg('--target') || process.cwd())
+const opencodeRoot = resolve(targetRoot, '.opencode')
+const runtimeRoot = resolve(opencodeRoot, 'ai-agent-engine')
+const stagingRoot = `${runtimeRoot}.staging-${Date.now()}`
+const backupRoot = `${runtimeRoot}.backup-${Date.now()}`
+const bridgePath = resolve(opencodeRoot, 'plugins', 'ae-server.js')
+const bridgeContent = "export { default } from '../ai-agent-engine/dist/src/index.js'\n"
+const ownershipFileName = '.ae-install-owner.json'
+const ownership = { schemaVersion: 1, product: 'ai-agent-engine-opencode', scope: 'project' }
+const distributionPaths = [
+  'LICENSE',
+  'package.json',
+  'package-lock.json',
+  'tsconfig.json',
+  'src',
+  'scripts/postbuild.mjs',
+  'scripts/install-project.mjs',
+  'scripts/install.js',
+  'scripts/uninstall.js',
+  'docs/talk-normal-fallback.md',
 ]
-const removedScriptNames = ['check-officecli-available.mjs', 'check-officecli-smoke.mjs']
-const lang = readArg('--lang') || readInstalledLang(targetRoot) || 'bilingual'
-const supportedLangs = new Set(['en', 'zh-CN', 'bilingual'])
 
-if (!supportedLangs.has(lang)) {
-  fail('Usage: node scripts/install-project.mjs --target <project> [--lang en|zh-CN|bilingual]')
+const targetFromSource = relative(repoRoot, targetRoot)
+if (targetFromSource === '' || (!targetFromSource.startsWith('..') && !isAbsolute(targetFromSource))) {
+  fail('The installation target must not be this source checkout.')
+}
+assertSafeTargetPath(targetRoot)
+if (existsSync(bridgePath) && readFileSync(bridgePath, 'utf8') !== bridgeContent) {
+  fail(`Refusing to overwrite an unrecognized OpenCode bridge: ${bridgePath}`)
+}
+if (existsSync(runtimeRoot) && !isOwnedRuntime(runtimeRoot)) {
+  fail(`Refusing to replace an unrecognized OpenCode runtime: ${runtimeRoot}`)
 }
 
-if (!existsSync(sourcePlugin)) {
-  fail(`source plugin not found: ${sourcePlugin}`)
-}
-
-mkdirSync(dirname(targetPlugin), { recursive: true })
-if (existsSync(targetPlugin)) rmSync(targetPlugin, { recursive: true, force: true })
-cpSync(sourcePlugin, targetPlugin, { recursive: true })
-
-mkdirSync(targetAgentsSkills, { recursive: true })
-for (const name of removedSkillNames) {
-  const dst = resolve(targetAgentsSkills, name)
-  if (existsSync(dst)) rmSync(dst, { recursive: true, force: true })
-}
-const sourceSkills = resolve(sourcePlugin, 'skills')
-for (const name of listDirs(sourceSkills)) {
-  if (opencodeExcludedSkillNames.includes(name)) continue
-  const dst = resolve(targetAgentsSkills, name)
-  if (existsSync(dst)) rmSync(dst, { recursive: true, force: true })
-  cpSync(resolve(sourceSkills, name), dst, { recursive: true })
-}
-
-mkdirSync(dirname(targetMarketplace), { recursive: true })
-const marketplace = loadMarketplace(targetMarketplace)
-const entry = {
-  name: pluginName,
-  source: { source: 'local', path: `./plugins/${pluginName}` },
-  policy: { installation: 'INSTALLED_BY_DEFAULT', authentication: 'ON_INSTALL' },
-  category: 'Coding',
-}
-const idx = marketplace.plugins.findIndex((plugin) => plugin.name === pluginName)
-if (idx >= 0) marketplace.plugins[idx] = entry
-else marketplace.plugins.push(entry)
-writeJson(targetMarketplace, marketplace)
-
-mkdirSync(targetScripts, { recursive: true })
-for (const name of removedScriptNames) {
-  const dst = resolve(targetScripts, name)
-  if (existsSync(dst)) rmSync(dst, { recursive: true, force: true })
-}
-writeFileSync(targetWrapper, "#!/usr/bin/env node\nimport '../plugins/ai-agent-engine-codex/scripts/ae-tools.mjs'\n", 'utf8')
-writeFileSync(targetUpdater, "#!/usr/bin/env node\nimport '../plugins/ai-agent-engine-codex/scripts/update-project.mjs'\n", 'utf8')
-writeFileSync(targetLanguageSetter, "#!/usr/bin/env node\nimport '../plugins/ai-agent-engine-codex/scripts/set-language.mjs'\n", 'utf8')
-writeFileSync(targetArtifactChecker, "#!/usr/bin/env node\nimport '../plugins/ai-agent-engine-codex/scripts/check-ae-artifacts.mjs'\n", 'utf8')
-writeFileSync(targetDesignContractChecker, "#!/usr/bin/env node\nimport '../plugins/ai-agent-engine-codex/scripts/check-design-contract.mjs'\n", 'utf8')
-writeFileSync(targetOpenCodeChecker, "#!/usr/bin/env node\nimport '../plugins/ai-agent-engine-codex/scripts/check-opencode.mjs'\n", 'utf8')
-cpSync(resolve(repoRoot, 'scripts', 'check-opencode-core.mjs'), targetOpenCodeCore)
-
-if (existsSync(sourceOpenCode)) {
-  mkdirSync(targetOpenCode, { recursive: true })
-  for (const name of ['commands', 'agents']) {
-    const sourceDir = resolve(sourceOpenCode, name)
-    if (existsSync(sourceDir)) cpSync(sourceDir, resolve(targetOpenCode, name), { recursive: true, force: true })
+try {
+  mkdirSync(opencodeRoot, { recursive: true })
+  mkdirSync(stagingRoot, { recursive: true })
+  for (const path of distributionPaths) {
+    const source = resolve(repoRoot, path)
+    if (!existsSync(source)) throw new Error(`Distribution source is missing: ${path}`)
+    const target = resolve(stagingRoot, path)
+    mkdirSync(dirname(target), { recursive: true })
+    cpSync(source, target, { recursive: true })
   }
-  const sourceReadme = resolve(sourceOpenCode, 'README.md')
-  if (existsSync(sourceReadme)) cpSync(sourceReadme, resolve(targetOpenCode, 'README.md'), { force: true })
-}
-if (existsSync(sourceOpenCodeConfig) && !existsSync(targetOpenCodeConfig)) {
-  cpSync(sourceOpenCodeConfig, targetOpenCodeConfig)
-}
+  run('npm', ['ci', '--ignore-scripts'], stagingRoot)
+  run('npm', ['run', 'build'], stagingRoot)
 
-runLanguageSetter(lang)
+  const entry = resolve(stagingRoot, 'dist', 'src', 'index.js')
+  if (!existsSync(entry)) throw new Error(`Build did not create plugin entry: ${entry}`)
+  if (process.env.AE_INSTALL_CORRUPT_STAGED_ENTRY === '1') {
+    writeFileSync(entry, 'throw new Error("Injected staged plugin load failure")\n', 'utf8')
+  }
+  validatePluginEntry(entry, stagingRoot)
+  writeFileSync(resolve(stagingRoot, ownershipFileName), `${JSON.stringify(ownership, null, 2)}\n`, 'utf8')
 
-if (existsSync(sourceTemplates)) {
-  mkdirSync(dirname(targetTemplates), { recursive: true })
-  cpSync(sourceTemplates, targetTemplates, { recursive: true, force: true })
+  let previousBridge = null
+  if (existsSync(bridgePath)) previousBridge = readFileSync(bridgePath, 'utf8')
+  try {
+    if (existsSync(runtimeRoot)) renameWithRetry(runtimeRoot, backupRoot)
+    renameWithRetry(stagingRoot, runtimeRoot)
+    if (process.env.AE_INSTALL_FAIL_AFTER_ACTIVATION === '1') {
+      throw new Error('Injected failure after runtime activation')
+    }
+    mkdirSync(dirname(bridgePath), { recursive: true })
+    writeFileSync(bridgePath, bridgeContent, 'utf8')
+    if (existsSync(backupRoot)) rmSync(backupRoot, { recursive: true, force: true })
+  } catch (error) {
+    if (existsSync(runtimeRoot)) rmSync(runtimeRoot, { recursive: true, force: true })
+    if (existsSync(backupRoot)) renameWithRetry(backupRoot, runtimeRoot)
+    if (previousBridge === null) rmSync(bridgePath, { force: true })
+    else writeFileSync(bridgePath, previousBridge, 'utf8')
+    throw error
+  }
+
+  console.log(JSON.stringify({ status: 'installed', targetRoot, runtime: '.opencode/ai-agent-engine', bridge: '.opencode/plugins/ae-server.js' }, null, 2))
+} catch (error) {
+  if (existsSync(stagingRoot)) rmSync(stagingRoot, { recursive: true, force: true })
+  console.error(`OpenCode runtime installation failed: ${error.message}`)
+  process.exit(1)
 }
-
-console.log(JSON.stringify({
-  status: 'installed',
-  targetRoot,
-  plugin: toPosix(relative(targetRoot, targetPlugin)),
-  marketplace: toPosix(relative(targetRoot, targetMarketplace)),
-  skills: toPosix(relative(targetRoot, targetAgentsSkills)),
-  wrapper: toPosix(relative(targetRoot, targetWrapper)),
-  updater: toPosix(relative(targetRoot, targetUpdater)),
-  languageSetter: toPosix(relative(targetRoot, targetLanguageSetter)),
-  artifactChecker: toPosix(relative(targetRoot, targetArtifactChecker)),
-  designContractChecker: toPosix(relative(targetRoot, targetDesignContractChecker)),
-  openCode: toPosix(relative(targetRoot, targetOpenCode)),
-  openCodeConfig: toPosix(relative(targetRoot, targetOpenCodeConfig)),
-  openCodeChecker: toPosix(relative(targetRoot, targetOpenCodeChecker)),
-  openCodeExcludedSkills: opencodeExcludedSkillNames,
-  lang,
-}, null, 2))
 
 function readArg(name) {
-  const idx = args.indexOf(name)
-  if (idx < 0) return null
-  return args[idx + 1] || null
+  const index = args.indexOf(name)
+  return index < 0 ? null : args[index + 1] || null
 }
 
-function listDirs(path) {
-  return existsSync(path)
-    ? readdirSync(path).filter((name) => statSync(resolve(path, name)).isDirectory())
-    : []
-}
-
-function loadMarketplace(path) {
-  if (!existsSync(path)) {
-    return {
-      name: 'local-codex-plugins',
-      interface: { displayName: 'Local Codex Plugins' },
-      plugins: [],
+function assertSafeTargetPath(root) {
+  for (const path of [root, resolve(root, '.opencode'), resolve(root, '.opencode', 'plugins'), bridgePath, runtimeRoot]) {
+    if (existsSync(path) && lstatSync(path).isSymbolicLink()) {
+      fail(`Refusing to install through a symbolic link or junction: ${path}`)
     }
   }
-  return JSON.parse(readFileSync(path, 'utf8'))
 }
 
-function readInstalledLang(targetRoot) {
-  const file = resolve(targetRoot, '.agents', 'skills', 'ae-help', 'agents', 'openai.yaml')
-  if (!existsSync(file)) return null
-  const content = readFileSync(file, 'utf8')
-  if (content.includes('查看 Codex 中可用的 AE 工作流能力 / List AE workflow capabilities for Codex')) return 'bilingual'
-  if (content.includes('查看 Codex 中可用的 AE 工作流能力')) return 'zh-CN'
-  if (content.includes('List AE workflow capabilities for Codex')) return 'en'
-  return null
-}
-
-function writeJson(path, value) {
-  writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`, 'utf8')
-}
-
-function runLanguageSetter(lang) {
-  const script = resolve(targetPlugin, 'scripts', 'set-language.mjs')
-  const result = spawnSync(process.execPath, [script, '--target', targetRoot, '--lang', lang], { stdio: 'inherit' })
+function run(command, commandArgs, cwd) {
+  const result = spawnSync(command, commandArgs, {
+    cwd,
+    stdio: 'inherit',
+    shell: process.platform === 'win32' && command === 'npm',
+  })
   if (result.error) throw result.error
-  if (result.status !== 0) process.exit(result.status ?? 1)
+  if (result.status !== 0) throw new Error(`${command} ${commandArgs.join(' ')} failed with exit ${result.status}`)
 }
 
-function toPosix(path) {
-  return path.replace(/\\/g, '/')
+function validatePluginEntry(entry, cwd) {
+  const script = [
+    "import { createRequire } from 'node:module'",
+    'globalThis.require = createRequire(import.meta.url)',
+    `const pluginModule = await import(${JSON.stringify(pathToFileURL(entry).href)})`,
+    "if (typeof pluginModule.default !== 'function') throw new Error('Plugin entry must export a default function')",
+  ].join('\n')
+  run(process.execPath, ['--input-type=module', '--eval', script], cwd)
+}
+
+function isOwnedRuntime(root) {
+  try {
+    const value = JSON.parse(readFileSync(resolve(root, ownershipFileName), 'utf8'))
+    return value?.schemaVersion === ownership.schemaVersion
+      && value?.product === ownership.product
+      && value?.scope === ownership.scope
+  } catch {
+    return false
+  }
+}
+
+function renameWithRetry(source, target) {
+  const retryableCodes = new Set(['EBUSY', 'ENOTEMPTY', 'EPERM'])
+  let lastError
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    try {
+      renameSync(source, target)
+      return
+    } catch (error) {
+      lastError = error
+      if (!retryableCodes.has(error?.code) || attempt === 7) throw error
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 100)
+    }
+  }
+  throw lastError
 }
 
 function fail(message) {
