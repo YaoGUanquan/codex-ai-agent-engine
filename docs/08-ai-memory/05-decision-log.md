@@ -146,3 +146,10 @@
 - Context: The upstream delta contains useful catalog organization and workflow contracts alongside OpenCode-only sessions, hooks, dynamic MCP, async execution, media fallback, graph telemetry, and agent registries.
 - Impact: AE help groups skills by explicit `core`, `docs`, `tools`, and `meta` metadata without changing routing. Design and task-loop improvements remain Codex-native process and validation contracts.
 - Re-evaluate when: Codex exposes a stable headless registry test surface or a real project artifact requires a broader design declaration grammar.
+
+## 2026-07-22: Adapt upstream validator safety and risk-scaled test design
+
+- Decision: Treat upstream commit `76d832c96a1c810410982bf28b425a3aedb461ab` as the latest observed reference; adopt symbolic-link rejection and conditional test-design methods while retaining the Codex-native runtime boundary.
+- Context: The local artifact and design validators used `statSync` recursive walks, which follow symbolic links. Upstream fixed the same class of directory traversal risk. Its newer test-case contracts add useful scenario-selection methods, but their universal scenario counts and OpenCode subagent execution model do not fit compact Codex design artifacts.
+- Impact: validators skip symbolic links and manifest entries must resolve inside the real design directory. `ae-design` now records a method-tagged, automatable coverage matrix only for triggered API, UI/state, business-rule, data, or authorization structures. Upstream package metadata for this snapshot is `GPL-3.0-or-later`; this repository continues to adapt behavior rather than vendoring upstream source.
+- Re-evaluate when: representative local design artifacts show a need for semantic coverage measurement beyond the current structural contract.
