@@ -12,7 +12,7 @@ const installer = resolve(repoRoot, 'scripts', 'install-project.mjs')
 const runtimeRoot = resolve(targetRoot, '.opencode', 'ai-agent-engine')
 const bridgePath = resolve(targetRoot, '.opencode', 'plugins', 'ae-server.js')
 const excluded = ['ae-pdf', 'ae-docx', 'ae-xlsx', 'ae-pptx', 'ae-officecli']
-const parityManifest = JSON.parse(readFileSync(resolve(repoRoot, 'docs', 'ae', 'parity', 'opencode-upstream-a144f785-manifest.json'), 'utf8'))
+const parityManifest = JSON.parse(readFileSync(resolve(repoRoot, 'docs', 'ae', 'parity', 'opencode-upstream-61b7775-manifest.json'), 'utf8'))
 const sourceSentinel = resolve(repoRoot, `.install-secret-sentinel-${randomUUID()}`)
 
 try {
@@ -57,7 +57,7 @@ try {
     if (packageJson.includes(dependency)) throw new Error(`Installed package contains excluded dependency: ${dependency}`)
   }
   const installedPaths = collectPaths(runtimeRoot)
-  for (const fragment of parityManifest.excludedPathFragments) {
+  for (const fragment of parityManifest.excludedDistributionPathFragments) {
     if (installedPaths.some((path) => path.includes(fragment.toLowerCase()))) {
       throw new Error(`Installed runtime path contains excluded fragment: ${fragment}`)
     }

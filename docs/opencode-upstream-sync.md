@@ -4,8 +4,8 @@
 
 - Repository: `https://gitee.com/jiangqiang1996/ai-agent-engine`
 - Branch: `master`
-- Last inspected commit: `ff97284db2855e0048820843dd6416fb0f00ab72`
-- Inspection command: `node scripts/check-opencode-upstream.mjs --source <checkout> --since b6df46e`
+- Last inspected commit: `61b777542fb00d2e082af126d17b070318281933`
+- Inspection command: `node scripts/check-opencode-upstream.mjs --source <checkout> --since a144f785579698190635305fe10784b7deca9e03`
 
 ## Adaptation policy
 
@@ -27,9 +27,8 @@ Before adapting an upstream change:
 
 | Upstream change | Local action | Evidence or reason |
 | --- | --- | --- |
-| `a2a0229` review specialists add `steps: 15` | Applied to `.opencode/agents/ae-review.md` | Same OpenCode agent frontmatter contract; limits review loops |
-| `ff97284` Office skill design systems and visual validation | Deferred | Current branch has no upstream `ae-officecli` tool/runtime |
-| `ff97284` removes upstream runtime dead assets | Not copied | No equivalent local files or behavior to remove |
+| `61b7775` SDK v2, Playwright CLI, OCR, and review routing | Selectively applied | Runtime and asset boundaries are asserted by the 61b7775 no-Office manifest |
+| `61b7775` PDF, document, and OfficeCLI paths | Excluded | No matching capability is shipped in the project-local installer distribution |
 
 ## Boundary
 

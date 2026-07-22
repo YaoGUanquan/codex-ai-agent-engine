@@ -1,8 +1,8 @@
 # AI Agent Engine for OpenCode
 
-AI Agent Engine（AE）是项目级 OpenCode 工程工作流插件。此专用分支基于上游 `a144f785579698190635305fe10784b7deca9e03`，提供技能、命令、子代理、工具、完整项目图谱、媒体理解、动态 MCP、模型路由和内置规则。
+AI Agent Engine（AE）是项目级 OpenCode 工程工作流插件。此专用分支对齐上游 `61b777542fb00d2e082af126d17b070318281933`，提供技能、命令、子代理、工具、完整项目图谱、媒体理解、Playwright CLI、显式 OCR 审查、模型路由和内置规则。
 
-本分支明确不提供 PDF、DOCX、XLSX、PPTX 和 OfficeCLI 能力。OpenCode plugin/SDK 兼容版本为 `1.18.1`。
+本分支明确不提供 PDF、DOCX、XLSX、PPTX 和 OfficeCLI 能力。OpenCode plugin/SDK 兼容版本为 `1.18.4`。
 
 AE 不要求业务项目采用本仓库结构。面向用户的运行时能力以 `src/` 下资产为真源，安装后的实际可用能力以 `/ae-help` 为准。
 
@@ -55,9 +55,7 @@ node "$env:TEMP\ae-opencode\scripts\install-project.mjs" --target "D:\codes\your
 前端和浏览器验收：
 
 ```text
-/ae-chrome-devtools
-/ae-web-forge 实现登录页
-/ae-web-forge --inspect http://localhost:3000/login
+/ae-playwright 打开 http://localhost:3000/login 并验证登录页
 ```
 
 解析 Swagger/OpenAPI：
@@ -86,8 +84,8 @@ node "$env:TEMP\ae-opencode\scripts\install-project.mjs" --target "D:\codes\your
 | 工作总结 | `/ae-work-report` |
 | 查看本人代码变更 | `/ae-my-code-changes` |
 | 代码或文档审查 | `/ae-review` |
-| 前端设计、还原、交互或验收 | `/ae-web-forge` |
-| chrome-devtools 浏览器能力 | `/ae-chrome-devtools` |
+| 浏览器自动化与验收 | `/ae-playwright` |
+| 原型预览 | `/ae-prototype-preview` |
 | 接口测试 | `/ae-api-tester` |
 | Swagger/OpenAPI 摘要 | `/ae-swagger-parser` |
 | 图片转 Markdown 描述 | `/ae-image` |
@@ -98,6 +96,10 @@ node "$env:TEMP\ae-opencode\scripts\install-project.mjs" --target "D:\codes\your
 | 探索性修复 | `/ae-task-loop` |
 | 数据库操作 | `/ae-sql` |
 | 会话交接 | `/ae-handoff` |
+| 项目探索 | `/ae-project-explore` |
+| 经验沉淀 | `/ae-save-experience` |
+| 深度追问 | `/ae-grill` |
+| 显式 OCR 审查 | `/ae-ocr` |
 | 创建技能 | `/ae-skill-creator` |
 | 提示词优化 | `/ae-prompt-optimize` |
 | 创建代理 | `/ae-agent-creator` |
@@ -113,7 +115,7 @@ node "$env:TEMP\ae-opencode\scripts\install-project.mjs" --target "D:\codes\your
 | 需求不清先澄清 | 复杂实现前先产出需求或设计，避免直接编码 |
 | 审查先定范围 | 代码、文档或通用混合范围按目标类型选择审查代理 |
 | 交付必须验证 | `/ae-work` 交付前检查验证、审查和 Git 授权证据 |
-| 浏览器先注册 MCP | 当前会话使用 chrome-devtools-mcp 工具前必须先通过 `/ae-chrome-devtools` 完成动态注册或连接状态确认 |
+| 浏览器验证 | 通过 `/ae-playwright` 和 Playwright CLI 执行；CLI 不可用时如实记录未验证 |
 | Git 写操作需授权 | 提交、拉取、重置、清理、变基、推送等都需要明确授权；`/ae-commit` 不等同于 push |
 | 远程写操作不默认提供 | 用户侧流程不提供 push、创建 PR、创建 Issue 或 Release 的可复制流程 |
 
@@ -121,10 +123,10 @@ node "$env:TEMP\ae-opencode\scripts\install-project.mjs" --target "D:\codes\your
 
 | 类型 | 当前快照 | 真源 |
 | --- | ---: | --- |
-| 技能 | 27 | `src/assets/skills/`、`src/schemas/ae-asset-schema.ts` |
-| 命令 | 34 | `src/services/command-registration.ts`、`src/assets/commands/` |
-| 代理 | 49 | `src/assets/agents/`、`src/services/agent-registration.ts` |
-| 工具 | 22 | `src/tools/` |
+| 技能 | 28 | `src/assets/skills/`、`src/schemas/ae-asset-schema.ts` |
+| 命令 | 37 | `src/services/command-registration.ts`、`src/assets/commands/` |
+| 代理 | 50 | `src/assets/agents/`、`src/services/agent-registration.ts` |
+| 工具 | 23 | `src/tools/` |
 | 规则 | 6 | `src/assets/rules/` |
 | 内置配置 | 1 | `src/assets/config/ae.jsonc` |
 

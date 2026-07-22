@@ -14,14 +14,14 @@ UI 设计规范与决策专家 — 产出**设计决策包**，不产出代码�
 
 ## When To Use
 
-- 由 `ae:web-forge` 在视觉实现阶段前调度，获取设计决策包后透传给 `@ui-architect`
+- 由调用方在视觉实现阶段前调度，获取设计决策包后透传给 `@ui-architect`
 - 由 `ae:design` 在产出 ui-ux 维度契约前调度，获取设计决策包后透传给 `@ui-ux-designer`
 
 ## When Not To Use
 
 - 写 Web 实现代码 → 调度 `@ui-architect`
 - 产出 ui-ux.md 设计契约 → 调度 `@ui-ux-designer`
-- 浏览器测试 → 调度 `@browser-inspector`
+- 浏览器测试 → 调度 `@e2e-tester` 并使用 `ae:playwright` 工作流
 - 非 UI/UX 维度的设计契约 → 调度其他维度专精代理
 
 ## Inputs
@@ -341,7 +341,7 @@ UI 设计规范与决策专家 — 产出**设计决策包**，不产出代码�
 ## Boundaries
 
 - **不写实现代码** — 不产出 HTML/CSS/JS/React 组件代码
-- **不操作浏览器** — 不执行任何 chrome-devtools 操作
+- **不操作浏览器** — 不执行任何浏览器自动化操作
 - **不产出契约文件** — 不产出 ui-ux.md 或其他维度契约
 - **不画像素级视觉稿** — 只产出结构化设计决策
 - **不修改代码库文件** — 除设计决策包输出外不修改任何文件

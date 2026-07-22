@@ -2,39 +2,11 @@
 
 **全局硬约束，适用于任何会话、任何角色需要执行浏览器操作或会产生持久副作用的操作的场景。无例外。**
 
-## 1. 浏览器 MCP 注册门禁
+## 1. 浏览器 CLI 边界
 
-无论通过技能、代理、命令、工具、bash 还是通过自动执行生成的新会话，只要需要使用 chrome-devtools-mcp 工具，就必须先通过 `ae:chrome-devtools` 技能完成浏览器 MCP 动态注册并确认连接就绪。`ae:chrome-devtools` 是浏览器 MCP 的唯一管理入口，上层技能和代理不应直接调用 `ae-chrome-devtools-mcp` 工具。
+浏览器自动化仅通过 `ae:playwright` 技能和已安装的 Playwright CLI 执行。调用前必须确认 CLI 可用；无法确认或执行失败时，停止浏览器流程并如实记录未验证原因，不得把配置、进程探测或历史结果说成当前浏览器验证。
 
-chrome-devtools MCP 支持三种注册模式：autoConnect（自动发现已运行的 Chrome，无需调试端口，需 Chrome >= M144）、connect（通过浏览器类型和调试端口连接已有实例）、isolated（启动独立浏览器）。
-
-### 1.1 核心规则
-
-1. **ae:chrome-devtools 是唯一管理入口** — 执行任何 chrome-devtools-mcp 工具前，必须先通过 `ae:chrome-devtools` 技能完成注册并确认连接就绪；上层不应直接调用 `ae-chrome-devtools-mcp` 进行注册/检查/断开
-2. **已有配置不能替代注册确认** — MCP 已在配置中声明、用户声称已配置、或本地进程检查成功，都不能替代通过 `ae:chrome-devtools` 技能完成的注册确认结果
-3. **MCP 注册状态可跨会话复用** — 已注册且连接的 MCP 状态在同一工作区可跨会话复用；新会话先检查，未就绪再注册
-4. **未完成注册确认前禁止执行** — MCP 未注册或未连接就绪时，不得执行任何 chrome-devtools-mcp 工具（含直接调用/子代理/封装调用）
-5. **注册失败时的降级路径** — 只有当注册失败、用户拒绝启动或环境无法启动时，才允许记录"无法验证"并停止浏览器流程，不得跳过门禁
-
-### 1.2 豁免
-
-- `ae:chrome-devtools` 自身可以直接调用 `ae-chrome-devtools-mcp` 工具，它负责检查、动态注册、状态确认和连接管理
-- 安全边界中提到 chrome-devtools-mcp 但不实际调用它的描述不强制环境准备
-
-### 1.3 机器可校验状态
-
-`ae:chrome-devtools` 技能内部调用 `ae-chrome-devtools-mcp action=check` 获取当前 MCP 注册和连接状态（`name`、`status`：connected/disabled/failed/needs_auth/needs_client_registration）。MCP 未注册、注册失败或连接状态非 `connected` 时，等同于未完成浏览器 MCP 动态注册。
-
-`ae-chrome-devtools-mcp action=detect` 用于检测浏览器环境（已安装、运行中、可接管），是纯只读操作，不注册 MCP 也不连接浏览器，不触发门禁约束。detect 的结果供 `ae:chrome-devtools` 技能智能决策注册模式，但 detect 本身不替代 register 确认步骤。
-
-### 1.4 新增消费方检查项
-
-新增任何会使用 chrome-devtools-mcp 工具的技能、代理、命令或工具时，必须：
-
-1. 在流程开始处通过 `ae:chrome-devtools` 技能完成注册并确认就绪
-2. 不得直接调用 `ae-chrome-devtools-mcp` 注册/检查/断开
-3. 未确认时不得继续执行；失败时提供降级路径，不得跳过门禁
-4. 自动执行新会话场景：提示词须包含通过 `ae:chrome-devtools` 完成注册的要求
+新增浏览器消费方时，必须引用 `ae:playwright`，不得引用已经废弃的浏览器自动化入口。
 
 ## 2. 副作用资源复用
 
@@ -69,13 +41,13 @@ chrome-devtools MCP 支持三种注册模式：autoConnect（自动发现已运�
 - 打开浏览器前检查：是否已有由本会话（或本工具）启动的浏览器实例在运行
 - 已在运行 → 复用旧实例，不再启动新浏览器
 - 需要新上下文或新配置 → 先关闭旧浏览器，再启动新浏览器
-- 检查方式：通过 chrome-devtools-mcp 的 `list_pages` 等只读工具确认浏览器与页面状态
+- 检查方式：通过 Playwright CLI 的会话或页面检查确认浏览器与页面状态
 
 **标签页：**
 - 打开 URL 前检查：是否已有同一 URL 对应的标签页打开
 - 已打开 → 复用现有标签页（可刷新或直接使用），不再新开标签页
 - 需要干净上下文（如 cookie、缓存） → 先关闭旧标签页，再打开
-- 检查方式：通过 chrome-devtools-mcp 的 `list_pages` 列出现有页面与 URL
+- 检查方式：通过 Playwright CLI 列出现有页面与 URL
 
 ### 2.4 检查方式
 
@@ -83,7 +55,7 @@ chrome-devtools MCP 支持三种注册模式：autoConnect（自动发现已运�
 |--------------|----------|
 | 进程类 | 按 PID 验证存活（Windows: `tasklist /FI "PID eq <pid>"`；Unix: `ps -p <pid>`） |
 | 端口类 | 检查端口占用情况 |
-| 浏览器/标签页类 | 通过 chrome-devtools-mcp 的 `list_pages` 等只读工具检查现有页面与 URL |
+| 浏览器/标签页类 | 通过 Playwright CLI 的只读页面检查确认现有页面与 URL |
 | 其他 | 通过日志、状态接口或只读探查确认副作用资源是否仍可用 |
 
 ### 2.5 复用失败的处理
@@ -94,11 +66,11 @@ chrome-devtools MCP 支持三种注册模式：autoConnect（自动发现已运�
 
 ## 3. 适用范围
 
-本规则适用于一切**不支持幂等性执行**的操作，包括但不限于：服务启动（web 服务器、watch 进程、长连接服务等）、浏览器实例（chrome-devtools-mcp 启动的浏览器等）、浏览器标签页、`ae-async-bash` 服务启动、占用端口或留下持续运行状态的任何操作。凡是"重复执行会产生多个并存实例、占用资源或导致状态冲突"的操作均适用本规则。
+本规则适用于一切**不支持幂等性执行**的操作，包括但不限于：服务启动（web 服务器、watch 进程、长连接服务等）、Playwright 启动的浏览器实例、浏览器标签页、`ae-async-bash` 服务启动、占用端口或留下持续运行状态的任何操作。凡是"重复执行会产生多个并存实例、占用资源或导致状态冲突"的操作均适用本规则。
 
-具体覆盖场景包括：内置技能（`ae:web-forge` 等）、工作流代理（`@ui-architect`/`@logic-weaver`/`@browser-inspector`）、命令（`/ae-web-forge` 等）、自动执行的新会话、直接工具调用（`chrome-devtools_navigate_page`/`take_snapshot`/`click`/`fill`/`take_screenshot` 等）、子代理，以及未来新增的任何使用 chrome-devtools-mcp 工具或产生持久副作用的技能/代理/命令/工具。
+具体覆盖场景包括：内置技能（`ae:playwright` 等）、工作流代理、自动执行的新会话、Playwright CLI 调用、子代理，以及未来新增的任何产生持久副作用的技能、代理、命令或工具。
 
 ## 4. 与现有规则的关系
 
 - `ai-core-guidelines.md` §4.2"重复启动同一服务的前置检查"委托至本规则 §2，本规则 §2 是其具体展开
-- 本规则 §1（浏览器 MCP 注册门禁）与 §2（副作用资源复用）配合使用：§1 负责浏览器 MCP 的注册确认，§2 负责已有浏览器实例与标签页的复用检查
+- 本规则 §1（浏览器 CLI 边界）与 §2（副作用资源复用）配合使用：§1 负责验证浏览器自动化入口，§2 负责已有浏览器实例与标签页的复用检查

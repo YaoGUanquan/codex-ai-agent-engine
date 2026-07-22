@@ -7,15 +7,20 @@ import plugin from '../../src/index.js'
 import { createToolRegistry } from '../../src/tools/index.js'
 
 interface ParityManifest {
+  upstream: { commit: string; opencodeVersion: string }
+  license: string
   retainedRoots: string[]
-  excludedPathFragments: string[]
+  distributionPaths: string[]
+  excludedDistributionPathFragments: string[]
   expectedPluginHooks: string[]
   expectedTools: string[]
+  expectedSkills: string[]
+  absentSkillOrToolNames: string[]
 }
 
 const repoRoot = resolve(import.meta.dirname, '..', '..')
 const manifest = JSON.parse(readFileSync(
-  resolve(repoRoot, 'docs', 'ae', 'parity', 'opencode-upstream-a144f785-manifest.json'),
+  resolve(repoRoot, 'docs', 'ae', 'parity', 'opencode-upstream-61b7775-manifest.json'),
   'utf8',
 )) as ParityManifest
 
@@ -30,7 +35,7 @@ function collectFiles(root: string): string[] {
 
 describe('OpenCode 上游对齐清单', () => {
   it('应该完整注册清单声明的插件 hooks 和工具', async () => {
-    const runtime = await plugin({ worktree: repoRoot, client: {} } as never)
+    const runtime = await plugin({ worktree: repoRoot, directory: repoRoot, serverUrl: new URL('http://localhost:4096'), client: {} } as never)
 
     expect(Object.keys(runtime).sort()).toEqual([...manifest.expectedPluginHooks].sort())
     expect(Object.keys(createToolRegistry()).sort()).toEqual([...manifest.expectedTools].sort())
@@ -42,15 +47,37 @@ describe('OpenCode 上游对齐清单', () => {
     }
   })
 
-  it('运行时源码路径不应该重新引入清单排除片段', () => {
+  it('可注册的运行时资产不应该重新引入清单排除片段', () => {
     const runtimeFiles = ['src', 'scripts'].flatMap((path) => collectFiles(resolve(repoRoot, path)))
     const relativePaths = runtimeFiles.map((path) => path.slice(repoRoot.length + 1).replaceAll('\\', '/').toLowerCase())
 
-    for (const fragment of manifest.excludedPathFragments) {
+    for (const fragment of manifest.excludedDistributionPathFragments) {
       expect(
         relativePaths.filter((path) => path.includes(fragment.toLowerCase())),
         `excluded path fragment found: ${fragment}`,
       ).toEqual([])
+    }
+  })
+
+  it('应该声明 61b7775、OpenCode 1.18.4、GPL-3.0-or-later 和新的浏览器/OCR 边界', () => {
+    expect(manifest.upstream).toMatchObject({
+      commit: '61b777542fb00d2e082af126d17b070318281933',
+      opencodeVersion: '1.18.4',
+    })
+    expect(manifest.license).toBe('GPL-3.0-or-later')
+    expect(readFileSync(resolve(repoRoot, 'LICENSE'), 'utf8')).toContain('GNU GENERAL PUBLIC LICENSE')
+    expect(readFileSync(resolve(repoRoot, 'LICENSE-NOTICE'), 'utf8')).toMatch(/either version 3 of the License, or \(at your\s+option\) any later version/)
+    expect(manifest.expectedSkills).toEqual(expect.arrayContaining(['ae-playwright', 'ae-ocr']))
+    expect(manifest.absentSkillOrToolNames).toEqual(expect.arrayContaining(['ae-chrome-devtools', 'ae-web-forge']))
+    expect(manifest.distributionPaths).toEqual(expect.arrayContaining(['THIRD-PARTY-NOTICES', 'scripts/ensure-playwright.mjs']))
+  })
+
+  it('workflow agents should route browser testing to the registered Playwright workflow', () => {
+    for (const agent of ['logic-weaver', 'ui-architect', 'ui-design-spec', 'ui-ux-designer']) {
+      const content = readFileSync(resolve(repoRoot, 'src', 'assets', 'agents', 'workflow', `${agent}.md`), 'utf8')
+      expect(content).not.toContain('@browser-inspector')
+      expect(content).toContain('@e2e-tester')
+      expect(content).toContain('ae:playwright')
     }
   })
 

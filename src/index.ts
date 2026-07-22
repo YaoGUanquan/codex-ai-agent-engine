@@ -1,4 +1,5 @@
 import type {Config, Plugin} from '@opencode-ai/plugin'
+import {createOpencodeClient} from '@opencode-ai/sdk/v2'
 import {join, resolve} from 'node:path'
 
 import {isInsideRoot} from './utils/path-utils.js'
@@ -123,7 +124,18 @@ function resolveConfiguredModelReferences(
 const plugin: Plugin = async (input) => {
     const manifest = createRuntimeAssetManifest(import.meta.url)
     const hostWorktree = input.worktree
-    setGlobalClient(input.client)
+    const authPassword = process.env.OPENCODE_SERVER_PASSWORD
+    const clientConfig: Parameters<typeof createOpencodeClient>[0] = {
+        baseUrl: input.serverUrl.toString(),
+        directory: input.directory,
+    }
+    if (authPassword) {
+        const authUsername = process.env.OPENCODE_SERVER_USERNAME ?? 'opencode'
+        clientConfig.headers = {
+            Authorization: `Basic ${Buffer.from(`${authUsername}:${authPassword}`).toString('base64')}`,
+        }
+    }
+    setGlobalClient(createOpencodeClient(clientConfig))
 
     return {
         config: async (config) => {

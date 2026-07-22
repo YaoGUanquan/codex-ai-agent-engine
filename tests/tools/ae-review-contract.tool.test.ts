@@ -29,6 +29,8 @@ async function callTool(args: {
   has_agent_config?: boolean
   has_config?: boolean
   has_evidence_claim?: boolean
+  has_security?: boolean
+  has_design_contract?: boolean
 }) {
   const { aeReviewContractTool: tool } = await import('../../src/tools/ae-review-contract.tool.js')
   const definition = tool as unknown as {
@@ -56,54 +58,55 @@ async function getToolDefinition() {
 }
 
 describe('ae-review-contract 工具', () => {
-  it('test 类型应返回测试文档契约并激活 test-case-reviewer', async () => {
+  it('test 类型使用当前文档审查器', async () => {
     const result = await callTool({ kind: 'test' })
 
     expect(result.kind).toBe('test')
     expect(result.documentType).toBe('test')
-    expect(result.reviewers).toContain(AGENT.TEST_CASE_REVIEWER)
+    expect(result.reviewers).toEqual([AGENT.DOCUMENT_REVIEWER])
   })
 
-  it('document 类型默认不应激活 test-case-reviewer', async () => {
+  it('document 类型默认使用文档审查器', async () => {
     const result = await callTool({ kind: 'document' })
 
     expect(result.kind).toBe('document')
     expect(result.documentType).toBe('requirements')
-    expect(result.reviewers).not.toContain(AGENT.TEST_CASE_REVIEWER)
+    expect(result.reviewers).toEqual([AGENT.DOCUMENT_REVIEWER])
   })
 
-  it('design 类型应激活 prototype-reviewer 和 test-case-reviewer', async () => {
+  it('design 类型在没有设计契约时使用默认文档审查器', async () => {
     const result = await callTool({ kind: 'design' })
 
     expect(result.documentType).toBe('design')
-    expect(result.reviewers).toContain(AGENT.PROTOTYPE_REVIEWER)
-    expect(result.reviewers).toContain(AGENT.TEST_CASE_REVIEWER)
+    expect(result.reviewers).toEqual([AGENT.DOCUMENT_REVIEWER])
   })
 
-  it('general 类型应返回通用文档契约且不激活 test-case-reviewer', async () => {
+  it('general 类型包含跨域的当前默认审查器', async () => {
     const result = await callTool({ kind: 'general' })
 
     expect(result.documentType).toBe('general')
-    expect(result.reviewers).not.toContain(AGENT.TEST_CASE_REVIEWER)
+    expect(result.reviewers).toEqual([AGENT.OCR_REVIEWER, AGENT.DOCUMENT_REVIEWER, AGENT.TRACEABILITY_REVIEWER])
   })
 
-  it('code 类型 has_new_abstraction 应激活架构审查者', async () => {
-    const result = await callTool({ kind: 'code', has_new_abstraction: true })
+  it('document 类型 security 信号激活安全设计审查器', async () => {
+    const result = await callTool({ kind: 'document', has_security: true })
 
-    expect(result.reviewers).toContain(AGENT.ARCHITECTURE_STRATEGIST)
+    expect(result.reviewers).toContain(AGENT.SECURITY_DESIGN_REVIEWER)
   })
 
-  it('document 类型 has_product_claim 应激活 product-lens-reviewer', async () => {
-    const result = await callTool({ kind: 'document', has_product_claim: true })
+  it('design contract 激活当前设计专用审查器', async () => {
+    const result = await callTool({ kind: 'design', has_design_contract: true })
 
-    expect(result.reviewers).toContain(AGENT.PRODUCT_LENS_REVIEWER)
+    expect(result.reviewers).toContain(AGENT.ARCHITECTURE_DESIGN_REVIEWER)
+    expect(result.reviewers).toContain(AGENT.TEST_CASES_DESIGN_REVIEWER)
+    expect(result.reviewers).toContain(AGENT.DESIGN_INTEGRITY_REVIEWER)
   })
 
-  it('has_config 应声明为非选择字段且不单独激活 agent-native-reviewer', async () => {
+  it('has_config remains a non-selection field', async () => {
     const result = await callTool({ kind: 'code', has_config: true })
 
     expect(result.nonSelectionInputs).toEqual(['has_typescript', 'has_config', 'has_script'])
-    expect(result.reviewers).not.toContain(AGENT.AGENT_NATIVE_REVIEWER)
+    expect(result.reviewers).toEqual([AGENT.OCR_REVIEWER, AGENT.DOCUMENT_REVIEWER])
   })
 
   it('应暴露新增选择参数给真实工具调用方', async () => {
@@ -116,39 +119,26 @@ describe('ae-review-contract 工具', () => {
       expect(definition.args).toHaveProperty('targetTypes')
   })
 
-  it('has_ui、has_tooling 和 has_agent_config 应激活 agent-native-reviewer', async () => {
-    const uiResult = await callTool({ kind: 'code', has_ui: true })
-    const toolingResult = await callTool({ kind: 'code', has_tooling: true })
-    const agentConfigResult = await callTool({ kind: 'code', has_agent_config: true })
-
-    expect(uiResult.reviewers).toContain(AGENT.AGENT_NATIVE_REVIEWER)
-    expect(toolingResult.reviewers).toContain(AGENT.AGENT_NATIVE_REVIEWER)
-    expect(agentConfigResult.reviewers).toContain(AGENT.AGENT_NATIVE_REVIEWER)
-  })
-
-  it('general 类型 targets 应激活对应审查者并返回目标覆盖', async () => {
+  it('general targets report coverage from the installed review matrix', async () => {
     const result = await callTool({ kind: 'general', targets: 'requirements,design,asset' })
 
     expect(result.normalizedKind).toBe('general')
-    expect(result.reviewers).toContain(AGENT.REQUIREMENTS_REVIEWER)
-    expect(result.reviewers).toContain(AGENT.DESIGN_LENS_REVIEWER)
-    expect(result.reviewers).toContain(AGENT.PROTOTYPE_REVIEWER)
-    expect(result.reviewers).toContain(AGENT.TEST_CASE_REVIEWER)
-    expect(result.reviewers).toContain(AGENT.AGENT_NATIVE_REVIEWER)
-    expect(result.targetCoverage?.requirements.status).toBe('covered')
-    expect(result.targetCoverage?.design.status).toBe('covered')
-    expect(result.targetCoverage?.asset.reviewers).toEqual([AGENT.AGENT_NATIVE_REVIEWER])
+    expect(result.reviewers).toContain(AGENT.DESIGN_INTEGRITY_REVIEWER)
+    expect(result.reviewers).toContain(AGENT.TRACEABILITY_REVIEWER)
+    expect(result.targetCoverage?.requirements.status).toBe('uncovered')
+    expect(result.targetCoverage?.design.status).toBe('uncovered')
+    expect(result.targetCoverage?.asset.status).toBe('uncovered')
   })
 
-  it('应兼容 reviewScenes 和 targetTypes 别名', async () => {
+  it('accepts reviewScenes and targetTypes aliases', async () => {
     const result = await callTool({ kind: 'mixed', reviewScenes: 'design', targetTypes: 'design' })
 
     expect(result.normalizedKind).toBe('general')
-    expect(result.reviewers).toContain(AGENT.DESIGN_LENS_REVIEWER)
-    expect(result.targetCoverage?.design.status).toBe('covered')
+    expect(result.reviewers).toContain(AGENT.DESIGN_INTEGRITY_REVIEWER)
+    expect(result.targetCoverage?.design.status).toBe('uncovered')
   })
 
-  it('hybrid 混合目标带 evidence_claim 应返回追溯和证据审查覆盖', async () => {
+  it('hybrid targets activate traceability without retired evidence reviewers', async () => {
     const result = await callTool({
       kind: 'hybrid',
       targetTypes: 'requirements,design,document',
@@ -157,10 +147,10 @@ describe('ae-review-contract 工具', () => {
 
     expect(result.normalizedKind).toBe('general')
     expect(result.reviewers).toContain(AGENT.TRACEABILITY_REVIEWER)
-    expect(result.reviewers).toContain(AGENT.EVIDENCE_REVIEWER)
-    expect(result.targetCoverage?.requirements.status).toBe('covered')
-    expect(result.targetCoverage?.design.status).toBe('covered')
-    expect(result.targetCoverage?.document.status).toBe('covered')
+    expect(result.reviewers).not.toContain(AGENT.EVIDENCE_REVIEWER)
+    expect(result.targetCoverage?.requirements.status).toBe('uncovered')
+    expect(result.targetCoverage?.design.status).toBe('uncovered')
+    expect(result.targetCoverage?.document.status).toBe('uncovered')
   })
 })
 

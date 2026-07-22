@@ -4,14 +4,14 @@
 
 ## Runtime
 
-This branch carries a project-local OpenCode plugin runtime based on upstream Gitee commit `a144f785579698190635305fe10784b7deca9e03`, with OpenCode plugin/SDK compatibility updated to `1.18.1`.
+This branch carries a project-local OpenCode plugin runtime aligned to upstream Gitee commit `61b777542fb00d2e082af126d17b070318281933`, with OpenCode plugin/SDK compatibility at `1.18.4`.
 
 Included runtime capabilities:
 
-- dynamic commands, agents, skills, rules, MCP registration, and model routing;
+- dynamic commands, agents, skills, rules, and model routing;
 - image, audio, and video understanding with media fallback hooks;
 - persistent project graph build/query, freshness, sharding, and preview assets;
-- browser DevTools MCP, sessions, handoff, API testing, Swagger, SQL, review, and engineering workflows.
+- Playwright CLI browser automation, explicit OCR review invocation, sessions, handoff, API testing, Swagger, SQL, review, and engineering workflows.
 
 Intentionally excluded end to end:
 
@@ -37,7 +37,7 @@ The installer copies source into a target-local staging directory, runs `npm ci 
 <project>/.opencode/plugins/ae-server.js
 ```
 
-The bridge is written last. A failed update restores the previous runtime and bridge. The installer does not write global OpenCode configuration and does not execute `git reset`, `git clean`, or `git pull`.
+The bridge is written last. A failed update restores the previous runtime and bridge. The installer does not write global OpenCode configuration and does not execute OCR or provision browsers.
 
 Restart OpenCode after install or update, then run `/ae-help`.
 

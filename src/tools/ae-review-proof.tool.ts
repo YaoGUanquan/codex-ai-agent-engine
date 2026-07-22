@@ -83,7 +83,7 @@ function normalizeStatusSummaryForEvidence(statusSummary: string): string {
     .split('\n')
     .filter((line) => !line.startsWith('## '))
     .filter((line) => line.trim())
-    .filter((line) => !isReviewRuntimePath(line.slice(3).trim()))
+    .filter((line) => !isReviewRuntimePath((line.length > 2 ? line.slice(3) : line).trim()))
     .map((line) => line.trim())
     .join('\n')
 }

@@ -8,8 +8,8 @@ const runtimeRoot = existsSync(resolve(nestedRuntime, 'package.json')) ? nestedR
 const sourceRoot = resolve(runtimeRoot, 'src')
 const assetsRoot = resolve(sourceRoot, 'assets')
 const bridgePath = resolve(targetRoot, '.opencode', 'plugins', 'ae-server.js')
-const expectedSkills = ['ae-design', 'ae-work', 'ae-review', 'ae-image', 'ae-audio', 'ae-video', 'ae-graph-build', 'ae-graph-query']
-const expectedTools = ['ae-help.tool.ts', 'ae-image.tool.ts', 'ae-audio.tool.ts', 'ae-video.tool.ts', 'ae-graph-build.tool.ts', 'ae-graph-query.tool.ts', 'ae-chrome-devtools-mcp.tool.ts']
+const expectedSkills = ['ae-design', 'ae-work', 'ae-review', 'ae-playwright', 'ae-ocr', 'ae-image', 'ae-audio', 'ae-video', 'ae-graph-build', 'ae-graph-query']
+const expectedTools = ['ae-help.tool.ts', 'ae-ocr.tool.ts', 'ae-image.tool.ts', 'ae-audio.tool.ts', 'ae-video.tool.ts', 'ae-graph-build.tool.ts', 'ae-graph-query.tool.ts']
 const excluded = ['ae-pdf', 'ae-docx', 'ae-xlsx', 'ae-pptx', 'ae-officecli']
 
 assertFile(resolve(runtimeRoot, 'package.json'), 'runtime package.json')
