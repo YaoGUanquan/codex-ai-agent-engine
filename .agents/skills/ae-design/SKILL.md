@@ -45,6 +45,17 @@ Every design contract must include:
 
 Keep the contract compact. Include only dimensions that affect implementation, review, or validation. If the artifact becomes too large to scan, keep `design.md` as the overview and split dimension details into sibling Markdown files listed in the Split Manifest.
 
+## Risk-Scaled Test Design
+
+When `test-cases` is required, select the smallest set of methods that exposes the design's actual risks and record that choice in the Test Coverage Matrix:
+
+- use equivalence classes and boundary values for constrained inputs, ranges, lengths, collections, or pagination;
+- use decision tables for multi-condition business rules;
+- use state transitions for declared UI or workflow states;
+- use error guessing for failure, timeout, concurrency, encoding, and hostile-input risks that the other methods do not cover.
+
+For each critical scenario, record the selected design method, covered stable IDs, and an automatable verification signal. Use each coverage category only when its triggering structure exists: API errors, database constraints, authorization decisions, and UI interactions. For an absent category, use `N/A` with the explicit-omission reason. Do not require fixed scenario counts or invent coverage metrics that the design artifact cannot measure.
+
 ## Review Closure
 
 Before treating a design as ready, run or request `ae-review domain:document` for the design artifact.

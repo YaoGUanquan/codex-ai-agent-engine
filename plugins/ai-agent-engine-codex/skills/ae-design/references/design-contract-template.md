@@ -88,6 +88,14 @@ sharded: false
 | TC ID | Scenario | Covered IDs | Verification signal |
 | --- | --- | --- | --- |
 
+### Test Coverage Matrix
+
+| TC ID | Scenario | Design method | Covered IDs | Automatable verification signal |
+| --- | --- | --- | --- | --- |
+| TC-XXX | <risk-relevant scenario> | equivalence-class \| boundary-value \| decision-table \| state-transition \| error-guessing | <ADR/EP/T/ST IDs> | <assertable response, state, record, or event> |
+
+Use equivalence classes and boundary values for constrained inputs; decision tables for multi-condition business rules; state transitions for declared state machines; and error guessing for residual failure risks. Cover API errors, database constraints, authorization decisions, and UI interactions only when their triggering structure exists. Record `N/A when the related dimension is explicitly omitted`, with its reason. Do not require fixed scenario counts or claim that this template measures executed coverage.
+
 ### ui-component-to-api-endpoint-mapping
 
 | Component/route | ST ID | EP ID | Data dependency |
