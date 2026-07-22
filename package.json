@@ -5,7 +5,7 @@
   "type": "module",
   "main": ".opencode/plugins/ae-server.js",
   "description": "Project-local OpenCode runtime fork of AI Agent Engine, excluding PDF and Office document capabilities.",
-  "license": "GPL-2.0-only",
+  "license": "GPL-3.0-or-later",
   "scripts": {
     "build": "tsc -p tsconfig.json && node scripts/postbuild.mjs",
     "test:runtime": "vitest run",
@@ -20,26 +20,30 @@
     "help": "node scripts/ae-tools.mjs help"
   },
   "dependencies": {
-    "@opencode-ai/plugin": "1.18.1",
-    "@opencode-ai/sdk": "1.18.1",
-    "effect": "4.0.0-beta.74",
+    "@alibaba-group/open-code-review": "^1.7.14",
+    "@opencode-ai/plugin": "1.18.4",
+    "@opencode-ai/sdk": "1.18.4",
+    "@playwright/cli": "^0.1.17",
+    "effect": "4.0.0-beta.100",
     "strip-json-comments": "^5.0.3",
     "tree-sitter-go": "^0.25.0",
     "tree-sitter-java": "^0.23.5",
     "tree-sitter-javascript": "^0.25.0",
     "tree-sitter-python": "^0.25.0",
     "tree-sitter-typescript": "^0.23.2",
-    "web-tree-sitter": "^0.26.8",
+    "web-tree-sitter": "^0.26.11",
     "yaml": "^2.8.3",
-    "zod": "4.1.8"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/node": "22.13.9",
+    "@types/node": "26.1.1",
     "esbuild": "^0.28.1",
-    "typescript": "5.8.2",
-    "vitest": "^3.2.6"
+    "typescript": "7.0.2",
+    "vitest": "^4.1.10"
   },
   "overrides": {
-    "uuid": "^11.1.1"
+    "uuid": "^11.1.1",
+    "zod": "^4.4.3",
+    "effect": "4.0.0-beta.100"
   }
 }

@@ -10,8 +10,8 @@ export const SKILL = {
   MY_CODE_CHANGES: 'ae:my-code-changes',
   MERGE_BRANCH: 'ae:merge-branch',
   REVIEW: 'ae:review',
-  CHROME_DEVTOOLS: 'ae:chrome-devtools',
-  WEB_FORGE: 'ae:web-forge',
+  PLAYWRIGHT: 'ae:playwright',
+  PROTOTYPE_PREVIEW: 'ae:prototype-preview',
   HANDOFF: 'ae:handoff',
   TASK_LOOP: 'ae:task-loop',
   SQL: 'ae:sql',
@@ -29,6 +29,7 @@ export const SKILL = {
   SKILL_CREATOR: 'ae:skill-creator',
   PROMPT_OPTIMIZE: 'ae:prompt-optimize',
   GRILL: 'ae:grill',
+  OCR: 'ae:ocr',
 } as const
 
 type SkillToCommand<S extends string> = S extends `ae:${infer R}` ? `ae-${R}` : S
@@ -65,17 +66,29 @@ export const AGENT = {
   PROTOTYPE_REVIEWER: 'prototype-reviewer',
   TRACEABILITY_REVIEWER: 'traceability-reviewer',
   EVIDENCE_REVIEWER: 'evidence-reviewer',
-  GOAL_ALIGNMENT_REVIEWER: 'goal-alignment-reviewer',
   DESIGN_CONSISTENCY_REVIEWER: 'design-consistency-reviewer',
   UI_CONSISTENCY_REVIEWER: 'ui-consistency-reviewer',
   TEST_COVERAGE_REVIEWER: 'test-coverage-reviewer',
+  OCR_REVIEWER: 'ocr-reviewer',
+  DOCUMENT_REVIEWER: 'document-reviewer',
+  ARCHITECTURE_DESIGN_REVIEWER: 'architecture-design-reviewer',
+  API_DESIGN_REVIEWER: 'api-design-reviewer',
+  DATABASE_DESIGN_REVIEWER: 'database-design-reviewer',
+  UI_UX_DESIGN_REVIEWER: 'ui-ux-design-reviewer',
+  TEST_CASES_DESIGN_REVIEWER: 'test-cases-design-reviewer',
+  SECURITY_DESIGN_REVIEWER: 'security-design-reviewer',
+  OBSERVABILITY_DESIGN_REVIEWER: 'observability-design-reviewer',
+  NON_FUNCTIONAL_DESIGN_REVIEWER: 'non-functional-design-reviewer',
+  DESIGN_INTEGRITY_REVIEWER: 'design-integrity-reviewer',
+  GOAL_ALIGNMENT_REVIEWER: 'goal-alignment-reviewer',
   ARCHITECTURE_STRATEGIST: 'architecture-strategist',
   REPO_RESEARCH_ANALYST: 'repo-research-analyst',
   WEB_RESEARCHER: 'web-researcher',
   SPEC_FLOW_ANALYZER: 'spec-flow-analyzer',
   UI_ARCHITECT: 'ui-architect',
   LOGIC_WEAVER: 'logic-weaver',
-  BROWSER_INSPECTOR: 'browser-inspector',
+  WEB_FIX: 'web-fix',
+  E2E_TESTER: 'e2e-tester',
   UI_UX_DESIGNER: 'ui-ux-designer',
   UI_DESIGN_SPEC: 'ui-design-spec',
   ARCHITECTURE_DESIGNER: 'architecture-designer',
@@ -114,10 +127,11 @@ export const TOOL = {
   AE_TASK_ANALYZER: 'ae-task-analyzer',
   AE_DOC_EXTRACT: 'ae-doc-extract',
   AE_DOMAIN_CATALOG: 'ae-domain-catalog',
-  AE_CHROME_DEVTOOLS_MCP: 'ae-chrome-devtools-mcp',
   AE_TIMER: 'ae-timer',
-  AE_DOMAIN_DISPATCH_PREPARE: 'ae-domain-dispatch-prepare',
-  AE_DOMAIN_DISPATCH_AGGREGATE: 'ae-domain-dispatch-aggregate',
+  AE_WORK_SPECIALIST_SELECT: 'ae-work-specialist-select',
+  AE_SPECIALIST_AGGREGATE: 'ae-specialist-aggregate',
+  AE_REVIEW_SCOPE_ANALYZE: 'ae-review-scope-analyze',
+  AE_OCR: 'ae-ocr',
   AE_ASYNC_BASH: 'ae-async-bash',
   AE_BRAINSTORM: 'ae-brainstorm',
 } as const
@@ -137,8 +151,8 @@ export const AeSkillNameSchema = z
     SKILL.MY_CODE_CHANGES,
     SKILL.MERGE_BRANCH,
     SKILL.REVIEW,
-    SKILL.CHROME_DEVTOOLS,
-    SKILL.WEB_FORGE,
+    SKILL.PLAYWRIGHT,
+    SKILL.PROTOTYPE_PREVIEW,
     SKILL.HANDOFF,
     SKILL.TASK_LOOP,
     SKILL.SQL,
@@ -155,6 +169,7 @@ export const AeSkillNameSchema = z
     SKILL.SKILL_CREATOR,
     SKILL.PROMPT_OPTIMIZE,
     SKILL.GRILL,
+    SKILL.OCR,
   ])
   .describe('AE 技能名')
 
@@ -181,7 +196,7 @@ export const AeAssetEntrySchema = z.object({
 })
 
 export const AgentStageSchema = z
-  .enum(['review', 'research', 'workflow', 'domain'])
+  .enum(['review', 'research', 'workflow', 'development', 'domain'])
   .describe('Agent 所属目录')
 
 export const AgentTierSchema = z

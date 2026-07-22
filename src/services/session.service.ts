@@ -1,5 +1,5 @@
 import { Effect } from 'effect'
-import type { OpencodeClient } from '@opencode-ai/sdk'
+import type { OpencodeClient } from '@opencode-ai/sdk/v2'
 import type { SessionExtractResult } from './session-extract.service.js'
 
 const HANDOFF_CONTEXT_HEADER = 'HANDOFF CONTEXT'
@@ -91,11 +91,10 @@ export function createNewSession(
   options: CreateSessionOptions,
 ): Effect.Effect<CreatedSession, Error> {
   return Effect.tryPromise(async () => {
-    const res = await client.session.create({
-      body: { title: options.title },
-    })
+    const res = await client.session.create({ title: options.title })
     if (res.error) {
-      throw new Error(`创建新会话失败: ${res.error.data?.message ?? res.error.name ?? '未知错误'}`)
+      const err = res.error as { message?: string; _tag?: string; data?: { message?: string } }
+      throw new Error(`创建新会话失败: ${err.data?.message ?? err.message ?? err._tag ?? '未知错误'}`)
     }
     const session = res.data
     if (!session?.id) {
@@ -108,9 +107,6 @@ export function createNewSession(
     }
   })
 }
-
-/** SDK v1 类型未声明 tui.session.select 事件，但 opencode 服务端支持该事件 */
-type TuiPublishBody = NonNullable<NonNullable<Parameters<OpencodeClient['tui']['publish']>[0]>['body']>
 
 /** 将交接上下文以普通消息形式注入到指定会话（降级路径，不需要 system prompt 支持）。 */
 export function injectContextAsMessage(
@@ -130,11 +126,9 @@ export function injectNoReplyMessage(
 ): Effect.Effect<void, Error> {
   return Effect.tryPromise(async () => {
     await client.session.prompt({
-      path: { id: sessionId },
-      body: {
-        noReply: true,
-        parts: [{ type: 'text', text }],
-      },
+      sessionID: sessionId,
+      noReply: true,
+      parts: [{ type: 'text', text }],
     })
   })
 }
@@ -147,12 +141,10 @@ export function injectSystemPrompt(
 ): Effect.Effect<void, Error> {
   return Effect.tryPromise(async () => {
     await client.session.prompt({
-      path: { id: sessionId },
-      body: {
-        noReply: true,
-        system: systemPrompt,
-        parts: [{ type: 'text', text: systemPrompt }],
-      },
+      sessionID: sessionId,
+      noReply: true,
+      system: systemPrompt,
+      parts: [{ type: 'text', text: systemPrompt }],
     })
   })
 }
@@ -165,10 +157,8 @@ export function submitUserPrompt(
 ): Effect.Effect<void, Error> {
   return Effect.tryPromise(async () => {
     await client.session.prompt({
-      path: { id: sessionId },
-      body: {
-        parts: [{ type: 'text', text }],
-      },
+      sessionID: sessionId,
+      parts: [{ type: 'text', text }],
     })
   })
 }
@@ -179,13 +169,6 @@ export function navigateToSession(
   sessionId: string,
 ): Effect.Effect<void, Error> {
   return Effect.tryPromise(async () => {
-    await client.tui.publish({
-      body: {
-        type: 'tui.session.select',
-        properties: {
-          sessionID: sessionId,
-        },
-      } as unknown as TuiPublishBody,
-    })
+    await client.tui.selectSession({ sessionID: sessionId })
   })
 }

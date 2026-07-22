@@ -13,7 +13,8 @@ describe('插件注册完整性', () => {
       expect(result.healthResp.error).toBeUndefined()
       const data = result.healthResp.data as { version?: string } | undefined
       expect(data).toBeDefined()
-      expect(data?.version).toBe('1.18.1')
+      // global.health reports the running OpenCode server version, not the plugin package version.
+      expect(data?.version).toMatch(/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/)
     },
     60_000,
   )

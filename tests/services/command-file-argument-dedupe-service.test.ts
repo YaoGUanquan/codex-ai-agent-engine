@@ -106,4 +106,16 @@ describe('command-file-argument-dedupe-service', () => {
 
     expect(parts.length).toBe(2)
   })
+
+  it('应该按路径分隔符、尾部斜杠和 file URL 大小写去重目录', () => {
+    const parts: Part[] = [
+      filePart('', 'file:///C:/Repo/src'),
+      filePart('@src', 'file:///c:/repo\\src/'),
+    ]
+
+    dedupeCommandFileArgumentParts(parts)
+
+    expect(parts).toHaveLength(1)
+    expect(parts[0]).toMatchObject({ type: 'file', url: 'file:///c:/repo\\src/' })
+  })
 })

@@ -3,12 +3,19 @@ import type { Part } from '@opencode-ai/sdk'
 type MutableTextPart = Extract<Part, { type: 'text' }>
 type MutableFilePart = Extract<Part, { type: 'file' }>
 
-function getFilePartUrl(part: Part): string | undefined {
+function normalizeDedupeKey(value: string): string {
+  const normalized = value.replace(/\\/g, '/').replace(/\/$/, '')
+  return normalized.startsWith('file:') ? normalized.toLowerCase() : normalized
+}
+
+function getFilePartDedupeKey(part: Part): string | undefined {
   if (part.type !== 'file') {
     return undefined
   }
 
-  return (part as MutableFilePart).url
+  const filePart = part as MutableFilePart
+  const value = filePart.url ?? filePart.source?.path?.trim() ?? filePart.filename
+  return value ? normalizeDedupeKey(value) : undefined
 }
 
 function collectFileReferenceTexts(parts: Part[]): string[] {
@@ -33,17 +40,17 @@ function hasSourceText(part: Part): boolean {
 }
 
 function dedupeFileParts(parts: Part[]): void {
-  const urlToFirstIndex = new Map<string, number>()
+  const keyToFirstIndex = new Map<string, number>()
 
   for (let i = 0; i < parts.length; i++) {
-    const url = getFilePartUrl(parts[i])
-    if (!url) {
+    const key = getFilePartDedupeKey(parts[i])
+    if (!key) {
       continue
     }
 
-    const existing = urlToFirstIndex.get(url)
+    const existing = keyToFirstIndex.get(key)
     if (existing === undefined) {
-      urlToFirstIndex.set(url, i)
+      keyToFirstIndex.set(key, i)
       continue
     }
 
@@ -55,7 +62,7 @@ function dedupeFileParts(parts: Part[]): void {
       i--
     } else if (!existingHasSource && currentHasSource) {
       parts.splice(existing, 1)
-      urlToFirstIndex.set(url, i - 1)
+      keyToFirstIndex.set(key, i - 1)
       i--
     } else {
       parts.splice(i, 1)

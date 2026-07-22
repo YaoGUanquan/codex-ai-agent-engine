@@ -15,17 +15,24 @@ const bridgePath = resolve(opencodeRoot, 'plugins', 'ae-server.js')
 const bridgeContent = "export { default } from '../ai-agent-engine/dist/src/index.js'\n"
 const ownershipFileName = '.ae-install-owner.json'
 const ownership = { schemaVersion: 1, product: 'ai-agent-engine-opencode', scope: 'project' }
+const excludedDistributionFragments = ['ae-pdf', 'ae-docx', 'ae-xlsx', 'ae-pptx', 'ae-officecli', 'officecli', 'pdf-', 'pdfjs-worker', 'document-output-path', 'document-path-security', 'document-tool-errors', 'file-backup']
 const distributionPaths = [
   'LICENSE',
+  'NOTICE.md',
+  'THIRD-PARTY-NOTICES',
+  'README.opencode.md',
   'package.json',
   'package-lock.json',
   'tsconfig.json',
   'src',
   'scripts/postbuild.mjs',
+  'scripts/ensure-playwright.mjs',
+  'scripts/ensure-playwright-lib.mjs',
   'scripts/install-project.mjs',
   'scripts/install.js',
   'scripts/uninstall.js',
   'docs/talk-normal-fallback.md',
+  'docs/ae/parity/opencode-upstream-61b7775-manifest.json',
 ]
 
 const targetFromSource = relative(repoRoot, targetRoot)
@@ -48,7 +55,7 @@ try {
     if (!existsSync(source)) throw new Error(`Distribution source is missing: ${path}`)
     const target = resolve(stagingRoot, path)
     mkdirSync(dirname(target), { recursive: true })
-    cpSync(source, target, { recursive: true })
+    cpSync(source, target, { recursive: true, filter: (candidate) => !isExcludedDistributionPath(candidate) })
   }
   run('npm', ['ci', '--ignore-scripts'], stagingRoot)
   run('npm', ['run', 'build'], stagingRoot)
@@ -98,6 +105,11 @@ function assertSafeTargetPath(root) {
       fail(`Refusing to install through a symbolic link or junction: ${path}`)
     }
   }
+}
+
+function isExcludedDistributionPath(candidate) {
+  const relativePath = relative(repoRoot, candidate).replaceAll('\\', '/').toLowerCase()
+  return excludedDistributionFragments.some((fragment) => relativePath.includes(fragment))
 }
 
 function run(command, commandArgs, cwd) {

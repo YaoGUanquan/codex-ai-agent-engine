@@ -103,8 +103,8 @@ describe('session-create.service', () => {
     expect(mockSubmitUserPrompt).not.toHaveBeenCalled()
   })
 
-  it('正常路径：自动执行时提交经过浏览器门禁处理的提示词', async () => {
-    const prompt = '使用 chrome-devtools_navigate_page type=url url=http://localhost:3000'
+  it('正常路径：自动执行时保留浏览器自动化提示词', async () => {
+    const prompt = '使用 ae:playwright 打开 http://localhost:3000'
     const result = await Effect.runPromise(createSessionFlow(client, {
       title: '测试会话',
       userPrompt: prompt,
@@ -113,22 +113,21 @@ describe('session-create.service', () => {
 
     expect(result.promptAttempted).toBe(true)
     expect(result.promptSubmitted).toBe(true)
-    expect(result.recoverablePrompt).toContain('ae:chrome-devtools')
+    expect(result.recoverablePrompt).toBe(prompt)
     expect(mockSubmitUserPrompt).toHaveBeenCalledWith(client, 'session-1', result.recoverablePrompt)
   })
 
-  it('正常路径：自动执行时对 system 上下文中的浏览器要求应用门禁', async () => {
+  it('正常路径：自动执行时保留 system 上下文中的浏览器要求', async () => {
     const result = await Effect.runPromise(createSessionFlow(client, {
       title: '测试会话',
-      systemPrompt: '使用 chrome-devtools-mcp 打开页面并截图',
+      systemPrompt: '使用 ae:playwright 打开页面并截图',
       userPrompt: '开始',
       autoExecute: true,
     }))
 
     expect(result.promptSubmitted).toBe(true)
-    expect(result.recoverablePrompt).toContain('ae:chrome-devtools')
-    expect(result.recoverablePrompt).toContain('使用 chrome-devtools-mcp 打开页面并截图')
-    expect(result.recoverablePrompt).toContain('开始')
+    expect(result.recoverableContext).toContain('使用 ae:playwright 打开页面并截图')
+    expect(result.recoverablePrompt).toBe('开始')
   })
 
   it('错误路径：autoExecute 为 true 但提示词为空时拒绝执行', async () => {

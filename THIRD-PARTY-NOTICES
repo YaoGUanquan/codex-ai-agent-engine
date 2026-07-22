@@ -1,0 +1,21 @@
+# Third-Party Notices
+
+Project license: GPL-3.0-or-later.
+
+The project-local runtime declares these direct dependencies. Their authoritative
+license texts and notices remain in the installed package metadata.
+
+- `@alibaba-group/open-code-review` 1.7.14, https://www.npmjs.com/package/@alibaba-group/open-code-review
+- `@opencode-ai/plugin` 1.18.4, https://www.npmjs.com/package/@opencode-ai/plugin
+- `@opencode-ai/sdk` 1.18.4, https://www.npmjs.com/package/@opencode-ai/sdk
+- `@playwright/cli` 0.1.17, https://www.npmjs.com/package/@playwright/cli
+- `effect` 4.0.0-beta.100, https://www.npmjs.com/package/effect
+- `strip-json-comments` 5.0.3, https://www.npmjs.com/package/strip-json-comments
+- `tree-sitter-go` 0.25.0, https://www.npmjs.com/package/tree-sitter-go
+- `tree-sitter-java` 0.23.5, https://www.npmjs.com/package/tree-sitter-java
+- `tree-sitter-javascript` 0.25.0, https://www.npmjs.com/package/tree-sitter-javascript
+- `tree-sitter-python` 0.25.0, https://www.npmjs.com/package/tree-sitter-python
+- `tree-sitter-typescript` 0.23.2, https://www.npmjs.com/package/tree-sitter-typescript
+- `web-tree-sitter` 0.26.11, https://www.npmjs.com/package/web-tree-sitter
+- `yaml` 2.8.3, https://www.npmjs.com/package/yaml
+- `zod` 4.4.3, https://www.npmjs.com/package/zod

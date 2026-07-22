@@ -131,8 +131,6 @@ describe('资产健康巡检', () => {
     expect(commandConfig[`${COMMAND.GRAPH_BUILD}-pa`], 'asset-health/prompt-variant/command/ae-graph-build-pa').toBeUndefined()
     expect(commandConfig[`${COMMAND.GRAPH_QUERY}-po`], 'asset-health/prompt-variant/command/ae-graph-query-po').toBeUndefined()
     expect(commandConfig[`${COMMAND.GRAPH_QUERY}-pa`], 'asset-health/prompt-variant/command/ae-graph-query-pa').toBeUndefined()
-    expect(commandConfig[`${COMMAND.CHROME_DEVTOOLS}-po`], 'asset-health/prompt-variant/command/ae-chrome-devtools-po').toBeUndefined()
-    expect(commandConfig[`${COMMAND.CHROME_DEVTOOLS}-pa`], 'asset-health/prompt-variant/command/ae-chrome-devtools-pa').toBeUndefined()
     expect(buildCommandConfig(join(process.cwd(), 'src/assets/commands'))['ae-work-continue'], 'asset-health/disk-command/command/ae-work-continue').toBeDefined()
     expect(commandConfig['ae-work-continue'], 'asset-health/catalog-command/command/ae-work-continue').toBeUndefined()
     expect(commandConfig['ae-work-continue-po'], 'asset-health/prompt-variant/command/ae-work-continue-po').toBeUndefined()
@@ -183,6 +181,16 @@ describe('资产健康巡检', () => {
       expect(definitionNames.has(agentName), `asset-health/design-agent/registration/${agentName}: 维度专精代理未注册`).toBe(true)
       const agentPath = join(process.cwd(), 'src/assets/agents/workflow', `${agentName}.md`)
       expect(existsSync(agentPath), `asset-health/design-agent/file/${agentName}: 缺少代理文件`).toBe(true)
+    }
+  })
+
+  it('review scope analyzer selected agents should be registered with assets', () => {
+    const definitions = getAllAgentDefinitions()
+    const definitionNames = new Set(definitions.map((agent) => agent.name))
+
+    for (const agentName of [AGENT.OCR_REVIEWER, AGENT.DOCUMENT_REVIEWER]) {
+      expect(definitionNames.has(agentName), `asset-health/review-scope-agent/registration/${agentName}`).toBe(true)
+      expect(existsSync(join(process.cwd(), 'src/assets/agents/domains/review/specialists', `${agentName}.md`))).toBe(true)
     }
   })
 
@@ -331,20 +339,24 @@ describe('资产健康巡检', () => {
       COMMAND.MERGE_BRANCH,
       COMMAND.WORK_REPORT,
       COMMAND.MY_CODE_CHANGES,
-      COMMAND.REVIEW,
-      COMMAND.WEB_FORGE,
-      COMMAND.CHROME_DEVTOOLS,
-      COMMAND.API_TESTER,
+       COMMAND.REVIEW,
+       COMMAND.PLAYWRIGHT,
+       COMMAND.PROTOTYPE_PREVIEW,
+       COMMAND.API_TESTER,
       COMMAND.SWAGGER_PARSER,
       COMMAND.IMAGE,
       COMMAND.AUDIO,
       COMMAND.VIDEO,
       COMMAND.SLIDES_OUTLINE,
       COMMAND.GRAPH_BUILD,
-      COMMAND.GRAPH_QUERY,
-      COMMAND.TASK_LOOP,
-      COMMAND.SQL,
-      COMMAND.HANDOFF,
+       COMMAND.GRAPH_QUERY,
+       COMMAND.TASK_LOOP,
+       COMMAND.SQL,
+       COMMAND.HANDOFF,
+       COMMAND.PROJECT_EXPLORE,
+       COMMAND.SAVE_EXPERIENCE,
+       COMMAND.GRILL,
+       COMMAND.OCR,
       COMMAND.SKILL_CREATOR,
       COMMAND.PROMPT_OPTIMIZE,
       COMMAND.AGENT_CREATOR,
@@ -365,7 +377,7 @@ describe('资产健康巡检', () => {
       [MODEL_SCENARIO.STANDARD, COMMAND.BRAINSTORM],
       [MODEL_SCENARIO.DEEP, COMMAND.DESIGN],
       [MODEL_SCENARIO.QUICK, COMMAND.GRAPH_QUERY],
-      [MODEL_SCENARIO.VISION, COMMAND.CHROME_DEVTOOLS],
+       [MODEL_SCENARIO.VISION, COMMAND.PLAYWRIGHT],
     ] as const
 
     for (const [scenario, representativeCommand] of scenarios) {

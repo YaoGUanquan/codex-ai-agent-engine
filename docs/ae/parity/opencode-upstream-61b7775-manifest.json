@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 2,
+  "upstream": {
+    "repository": "https://gitee.com/jiangqiang1996/ai-agent-engine",
+    "commit": "61b777542fb00d2e082af126d17b070318281933",
+    "opencodeVersion": "1.18.4"
+  },
+  "license": "GPL-3.0-or-later",
+  "retainedRoots": [
+    "src/index.ts",
+    "src/hooks",
+    "src/services",
+    "src/tools",
+    "src/schemas",
+    "src/utils",
+    "src/assets/agents",
+    "src/assets/commands",
+    "src/assets/config",
+    "src/assets/rules",
+    "src/assets/skills",
+    "scripts/install-project.mjs",
+    "scripts/postbuild.mjs",
+    "scripts/ensure-playwright.mjs",
+    "scripts/ensure-playwright-lib.mjs",
+    "THIRD-PARTY-NOTICES"
+  ],
+  "distributionPaths": [
+    "LICENSE",
+    "LICENSE-NOTICE",
+    "NOTICE.md",
+    "THIRD-PARTY-NOTICES",
+    "README.opencode.md",
+    "package.json",
+    "package-lock.json",
+    "tsconfig.json",
+    "src",
+    "scripts/postbuild.mjs",
+    "scripts/ensure-playwright.mjs",
+    "scripts/ensure-playwright-lib.mjs",
+    "scripts/install-project.mjs",
+    "scripts/install.js",
+    "scripts/uninstall.js",
+    "docs/talk-normal-fallback.md",
+    "docs/ae/parity/opencode-upstream-61b7775-manifest.json"
+  ],
+  "excludedDistributionPathFragments": [
+    "ae-pdf",
+    "ae-docx",
+    "ae-xlsx",
+    "ae-pptx",
+    "ae-officecli",
+    "officecli",
+    "pdf-",
+    "pdfjs-worker",
+    "document-output-path",
+    "document-path-security",
+    "document-tool-errors",
+    "file-backup"
+  ],
+  "expectedPluginHooks": [
+    "config",
+    "experimental.chat.system.transform",
+    "command.execute.before",
+    "chat.message",
+    "experimental.chat.messages.transform",
+    "tool.execute.after",
+    "event",
+    "tool"
+  ],
+  "expectedTools": [
+    "ae-recovery",
+    "ae-review-contract",
+    "ae-handoff",
+    "ae-worktree-handoff",
+    "ae-create-session",
+    "ae-help",
+    "ae-review-proof",
+    "ae-swagger-parser",
+    "ae-image",
+    "ae-audio",
+    "ae-video",
+    "ae-graph-build",
+    "ae-graph-query",
+    "ae-task-analyzer",
+    "ae-doc-extract",
+    "ae-domain-catalog",
+    "ae-timer",
+    "ae-work-specialist-select",
+    "ae-specialist-aggregate",
+    "ae-review-scope-analyze",
+    "ae-ocr",
+    "ae-async-bash",
+    "ae-brainstorm"
+  ],
+  "expectedSkills": [
+    "ae-playwright",
+    "ae-ocr"
+  ],
+  "absentSkillOrToolNames": [
+    "ae-chrome-devtools",
+    "ae-chrome-devtools-mcp",
+    "ae-web-forge"
+  ],
+  "runtimeContracts": {
+    "ocrRegisteredButNotInstalledOrInvoked": true,
+    "playwrightIsExplicitlyInvoked": true,
+    "installerDoesNotProvisionBrowsers": true
+  }
+}

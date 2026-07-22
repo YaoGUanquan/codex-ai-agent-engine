@@ -18,9 +18,13 @@ describe('ae-asset-schema', () => {
     expect(AeCommandNameSchema.parse(COMMAND.SWAGGER_PARSER)).toBe('ae-swagger-parser')
   })
 
-  it('应该接受 chrome-devtools 指导技能和命令', () => {
-    expect(AeSkillNameSchema.parse(SKILL.CHROME_DEVTOOLS)).toBe('ae:chrome-devtools')
-    expect(AeCommandNameSchema.parse(COMMAND.CHROME_DEVTOOLS)).toBe('ae-chrome-devtools')
+  it('应该接受 Playwright 技能和命令，并拒绝旧浏览器入口', () => {
+    expect(AeSkillNameSchema.parse(SKILL.PLAYWRIGHT)).toBe('ae:playwright')
+    expect(AeCommandNameSchema.parse(COMMAND.PLAYWRIGHT)).toBe('ae-playwright')
+    expect(AeSkillNameSchema.safeParse('ae:chrome-devtools').success).toBe(false)
+    expect(AeCommandNameSchema.safeParse('ae-chrome-devtools').success).toBe(false)
+    expect(AeSkillNameSchema.safeParse('ae:web-forge').success).toBe(false)
+    expect(AeCommandNameSchema.safeParse('ae-web-forge').success).toBe(false)
   })
 
   it('应该拒绝旧会话沉淀和资产纠偏入口', () => {

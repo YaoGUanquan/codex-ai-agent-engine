@@ -57,19 +57,11 @@ function stripNegativeContext(content: string): string {
 }
 
 describe('Markdown 协议测试', () => {
-  it('浏览器消费方必须在命令前声明 chrome-devtools MCP 门禁和失败降级', () => {
-    const CHROME_DEVTOOLS_MCP = /chrome-devtools_\w+/
-    const browserAssets = ASSETS.filter((asset) => CHROME_DEVTOOLS_MCP.test(asset.content) && !asset.path.includes('ae-chrome-devtools'))
-    const required = ['ae:chrome-devtools', '不得执行', 'MCP 注册', '不能替代']
-
-    for (const asset of browserAssets) {
-      const firstCommandIndex = asset.content.search(CHROME_DEVTOOLS_MCP)
-      const gateIndex = asset.content.indexOf('ae:chrome-devtools')
-
-      expect(
-        gateIndex >= 0 && gateIndex < firstCommandIndex && hasAll(asset.content, required) && /(失败|无法验证|停止)/.test(asset.content),
-        `protocol/chrome-devtools-mcp-gate/${relative(process.cwd(), asset.path)}: 缺少命令前 chrome-devtools MCP 门禁、未完成停止、MCP 注册不能替代或失败降级语义`,
-      ).toBe(true)
+  it('用户侧资产不应该引用已移除的 Chrome DevTools MCP 或 Web Forge 入口', () => {
+    for (const asset of ASSETS) {
+      expect(asset.content, `protocol/removed-browser-boundary/${relative(process.cwd(), asset.path)}`).not.toMatch(
+        /ae:chrome-devtools|ae-chrome-devtools-mcp|chrome-devtools_|ae:web-forge|\/ae-web-forge/,
+      )
     }
   })
 

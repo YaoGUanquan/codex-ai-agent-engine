@@ -84,25 +84,19 @@ const PHASE_ONE_ENTRIES: AeAssetEntry[] = [
     tier: 'core',
   },
   {
-    skillName: SKILL.CHROME_DEVTOOLS,
-    commandName: COMMAND.CHROME_DEVTOOLS,
-    description: 'chrome-devtools-mcp 浏览器能力中枢：启动或接管浏览器，打开 URL，执行指定任务。ae:chrome-devtools 是 ae-chrome-devtools-mcp 工具的唯一管理入口，上层技能和代理不应直接调用 ae-chrome-devtools-mcp。',
-    argumentHint: '[url] [action] [mode] [browser] [port] [headless] [task=任务描述]',
-    skillFile: `src/assets/skills/${skillDir(SKILL.CHROME_DEVTOOLS)}/SKILL.md`,
+    skillName: SKILL.PLAYWRIGHT,
+    commandName: COMMAND.PLAYWRIGHT,
+    description: 'Use when browser behavior needs Playwright CLI validation in an OpenCode project.',
+    skillFile: `src/assets/skills/${skillDir(SKILL.PLAYWRIGHT)}/SKILL.md`,
     tier: 'tools',
   },
   {
-    skillName: SKILL.WEB_FORGE,
-    commandName: COMMAND.WEB_FORGE,
-    description: `前端开发统一入口：自动识别技术栈与可复用资产，自适应组合设计/实现/验收阶段，支持无人值守模式。需先完成 ${SKILL.CHROME_DEVTOOLS} MCP 注册，子代理 @ui-design-spec、@ui-architect、@logic-weaver、@browser-inspector`,
-    argumentHint: '[描述|Figma URL|截图路径|页面路由] [--no-inspect|--yes]',
-    skillFile: `src/assets/skills/${skillDir(SKILL.WEB_FORGE)}/SKILL.md`,
+    skillName: SKILL.PROTOTYPE_PREVIEW,
+    commandName: COMMAND.PROTOTYPE_PREVIEW,
+    description: 'Convert a PRD prototype document into technology-agnostic multi-page static HTML for prototype validation.',
+    argumentHint: '[prd directory|prototype document] [--no-inspect|--yes]',
+    skillFile: `src/assets/skills/${skillDir(SKILL.PROTOTYPE_PREVIEW)}/SKILL.md`,
     tier: 'tools',
-    customTemplate: [
-      `先使用 \`${SKILL.CHROME_DEVTOOLS} action=register mode=autoConnect\` 技能完成浏览器 MCP 动态注册；`,
-      '未完成 MCP 注册前不得执行任何浏览器控制命令。',
-      `MCP 就绪后，再使用 \`${SKILL.WEB_FORGE}\` 技能处理这次请求，并沿用参数：\`$ARGUMENTS\`。`,
-    ].join(''),
   },
   {
     skillName: SKILL.SLIDES_OUTLINE,
@@ -232,6 +226,14 @@ const PHASE_ONE_ENTRIES: AeAssetEntry[] = [
     skillFile: `src/assets/skills/${skillDir(SKILL.GRILL)}/SKILL.md`,
     tier: 'core',
   },
+  {
+    skillName: SKILL.OCR,
+    commandName: COMMAND.OCR,
+    description: 'Explicit OpenCodeReview CLI invocation for AI code review.',
+    argumentHint: '[review|scan] [path|ref]',
+    skillFile: `src/assets/skills/${skillDir(SKILL.OCR)}/SKILL.md`,
+    tier: 'tools',
+  },
 ]
 
 const REVIEW_SPECIALIST_AGENT_NAMES = new Set<string>([
@@ -263,6 +265,8 @@ const REVIEW_SPECIALIST_AGENT_NAMES = new Set<string>([
   AGENT.DESIGN_CONSISTENCY_REVIEWER,
   AGENT.UI_CONSISTENCY_REVIEWER,
   AGENT.TEST_COVERAGE_REVIEWER,
+  AGENT.OCR_REVIEWER,
+  AGENT.DOCUMENT_REVIEWER,
 ])
 
 const REQUIRED_AGENTS: ReadonlyArray<readonly [string, AgentDefinition['stage'], string, string?]> = [
@@ -301,6 +305,8 @@ const REQUIRED_AGENTS: ReadonlyArray<readonly [string, AgentDefinition['stage'],
   [AGENT.DESIGN_CONSISTENCY_REVIEWER, 'review', '审查设计文档与需求的一致性、设计维度完整性、架构与数据模型可行性和安全设计覆盖'],
   [AGENT.UI_CONSISTENCY_REVIEWER, 'review', '审查 UI/UX 设计维度的交互流程完整性、状态覆盖和与需求的一致性'],
   [AGENT.TEST_COVERAGE_REVIEWER, 'review', '审查设计文档中测试用例维度的覆盖完备性、步骤可执行性和需求对齐程度'],
+  [AGENT.OCR_REVIEWER, 'review', '使用 OpenCodeReview 审查代码中的缺陷、安全、性能和可维护性风险'],
+  [AGENT.DOCUMENT_REVIEWER, 'review', '审查文本工件的一致性、可行性和证据完整性'],
   [AGENT.REVIEW_DOMAIN, 'domain', '审查域代理：选择审查者、并行调度、综合发现', 'domains/review/DOMAIN.md'],
   [AGENT.DEVELOPMENT_DOMAIN, 'domain', '开发域代理：分析任务、选择专精、协调执行', 'domains/development/DOMAIN.md'],
   [AGENT.FRONTEND_DEV, 'domain', '前端开发专精代理：处理 UI 组件、样式、交互逻辑和响应式设计', 'domains/development/specialists/frontend-dev.md'],
@@ -312,7 +318,7 @@ const GILDED_AGENTS: ReadonlyArray<readonly [string, AgentDefinition['stage'], s
   [AGENT.UI_DESIGN_SPEC, 'workflow', 'UI 设计规范与决策专家：推断设计读数、配置三旋钮、选择设计体系、推荐风格变体，产出结构化设计决策包'],
   [AGENT.UI_ARCHITECT, 'workflow', 'Web 视觉实现：根据设计决策包和设计输入，完成页面的视觉代码实现'],
   [AGENT.LOGIC_WEAVER, 'workflow', '前端代码实现：交互逻辑、API联调、状态管理、组件开发、重构、性能优化'],
-  [AGENT.BROWSER_INSPECTOR, 'workflow', '浏览器验收：端到端浏览器测试与回归验证'],
+  [AGENT.E2E_TESTER, 'workflow', '浏览器验收：端到端浏览器测试与回归验证'],
   [AGENT.UI_UX_DESIGNER, 'workflow', 'UI/UX 设计维度专精代理：根据 prd 需求和 ae:grill 追问结果产出 ui-ux.md 设计契约，含设计读数、信息架构、页面规格、组件契约、设计 Token 和交互状态机'],
   [AGENT.ARCHITECTURE_DESIGNER, 'workflow', '架构设计维度专精代理：根据 prd 需求和 ae:grill 追问结果产出 architecture.md 设计契约，含模块边界、依赖方向、分层规则、数据流和错误传播链'],
   [AGENT.API_DESIGNER, 'workflow', '接口设计维度专精代理：根据 prd 需求和 ae:grill 追问结果产出 api.md 设计契约，含端点清单、TypeScript interface、认证授权、错误码体系和幂等性声明'],

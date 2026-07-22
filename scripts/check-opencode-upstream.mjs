@@ -33,6 +33,7 @@ console.log(JSON.stringify({
   policy: {
     copySkillsOnlyAfterFrontmatterAndToolBoundaryReview: true,
     doNotCopyUpstreamRuntimeWithoutOpenCodeCompatibilityCheck: true,
+    excludedCapabilityFamilies: ['PDF', 'DOCX', 'XLSX', 'PPTX', 'OfficeCLI'],
     officeSkillsDeferredUntilOfficeCliRuntimeExists: true,
   },
 }, null, 2))
@@ -46,7 +47,7 @@ function parseChanged(output) {
 }
 
 function classify(path) {
-  if (/^src\/assets\/skills\/ae-(docx|pptx|xlsx|officecli)\//.test(path)) return 'deferred-runtime'
+  if (/^src\/(assets\/skills\/ae-(pdf|docx|pptx|xlsx|officecli)|tools\/ae-(pdf|docx|pptx|xlsx|officecli)|services\/(pdf|officecli|document-))/.test(path)) return 'deferred-runtime'
   if (/^src\/assets\/skills\/ae-[^/]+\/SKILL\.md$/.test(path)) return 'portable-skill'
   if (/^src\/assets\/agents\//.test(path)) return 'portable-agent'
   if (/^src\/(index|services|tools|hooks)\//.test(path) || /^src\/index\.ts$/.test(path)) return 'upstream-runtime'
