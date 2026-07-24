@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "20260724T080149910Z-634ace824fe7",
+  "id": "20260722T040330613Z-634ace824fe7",
   "evidenceKind": "review-contract",
   "payload": {
     "kind": "code",
@@ -40,18 +40,18 @@
     }
   },
   "timestamps": {
-    "writtenAt": "2026-07-24T08:01:49.912Z"
+    "writtenAt": "2026-07-22T04:03:30.627Z"
   },
   "git": {
     "available": true,
     "head": "d2a571890aea635b00e983bf195c534e39614cac",
     "branch": "main",
-    "statusHash": "ea2d88fdcb9bf09881677690b81c311cc261e69d8a878fc57d1ea0f30827c184",
-    "dirty": true
+    "statusHash": null,
+    "dirty": false
   },
   "hashes": {
-    "previousRecordHash": "b2588f1d605201e428a2d34d80cd78c248d6f4b0c26b00aaa6d346b4715c0cff",
+    "previousRecordHash": "630d6742e1a58b6b49f52c4ebe9fa9b4ca239a3bac491bc7c5b95b01341e01f7",
     "payloadHash": "634ace824fe74da479248c908787b53119f2662d0fbeed3ea3598b6db83ba43e",
-    "recordHash": "17d3a96eed6a59b907459ccec1172389316634920bda1cbae5b63b2167db75a2"
+    "recordHash": "b2588f1d605201e428a2d34d80cd78c248d6f4b0c26b00aaa6d346b4715c0cff"
   }
 }
