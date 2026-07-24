@@ -69,6 +69,14 @@ test('check-skill-mirror reports ok', () => {
   assert.ok(result.fileCount > 0)
 })
 
+test('root package and plugin manifest keep synchronized distribution versions', () => {
+  const packageJson = JSON.parse(readFileSync(resolve(repoRoot, 'package.json'), 'utf8'))
+  const pluginManifest = JSON.parse(readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/.codex-plugin/plugin.json'), 'utf8'))
+
+  assert.match(packageJson.version, /^\d+\.\d+\.\d+$/)
+  assert.equal(pluginManifest.version, packageJson.version)
+})
+
 test('check-skill-language-metadata reports ok', () => {
   const result = runNodeScript('scripts/check-skill-language-metadata.mjs')
   assert.equal(result.status, 'ok')
@@ -179,10 +187,18 @@ test('local runtime smoke gate is shared by execution skills without secret tran
     /start, execute, automatically run, smoke test, bubble test, or locally integrate/i,
     /restart or hot-reload rule/i,
     /read-only or state-changing/i,
-    /user-created local secret reference/i,
+    /user-controlled local secret reference/i,
+    /proactively create a token-free request template/i,
+    /verified ignored project path or in the operating system temporary directory/i,
+    /report its absolute path and wait for the user to populate it locally and confirm readiness/i,
+    /must not open, read, write, print, or validate the populated reference/i,
+    /pass its absolute path to a client option that consumes the reference without echoing its contents/i,
     /must not be copied into command text, patches, logs, agent-written files, or tool stdin/i,
     /Do not repeatedly ask for a prerequisite that the user already confirmed/i,
+    /run the bounded request once by referencing the populated secret path or environment variable/i,
     /4xx, 5xx, transport failure, or business error/i,
+    /Archive only this sanitized execution evidence/i,
+    /never archive, commit, relocate, or expose a secret reference/i,
     /not a secret manager/i,
   ]) {
     assert.match(sourceReference, expectation, `local runtime smoke gate should include ${expectation}`)
@@ -883,6 +899,8 @@ test('installed language switching updates active skills for all supported modes
   assert.equal(result.verifiedLocalToolPolicy, 'video_requires_ffmpeg_ffprobe_checks')
   assert.equal(result.verifiedMultiAgentPolicy, 'multi_agent_auto_analysis_by_default')
   assert.equal(result.verifiedSkillGovernancePolicy, 'source_mirror_metadata_and_path_safety')
+  const packageJson = JSON.parse(readFileSync(resolve(repoRoot, 'package.json'), 'utf8'))
+  assert.equal(result.verifiedPluginVersion, packageJson.version)
 })
 
 test('package check script omits OfficeCLI checks', () => {

@@ -53,6 +53,7 @@ try {
     'plugins/ai-agent-engine-codex/skills/ae-imagegen-prompt/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-video-edit-computer/SKILL.md',
     'plugins/ai-agent-engine-codex/scripts/check-ae-artifacts.mjs',
+    'plugins/ai-agent-engine-codex/.codex-plugin/plugin.json',
     '.agents/skills/ae-prd/agents/openai.yaml',
     '.agents/skills/ae-work-report/agents/openai.yaml',
     '.agents/skills/ae-task-loop/agents/openai.yaml',
@@ -84,6 +85,11 @@ try {
   for (const relPath of expectedPaths) {
     const fullPath = resolve(targetRoot, relPath)
     if (!existsSync(fullPath)) throw new Error(`Missing installed path: ${relative(targetRoot, fullPath)}`)
+  }
+  const sourcePluginManifest = JSON.parse(readFileSync(resolve(repoRoot, 'plugins', 'ai-agent-engine-codex', '.codex-plugin', 'plugin.json'), 'utf8'))
+  const installedPluginManifest = JSON.parse(readFileSync(resolve(targetRoot, 'plugins', 'ai-agent-engine-codex', '.codex-plugin', 'plugin.json'), 'utf8'))
+  if (installedPluginManifest.version !== sourcePluginManifest.version) {
+    throw new Error(`Installed plugin version mismatch: expected ${sourcePluginManifest.version}, got ${installedPluginManifest.version}`)
   }
   if (!existsSync(existingTemplatePath)) {
     throw new Error('Install removed a pre-existing user docs/ae/templates file')
@@ -275,6 +281,7 @@ try {
     verifiedLocalToolPolicy: 'video_requires_ffmpeg_ffprobe_checks',
     verifiedMultiAgentPolicy: 'multi_agent_auto_analysis_by_default',
     verifiedSkillGovernancePolicy: 'source_mirror_metadata_and_path_safety',
+    verifiedPluginVersion: installedPluginManifest.version,
     verifiedCommands: ['recovery', 'claude-delegate', 'markitdown', 'static-server', 'check-ae-artifacts', 'check-design-contract'],
   }, null, 2))
 } finally {
