@@ -1,6 +1,10 @@
 # Local/reference clones
 upstream-ai-agent-engine/
 
+# Local OpenCode runtime and generated graph output
+.opencode/
+ae/
+
 # Runtime artifacts created by AE workflows in target projects
 .ae/
 .codex/ae-skill-profiles.yaml
