@@ -32,6 +32,8 @@ Iterate on an exploratory task until fixed, verified, or clearly blocked.
 8. When all success criteria pass after file changes, run the Candidate Success Review Gate before declaring success.
 9. Continue until both completion gates pass, the task is blocked, or the iteration limit is reached.
 
+When a loop changes a local API or UI surface and the user explicitly requests runtime smoke, read [the local runtime smoke gate](../ae-work/references/local-runtime-smoke-gate.md) before treating the loop as complete. A missing gate precondition is an explicit runtime-validation blocker, not a reason to silently omit the smoke.
+
 ## Candidate Success Review Gate
 
 Apply this gate only when the loop changed files and objective verification reports that every success criterion passes.

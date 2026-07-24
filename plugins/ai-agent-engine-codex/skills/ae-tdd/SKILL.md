@@ -18,6 +18,8 @@ Use red-green-refactor when the behavior is precise enough to test before implem
 7. Refactor only after the behavior is protected by passing tests.
 8. Report the failing test, the fix, and the final validation commands.
 
+When the user explicitly requests local runtime smoke after a green change to an API or UI surface, read [the local runtime smoke gate](../ae-work/references/local-runtime-smoke-gate.md). TDD remains test-first; the gate selects additional runtime evidence without inventing a red phase after implementation.
+
 ## Rules
 
 - Do not call the workflow TDD if the failing test never ran before the implementation.

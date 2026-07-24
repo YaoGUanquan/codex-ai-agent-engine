@@ -86,6 +86,7 @@ Before editing behavior, choose the smallest correct implementation that satisfi
 - Add tests or update existing tests when behavior changes.
 - Stop and report blockers when the failure mode invalidates the current step or assumptions.
 - Run the narrowest meaningful validation, then broader validation when practical.
+- When a changed local API or UI surface has an explicit runtime smoke request, read [the local runtime smoke gate](references/local-runtime-smoke-gate.md) after focused validation. It defines the trigger synonyms, restart and request classification checks, safe secret-reference boundary, and evidence needed before a local call is claimed.
 - Track validation commands exactly for final reporting.
 - When using a task artifact, mark or report task completion only after the corresponding file change or validation evidence exists.
 - Prefer ae-debug for investigation-heavy failures and ae-tdd when the user wants or the change benefits from red-green-refactor discipline.

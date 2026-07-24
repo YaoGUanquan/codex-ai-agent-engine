@@ -166,6 +166,37 @@ test('task loop dual completion gate requires verification and non-blocking revi
   assert.doesNotMatch(source, /OpenCode/i)
 })
 
+test('local runtime smoke gate is shared by execution skills without secret transport claims', () => {
+  const referencePaths = [
+    'plugins/ai-agent-engine-codex/skills/ae-work/references/local-runtime-smoke-gate.md',
+    '.agents/skills/ae-work/references/local-runtime-smoke-gate.md',
+  ]
+  const sourceReference = readFileSync(resolve(repoRoot, referencePaths[0]), 'utf8')
+  const mirrorReference = readFileSync(resolve(repoRoot, referencePaths[1]), 'utf8')
+
+  assert.equal(mirrorReference, sourceReference, 'local runtime smoke gate mirror should match plugin source')
+  for (const expectation of [
+    /start, execute, automatically run, smoke test, bubble test, or locally integrate/i,
+    /restart or hot-reload rule/i,
+    /read-only or state-changing/i,
+    /user-created local secret reference/i,
+    /must not be copied into command text, patches, logs, agent-written files, or tool stdin/i,
+    /Do not repeatedly ask for a prerequisite that the user already confirmed/i,
+    /4xx, 5xx, transport failure, or business error/i,
+    /not a secret manager/i,
+  ]) {
+    assert.match(sourceReference, expectation, `local runtime smoke gate should include ${expectation}`)
+  }
+  assert.doesNotMatch(sourceReference, /Read-Host|write_stdin/i)
+
+  for (const skillName of ['ae-work', 'ae-tdd', 'ae-debug', 'ae-task-loop']) {
+    const source = readSkillBody('plugins/ai-agent-engine-codex/skills', skillName)
+    const mirror = readSkillBody('.agents/skills', skillName)
+    assert.equal(mirror, source, `${skillName} mirror should match plugin source`)
+    assert.match(source, /local runtime smoke gate/i, `${skillName} should route explicit runtime smoke to the shared gate`)
+  }
+})
+
 test('OCR-inspired review guidance is present in source and mirror skills', () => {
   const reviewSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-review')
   const reviewMirror = readSkillBody('.agents/skills', 'ae-review')

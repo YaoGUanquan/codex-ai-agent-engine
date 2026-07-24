@@ -153,3 +153,10 @@
 - Context: The local artifact and design validators used `statSync` recursive walks, which follow symbolic links. Upstream fixed the same class of directory traversal risk. Its newer test-case contracts add useful scenario-selection methods, but their universal scenario counts and OpenCode subagent execution model do not fit compact Codex design artifacts.
 - Impact: validators skip symbolic links and manifest entries must resolve inside the real design directory. `ae-design` now records a method-tagged, automatable coverage matrix only for triggered API, UI/state, business-rule, data, or authorization structures. Upstream package metadata for this snapshot is `GPL-3.0-or-later`; this repository continues to adapt behavior rather than vendoring upstream source.
 - Re-evaluate when: representative local design artifacts show a need for semantic coverage measurement beyond the current structural contract.
+
+## 2026-07-24: Require an explicit local runtime smoke gate after implementation
+
+- Decision: `ae-work` owns a shared local runtime smoke gate, and `ae-tdd`, `ae-debug`, and `ae-task-loop` route explicit local API/UI smoke requests to it. The gate recognizes start, execute, automatic, smoke, bubble, and local-integration requests as equivalent intent.
+- Context: A completed local restart and explicit smoke request previously stalled on repeated credential handoff questions. Runtime calls were possible; the missing contract was a deterministic transition from focused tests to bounded localhost evidence and a safe credential boundary.
+- Impact: A runnable local read-only request proceeds once restart, target, request fixture, and user-created secret reference are ready. Raw chat credentials must not enter command text, patches, logs, agent-written files, or tool stdin. State-changing calls still require explicit authorization, and 4xx/5xx/transport/business errors block a pass claim.
+- Re-evaluate when: Codex exposes a documented non-persisting secret-input capability, or a target-project contract needs a more specific local service lifecycle policy.
