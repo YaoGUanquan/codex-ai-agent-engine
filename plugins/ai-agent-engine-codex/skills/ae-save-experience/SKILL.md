@@ -23,10 +23,15 @@ Choose the narrowest durable location:
 - `docs/08-ai-memory`: stable cross-session project decisions and reusable workflows;
 - `docs/00-process/active`: in-progress evidence, temporary prompts, command output, and process notes;
 - `docs/ae/experience`: reusable lessons from completed work;
+- `docs/ae/integrity`: claim corrections, retractions, and methodology fixes that affect public docs, install behavior, benchmark claims, validation claims, or AE workflow guidance;
 - `docs/ae/handoffs`: next-session state and continuation context;
 - skill `references/`: reusable detail owned by one skill, such as schemas, templates, or long checklists.
 
 Do not move transient process notes into long-term memory. If a lesson is specific to an unfinished task, keep it under `docs/00-process/active` until the durable rule or decision is clear.
+
+## Integrity Ledger Routing
+
+Use `docs/ae/integrity/` when the output is a correction or retraction, not a reusable lesson. Do not bury retractions in ordinary experience notes, memory updates, or handoffs. An integrity entry should name the original claim, affected path, corrected statement, evidence, validation, and any follow-up.
 
 ## Rules
 

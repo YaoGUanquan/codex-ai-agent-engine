@@ -1,0 +1,19 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": null,
+  "validation_commands": [
+    "git diff --check -- docs/04-api/2026-06-05-人工细则创建并发布manifest接口.md docs/05-reports/2026-06-12-assignment-grading-school-id-smoke-report.md docs/00-process/archive/2026-06/assignment-grading-school-id/smoke-report-2026-06-12.md docs/00-process/archive/2026-06/assignment-grading-school-id/修改方案.md docs/08-ai-memory/03-key-workflows.md docs/01-history/开发历史记录.md"
+  ],
+  "review_status": "not_run",
+  "worktree_decision": "not_applicable",
+  "git_operations": [],
+  "blockers": [],
+  "warnings": [
+    "plan path not provided"
+  ],
+  "notes": null,
+  "generated_at": "2026-06-12T09:05:20.605Z"
+}

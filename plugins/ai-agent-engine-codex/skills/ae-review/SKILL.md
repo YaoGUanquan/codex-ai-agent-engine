@@ -1,6 +1,6 @@
 ---
 name: ae-review
-description: Use when the user asks for AE review, /ae-review, layered review, report-only review, autofix review, domain:code, domain:document, review a plan, review requirements, review current changes, or inspect risks before delivery. Findings must be primary.
+description: Use when the user asks for ae-review, /ae-review, $ae-review, "use ae-review", AE review, layered review, report-only review, autofix review, domain:code, domain:document, review a plan, review requirements, review current changes, or inspect risks before delivery. Findings must be primary.
 ---
 
 # AE Review
@@ -22,12 +22,27 @@ Supported mode markers:
 - `mode:autofix`: apply only deterministic fixes after reporting internally.
 - `mode:headless`: concise pipeline review.
 
+## Deterministic Review Preparation
+
+For a branch or commit range, create a review package before drawing conclusions:
+
+```powershell
+node scripts/ae-tools.mjs review-package --base <base-ref> --head <head-ref> --with-impact
+```
+
+Treat the returned `inventory.files` as the complete changed-file review set. Every file must either be reviewed or be listed in the final result as excluded with a concrete reason. Do not silently omit configuration, documentation, tests, renames, binary files, or untracked artifacts that are in the selected scope.
+
+`--with-impact` adds a bounded, shallow static dependency context. Use it when changed source/configuration files may affect imports or mentioned local paths; inspect relevant related files or explain why they do not alter the finding. It is advisory only: dynamic imports, aliases, generated code, and framework resolution can be absent, so it never proves the impact set is complete.
+
+For workspace or session review, establish the same inventory from `git status --short` and the selected scope. Use `review-contract` after file inventory to select lenses; it selects reviewers, not files or findings.
+
 ## Diff Review Discipline
 
 Apply this section only when `domain:code` uses a diff-like scope: `from:<ref>`, `recent:<N>`, `session`, or the default Git status/diff review. `full` and `full:<path>` remain repository or path scans and must not be narrowed to changed lines only.
 
 For diff-like scopes:
 
+- Establish the changed-file inventory before line-level analysis. Include the inventory count and every explicit exclusion in the review output or delivery evidence.
 - Make the finding subject newly added or modified code whenever possible. Deleted lines, unchanged context, and other files may support the evidence, but they should not become the primary finding unless the user explicitly requested a broader scan.
 - Perform a manual position check before finalizing each code finding: re-open the target file, diff, or hunk context and confirm the path plus line still identifies the affected code. If the exact line is uncertain, report the finding at path level and state the location uncertainty.
 - Run a contradiction check before final output. If the reviewed diff directly contradicts a finding's factual claim, mark the finding as contradicted or remove it only when the contradiction is certain. Do not discard security, reliability, contract, or architecture findings merely because the diff alone cannot prove them.
@@ -68,6 +83,20 @@ Use these tags for concrete findings:
 
 Complexity findings must include location, evidence, what to cut or replace, the concrete replacement, and expected impact. Do not flag narrow tests, trust-boundary validation, security controls, accessibility basics, or explicit user requirements as bloat. Suppress stylistic preferences that do not reduce owned behavior or maintenance risk.
 
+## Claim-Integrity Lane
+
+When reviewing documentation, skill instructions, installer docs, benchmark notes, external-audit reports, or delivery evidence, add a claim-integrity lane. This lane checks whether each material claim has current evidence and whether unsupported runtime behavior is being presented as enforced behavior.
+
+Flag findings for:
+
+- capability, benchmark, install, or behavior claims without an evidence path or validation command;
+- a stale or unverifiable number, commit, version, star count, benchmark result, or external fact;
+- unsupported runtime behavior such as hooks, slash commands, global config propagation, automatic agents, or MCP auto-loading;
+- source-derived text or code whose license boundary is missing or incompatible;
+- corrections or retractions that should be recorded under `docs/ae/integrity/`.
+
+Claim-integrity findings must name the claim, the source path, the missing or contradictory evidence, and the fix: add evidence, mark as an assumption, rewrite as a process contract, or remove the claim.
+
 ## Findings Standard
 
 Read `references/review-output-template.md`.
@@ -103,6 +132,7 @@ Serious findings should block downstream execution until resolved or explicitly 
 When a review is used as a delivery gate, preserve enough proof for later checks:
 
 - include worktree, branch, and current Git status summary in the review output when available;
+- include the changed-file inventory, explicit exclusions, and whether advisory impact context was used for range/commit reviews;
 - cite validation commands exactly;
 - when `review-contract --write-evidence` was used, mention the returned evidence path;
 - use `node scripts/ae-tools.mjs evidence read` to inspect existing evidence records before relying on them.

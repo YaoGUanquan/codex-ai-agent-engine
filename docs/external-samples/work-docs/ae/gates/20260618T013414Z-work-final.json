@@ -1,0 +1,17 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": "docs/00-process/active/generic-grading-multi-upload-targets/plan.md",
+  "validation_commands": [
+    "mvn -pl axon-common -Dtest=ExamGenericGradingUploadTypeEnumTest,ExamGenericGradingServiceImplTest test; mvn -pl axon-chat -am -Dtest=ExamGenericGradingControllerTest -Dsurefire.failIfNoSpecifiedTests=false test"
+  ],
+  "review_status": "self-reviewed",
+  "worktree_decision": "in-place",
+  "git_operations": [],
+  "blockers": [],
+  "warnings": [],
+  "notes": null,
+  "generated_at": "2026-06-18T01:34:14.184Z"
+}

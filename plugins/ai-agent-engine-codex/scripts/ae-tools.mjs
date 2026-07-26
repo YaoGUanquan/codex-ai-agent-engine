@@ -106,6 +106,15 @@ function main() {
 
 function printHelp(query) {
   const catalog = readJson(catalogPath)
+  const tiers = [
+    { id: 'core', label: '核心工程流程' },
+    { id: 'docs', label: '文档处理' },
+    { id: 'tools', label: '辅助工具' },
+    { id: 'meta', label: '维护与配置' },
+  ]
+  const supportedTiers = new Set(tiers.map((tier) => tier.id))
+  const invalidSkill = catalog.skills.find((skill) => !supportedTiers.has(skill.tier))
+  if (invalidSkill) throw new Error(`capability catalog skill ${invalidSkill.name} has unsupported tier: ${invalidSkill.tier || '<missing>'}`)
   const q = query.toLowerCase()
   const skills = catalog.skills.filter((skill) => {
     if (!q) return true
@@ -124,14 +133,20 @@ function printHelp(query) {
   if (skills.length > 0) {
     lines.push('')
     lines.push('## 入口')
-    lines.push('')
-    for (const skill of skills) {
-      const entry = skill.entry || `/${skill.name}`
-      const target = skill.target ? `${skill.target}: ` : ''
-      lines.push(`- ${target}${entry} (${skill.name})`)
-      lines.push(`  说明: ${skill.purpose}`)
-      if (skill.script) lines.push(`  脚本: ${skill.script}`)
-      if (skill.artifactPath) lines.push(`  产物路径: ${skill.artifactPath}`)
+    for (const tier of tiers) {
+      const tierSkills = skills.filter((skill) => skill.tier === tier.id)
+      if (tierSkills.length === 0) continue
+      lines.push('')
+      lines.push(`### ${tier.label} (${tier.id})`)
+      lines.push('')
+      for (const skill of tierSkills) {
+        const entry = skill.entry || `/${skill.name}`
+        const target = skill.target ? `${skill.target}: ` : ''
+        lines.push(`- ${target}${entry} (${skill.name})`)
+        lines.push(`  说明: ${skill.purpose}`)
+        if (skill.script) lines.push(`  脚本: ${skill.script}`)
+        if (skill.artifactPath) lines.push(`  产物路径: ${skill.artifactPath}`)
+      }
     }
   }
   if (skills.length === 0 && commands.length === 0) {
@@ -1025,6 +1040,10 @@ function reviewPackage(worktree, args) {
 
   const commitLog = runGitRequired(worktree, ['log', '--oneline', `${base}..${head}`])
   const diffStat = runGitRequired(worktree, ['diff', '--stat', `${base}..${head}`])
+  const inventory = buildReviewFileInventory(worktree, base, head)
+  const impact = truthy(opts['with-impact']) || truthy(opts.impact)
+    ? buildReviewImpactContext(worktree, inventory, opts)
+    : null
   const diffBody = runGitRequired(worktree, ['diff', '-U10', `${base}..${head}`])
   const content = [
     `# Review package: ${base}..${head}`,
@@ -1035,6 +1054,10 @@ function reviewPackage(worktree, args) {
     '## Files changed',
     diffStat || '(no file changes)',
     '',
+    '## Review inventory',
+    reviewInventoryMarkdown(inventory),
+    '',
+    ...(impact ? ['## Impact context', reviewImpactMarkdown(impact), ''] : []),
     '## Diff',
     diffBody || '(no diff)',
     '',
@@ -1045,11 +1068,144 @@ function reviewPackage(worktree, args) {
     status: 'ok',
     base,
     head,
+    inventory,
+    impact,
     artifact: {
       path: outRel,
       bytes: statSync(outPath).size,
     },
   }
+}
+
+function buildReviewFileInventory(worktree, base, head) {
+  const nameStatus = runGitRequired(worktree, ['diff', '--name-status', '-z', '--find-renames', `${base}..${head}`])
+  const numStat = runGitRequired(worktree, ['diff', '--numstat', '-z', '--find-renames', `${base}..${head}`])
+  const statsByPath = parseGitNumStat(numStat)
+  const files = parseGitNameStatus(nameStatus).map((entry) => {
+    const stat = statsByPath.get(entry.path) || { additions: null, deletions: null, binary: false }
+    return {
+      ...entry,
+      ...stat,
+      role: graphNodeKind(entry.path, extname(entry.path).toLowerCase()),
+    }
+  }).sort((left, right) => left.path.localeCompare(right.path))
+  return {
+    changedFileCount: files.length,
+    files,
+    reviewRule: 'Every changed file is a review target unless its exclusion is explicitly recorded in the review result.',
+  }
+}
+
+function parseGitNameStatus(output) {
+  const fields = output.split('\0')
+  const entries = []
+  for (let index = 0; index < fields.length;) {
+    const status = fields[index++]
+    if (!status) continue
+    const previousPath = /^[RC]/.test(status) ? fields[index++] : null
+    const path = fields[index++]
+    if (!path) continue
+    entries.push({
+      path: toPosix(path),
+      previousPath: previousPath ? toPosix(previousPath) : null,
+      status,
+    })
+  }
+  return entries
+}
+
+function parseGitNumStat(output) {
+  const fields = output.split('\0')
+  const stats = new Map()
+  for (let index = 0; index < fields.length;) {
+    const additionsRaw = fields[index++]
+    if (!additionsRaw) continue
+    const deletionsRaw = fields[index++]
+    let path = fields[index++]
+    if (path === '') {
+      index += 1
+      path = fields[index++]
+    }
+    if (!path) continue
+    const binary = additionsRaw === '-' || deletionsRaw === '-'
+    stats.set(toPosix(path), {
+      additions: binary ? null : Number(additionsRaw),
+      deletions: binary ? null : Number(deletionsRaw),
+      binary,
+    })
+  }
+  return stats
+}
+
+function buildReviewImpactContext(worktree, inventory, opts) {
+  const depth = clampInteger(Number(opts['impact-depth'] || opts.impactDepth || 2), 2, 0, 4)
+  const fileLimit = clampInteger(Number(opts['impact-file-limit'] || opts.impactFileLimit || 500), 500, 1, 5000)
+  const files = collectSourceFiles(worktree).slice(0, fileLimit)
+  const graph = buildShallowGraph(worktree, files)
+  const nodes = new Set(graph.nodes.map((node) => node.path))
+  const seeds = inventory.files.map((file) => file.path).filter((path) => nodes.has(path))
+  const unresolvedChangedFiles = inventory.files.map((file) => file.path).filter((path) => !nodes.has(path))
+  const reached = new Map(seeds.map((path) => [path, { path, hops: 0, relations: ['changed'] }]))
+  const queue = [...seeds]
+  while (queue.length > 0) {
+    const current = queue.shift()
+    const currentEntry = reached.get(current)
+    if (!currentEntry || currentEntry.hops >= depth) continue
+    for (const edge of graph.edges) {
+      const neighbor = edge.from === current ? edge.to : edge.to === current ? edge.from : null
+      if (!neighbor) continue
+      const relation = edge.from === current ? `depends-on:${edge.type}` : `dependent:${edge.type}`
+      const existing = reached.get(neighbor)
+      if (!existing) {
+        reached.set(neighbor, { path: neighbor, hops: currentEntry.hops + 1, relations: [relation] })
+        queue.push(neighbor)
+      } else if (!existing.relations.includes(relation)) {
+        existing.relations.push(relation)
+      }
+    }
+  }
+  return {
+    status: 'advisory',
+    depth,
+    fileLimit,
+    sourceFilesScanned: files.length,
+    seedFiles: seeds,
+    unresolvedChangedFiles,
+    relatedFiles: [...reached.values()]
+      .filter((entry) => entry.hops > 0)
+      .sort((left, right) => left.hops - right.hops || left.path.localeCompare(right.path)),
+    limitations: [
+      'static shallow scan only',
+      'impact context is review guidance, not a completeness proof',
+      'dynamic imports, aliases, generated code, and framework-specific resolution may be incomplete',
+    ],
+  }
+}
+
+function reviewInventoryMarkdown(inventory) {
+  if (inventory.files.length === 0) return '(no changed files)'
+  const lines = ['| Path | Status | Added | Deleted | Role |', '| --- | --- | ---: | ---: | --- |']
+  for (const file of inventory.files) {
+    const additions = file.binary ? 'binary' : file.additions ?? 'unknown'
+    const deletions = file.binary ? 'binary' : file.deletions ?? 'unknown'
+    lines.push(`| ${scalarMarkdownCell(file.path)} | ${scalarMarkdownCell(file.status)} | ${additions} | ${deletions} | ${file.role} |`)
+  }
+  return lines.join('\n')
+}
+
+function reviewImpactMarkdown(impact) {
+  const lines = [
+    `- Status: ${impact.status}; depth: ${impact.depth}; source files scanned: ${impact.sourceFilesScanned}.`,
+    `- Changed files represented in the graph: ${impact.seedFiles.length}.`,
+  ]
+  if (impact.unresolvedChangedFiles.length > 0) lines.push(`- Unresolved changed files: ${impact.unresolvedChangedFiles.map((path) => `\`${path}\``).join(', ')}.`)
+  if (impact.relatedFiles.length === 0) lines.push('- Related files: none found within the configured depth.')
+  else {
+    lines.push('- Related files:')
+    for (const file of impact.relatedFiles) lines.push(`  - \`${file.path}\` (hop ${file.hops}; ${file.relations.join(', ')})`)
+  }
+  lines.push(`- Limitations: ${impact.limitations.join('; ')}.`)
+  return lines.join('\n')
 }
 
 function gate(worktree, args) {
@@ -1555,9 +1711,11 @@ function graphBuild(worktree, args) {
   const root = opts.root ? safeResolve(worktree, opts.root) : worktree
   const files = collectSourceFiles(root).slice(0, Number(opts.limit || 500))
   const graph = buildShallowGraph(root, files)
-  const store = truthy(opts['no-write'])
-    ? { path: 'docs/ae/graphs/graph.json', schemaVersion: 1, written: false }
-    : writeGraphStore(worktree, root, graph)
+  const store = {
+    path: 'docs/ae/graphs/graph.json',
+    schemaVersion: 1,
+    written: false,
+  }
   const result = {
     status: 'ok',
     mode: 'shallow-dependency-graph',
@@ -1620,26 +1778,6 @@ function graphFreshness(worktree, root, graph) {
     fingerprint: stableHash(input),
     basis: ['current filesystem scan completed during this command'],
     git: input.git,
-  }
-}
-
-function writeGraphStore(worktree, root, graph) {
-  const relPath = 'docs/ae/graphs/graph.json'
-  const target = safeResolve(worktree, relPath)
-  mkdirSync(dirname(target), { recursive: true })
-  const snapshot = {
-    schemaVersion: 1,
-    generatedAt: new Date().toISOString(),
-    root: toPosix(relative(worktree, root)) || '.',
-    freshness: graphFreshness(worktree, root, graph),
-    nodes: graph.nodes,
-    edges: graph.edges,
-    externalDependencies: graph.externalDependencies,
-  }
-  writeFileSync(target, `${JSON.stringify(snapshot, null, 2)}\n`, 'utf8')
-  return {
-    path: relPath,
-    schemaVersion: 1,
   }
 }
 

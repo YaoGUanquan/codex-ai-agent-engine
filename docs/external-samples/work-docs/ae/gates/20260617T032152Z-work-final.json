@@ -1,0 +1,17 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": "docs/00-process/active/generic-grading-third-party-wrapper/2026-06-16-generic-grading-third-party-wrapper-plan.md",
+  "validation_commands": [
+    "mvn -pl axon-common -Dtest=ExamGenericGradingServiceImplTest,OssUploadStsServiceImplTest,ExamThirdPartyGatewayServiceImplTest,ExamGenericGradingUploadTypeEnumTest test; mvn -pl axon-chat -am -Dtest=ExamGenericGradingControllerTest -Dsurefire.failIfNoSpecifiedTests=false test; mvn -pl axon-common,axon-chat -am -DskipTests compile; git diff --check"
+  ],
+  "review_status": "pass",
+  "worktree_decision": "existing-dirty-worktree",
+  "git_operations": [],
+  "blockers": [],
+  "warnings": [],
+  "notes": null,
+  "generated_at": "2026-06-17T03:21:52.565Z"
+}

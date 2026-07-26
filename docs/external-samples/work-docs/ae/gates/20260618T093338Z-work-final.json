@@ -1,0 +1,17 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": "docs/00-process/archive/2026-06/generic-grading-json-aggregate-progress/2026-06-18-generic-grading-json-aggregate-plan.md",
+  "validation_commands": [
+    "common targeted tests passed; chat controller test passed with jacoco skip; axon-chat -am compile passed"
+  ],
+  "review_status": "self-reviewed",
+  "worktree_decision": "in-place",
+  "git_operations": [],
+  "blockers": [],
+  "warnings": [],
+  "notes": null,
+  "generated_at": "2026-06-18T09:33:38.988Z"
+}

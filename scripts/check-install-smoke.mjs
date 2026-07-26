@@ -40,7 +40,9 @@ try {
     'plugins/ai-agent-engine-codex/skills/ae-task-loop/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-constitution/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-tasks/SKILL.md',
+    'plugins/ai-agent-engine-codex/skills/ae-design/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-web-app/SKILL.md',
+    'plugins/ai-agent-engine-codex/skills/ae-web-forge/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-backend/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-debug/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-tdd/SKILL.md',
@@ -51,12 +53,16 @@ try {
     'plugins/ai-agent-engine-codex/skills/ae-imagegen-prompt/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-video-edit-computer/SKILL.md',
     'plugins/ai-agent-engine-codex/.codebuddy-plugin/plugin.json',
+    'plugins/ai-agent-engine-codex/scripts/check-ae-artifacts.mjs',
+    'plugins/ai-agent-engine-codex/.codex-plugin/plugin.json',
     '.agents/skills/ae-prd/agents/openai.yaml',
     '.agents/skills/ae-work-report/agents/openai.yaml',
     '.agents/skills/ae-task-loop/agents/openai.yaml',
     '.agents/skills/ae-constitution/agents/openai.yaml',
     '.agents/skills/ae-tasks/agents/openai.yaml',
+    '.agents/skills/ae-design/agents/openai.yaml',
     '.agents/skills/ae-web-app/agents/openai.yaml',
+    '.agents/skills/ae-web-forge/agents/openai.yaml',
     '.agents/skills/ae-backend/agents/openai.yaml',
     '.agents/skills/ae-debug/agents/openai.yaml',
     '.agents/skills/ae-tdd/agents/openai.yaml',
@@ -74,11 +80,15 @@ try {
     'docs/ae/templates/computer-use-hooks/pre-tool-use-computer-budget.example.py',
     'scripts/ae-tools.mjs',
     'scripts/set-ae-language.mjs',
+    'scripts/check-ae-artifacts.mjs',
+    'scripts/check-design-contract.mjs',
   ]
   for (const relPath of expectedPaths) {
     const fullPath = resolve(targetRoot, relPath)
     if (!existsSync(fullPath)) throw new Error(`Missing installed path: ${relative(targetRoot, fullPath)}`)
   }
+  const sourcePluginManifest = JSON.parse(readFileSync(resolve(repoRoot, 'plugins', 'ai-agent-engine-codex', '.codex-plugin', 'plugin.json'), 'utf8'))
+  const installedPluginManifest = JSON.parse(readFileSync(resolve(targetRoot, 'plugins', 'ai-agent-engine-codex', '.codex-plugin', 'plugin.json'), 'utf8'))
   const codebuddyManifest = JSON.parse(readFileSync(resolve(targetRoot, 'plugins', 'ai-agent-engine-codex', '.codebuddy-plugin', 'plugin.json'), 'utf8'))
   if (codebuddyManifest.name !== 'ai-agent-engine-codex') {
     throw new Error('Installed CodeBuddy manifest does not preserve the plugin name')
@@ -88,6 +98,12 @@ try {
   }
   if (codebuddyManifest.mcpServers !== './.mcp.json') {
     throw new Error('Installed CodeBuddy manifest does not point to the plugin MCP configuration')
+  }
+  if (codebuddyManifest.version !== sourcePluginManifest.version) {
+    throw new Error(`Installed CodeBuddy plugin version mismatch: expected ${sourcePluginManifest.version}, got ${codebuddyManifest.version}`)
+  }
+  if (installedPluginManifest.version !== sourcePluginManifest.version) {
+    throw new Error(`Installed plugin version mismatch: expected ${sourcePluginManifest.version}, got ${installedPluginManifest.version}`)
   }
   if (!existsSync(existingTemplatePath)) {
     throw new Error('Install removed a pre-existing user docs/ae/templates file')
@@ -109,7 +125,9 @@ try {
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'loop'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'constitution'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'tasks'], { cwd: targetRoot })
+  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'design'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'web'], { cwd: targetRoot })
+  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'forge'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'backend'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'debug'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'tdd'], { cwd: targetRoot })
@@ -120,6 +138,14 @@ try {
     throw new Error('Installed recovery command did not inspect the target project root')
   }
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'claude'], { cwd: targetRoot })
+  const artifactResult = JSON.parse(run(process.execPath, [resolve(targetRoot, 'scripts', 'check-ae-artifacts.mjs')], { cwd: targetRoot }).stdout)
+  if (artifactResult.status !== 'ok' || artifactResult.targetRoot !== targetRoot) {
+    throw new Error('Installed check-ae-artifacts command did not inspect the target project root')
+  }
+  const designContractResult = JSON.parse(run(process.execPath, [resolve(targetRoot, 'scripts', 'check-design-contract.mjs')], { cwd: targetRoot }).stdout)
+  if (designContractResult.status !== 'ok' || designContractResult.checked !== 0) {
+    throw new Error('Installed check-design-contract command did not return stable no-design JSON')
+  }
   const claudeCheckResult = JSON.parse(run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'claude-delegate', '--check'], { cwd: targetRoot }).stdout)
   if (!['ok', 'skip'].includes(claudeCheckResult.status) || typeof claudeCheckResult.available !== 'boolean') {
     throw new Error('Installed claude-delegate check did not return stable availability JSON')
@@ -130,6 +156,8 @@ try {
     ['ae-task-loop', 'AE Task Loop'],
     ['ae-constitution', 'AE Constitution'],
     ['ae-tasks', 'AE Tasks'],
+    ['ae-design', 'AE 设计契约 / AE Design'],
+    ['ae-web-forge', 'AE Web Forge'],
     ['ae-claude-code', 'AE Claude Code'],
     ['ae-markitdown', 'AE Markitdown'],
     ['ae-static-server', 'AE 静态服务器 / AE Static Server'],
@@ -198,7 +226,9 @@ try {
     ['ae-task-loop', 'AE Task Loop'],
     ['ae-constitution', 'AE Constitution'],
     ['ae-tasks', 'AE Tasks'],
+    ['ae-design', 'AE Design'],
     ['ae-web-app', 'AE Web App'],
+    ['ae-web-forge', 'AE Web Forge'],
     ['ae-claude-code', 'AE Claude Code'],
     ['ae-markitdown', 'AE Markitdown'],
     ['ae-static-server', 'AE Static Server'],
@@ -220,7 +250,9 @@ try {
     ['ae-task-loop', 'AE 任务循环'],
     ['ae-constitution', 'AE Constitution'],
     ['ae-tasks', 'AE Tasks'],
+    ['ae-design', 'AE 设计契约'],
     ['ae-web-app', 'AE Web 应用开发'],
+    ['ae-web-forge', 'AE Web Forge'],
     ['ae-claude-code', 'AE Claude Code'],
     ['ae-markitdown', 'AE Markitdown'],
     ['ae-static-server', 'AE 静态服务器'],
@@ -244,7 +276,9 @@ try {
       'ae-task-loop',
       'ae-constitution',
       'ae-tasks',
+      'ae-design',
       'ae-web-app',
+      'ae-web-forge',
       'ae-backend',
       'ae-debug',
       'ae-tdd',
@@ -261,7 +295,8 @@ try {
     verifiedLocalToolPolicy: 'video_requires_ffmpeg_ffprobe_checks',
     verifiedMultiAgentPolicy: 'multi_agent_auto_analysis_by_default',
     verifiedSkillGovernancePolicy: 'source_mirror_metadata_and_path_safety',
-    verifiedCommands: ['recovery', 'claude-delegate', 'markitdown', 'static-server'],
+    verifiedPluginVersion: installedPluginManifest.version,
+    verifiedCommands: ['recovery', 'claude-delegate', 'markitdown', 'static-server', 'check-ae-artifacts', 'check-design-contract'],
   }, null, 2))
 } finally {
   cleanupTarget()

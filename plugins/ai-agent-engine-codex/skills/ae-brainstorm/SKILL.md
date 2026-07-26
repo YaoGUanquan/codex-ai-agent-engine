@@ -1,6 +1,6 @@
 ---
 name: ae-brainstorm
-description: Use when the user wants AE-style requirement clarification, /ae-brainstorm, feature brainstorming, scope definition, acceptance criteria, or has a fuzzy software idea that should become a durable requirements artifact before planning.
+description: Use when the user asks for ae-brainstorm, /ae-brainstorm, $ae-brainstorm, "use ae-brainstorm", AE-style requirement clarification, feature brainstorming, multi-perspective option collision, scope definition, acceptance criteria, or a fuzzy software idea that should become a durable requirements artifact before planning.
 ---
 
 # AE Brainstorm
@@ -16,6 +16,7 @@ Clarify what should be built. Produce a requirements artifact only when it will 
 - Keep the output behavior-focused so `ae-plan` can turn it into implementation units.
 - If the request is too large for one plan, decompose it before refining details.
 - Treat requirement quality like a pre-implementation test surface: WHAT/WHY, measurable success, assumptions, and non-goals must be inspectable before planning.
+- For ambiguous or design-heavy choices, use perspective collision to expose disagreements before compressing them into requirements.
 
 ## Workflow
 
@@ -28,9 +29,23 @@ Clarify what should be built. Produce a requirements artifact only when it will 
 7. Ask at most three clarification questions before recording explicit assumptions; ask fewer when repository evidence is enough.
 8. For design-heavy work, compare 2-3 materially different approaches before converging.
 9. When a design needs validation, present the smallest useful design slices instead of a full speculative implementation.
-10. When durable decisions exist, write a requirements file using `references/requirements-capture.md`.
-11. If the behavior is already clear, summarize the confirmed scope and route to ae-plan or ae-work.
-12. If the user wants to continue, route to ae-plan with the requirements path.
+10. When the request benefits from multiple roles, run the Perspective Collision Pass before choosing or recording the scope.
+11. When durable decisions exist, write a requirements file using `references/requirements-capture.md`.
+12. If the behavior is already clear, summarize the confirmed scope and route to ae-plan or ae-work.
+13. If the user wants to continue, route to ae-plan with the requirements path.
+
+## Perspective Collision Pass
+
+Use this pass when the request has competing value judgments, product/engineering tradeoffs, or a vague "which direction is better" shape. Keep it lightweight for small tasks.
+
+- Build a perspective matrix with at least critic, pragmatist, innovator, and systems perspectives when the topic is broad enough.
+- Classify disagreements as fact disagreement, value disagreement, or assumption disagreement instead of flattening all conflict into pros and cons.
+- Extract collision insights: cases where one perspective's objection becomes another perspective's breakthrough condition.
+- Name blind spots that none of the perspectives covered well enough.
+- Preserve a thinking preservation zone: decisions where human taste, domain judgment, or long-term strategy should not be over-compressed into automation.
+- End with 1-2 deepening directions that can become PRD questions, design constraints, validation work, or plan risks.
+
+Do not let the collision pass replace requirements. It is evidence for choosing scope, assumptions, validation expectations, and open questions.
 
 ## Requirements Readiness
 
@@ -43,6 +58,7 @@ Before routing to `ae-plan`, make sure the downstream plan will have:
 - validation expectations,
 - unresolved questions labeled as open rather than assumed.
 - a requirement-quality checklist when the work is S4, externally visible, or likely to be delegated.
+- collision insights, blind spots, and thinking preservation zone notes when those shaped the chosen approach.
 
 If any missing item would change architecture, data shape, public behavior, security posture, or validation strategy, do not route to implementation. Ask the next highest-leverage question or record the blocker.
 

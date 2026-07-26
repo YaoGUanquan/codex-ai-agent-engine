@@ -20,6 +20,7 @@
 - `09-multi-agent-auto-config.md`：`multi_agent.enabled: auto` 的默认策略、升级路径和安全边界。
 - `10-minimality-review.md`：Ponytail-inspired minimality gate and complexity review adaptation boundaries.
 - `11-ocr-review-guidance.md`：OCR-inspired diff review discipline, rule profiles, deterministic engineering audit, and prompt pattern boundaries.
+- `12-codex-skill-slash-discoverability.md`：Codex skill-backed discoverability decision, wording boundaries, and validation workflow.
 - `99-prompt-template.md`：初始化或维护记忆库的提示词模板。
 
 ## 维护规则

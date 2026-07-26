@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { chmodSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
@@ -10,10 +10,11 @@ import { renderYaml, skillMetadata } from '../plugins/ai-agent-engine-codex/scri
 
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
 
-test('renderYaml emits Chinese metadata for ae-web-app', () => {
+test('renderYaml emits implementation metadata for ae-web-app', () => {
   const yaml = renderYaml(skillMetadata['ae-web-app'], 'zh-CN')
   assert.match(yaml, /display_name: "AE Web 应用开发"/)
-  assert.match(yaml, /short_description: "基于现有仓库技术栈构建或扩展 Web 应用"/)
+  assert.match(skillMetadata['ae-web-app'].en, /Implement Web app flows selected by ae-web-forge/)
+  assert.doesNotMatch(skillMetadata['ae-web-app'].en, /four-question routing/i)
   assert.match(yaml, /default_prompt: "使用 \$ae-web-app 实现这个 Web 应用流程。"/)
 })
 
@@ -66,6 +67,14 @@ test('check-skill-mirror reports ok', () => {
   const result = runNodeScript('scripts/check-skill-mirror.mjs')
   assert.equal(result.status, 'ok')
   assert.ok(result.fileCount > 0)
+})
+
+test('root package and plugin manifest keep synchronized distribution versions', () => {
+  const packageJson = JSON.parse(readFileSync(resolve(repoRoot, 'package.json'), 'utf8'))
+  const pluginManifest = JSON.parse(readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/.codex-plugin/plugin.json'), 'utf8'))
+
+  assert.match(packageJson.version, /^\d+\.\d+\.\d+$/)
+  assert.equal(pluginManifest.version, packageJson.version)
 })
 
 test('check-skill-language-metadata reports ok', () => {
@@ -143,6 +152,64 @@ test('Ponytail-inspired minimality guidance is present in source and mirror skil
     for (const expectation of expectations) {
       assert.match(sourceBody, expectation, `${skillName} should include ${expectation}`)
     }
+  }
+})
+
+test('task loop dual completion gate requires verification and non-blocking review', () => {
+  const source = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-task-loop')
+  const mirror = readSkillBody('.agents/skills', 'ae-task-loop')
+
+  assert.equal(mirror, source, 'ae-task-loop mirror should match plugin source')
+  for (const expectation of [
+    /## Candidate Success Review Gate/,
+    /success criteria.*review.*no blocking findings/is,
+    /both gates.*independent/is,
+    /blocking findings.*next fix hypothesis/is,
+    /review.*unavailable.*blocked or unverified/is,
+    /review status/,
+  ]) {
+    assert.match(source, expectation, `ae-task-loop should include ${expectation}`)
+  }
+  assert.doesNotMatch(source, /mode=autofix/i)
+  assert.doesNotMatch(source, /OpenCode/i)
+})
+
+test('local runtime smoke gate is shared by execution skills without secret transport claims', () => {
+  const referencePaths = [
+    'plugins/ai-agent-engine-codex/skills/ae-work/references/local-runtime-smoke-gate.md',
+    '.agents/skills/ae-work/references/local-runtime-smoke-gate.md',
+  ]
+  const sourceReference = readFileSync(resolve(repoRoot, referencePaths[0]), 'utf8')
+  const mirrorReference = readFileSync(resolve(repoRoot, referencePaths[1]), 'utf8')
+
+  assert.equal(mirrorReference, sourceReference, 'local runtime smoke gate mirror should match plugin source')
+  for (const expectation of [
+    /start, execute, automatically run, smoke test, bubble test, or locally integrate/i,
+    /restart or hot-reload rule/i,
+    /read-only or state-changing/i,
+    /user-controlled local secret reference/i,
+    /proactively create a token-free request template/i,
+    /verified ignored project path or in the operating system temporary directory/i,
+    /report its absolute path and wait for the user to populate it locally and confirm readiness/i,
+    /must not open, read, write, print, or validate the populated reference/i,
+    /pass its absolute path to a client option that consumes the reference without echoing its contents/i,
+    /must not be copied into command text, patches, logs, agent-written files, or tool stdin/i,
+    /Do not repeatedly ask for a prerequisite that the user already confirmed/i,
+    /run the bounded request once by referencing the populated secret path or environment variable/i,
+    /4xx, 5xx, transport failure, or business error/i,
+    /Archive only this sanitized execution evidence/i,
+    /never archive, commit, relocate, or expose a secret reference/i,
+    /not a secret manager/i,
+  ]) {
+    assert.match(sourceReference, expectation, `local runtime smoke gate should include ${expectation}`)
+  }
+  assert.doesNotMatch(sourceReference, /Read-Host|write_stdin/i)
+
+  for (const skillName of ['ae-work', 'ae-tdd', 'ae-debug', 'ae-task-loop']) {
+    const source = readSkillBody('plugins/ai-agent-engine-codex/skills', skillName)
+    const mirror = readSkillBody('.agents/skills', skillName)
+    assert.equal(mirror, source, `${skillName} mirror should match plugin source`)
+    assert.match(source, /local runtime smoke gate/i, `${skillName} should route explicit runtime smoke to the shared gate`)
   }
 })
 
@@ -259,6 +326,118 @@ test('Claude Code best practice adaptation guidance is present in source and mir
   }
 })
 
+test('agent skill audit optimization guidance is present in references and mirrored skills', () => {
+  const fiveLayerReference = readFileSync(resolve(repoRoot, 'docs/ae/references/codex-five-layer-architecture.md'), 'utf8')
+  for (const expectation of [
+    /Memory Layer/,
+    /Knowledge Layer/,
+    /Guardrail Layer/,
+    /Delegation Layer/,
+    /Distribution Layer/,
+    /Unsupported runtime assumptions/,
+  ]) {
+    assert.match(fiveLayerReference, expectation, `five-layer reference should include ${expectation}`)
+  }
+
+  const invariantReference = readFileSync(resolve(repoRoot, 'docs/ae/references/agent-engineering-invariants.md'), 'utf8')
+  for (const expectation of [
+    /Surface assumptions before editing/,
+    /Choose the simplest sufficient route/,
+    /Keep edits surgical/,
+    /Define verifiable goals/,
+    /Claim evidence before confidence/,
+  ]) {
+    assert.match(invariantReference, expectation, `engineering invariants should include ${expectation}`)
+  }
+
+  const integrityReadme = readFileSync(resolve(repoRoot, 'docs/ae/integrity/README.md'), 'utf8')
+  assert.match(integrityReadme, /claim corrections/i)
+  assert.match(integrityReadme, /retractions/i)
+  assert.match(integrityReadme, /methodology fixes/i)
+
+  const expectedBySkill = {
+    'ae-skill-audit': [
+      /claim provenance/i,
+      /evidence ledger/i,
+      /unsupported runtime assumptions/i,
+    ],
+    'ae-prd': [
+      /Evidence Expectations/i,
+      /capability, benchmark, installation, or behavior claims/i,
+      /separate assumptions from evidence/i,
+    ],
+    'ae-plan': [
+      /Five-Layer Ownership/i,
+      /Memory, Knowledge, Guardrail, Delegation, or Distribution/i,
+      /claim-evidence/i,
+    ],
+    'ae-work': [
+      /Claim-Evidence Mapping/i,
+      /docs, README, installation behavior, capability claims, or skill behavior/i,
+      /evidence path, validation command, or explicit assumption/i,
+    ],
+    'ae-review': [
+      /Claim-Integrity Lane/i,
+      /unsupported runtime behavior/i,
+      /stale or unverifiable number/i,
+    ],
+    'ae-save-experience': [
+      /Integrity Ledger Routing/i,
+      /docs\/ae\/integrity/i,
+      /Do not bury retractions/i,
+    ],
+  }
+
+  for (const [skillName, expectations] of Object.entries(expectedBySkill)) {
+    const sourceBody = readSkillBody('plugins/ai-agent-engine-codex/skills', skillName)
+    const mirrorBody = readSkillBody('.agents/skills', skillName)
+    assert.equal(mirrorBody, sourceBody, `${skillName} mirror should match plugin source`)
+    for (const expectation of expectations) {
+      assert.match(sourceBody, expectation, `${skillName} should include ${expectation}`)
+    }
+  }
+})
+
+test('SkillOpt audit filter guidance is present in source and mirror skills', () => {
+  const auditSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-skill-audit')
+  const auditMirror = readSkillBody('.agents/skills', 'ae-skill-audit')
+  assert.equal(auditMirror, auditSource, 'ae-skill-audit mirror should match plugin source')
+
+  for (const expectation of [
+    /Skill Optimization Pattern Filter/,
+    /trajectory source/i,
+    /bounded edit shape/i,
+    /validation gate/i,
+    /rejected-update handling/i,
+    /staging and adoption/i,
+    /AE validation mapping/i,
+    /ungated live mutation/i,
+    /auto-adoption without review/i,
+  ]) {
+    assert.match(auditSource, expectation, `ae-skill-audit should include ${expectation}`)
+  }
+
+  const auditTemplateSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-skill-audit/references/audit-template.md'), 'utf8')
+  const auditTemplateMirror = readFileSync(resolve(repoRoot, '.agents/skills/ae-skill-audit/references/audit-template.md'), 'utf8')
+  assert.equal(auditTemplateMirror, auditTemplateSource, 'ae-skill-audit template mirror should match plugin source')
+
+  for (const expectation of [
+    /## Skill Optimization Pattern Filter/,
+    /Optimization claim:/,
+    /Trajectory source: real sessions \/ synthetic tasks \/ benchmark split \/ user task file \/ unverifiable demo/,
+    /Held-out validation or gate:/,
+    /Gate metric and accept rule:/,
+    /Candidate edit shape: add \/ replace \/ delete \/ full rewrite \/ memory append \/ live mutation/,
+    /Rejected update handling:/,
+    /Staging and adoption policy:/,
+    /AE validation mapping: mirror check \/ skill contract check \/ claim check \/ gate proof \/ future replay suite/,
+    /Direct adoption blockers:/,
+    /Safe AE rewrite:/,
+  ]) {
+    assert.match(auditTemplateSource, expectation, `audit template should include ${expectation}`)
+  }
+})
+
 test('PRD and plan artifact contracts are present in source and mirror skills', () => {
   const expectationsByFile = [
     ['plugins/ai-agent-engine-codex/skills/ae-prd/SKILL.md', '.agents/skills/ae-prd/SKILL.md', [
@@ -314,18 +493,218 @@ test('PRD and plan artifact contracts are present in source and mirror skills', 
   }
 })
 
+test('upstream PRD reference sync keeps required references and source freshness current', () => {
+  const expectedUpstreamCommit = '76d832c96a1c810410982bf28b425a3aedb461ab'
+  const referencePaths = [
+    'plugins/ai-agent-engine-codex/skills/ae-prd/references/requirements-capture.md',
+    '.agents/skills/ae-prd/references/requirements-capture.md',
+    'plugins/ai-agent-engine-codex/skills/ae-prd/references/handoff.md',
+    '.agents/skills/ae-prd/references/handoff.md',
+  ]
+
+  for (const referencePath of referencePaths) {
+    assert.ok(existsSync(resolve(repoRoot, referencePath)), `${referencePath} should exist`)
+  }
+
+  const sourceRequirements = readFileSync(resolve(repoRoot, referencePaths[0]), 'utf8')
+  const mirrorRequirements = readFileSync(resolve(repoRoot, referencePaths[1]), 'utf8')
+  assert.equal(mirrorRequirements, sourceRequirements, 'ae-prd requirements capture mirror should match plugin source')
+  for (const expectation of [
+    /canonicalKind: requirements/,
+    /format: human-readable-requirements/,
+    /stableIdsRequired: true/,
+    /requirementsCount/,
+    /Do not include implementation details/i,
+  ]) {
+    assert.match(sourceRequirements, expectation, `requirements capture should include ${expectation}`)
+  }
+
+  const sourceHandoff = readFileSync(resolve(repoRoot, referencePaths[2]), 'utf8')
+  const mirrorHandoff = readFileSync(resolve(repoRoot, referencePaths[3]), 'utf8')
+  assert.equal(mirrorHandoff, sourceHandoff, 'ae-prd handoff mirror should match plugin source')
+  assert.match(sourceHandoff, /Codex-native handoff/i)
+  assert.match(sourceHandoff, /ae-plan/)
+  assert.doesNotMatch(sourceHandoff, /opencode/i)
+
+  for (const catalogPath of [
+    'plugins/ai-agent-engine-codex/skills/ae-help/references/capability-catalog.json',
+    '.agents/skills/ae-help/references/capability-catalog.json',
+  ]) {
+    const catalog = JSON.parse(readFileSync(resolve(repoRoot, catalogPath), 'utf8'))
+    assert.equal(catalog.source.observedCommit, expectedUpstreamCommit, `${catalogPath} should record observed upstream HEAD`)
+  }
+})
+
+test('upstream brainstorm and web workflow modernization is reflected in source and mirror skills', () => {
+  const brainstormSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-brainstorm')
+  const brainstormMirror = readSkillBody('.agents/skills', 'ae-brainstorm')
+  assert.equal(brainstormMirror, brainstormSource, 'ae-brainstorm mirror should match plugin source')
+  for (const expectation of [
+    /Perspective Collision Pass/i,
+    /perspective matrix/i,
+    /fact disagreement/i,
+    /value disagreement/i,
+    /assumption disagreement/i,
+    /collision insights/i,
+    /blind spots/i,
+    /thinking preservation zone/i,
+    /deepening directions/i,
+  ]) {
+    assert.match(brainstormSource, expectation, `ae-brainstorm should include ${expectation}`)
+  }
+
+  const frontendSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-frontend-design')
+  const frontendMirror = readSkillBody('.agents/skills', 'ae-frontend-design')
+  assert.equal(frontendMirror, frontendSource, 'ae-frontend-design mirror should match plugin source')
+  assert.match(frontendSource, /Frontend Design And UI Implementation/i)
+  assert.match(frontendSource, /design input/i)
+  assert.match(frontendSource, /visual baseline/i)
+  assert.doesNotMatch(frontendSource, /Build the first usable frontend version\./)
+
+  const webSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-web-app')
+  const webMirror = readSkillBody('.agents/skills', 'ae-web-app')
+  assert.equal(webMirror, webSource, 'ae-web-app mirror should match plugin source')
+  for (const expectation of [
+    /implementation skill/i,
+    /selected by `ae-web-forge`/i,
+    /state, forms, API calls, auth, persistence, or error handling/i,
+    /ae-test-browser/,
+    /Do not claim OpenCode sub-agent registry/i,
+  ]) {
+    assert.match(webSource, expectation, `ae-web-app should include ${expectation}`)
+  }
+  assert.doesNotMatch(webSource, /## Four-Question Web Routing/i)
+  assert.doesNotMatch(webSource, /Q1.*second-development/is)
+  assert.doesNotMatch(webSource, /Q2.*design input/is)
+  assert.doesNotMatch(webSource, /Q3.*interaction.*API/is)
+  assert.doesNotMatch(webSource, /Q4.*visual baseline/is)
+
+  const metadata = skillMetadata['ae-frontend-design']
+  assert.equal(metadata.display.zh, 'AE 前端设计')
+  assert.match(metadata.en, /Design and implement frontend UI/)
+  assert.match(metadata.zh, /前端设计与界面实现/)
+  assert.doesNotMatch(metadata.zh, /首版|初版/)
+
+  for (const catalogPath of [
+    'plugins/ai-agent-engine-codex/skills/ae-help/references/capability-catalog.json',
+    '.agents/skills/ae-help/references/capability-catalog.json',
+  ]) {
+    const catalogText = readFileSync(resolve(repoRoot, catalogPath), 'utf8')
+    assert.match(catalogText, /前端设计与界面实现/)
+    assert.match(catalogText, /四问题路由/)
+    assert.match(catalogText, /ae-web-forge.*统一前端\/Web 路由/s)
+    assert.match(catalogText, /ae-web-app.*Web 应用实现/s)
+    assert.doesNotMatch(catalogText, /前端初版/)
+  }
+
+  const readme = readFileSync(resolve(repoRoot, 'README.md'), 'utf8')
+  assert.match(readme, /`ae-frontend-design`：前端设计与界面实现/)
+  assert.match(readme, /`ae-web-forge`：统一前端\/Web 路由入口/)
+  assert.match(readme, /`ae-web-app`：实现由 `ae-web-forge` 路由后的 Web 应用/)
+  assert.doesNotMatch(readme, /`ae-web-app`：基于四问题路由/)
+  assert.doesNotMatch(readme, /`ae-frontend-design`：交付可用的前端初版。/)
+})
+
+test('design and web forge skill contracts are present in source, mirror, metadata, and docs', () => {
+  const designSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-design')
+  const designMirror = readSkillBody('.agents/skills', 'ae-design')
+  assert.equal(designMirror, designSource, 'ae-design mirror should match plugin source')
+  for (const expectation of [
+    /docs\/ae\/designs/,
+    /PRD input/i,
+    /old design input/i,
+    /bare-description fallback/i,
+    /risk-based dimension triggers/i,
+    /explicit omitted dimensions/i,
+    /ADR-XXX/,
+    /EP-XXX/,
+    /T-XXX/,
+    /TC-XXX/,
+    /ST-XXX/,
+    /cross-dimension mapping/i,
+    /ae-review domain:document/i,
+    /does not implement code/i,
+  ]) {
+    assert.match(designSource, expectation, `ae-design should include ${expectation}`)
+  }
+
+  const designTemplateSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-design/references/design-contract-template.md'), 'utf8')
+  const designTemplateMirror = readFileSync(resolve(repoRoot, '.agents/skills/ae-design/references/design-contract-template.md'), 'utf8')
+  assert.equal(designTemplateMirror, designTemplateSource, 'ae-design template mirror should match plugin source')
+  for (const expectation of [
+    /AI Parse Contract/,
+    /Split Manifest/,
+    /Implementation Constraints/,
+    /Mapping Tables/,
+    /Consistency Check/,
+  ]) {
+    assert.match(designTemplateSource, expectation, `ae-design template should include ${expectation}`)
+  }
+
+  const forgeSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-web-forge')
+  const forgeMirror = readSkillBody('.agents/skills', 'ae-web-forge')
+  assert.equal(forgeMirror, forgeSource, 'ae-web-forge mirror should match plugin source')
+  for (const expectation of [
+    /target existence check/i,
+    /Q1.*existing route/is,
+    /Q2.*design input/is,
+    /Q3.*backend|Q3.*API/is,
+    /Q4.*visual baseline/is,
+    /ae-frontend-design/,
+    /ae-web-app/,
+    /ae-test-browser/,
+    /max 3 rework loops/i,
+    /Do not claim OpenCode sub-agent registry/i,
+    /dynamic Chrome MCP/i,
+    /slash command behavior/i,
+  ]) {
+    assert.match(forgeSource, expectation, `ae-web-forge should include ${expectation}`)
+  }
+
+  const expectedMetadata = [
+    ['ae-design', /Design contract/, /设计契约/],
+    ['ae-web-forge', /frontend\/web routing/i, /前端.*Web.*路由/],
+  ]
+  for (const [skillName, enExpectation, zhExpectation] of expectedMetadata) {
+    assert.match(skillMetadata[skillName].en, enExpectation, `${skillName} should have English metadata`)
+    assert.match(skillMetadata[skillName].zh, zhExpectation, `${skillName} should have Chinese metadata`)
+  }
+
+  for (const catalogPath of [
+    'plugins/ai-agent-engine-codex/skills/ae-help/references/capability-catalog.json',
+    '.agents/skills/ae-help/references/capability-catalog.json',
+  ]) {
+    const catalog = JSON.parse(readFileSync(resolve(repoRoot, catalogPath), 'utf8'))
+    const skillNames = catalog.skills.map((skill) => skill.name)
+    assert.ok(skillNames.includes('ae-design'), `${catalogPath} should include ae-design`)
+    assert.ok(skillNames.includes('ae-web-forge'), `${catalogPath} should include ae-web-forge`)
+    assert.equal(catalog.artifactPaths.designs, 'docs/ae/designs')
+  }
+
+  const readme = readFileSync(resolve(repoRoot, 'README.md'), 'utf8')
+  const readmeEn = readFileSync(resolve(repoRoot, 'README.en.md'), 'utf8')
+  assert.match(readme, /`ae-design`：.*设计契约/)
+  assert.match(readme, /`ae-web-forge`：.*Web.*路由/)
+  assert.match(readmeEn, /`ae-design`: .*design contract/i)
+  assert.match(readmeEn, /`ae-web-forge`: .*frontend\/web routing/i)
+})
+
 test('check-install-smoke reports ok and verifies new skills', () => {
   const result = runNodeScript('scripts/check-install-smoke.mjs')
   assert.equal(result.status, 'ok')
   assert.ok(result.verifiedCommands.includes('recovery'))
   assert.ok(result.verifiedCommands.includes('claude-delegate'))
+  assert.ok(result.verifiedCommands.includes('check-ae-artifacts'))
+  assert.ok(result.verifiedCommands.includes('check-design-contract'))
   assert.deepEqual(result.verifiedSkills, [
     'ae-prd',
     'ae-work-report',
     'ae-task-loop',
     'ae-constitution',
     'ae-tasks',
+    'ae-design',
     'ae-web-app',
+    'ae-web-forge',
     'ae-backend',
     'ae-debug',
     'ae-tdd',
@@ -474,6 +853,43 @@ test('help can find markitdown and static server capabilities', () => {
   assert.match(serverOutput, /static-server/)
 })
 
+test('tiered capability help groups every skill and preserves filtered output', () => {
+  const sourcePath = resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-help/references/capability-catalog.json')
+  const mirrorPath = resolve(repoRoot, '.agents/skills/ae-help/references/capability-catalog.json')
+  const source = JSON.parse(readFileSync(sourcePath, 'utf8'))
+  const mirror = JSON.parse(readFileSync(mirrorPath, 'utf8'))
+  const expectedByTier = {
+    core: ['ae-ideate', 'ae-brainstorm', 'ae-prd', 'ae-design', 'ae-lfg', 'ae-plan', 'ae-constitution', 'ae-tasks', 'ae-work', 'ae-refactor', 'ae-review', 'ae-frontend-design', 'ae-web-app', 'ae-web-forge', 'ae-backend', 'ae-debug', 'ae-task-loop', 'ae-tdd', 'ae-test-browser', 'ae-handoff'],
+    docs: ['ae-doc-humanize', 'ae-doc-structure', 'ae-markitdown', 'ae-work-report'],
+    tools: ['ae-claude-code', 'ae-sql', 'ae-swagger-parser', 'ae-static-server', 'ae-prompt-optimize', 'ae-save-experience'],
+    meta: ['ae-help', 'ae-init', 'ae-skill-creator', 'ae-skill-audit', 'ae-agent-creator', 'ae-update', 'ae-language'],
+  }
+
+  assert.deepEqual(mirror, source, 'capability catalog mirror should match plugin source')
+  assert.equal(source.source.observedCommit, '76d832c96a1c810410982bf28b425a3aedb461ab')
+  assert.equal(source.source.license, 'GPL-3.0-or-later')
+  assert.equal(source.skills.length, Object.values(expectedByTier).flat().length)
+  for (const [tier, names] of Object.entries(expectedByTier)) {
+    assert.deepEqual(source.skills.filter((skill) => skill.tier === tier).map((skill) => skill.name), names)
+  }
+  assert.deepEqual([...new Set(source.skills.map((skill) => skill.tier))].sort(), ['core', 'docs', 'meta', 'tools'])
+
+  const fullOutput = runNodeScriptRaw('node scripts/ae-tools.mjs help')
+  const headings = ['### 核心工程流程 (core)', '### 文档处理 (docs)', '### 辅助工具 (tools)', '### 维护与配置 (meta)']
+  let previousIndex = -1
+  for (const heading of headings) {
+    const index = fullOutput.indexOf(heading)
+    assert.ok(index > previousIndex, `${heading} should appear in deterministic tier order`)
+    previousIndex = index
+  }
+
+  const filteredOutput = runNodeScriptRaw('node scripts/ae-tools.mjs help design')
+  assert.match(filteredOutput, /### 核心工程流程 \(core\)/)
+  assert.doesNotMatch(filteredOutput, /### 文档处理 \(docs\)/)
+  assert.doesNotMatch(filteredOutput, /### 辅助工具 \(tools\)/)
+  assert.doesNotMatch(filteredOutput, /### 维护与配置 \(meta\)/)
+})
+
 test('installed language switching updates active skills for all supported modes', () => {
   const result = runNodeScript('scripts/check-install-smoke.mjs')
   assert.equal(result.status, 'ok')
@@ -483,6 +899,8 @@ test('installed language switching updates active skills for all supported modes
   assert.equal(result.verifiedLocalToolPolicy, 'video_requires_ffmpeg_ffprobe_checks')
   assert.equal(result.verifiedMultiAgentPolicy, 'multi_agent_auto_analysis_by_default')
   assert.equal(result.verifiedSkillGovernancePolicy, 'source_mirror_metadata_and_path_safety')
+  const packageJson = JSON.parse(readFileSync(resolve(repoRoot, 'package.json'), 'utf8'))
+  assert.equal(result.verifiedPluginVersion, packageJson.version)
 })
 
 test('package check script omits OfficeCLI checks', () => {
@@ -491,6 +909,7 @@ test('package check script omits OfficeCLI checks', () => {
   assert.doesNotMatch(checkScript, /node scripts\/check-officecli-available\.mjs/)
   assert.doesNotMatch(checkScript, /node scripts\/check-officecli-smoke\.mjs/)
   assert.match(checkScript, /node scripts\/check-ae-artifacts\.mjs/)
+  assert.match(checkScript, /node scripts\/check-design-contract\.mjs/)
   assert.match(checkScript, /node scripts\/check-skill-contract\.mjs/)
   assert.match(checkScript, /node scripts\/ae-tools\.mjs ae-graph-build --root scripts/)
   assert.match(checkScript, /node scripts\/ae-tools\.mjs ae-graph-query --root scripts --path ae-tools\.mjs/)
@@ -498,7 +917,7 @@ test('package check script omits OfficeCLI checks', () => {
 
 test('renderYaml supports PRD, work report, and task loop metadata', () => {
   const skills = [
-    ['ae-prd', 'AE PRD'],
+    ['ae-prd', 'AE PRD (ae-prd)'],
     ['ae-work-report', 'AE Work Report'],
     ['ae-task-loop', 'AE Task Loop'],
     ['ae-constitution', 'AE Constitution'],
@@ -507,8 +926,61 @@ test('renderYaml supports PRD, work report, and task loop metadata', () => {
 
   for (const [skillName, englishLabel] of skills) {
     const yaml = renderYaml(skillMetadata[skillName], 'en')
-    assert.match(yaml, new RegExp(`display_name: "${englishLabel}"`))
+    assert.ok(yaml.includes(`display_name: "${englishLabel}"`))
   }
+})
+
+test('core AE workflow metadata carries stable skill trigger signals', () => {
+  const coreSkills = [
+    'ae-brainstorm',
+    'ae-lfg',
+    'ae-plan',
+    'ae-prd',
+    'ae-review',
+    'ae-work',
+  ]
+
+  for (const skillName of coreSkills) {
+    const item = skillMetadata[skillName]
+    const englishYaml = renderYaml(item, 'en')
+    const bilingualYaml = renderYaml(item, 'bilingual')
+    const sourceSkill = readSkillBody('plugins/ai-agent-engine-codex/skills', skillName)
+    const mirrorSkill = readSkillBody('.agents/skills', skillName)
+
+    assert.match(englishYaml, new RegExp(`display_name: ".*${skillName}`))
+    assert.match(englishYaml, new RegExp(`short_description: ".*${skillName}`))
+    assert.match(englishYaml, new RegExp(`default_prompt: "Use \\$${skillName}`))
+    assert.match(bilingualYaml, new RegExp(`default_prompt: ".*\\$${skillName}`))
+    assert.equal(mirrorSkill, sourceSkill, `${skillName} mirror should match plugin source`)
+    assert.match(sourceSkill, new RegExp(`/${skillName}`))
+    assert.match(sourceSkill, new RegExp(`\\$${skillName}`))
+    assert.match(sourceSkill, new RegExp(`use ${skillName}`, 'i'))
+  }
+})
+
+test('Codex skill discoverability docs keep slash command boundary explicit', () => {
+  const readme = readFileSync(resolve(repoRoot, 'README.md'), 'utf8')
+  const readmeEn = readFileSync(resolve(repoRoot, 'README.en.md'), 'utf8')
+  const releaseChecklist = readFileSync(resolve(repoRoot, 'docs/release-checklist.md'), 'utf8')
+  const helpSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-help/SKILL.md'), 'utf8')
+  const helpMirror = readFileSync(resolve(repoRoot, '.agents/skills/ae-help/SKILL.md'), 'utf8')
+  const catalogSource = JSON.parse(readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-help/references/capability-catalog.json'), 'utf8'))
+  const catalogMirror = JSON.parse(readFileSync(resolve(repoRoot, '.agents/skills/ae-help/references/capability-catalog.json'), 'utf8'))
+
+  assert.equal(helpMirror, helpSource, 'ae-help mirror should match plugin source')
+  assert.deepEqual(catalogMirror.codexPort, catalogSource.codexPort, 'capability catalog mirror should match source boundary')
+  assert.deepEqual(catalogMirror.notes, catalogSource.notes, 'capability catalog mirror notes should match source')
+
+  for (const content of [readme, readmeEn, releaseChecklist, helpSource, JSON.stringify(catalogSource)]) {
+    assert.match(content, /skill-backed discoverability|skill discoverability|skill 搜索|已启用 skills/i)
+    assert.match(content, /OpenCode.*config\.command|config\.command.*OpenCode/i)
+    assert.doesNotMatch(content, /AE automatically registers Codex slash commands/i)
+    assert.doesNotMatch(content, /自动注册 Codex slash command/)
+  }
+
+  assert.match(releaseChecklist, /fresh Codex App thread|新 Codex App thread|新 Codex 线程/i)
+  assert.match(releaseChecklist, /\$ae-plan/)
+  assert.match(releaseChecklist, /\$ae-prd/)
 })
 
 test('swagger parses local YAML and resolves local schema refs', () => {
@@ -657,6 +1129,52 @@ test('check-ae-artifacts compatibility mode allows legacy pre-contract prd and p
   }
 })
 
+test('check-ae-artifacts compatibility mode allows historical target-project statuses', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-artifacts-'))
+  try {
+    writeAeArtifact(tempRoot, 'docs/ae/prds/implemented-prd.md', [
+      '---',
+      'type: prd',
+      'status: implemented',
+      'date: 2026-06-30',
+      'topic: implemented legacy prd',
+      'format: human-readable-requirements',
+      'sharded: false',
+      '---',
+      '# Implemented Legacy PRD',
+      '',
+    ])
+    writeAeArtifact(tempRoot, 'docs/ae/plans/paused-plan.md', [
+      '---',
+      'type: plan',
+      'status: archived-paused',
+      'date: 2026-06-29',
+      'title: paused legacy plan',
+      'format: human-readable-plan',
+      'sharded: false',
+      '---',
+      '# Paused Legacy Plan',
+      '',
+    ])
+    writeAeArtifact(tempRoot, 'docs/ae/plans/reviewed-plan.md', [
+      '---',
+      'type: plan',
+      'status: reviewed',
+      'date: 2026-06-09',
+      'title: reviewed legacy plan',
+      '---',
+      '# Reviewed Legacy Plan',
+      '',
+    ])
+
+    const result = runAeArtifactCheck(tempRoot)
+    assert.equal(result.status, 0, result.stderr)
+    assert.match(result.stdout, /"status": "ok"/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
 test('check-ae-artifacts compatibility mode rejects new contract artifact missing fields', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-artifacts-'))
   try {
@@ -704,7 +1222,7 @@ test('check-ae-artifacts strict mode rejects legacy artifact missing contract fi
   }
 })
 
-test('check-ae-artifacts rejects partial origin lineage in compatibility and strict modes', () => {
+test('check-ae-artifacts compatibility mode allows legacy partial origin lineage', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-artifacts-'))
   try {
     writeAeArtifact(tempRoot, 'docs/ae/prds/partial-origin.md', [
@@ -713,6 +1231,45 @@ test('check-ae-artifacts rejects partial origin lineage in compatibility and str
       'status: drafted',
       'date: 2026-06-23',
       'topic: partial origin',
+      'origin: docs/source.md',
+      '---',
+      '# Partial Origin',
+      '',
+    ])
+    writeAeArtifact(tempRoot, 'docs/ae/prds/partial-fingerprint.md', [
+      '---',
+      'type: prd',
+      'status: drafted',
+      'date: 2026-06-23',
+      'topic: partial fingerprint',
+      'originFingerprint: legacy-fingerprint',
+      '---',
+      '# Partial Fingerprint',
+      '',
+    ])
+
+    const compatibility = runAeArtifactCheck(tempRoot)
+    assert.equal(compatibility.status, 0, compatibility.stderr)
+
+    const strict = runAeArtifactCheck(tempRoot, ['--strict'])
+    assert.notEqual(strict.status, 0)
+    assert.match(strict.stderr, /originFingerprint/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('check-ae-artifacts rejects new partial origin lineage in compatibility and strict modes', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-artifacts-'))
+  try {
+    writeAeArtifact(tempRoot, 'docs/ae/prds/partial-origin.md', [
+      '---',
+      'type: prd',
+      'status: drafted',
+      'date: 2026-06-24',
+      'topic: partial origin',
+      'format: human-readable-requirements',
+      'sharded: false',
       'origin: docs/source.md',
       '---',
       '# Partial Origin',
@@ -771,6 +1328,212 @@ test('check-ae-artifacts accepts valid new contract prd and plan artifacts', () 
   }
 })
 
+test('check-design-contract passes when no design artifacts exist', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-design-contract-'))
+  try {
+    mkdirSync(join(tempRoot, 'docs', 'ae'), { recursive: true })
+    const result = runDesignContractCheck(tempRoot)
+    assert.equal(result.status, 0, result.stderr)
+    const output = JSON.parse(result.stdout)
+    assert.equal(output.status, 'ok')
+    assert.equal(output.checked, 0)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('check-design-contract accepts a valid design contract', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-design-contract-'))
+  try {
+    writeAeArtifact(tempRoot, 'docs/ae/designs/sample-2026-07-07/design.md', validDesignContractLines())
+    const result = runDesignContractCheck(tempRoot)
+    assert.equal(result.status, 0, result.stderr)
+    const output = JSON.parse(result.stdout)
+    assert.equal(output.status, 'ok')
+    assert.equal(output.checked, 1)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('check-design-contract rejects malformed design contracts with structured errors', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-design-contract-'))
+  try {
+    writeAeArtifact(tempRoot, 'docs/ae/designs/bad-2026-07-07/design.md', [
+      '---',
+      'type: design',
+      'status: drafted',
+      'date: 2026-07-07',
+      'title: bad design',
+      'format: human-readable-design',
+      'sharded: false',
+      '---',
+      '# Design: bad design',
+      '',
+      '## Overview',
+      '',
+      '## Decisions',
+      '',
+      '### ADR-001 - First decision',
+      '',
+      '### ADR-001 - Duplicate decision',
+      '',
+    ])
+
+    const result = runDesignContractCheck(tempRoot)
+    assert.notEqual(result.status, 0)
+    const output = JSON.parse(result.stderr)
+    assert.equal(output.status, 'failed')
+    assert.equal(output.checked, 1)
+    assert.ok(output.errors.some((error) => error.field === 'section' && /AI Parse Contract/.test(error.message)))
+    assert.ok(output.errors.some((error) => error.field === 'stableId' && /ADR-001/.test(error.message)))
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('design contract semantic validation resolves mapping IDs and split files', () => {
+  const danglingRoot = mkdtempSync(join(tmpdir(), 'ae-design-semantic-'))
+  const traversalRoot = mkdtempSync(join(tmpdir(), 'ae-design-semantic-'))
+  const missingRoot = mkdtempSync(join(tmpdir(), 'ae-design-semantic-'))
+  const validSplitRoot = mkdtempSync(join(tmpdir(), 'ae-design-semantic-'))
+  try {
+    const danglingLines = validDesignContractLines().map((line) => line.replace('| EP-001 | n/a | T-001 |', '| EP-999 | n/a | T-001 |'))
+    writeAeArtifact(danglingRoot, 'docs/ae/designs/sample-2026-07-07/design.md', danglingLines)
+    const dangling = runDesignContractCheck(danglingRoot)
+    assert.notEqual(dangling.status, 0)
+    const danglingOutput = JSON.parse(dangling.stderr)
+    assert.ok(danglingOutput.errors.some((error) => error.field === 'stableReference' && /EP-999/.test(error.message)))
+
+    const traversalLines = validDesignContractLines().flatMap((line) => line === '  - design.md' ? [line, '  - ../outside.md'] : [line])
+    writeAeArtifact(traversalRoot, 'docs/ae/designs/sample-2026-07-07/design.md', traversalLines)
+    writeAeArtifact(traversalRoot, 'docs/ae/designs/outside.md', ['# Outside'])
+    const traversal = runDesignContractCheck(traversalRoot)
+    assert.notEqual(traversal.status, 0)
+    const traversalOutput = JSON.parse(traversal.stderr)
+    assert.ok(traversalOutput.errors.some((error) => error.field === 'splitManifest' && /stay inside/i.test(error.message)))
+
+    const missingLines = validDesignContractLines().flatMap((line) => line === '  - design.md' ? [line, '  - missing.md'] : [line])
+    writeAeArtifact(missingRoot, 'docs/ae/designs/sample-2026-07-07/design.md', missingLines)
+    const missing = runDesignContractCheck(missingRoot)
+    assert.notEqual(missing.status, 0)
+    const missingOutput = JSON.parse(missing.stderr)
+    assert.ok(missingOutput.errors.some((error) => error.field === 'splitManifest' && /does not exist/i.test(error.message)))
+
+    const splitLines = validDesignContractLines().flatMap((line) => line === '  - design.md' ? [line, '  - api.md'] : [line])
+    writeAeArtifact(validSplitRoot, 'docs/ae/designs/sample-2026-07-07/design.md', splitLines)
+    writeAeArtifact(validSplitRoot, 'docs/ae/designs/sample-2026-07-07/api.md', ['# API shard', '', '### EP-001 - No public endpoint', ''])
+    const validSplit = runDesignContractCheck(validSplitRoot)
+    assert.equal(validSplit.status, 0, validSplit.stderr)
+  } finally {
+    for (const root of [danglingRoot, traversalRoot, missingRoot, validSplitRoot]) {
+      rmSync(root, { recursive: true, force: true })
+    }
+  }
+})
+
+test('design contract semantic validation requires root manifest and owning declarations', () => {
+  const missingRootEntry = mkdtempSync(join(tmpdir(), 'ae-design-semantic-'))
+  const fakeDeclaration = mkdtempSync(join(tmpdir(), 'ae-design-semantic-'))
+  try {
+    const missingRootLines = validDesignContractLines().map((line) => line === '  - design.md' ? '  - api.md' : line)
+    writeAeArtifact(missingRootEntry, 'docs/ae/designs/sample-2026-07-07/design.md', missingRootLines)
+    writeAeArtifact(missingRootEntry, 'docs/ae/designs/sample-2026-07-07/api.md', ['# API shard', ''])
+    const missingRoot = runDesignContractCheck(missingRootEntry)
+    assert.notEqual(missingRoot.status, 0)
+    const missingRootOutput = JSON.parse(missingRoot.stderr)
+    assert.ok(missingRootOutput.errors.some((error) => error.field === 'splitManifest' && /list design\.md/i.test(error.message)))
+
+    const fakeDeclarationLines = validDesignContractLines()
+      .filter((line) => line !== '### EP-001 - No public endpoint')
+      .flatMap((line) => line === '### api-field-to-database-column-mapping' ? [line, '', '#### EP-001 - Mapping-local fake declaration'] : [line])
+    writeAeArtifact(fakeDeclaration, 'docs/ae/designs/sample-2026-07-07/design.md', fakeDeclarationLines)
+    const fake = runDesignContractCheck(fakeDeclaration)
+    assert.notEqual(fake.status, 0)
+    const fakeOutput = JSON.parse(fake.stderr)
+    assert.ok(fakeOutput.errors.some((error) => error.field === 'stableReference' && /EP-001/.test(error.message)))
+  } finally {
+    rmSync(missingRootEntry, { recursive: true, force: true })
+    rmSync(fakeDeclaration, { recursive: true, force: true })
+  }
+})
+
+test('symbolic links are excluded from artifact discovery and design manifests', () => {
+  const artifactRoot = mkdtempSync(join(tmpdir(), 'ae-artifact-link-'))
+  const designRoot = mkdtempSync(join(tmpdir(), 'ae-design-link-'))
+  const artifactOutside = mkdtempSync(join(tmpdir(), 'ae-artifact-outside-'))
+  const designOutside = mkdtempSync(join(tmpdir(), 'ae-design-outside-'))
+  const linkType = process.platform === 'win32' ? 'junction' : 'dir'
+  try {
+    writeAeArtifact(artifactOutside, 'escaped.md', [
+      '---',
+      'type: experience',
+      'date: 2026-07-22',
+      '---',
+      '# Outside artifact',
+      '',
+    ])
+    mkdirSync(join(artifactRoot, 'docs', 'ae'), { recursive: true })
+    symlinkSync(artifactOutside, join(artifactRoot, 'docs', 'ae', 'linked'), linkType)
+    const artifactResult = runAeArtifactCheck(artifactRoot)
+    assert.equal(artifactResult.status, 0, artifactResult.stderr)
+    assert.equal(JSON.parse(artifactResult.stdout).checked, 0, 'linked artifacts must not be scanned')
+
+    const linkedDesignLines = validDesignContractLines().flatMap((line) => line === '  - design.md' ? [line, '  - docs/ae/designs/sample-2026-07-07/linked/api.md'] : [line])
+    writeAeArtifact(designRoot, 'docs/ae/designs/sample-2026-07-07/design.md', linkedDesignLines)
+    writeAeArtifact(designOutside, 'api.md', ['# API shard', '', '### EP-001 - External declaration', ''])
+    symlinkSync(designOutside, join(designRoot, 'docs', 'ae', 'designs', 'sample-2026-07-07', 'linked'), linkType)
+    const designResult = runDesignContractCheck(designRoot)
+    assert.notEqual(designResult.status, 0, 'linked manifest shards must be rejected')
+    const designOutput = JSON.parse(designResult.stderr)
+    assert.ok(designOutput.errors.some((error) => error.field === 'splitManifest' && /symbolic link|real design directory/i.test(error.message)))
+
+    if (process.platform !== 'win32') {
+      const directLinkDesignLines = validDesignContractLines().flatMap((line) => line === '  - design.md' ? [line, '  - api-link.md'] : [line])
+      writeAeArtifact(designRoot, 'docs/ae/designs/direct-link-2026-07-22/design.md', directLinkDesignLines)
+      symlinkSync(join(designOutside, 'api.md'), join(designRoot, 'docs', 'ae', 'designs', 'direct-link-2026-07-22', 'api-link.md'), 'file')
+      const directLinkResult = runDesignContractCheck(designRoot)
+      assert.notEqual(directLinkResult.status, 0, 'direct manifest file links must be rejected')
+      const directLinkOutput = JSON.parse(directLinkResult.stderr)
+      assert.ok(directLinkOutput.errors.some((error) => error.field === 'splitManifest' && /must not be a symbolic link/i.test(error.message)))
+    }
+  } finally {
+    for (const root of [artifactRoot, designRoot, artifactOutside, designOutside]) {
+      rmSync(root, { recursive: true, force: true })
+    }
+  }
+})
+
+test('risk-scaled test design guidance is present in source and mirror skills', () => {
+  const source = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-design')
+  const mirror = readSkillBody('.agents/skills', 'ae-design')
+  const templateSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-design/references/design-contract-template.md'), 'utf8')
+  const templateMirror = readFileSync(resolve(repoRoot, '.agents/skills/ae-design/references/design-contract-template.md'), 'utf8')
+
+  assert.equal(mirror, source, 'ae-design mirror should match plugin source')
+  assert.equal(templateMirror, templateSource, 'ae-design template mirror should match plugin source')
+  for (const expectation of [
+    /Risk-Scaled Test Design/,
+    /equivalence classes/i,
+    /boundary values/i,
+    /decision tables/i,
+    /state transitions/i,
+    /error guessing/i,
+    /only when its triggering structure exists/i,
+    /do not require fixed scenario counts/i,
+  ]) {
+    assert.match(source, expectation, `ae-design should include ${expectation}`)
+  }
+  for (const expectation of [
+    /Test Coverage Matrix/,
+    /Design method/,
+    /Automatable verification signal/,
+    /N\/A when the related dimension is explicitly omitted/,
+  ]) {
+    assert.match(templateSource, expectation, `design template should include ${expectation}`)
+  }
+})
+
 test('graph-build reports shallow local dependencies', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-graph-'))
   try {
@@ -795,6 +1558,9 @@ test('graph-build reports shallow local dependencies', () => {
     assert.equal(result.freshness.canUseAsEvidence, true)
     assert.equal(typeof result.freshness.fingerprint, 'string')
     assert.equal(result.store.path, 'docs/ae/graphs/graph.json')
+    assert.equal(result.store.schemaVersion, 1)
+    assert.equal(result.store.written, false)
+    assert.equal(existsSync(join(tempRoot, 'docs', 'ae', 'graphs', 'graph.json')), false)
     assert.ok(result.nodes.some((node) => node.path === 'src/main.js'))
     assert.ok(result.edges.some((edge) => edge.from === 'src/main.js' && edge.to === 'src/helper.js' && edge.type === 'imports'))
     assert.ok(result.externalDependencies.some((dep) => dep.from === 'src/main.js' && dep.dependency === 'node:fs'))
@@ -814,11 +1580,22 @@ test('graph-query filters shallow graph by path', () => {
     assert.equal(result.status, 'ok')
     assert.equal(result.freshness.status, 'fresh')
     assert.equal(result.store.path, 'docs/ae/graphs/graph.json')
+    assert.equal(result.store.schemaVersion, 1)
+    assert.equal(result.store.written, false)
+    assert.equal(existsSync(join(tempRoot, 'docs', 'ae', 'graphs', 'graph.json')), false)
     assert.deepEqual(result.matchedNodes.map((node) => node.path), ['src/main.js'])
     assert.ok(result.relatedEdges.some((edge) => edge.to === 'src/helper.js'))
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }
+})
+
+test('graph helper documentation states that graph snapshots are not persisted', () => {
+  const readme = readFileSync(resolve(repoRoot, 'README.md'), 'utf8')
+  const readmeEn = readFileSync(resolve(repoRoot, 'README.en.md'), 'utf8')
+
+  assert.match(readme, /不会写入 `docs\/ae\/graphs\/graph\.json`/)
+  assert.match(readmeEn, /do not write `docs\/ae\/graphs\/graph\.json`/i)
 })
 
 test('review-contract selects reviewers and writes evidence ledger records', () => {
@@ -1002,11 +1779,21 @@ test('review-package writes commit list stat summary and diff into an evidence a
       base,
       '--head',
       head,
+      '--with-impact',
+      '--impact-file-limit',
+      '0',
     ], tempRoot)
 
     assert.equal(result.status, 'ok')
     assert.equal(result.base, base)
     assert.equal(result.head, head)
+    assert.equal(result.inventory.changedFileCount, 1)
+    assert.deepEqual(result.inventory.files.map((file) => file.path), ['sample.txt'])
+    assert.equal(result.inventory.files[0].role, 'document')
+    assert.equal(result.impact.status, 'advisory')
+    assert.equal(result.impact.fileLimit, 1)
+    assert.equal(result.impact.sourceFilesScanned, 1)
+    assert.deepEqual(result.impact.seedFiles, ['sample.txt'])
     assert.match(result.artifact.path, /^docs\/ae\/evidence\/artifacts\/review-package\//)
     const artifactBody = readFileSync(join(tempRoot, result.artifact.path), 'utf8')
     assert.match(artifactBody, new RegExp(`# Review package: ${base}\\.\\.${head}`))
@@ -1014,8 +1801,44 @@ test('review-package writes commit list stat summary and diff into an evidence a
     assert.match(artifactBody, /update sample/)
     assert.match(artifactBody, /## Files changed/)
     assert.match(artifactBody, /sample\.txt/)
+    assert.match(artifactBody, /## Review inventory/)
+    assert.match(artifactBody, /## Impact context/)
     assert.match(artifactBody, /## Diff/)
     assert.match(artifactBody, /\+two/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('review-package retains renamed file identity in its review inventory', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-review-package-rename-'))
+  try {
+    runGit(['init'], tempRoot)
+    runGit(['config', 'user.name', 'Codex Test'], tempRoot)
+    runGit(['config', 'user.email', 'codex@example.com'], tempRoot)
+
+    writeFileSync(join(tempRoot, 'old-name.js'), 'export const value = 1\n', 'utf8')
+    runGit(['add', 'old-name.js'], tempRoot)
+    runGit(['commit', '-m', 'initial'], tempRoot)
+    const base = runGit(['rev-parse', 'HEAD'], tempRoot).stdout.trim()
+
+    runGit(['mv', 'old-name.js', 'new-name.js'], tempRoot)
+    runGit(['commit', '-m', 'rename sample'], tempRoot)
+    const head = runGit(['rev-parse', 'HEAD'], tempRoot).stdout.trim()
+
+    const result = runNodeScriptJson([
+      'scripts/ae-tools.mjs',
+      'review-package',
+      '--base',
+      base,
+      '--head',
+      head,
+    ], tempRoot)
+
+    assert.equal(result.inventory.changedFileCount, 1)
+    assert.equal(result.inventory.files[0].path, 'new-name.js')
+    assert.equal(result.inventory.files[0].previousPath, 'old-name.js')
+    assert.match(result.inventory.files[0].status, /^R/)
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }
@@ -1644,6 +2467,14 @@ function runAeArtifactCheck(tempRoot, extraArgs = []) {
   })
 }
 
+function runDesignContractCheck(tempRoot, extraArgs = []) {
+  return spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'check-design-contract.mjs'), '--target', tempRoot, ...extraArgs], {
+    cwd: repoRoot,
+    encoding: 'utf8',
+    stdio: 'pipe',
+  })
+}
+
 function writeAeArtifact(tempRoot, relativePath, lines) {
   const fullPath = join(tempRoot, relativePath)
   mkdirSync(resolve(fullPath, '..'), { recursive: true })
@@ -1652,4 +2483,116 @@ function writeAeArtifact(tempRoot, relativePath, lines) {
 
 function readSkillBody(root, skillName) {
   return readFileSync(resolve(repoRoot, root, skillName, 'SKILL.md'), 'utf8')
+}
+
+function validDesignContractLines() {
+  return [
+    '---',
+    'type: design',
+    'status: drafted',
+    'date: 2026-07-07',
+    'title: sample design',
+    'format: human-readable-design',
+    'sharded: false',
+    '---',
+    '',
+    '# Design: sample design',
+    '',
+    '## Source',
+    '',
+    '## AI Parse Contract',
+    '',
+    '- canonicalKind: design',
+    '- humanEquivalent: true',
+    '- stableIdsRequired: true',
+    '- noImplicitScope: true',
+    '',
+    '## Split Manifest',
+    '',
+    '- mode: unified',
+    '- root: docs/ae/designs/sample-2026-07-07',
+    '- files:',
+    '  - design.md',
+    '',
+    '## Overview',
+    '',
+    '- Goal: sample',
+    '- Required dimensions: overview, architecture, test-cases',
+    '- Explicit omitted dimensions: api: explicitly-omitted - no public API change; database: explicitly-omitted - no persistence change',
+    '',
+    '## Implementation Constraints',
+    '',
+    '- Repository paths: scripts/check-design-contract.mjs',
+    '- Runtime/build commands: node scripts/check-design-contract.mjs',
+    '',
+    '## Decisions',
+    '',
+    '### ADR-001 - Keep validation local',
+    '',
+    '- Decision: Use a local script.',
+    '- Drivers: No external dependency.',
+    '',
+    '## Mapping Tables',
+    '',
+    '### api-field-to-database-column-mapping',
+    '',
+    '| EP ID | API field | T ID | Data field | Notes |',
+    '| --- | --- | --- | --- | --- |',
+    '| EP-001 | n/a | T-001 | n/a | No API/database mapping. |',
+    '',
+    '### api-error-to-ui-state-mapping',
+    '',
+    '| EP ID | Error/status | ST ID | UI state | User-visible behavior |',
+    '| --- | --- | --- | --- | --- |',
+    '| EP-001 | n/a | ST-001 | n/a | No UI error state. |',
+    '',
+    '### test-case-to-contract-coverage',
+    '',
+    '| TC ID | Scenario | Covered IDs | Verification signal |',
+    '| --- | --- | --- | --- |',
+    '| TC-001 | Valid contract | ADR-001 | checker exits 0 |',
+    '',
+    '### ui-component-to-api-endpoint-mapping',
+    '',
+    '| Component/route | ST ID | EP ID | Data dependency |',
+    '| --- | --- | --- | --- |',
+    '| n/a | ST-001 | EP-001 | none |',
+    '',
+    '## Architecture',
+    '',
+    '## API',
+    '',
+    '### EP-001 - No public endpoint',
+    '',
+    '## Database',
+    '',
+    '### T-001 - No persistent data',
+    '',
+    '## UI/UX',
+    '',
+    '### ST-001 - No UI state',
+    '',
+    '## Test Cases',
+    '',
+    '### TC-001 - Valid contract passes',
+    '',
+    '- Priority: P1',
+    '- Covered IDs: ADR-001, EP-001, T-001, ST-001',
+    '',
+    '## Security',
+    '',
+    '## Observability',
+    '',
+    '## Non-Functional',
+    '',
+    '## Consistency Check',
+    '',
+    '- requiredDimensionsCovered: true',
+    '- omittedDimensionsJustified: true',
+    '- stableIdsUnique: true',
+    '- mappingTablesComplete: true',
+    '- sourceScopePreserved: true',
+    '- reviewStatus: not-run',
+    '',
+  ]
 }

@@ -1,0 +1,24 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": "docs/ae/plans/2026-06-29-003-external-manifest-to-assignment-grading-plan.md",
+  "archive_path": "docs/00-process/archive/2026-06/external-manifest-to-assignment-grading/",
+  "change": "external create-from-manifest: subject via flow_state.paper_pool_id (lowercase), grade via local_exam_id->exam_info.grade_id, skip fill_blank sections while preserving task_id sequence, name_preset from layout name region, section preset without fixed id",
+  "validation_commands": [
+    "mvn -pl axon-common \"-Dtest=ExamAssignmentGradingServiceImplTest#createTaskFromExternalGenericManifest*\" test",
+    "mvn -pl axon-common -DskipTests compile",
+    "mvn -pl axon-chat -am -DskipTests compile"
+  ],
+  "unit_tests": [
+    "createTaskFromExternalGenericManifest_resolvesPaperPoolFromFlowStateId",
+    "createTaskFromExternalGenericManifest_resolvesSubjectAndGradeFromLocalData",
+    "createTaskFromExternalGenericManifest_skipsFillBlankSections",
+    "createTaskFromExternalGenericManifest_usesFlowStatePaperPoolPdfUrlFirst"
+  ],
+  "review_status": "self-reviewed",
+  "git_operations": [],
+  "blockers": [],
+  "generated_at": "2026-06-30T11:37:00+08:00"
+}

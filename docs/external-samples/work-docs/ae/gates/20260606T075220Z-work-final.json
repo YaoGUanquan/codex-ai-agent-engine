@@ -1,0 +1,19 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": null,
+  "validation_commands": [
+    "mvn -pl axon-common -Dtest=ExamAssignmentGradingServiceImplTest test; mvn -pl axon-chat -am -Dtest=ExamAssignmentGradingControllerTest -Dsurefire.failIfNoSpecifiedTests=false test; git diff --check; rg -n essayAnnotationImage axon-common/src/main/java axon-common/src/test/java axon-chat/src/test/java docs/04-api docs/08-ai-memory docs/01-history docs/00-process/archive/2026-06/exam-assignment-grading-essay-annotation-image"
+  ],
+  "review_status": "approve",
+  "worktree_decision": "not_created",
+  "git_operations": [],
+  "blockers": [],
+  "warnings": [
+    "plan path not provided"
+  ],
+  "notes": null,
+  "generated_at": "2026-06-06T07:52:20.007Z"
+}

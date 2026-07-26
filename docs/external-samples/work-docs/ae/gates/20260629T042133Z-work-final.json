@@ -1,0 +1,17 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": "docs/00-process/archive/2026-06/assignment-grading-essay-polish-options/同步执行方案.md",
+  "validation_commands": [
+    "mvn -pl axon-common -Dtest=ExamAssignmentGradingServiceImplTest,ExamAssignmentGradingModeEnumTest test"
+  ],
+  "review_status": "approve",
+  "worktree_decision": "current_branch_dirty_existing_changes",
+  "git_operations": [],
+  "blockers": [],
+  "warnings": [],
+  "notes": null,
+  "generated_at": "2026-06-29T04:21:33.317Z"
+}

@@ -1,0 +1,17 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\ph-AI-Agent-Engine",
+  "plan_path": "docs/ae/plans/2026-07-26-001-review-capability-upstream-adaptation-plan.md",
+  "validation_commands": [
+    "node --test --test-name-pattern=review-package tests/skill-scripts.test.mjs; npm test; npm run check; git diff --check"
+  ],
+  "review_status": "APPROVE",
+  "worktree_decision": "main-user-requested",
+  "git_operations": [],
+  "blockers": [],
+  "warnings": [],
+  "notes": null,
+  "generated_at": "2026-07-26T04:03:59.820Z"
+}

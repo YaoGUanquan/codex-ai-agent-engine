@@ -6,6 +6,7 @@ Use this before publishing a GitHub release.
 
 ```bash
 npm run check
+node scripts/check-design-contract.mjs
 node scripts/ae-tools.mjs help
 node scripts/ae-tools.mjs ae-graph-build --root scripts
 node scripts/ae-tools.mjs ae-graph-query --root scripts --path ae-tools.mjs
@@ -24,6 +25,7 @@ $tmp = Join-Path (Get-Location) '.tmp-install-smoke'
 New-Item -ItemType Directory -Force -Path $tmp | Out-Null
 node scripts\install-project.mjs --target $tmp
 node (Join-Path $tmp 'scripts\ae-tools.mjs') help
+node (Join-Path $tmp 'scripts\check-design-contract.mjs')
 Get-Content (Join-Path $tmp '.agents\skills\ae-help\agents\openai.yaml') -Encoding UTF8
 node (Join-Path $tmp 'scripts\set-ae-language.mjs') --lang zh-CN
 node (Join-Path $tmp 'scripts\set-ae-language.mjs') --lang en
@@ -47,13 +49,24 @@ The installed template should include `multi_agent.enabled: auto`, `mode: sugges
 ```bash
 node scripts/check-skill-mirror.mjs
 node scripts/check-skill-language-metadata.mjs
+node scripts/check-design-contract.mjs
 node scripts/ae-tools.mjs help constitution
 node scripts/ae-tools.mjs help tasks
 ```
 
 The active catalog should include `ae-constitution` and `ae-tasks`, and should not include removed OfficeCLI skills.
 
-6. Confirm no reference clone is present:
+6. Manually verify Codex skill discoverability in a fresh Codex App thread:
+
+```text
+Open a fresh Codex thread in a project where AE is installed.
+Type `/` and search for `ae-plan` and `ae-prd`.
+Verify explicit `$ae-plan` and `$ae-prd` skill invocation guidance remains available.
+```
+
+This confirms the active Codex App behavior only. Do not record this as OpenCode `config.command`-style slash command registration.
+
+7. Confirm no reference clone is present:
 
 ```bash
 ls upstream-ai-agent-engine
@@ -61,7 +74,7 @@ ls upstream-ai-agent-engine
 
 This should fail or show no directory.
 
-7. Commit and tag:
+8. Commit and tag:
 
 ```bash
 git add .

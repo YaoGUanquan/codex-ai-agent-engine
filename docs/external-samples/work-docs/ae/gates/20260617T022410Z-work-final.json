@@ -1,0 +1,17 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": "docs/00-process/active/generic-grading-third-party-wrapper/2026-06-16-generic-grading-third-party-wrapper-plan.md",
+  "validation_commands": [
+    "mvn tests + compile + git diff --check"
+  ],
+  "review_status": "not_run",
+  "worktree_decision": "not_applicable",
+  "git_operations": [],
+  "blockers": [],
+  "warnings": [],
+  "notes": null,
+  "generated_at": "2026-06-17T02:24:10.326Z"
+}

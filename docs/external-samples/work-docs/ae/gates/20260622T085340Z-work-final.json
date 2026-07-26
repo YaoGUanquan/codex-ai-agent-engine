@@ -1,0 +1,17 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": "docs/ae/plans/2026-06-22-002-generic-grading-layout-contract-plan.md",
+  "validation_commands": [
+    "rg -n bbox"
+  ],
+  "review_status": "approve",
+  "worktree_decision": "in_place_dirty_worktree",
+  "git_operations": [],
+  "blockers": [],
+  "warnings": [],
+  "notes": null,
+  "generated_at": "2026-06-22T08:53:40.373Z"
+}

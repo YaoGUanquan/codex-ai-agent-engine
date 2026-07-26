@@ -2,17 +2,18 @@
   "source": {
     "name": "AI Agent Engine",
     "url": "https://gitee.com/jiangqiang1996/ai-agent-engine",
-    "observedCommit": "b50ca004a6b4300f4ad5d8d281bcb17d4be1b392",
-    "license": "GPL-2.0-only"
+    "observedCommit": "76d832c96a1c810410982bf28b425a3aedb461ab",
+    "license": "GPL-3.0-or-later"
   },
   "codexPort": {
     "name": "ai-agent-engine-codex",
     "goal": "在 Codex 中提供 AE 风格的软件工程工作流入口。",
-    "runtimeBoundary": "Codex 使用 skill 承载工作流；/ae-* 是兼容标签，不是 OpenCode 式自动 slash command。"
+    "runtimeBoundary": "Codex 使用 skill 承载工作流；/ae-* 是兼容标签，不是 OpenCode config.command 式动态 slash command。已启用 skill 是否出现在 / 或 skill 搜索中取决于当前 Codex App。"
   },
   "skills": [
     {
       "name": "ae-help",
+      "tier": "meta",
       "entry": "/ae-help",
       "target": "查看当前能力",
       "purpose": "查看本地 AE for Codex 已安装的工作流入口和使用边界。",
@@ -20,6 +21,7 @@
     },
     {
       "name": "ae-init",
+      "tier": "meta",
       "entry": "/ae-init",
       "target": "初始化项目",
       "purpose": "初始化当前项目的 AGENTS.md、AE 工作流目录、过程文档、归档规则、UTF-8 中文处理规则和长期 AI 记忆库。",
@@ -28,19 +30,22 @@
     },
     {
       "name": "ae-ideate",
+      "tier": "core",
       "entry": "/ae-ideate",
       "target": "想法生成",
       "purpose": "围绕模糊目标生成候选方向、取舍、风险和下一步澄清问题。"
     },
     {
       "name": "ae-brainstorm",
+      "tier": "core",
       "entry": "/ae-brainstorm",
       "target": "需求澄清",
-      "purpose": "澄清需求、范围、验收标准和开放问题，必要时沉淀需求文档。",
+      "purpose": "澄清需求、范围、碰撞洞见、验收标准和开放问题，必要时沉淀需求文档。",
       "artifactPath": "docs/ae/brainstorms"
     },
     {
       "name": "ae-claude-code",
+      "tier": "tools",
       "entry": "/ae-claude-code",
       "target": "Claude Code CLI 委派",
       "purpose": "将本地 Claude Code CLI 作为受控外部 worker，用于只读分析、审查或 patch 候选方案；Codex 仍负责审查、应用和验证。",
@@ -48,13 +53,23 @@
     },
     {
       "name": "ae-prd",
+      "tier": "core",
       "entry": "/ae-prd",
       "target": "PRD 需求文档",
       "purpose": "在实现计划前沉淀 WHAT 层面的产品需求、范围、验收标准和待定问题。",
       "artifactPath": "docs/ae/prds"
     },
     {
+      "name": "ae-design",
+      "tier": "core",
+      "entry": "/ae-design",
+      "target": "设计契约",
+      "purpose": "在 PRD 和实现计划之间沉淀架构、API、数据、UI/UX、测试、安全、观测和非功能设计契约。",
+      "artifactPath": "docs/ae/designs"
+    },
+    {
       "name": "ae-lfg",
+      "tier": "core",
       "entry": "/ae-lfg",
       "target": "默认全流程",
       "purpose": "从需求澄清到计划、实现、审查、验证和交付证据的完整流程。",
@@ -62,6 +77,7 @@
     },
     {
       "name": "ae-plan",
+      "tier": "core",
       "entry": "/ae-plan",
       "target": "计划生成",
       "purpose": "在编码前生成可执行的实现计划，包含单元、文件、测试、风险和回滚。",
@@ -69,6 +85,7 @@
     },
     {
       "name": "ae-constitution",
+      "tier": "core",
       "entry": "/ae-constitution",
       "target": "Project governance",
       "purpose": "Create or update durable AE project principles that plans, reviews, tasks, and gates can inspect.",
@@ -76,6 +93,7 @@
     },
     {
       "name": "ae-tasks",
+      "tier": "core",
       "entry": "/ae-tasks",
       "target": "Implementation task breakdown",
       "purpose": "Turn an approved AE plan into dependency-ordered task IDs with file paths, validation tasks, and parallel-safety markers.",
@@ -83,6 +101,7 @@
     },
     {
       "name": "ae-work",
+      "tier": "core",
       "entry": "/ae-work",
       "target": "计划执行",
       "purpose": "在 Git/工作区安全检查后执行计划或窄范围任务，并保留验证证据。",
@@ -90,12 +109,14 @@
     },
     {
       "name": "ae-refactor",
+      "tier": "core",
       "entry": "/ae-refactor",
       "target": "重构计划",
       "purpose": "为行为保持型重构生成计划、风险、验证和回滚策略。"
     },
     {
       "name": "ae-review",
+      "tier": "core",
       "entry": "/ae-review",
       "target": "代码或文档审查",
       "purpose": "执行分层代码或文档审查，按严重度优先输出问题。",
@@ -103,66 +124,84 @@
     },
     {
       "name": "ae-doc-humanize",
+      "tier": "docs",
       "entry": "/ae-doc-humanize",
       "target": "文档人读化",
       "purpose": "把结构化或生硬内容改写成人类可读文档，同时保持事实不变。"
     },
     {
       "name": "ae-doc-structure",
+      "tier": "docs",
       "entry": "/ae-doc-structure",
       "target": "文档结构化",
       "purpose": "把散乱文本整理成结构化需求、计划、决策、检查清单或交付文档。"
     },
     {
       "name": "ae-frontend-design",
+      "tier": "core",
       "entry": "/ae-frontend-design",
-      "target": "前端初版",
-      "purpose": "按现有前端栈和设计约束交付可用的前端初版体验。"
+      "target": "前端设计",
+      "purpose": "按现有前端栈、设计输入和视觉基准执行前端设计与界面实现。"
     },
     {
       "name": "ae-web-app",
+      "tier": "core",
       "entry": "/ae-web-app",
-      "target": "Web 应用开发",
-      "purpose": "基于现有仓库技术栈实现前端或轻量全栈 Web 流程，并结合浏览器验收与交付检查。"
+      "target": "Web 应用实现",
+      "purpose": "实现由 ae-web-forge 统一路由后的前端或轻量全栈 Web 流程，并结合现有仓库技术栈、浏览器验收与交付检查。"
+    },
+    {
+      "name": "ae-web-forge",
+      "tier": "core",
+      "entry": "/ae-web-forge",
+      "target": "统一前端/Web 路由",
+      "purpose": "作为统一入口执行前端/Web 四问题路由，选择 ae-frontend-design、ae-web-app 和 ae-test-browser 等 Codex-native skills，并限制最多 3 轮返工。"
     },
     {
       "name": "ae-backend",
+      "tier": "core",
       "entry": "/ae-backend",
       "target": "后端实现",
       "purpose": "基于仓库中的接口、服务、数据和权限契约实现后端行为。"
     },
     {
       "name": "ae-debug",
+      "tier": "core",
       "entry": "/ae-debug",
       "target": "调试排障",
       "purpose": "围绕构建失败、运行时异常、UI 问题和接口故障执行系统化排查与验证。"
     },
     {
       "name": "ae-task-loop",
+      "tier": "core",
       "entry": "/ae-task-loop",
       "target": "任务循环",
       "purpose": "固定成功标准，围绕探索性修复、环境搭建或遗留问题循环验证直到通过或明确阻塞。"
     },
     {
       "name": "ae-tdd",
+      "tier": "core",
       "entry": "/ae-tdd",
       "target": "测试驱动开发",
       "purpose": "围绕明确行为执行先失败测试、最小实现、回归验证和重构。"
     },
     {
       "name": "ae-test-browser",
+      "tier": "core",
       "entry": "/ae-test-browser",
       "target": "浏览器验收",
       "purpose": "使用真实浏览器执行 UI 流程、截图、控制台和网络验收。"
     },
     {
       "name": "ae-sql",
+      "tier": "tools",
       "entry": "/ae-sql",
       "target": "数据库操作",
       "purpose": "生成、审查或执行 SQL。默认只读；写入和生产操作必须显式确认。"
     },
     {
       "name": "ae-swagger-parser",
+      "tier": "tools",
       "entry": "/ae-swagger-parser",
       "target": "Swagger/OpenAPI 摘要",
       "purpose": "摘要或过滤 Swagger/OpenAPI JSON/YAML 规格，不调用业务接口。",
@@ -170,6 +209,7 @@
     },
     {
       "name": "ae-markitdown",
+      "tier": "docs",
       "entry": "/ae-markitdown",
       "target": "Local file to Markdown",
       "purpose": "Convert lightweight local files such as HTML, CSV, TSV, JSON, YAML, XML, text, and Markdown into Markdown without fetching remote URLs.",
@@ -177,6 +217,7 @@
     },
     {
       "name": "ae-static-server",
+      "tier": "tools",
       "entry": "/ae-static-server",
       "target": "Static preview server",
       "purpose": "Serve a local static file or directory for quick browser preview; use --dry-run to plan the URL without starting a process.",
@@ -184,12 +225,14 @@
     },
     {
       "name": "ae-handoff",
+      "tier": "core",
       "entry": "/ae-handoff",
       "target": "会话交接",
       "purpose": "沉淀当前任务状态、文件、命令、结论、阻塞点和下一步。"
     },
     {
       "name": "ae-work-report",
+      "tier": "docs",
       "entry": "/ae-work-report",
       "target": "工作总结",
       "purpose": "基于 Git 历史、当前未提交变更和已有报告生成日报、周报或指定范围工作总结。",
@@ -197,36 +240,42 @@
     },
     {
       "name": "ae-prompt-optimize",
+      "tier": "tools",
       "entry": "/ae-prompt-optimize",
       "target": "提示词优化",
       "purpose": "把用户目标改写为更可执行、边界更清晰的 Codex 提示词。"
     },
     {
       "name": "ae-save-experience",
+      "tier": "tools",
       "entry": "/ae-save-experience",
       "target": "经验沉淀",
       "purpose": "把本次问题、决策、命令、验证和注意事项沉淀为项目经验。"
     },
     {
       "name": "ae-skill-creator",
+      "tier": "meta",
       "entry": "/ae-skill-creator",
       "target": "创建技能",
       "purpose": "创建或更新 Codex skill，遵循本地 skill-creator 规范。"
     },
     {
       "name": "ae-skill-audit",
+      "tier": "meta",
       "entry": "/ae-skill-audit",
       "target": "审计外部技能库",
       "purpose": "只读审计外部 agent/skill 仓库，提炼可适配的 AE skill 改进或新增建议。"
     },
     {
       "name": "ae-agent-creator",
+      "tier": "meta",
       "entry": "/ae-agent-creator",
       "target": "创建代理",
       "purpose": "创建 Codex 可使用的代理提示、UI 元数据或委派模板；不声称 OpenCode 代理自动注册。"
     },
     {
       "name": "ae-update",
+      "tier": "meta",
       "entry": "/ae-update",
       "target": "更新 AE 插件",
       "purpose": "从指定 Git 仓库更新项目本地 AE for Codex 安装，需要网络和 Git 操作确认。",
@@ -234,6 +283,7 @@
     },
     {
       "name": "ae-language",
+      "tier": "meta",
       "entry": "/ae-language",
       "target": "切换显示语言",
       "purpose": "切换本地 AE skill 列表显示语言为中文、英文或双语。",
@@ -250,6 +300,11 @@
       "name": "check-ae-artifacts",
       "purpose": "检查 docs/ae 中 PRD、计划和其他 AE 产物 frontmatter 的基本合规性。",
       "script": "node scripts/check-ae-artifacts.mjs [--target <project>]"
+    },
+    {
+      "name": "check-design-contract",
+      "purpose": "检查 docs/ae/designs/**/design.md 设计契约的 frontmatter、必需章节、稳定 ID、显式省略维度、映射表和一致性字段。",
+      "script": "node scripts/check-design-contract.mjs [--target <project>]"
     },
     {
       "name": "ae-graph-build",
@@ -311,6 +366,7 @@
     "aiMemory": "docs/08-ai-memory",
     "aiMemoryCompat": "docs/ai-memory",
     "prds": "docs/ae/prds",
+    "designs": "docs/ae/designs",
     "workReports": "docs/ae/work-reports",
     "constitution": "docs/ae/constitution.md",
     "tasks": "docs/ae/tasks",
@@ -318,9 +374,9 @@
     "graphs": "docs/ae/graphs"
   },
   "notes": [
-    "/ae-* 是兼容标签；Codex 中可靠触发方式是 skill 名称，例如“用 ae-work 执行这个计划”。",
+    "/ae-* 是兼容标签；Codex 中可靠触发方式是 skill 名称、显式 $ae-* 调用或自然语言请求，例如“用 ae-work 执行这个计划”。支持的 Codex App 版本也可能在 / 或 skill 搜索中显示已启用 skills。",
     "涉及 Git 写入、网络、依赖安装、数据库写入、生产环境或破坏性操作时，必须按 Codex 审批规则执行。",
-    "OpenCode 的自动 slash command、agent registry、session navigation 和全局规则注入不是 Codex 原生能力。",
+    "OpenCode 的 config.command 动态 slash command、agent registry、session navigation 和全局规则注入不是当前 Codex 项目级插件能力。",
     "ae-graph-build / ae-graph-query now provide a shallow JSON graph with freshness evidence; this still does not port the full OpenCode graph schema, SQLite storage, sharding, or preview UI.",
     "ae-merge-branch 暂不作为 Codex skill 暴露；Git merge 类写操作需等待 ae-work 的 Git 证据链和授权边界进一步增强。",
     "ae-chrome-devtools 不照搬动态 MCP 注册；Codex 中通过现有 Browser、Playwright 或 DevTools 可用工具路由，并由 ae-test-browser 记录证据。",

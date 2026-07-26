@@ -1,0 +1,17 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": "docs/ae/plans/2026-06-30-001-task-options-manifest-layout-fault-tolerance-plan.md",
+  "validation_commands": [
+    "mvn -pl axon-common \"-Dtest=ExamAssignmentGradingServiceImplTest#listTaskOptions_*\" test"
+  ],
+  "review_status": "pass",
+  "worktree_decision": "current-branch",
+  "git_operations": [],
+  "blockers": [],
+  "warnings": [],
+  "notes": "Partial manifest layout failure no longer fails entire task-options page; aligned with existing scoreSummary per-item tolerance.",
+  "generated_at": "2026-06-30T11:12:36.000Z"
+}

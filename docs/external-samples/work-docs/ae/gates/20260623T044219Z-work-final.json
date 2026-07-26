@@ -1,0 +1,17 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": "docs/00-process/archive/2026-06/generic-grading-json-generation-order/2026-06-23-generic-grading-json-generation-order-plan.md",
+  "validation_commands": [
+    "mvn -pl axon-common -am -Dtest=ExamGenericGradingServiceImplTest,ExamGenericGradingJsonGenerationSnapshotServiceImplTest test; mvn -pl axon-common,axon-chat -am -DskipTests compile"
+  ],
+  "review_status": "pass",
+  "worktree_decision": "in_place",
+  "git_operations": [],
+  "blockers": [],
+  "warnings": [],
+  "notes": null,
+  "generated_at": "2026-06-23T04:42:19.354Z"
+}

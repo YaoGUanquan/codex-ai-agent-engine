@@ -1,6 +1,6 @@
 ---
 name: ae-plan
-description: Use when the user asks for AE plan, /ae-plan, technical plan, implementation plan, design plan, break down requirements, plan before coding, or convert a requirements artifact into implementation units. This skill writes plans and must not implement code.
+description: Use when the user asks for ae-plan, /ae-plan, $ae-plan, "use ae-plan", AE plan, technical plan, implementation plan, design plan, break down requirements, plan before coding, or convert a requirements artifact into implementation units. This skill writes plans and must not implement code.
 ---
 
 # AE Plan
@@ -91,6 +91,12 @@ When the task may benefit from multi-agent execution, make the plan dependency-a
 - Do not design units only to reach a worker count. Split by real file ownership and dependency boundaries.
 - Shared config, public contracts, migrations, auth, lockfiles, and cross-cutting abstractions should usually stay serial unless a later plan proves disjoint ownership.
 
+## Five-Layer Ownership
+
+For cross-cutting AE skill, plugin, installation, documentation, or governance work, identify whether each implementation unit touches Memory, Knowledge, Guardrail, Delegation, or Distribution. Use `docs/ae/references/codex-five-layer-architecture.md` as the placement map.
+
+When a unit changes docs, README content, installation behavior, capability claims, benchmark claims, or runtime-support claims, include a claim-evidence note: the evidence path, validation command, or explicit assumption that will prove the changed claim. Do not claim hooks, global config, slash commands, MCP auto-loading, or automatic agents unless the current Codex runtime or local scripts actually provide that behavior.
+
 ## Optional Cross-Model Lane
 
 Use a second-model planning lane only when risk, ambiguity, or external-repository comparison justifies the extra review. The lane is optional; Codex remains the orchestrator and owns the final plan.
@@ -118,6 +124,7 @@ Before finalizing, check and fix the plan inline:
 - high-risk plans include pre-mortem failures and layered validation,
 - rollback and recovery signals are credible for the changed area,
 - proposed dependencies, abstractions, wrappers, and files are justified by current requirements rather than speculative future flexibility,
+- claim-evidence notes exist for changed public or workflow claims,
 - the plan is still focused enough for one execution pass; otherwise split it.
 
 ## Rules

@@ -1,0 +1,19 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": null,
+  "validation_commands": [
+    "mvn -pl axon-common test -Dtest=ExamGenericGradingServiceImplTest; mvn -pl axon-chat test -Dtest=ExamGenericGradingControllerTest; mvn -pl axon-chat -DskipTests compile"
+  ],
+  "review_status": "self_reviewed",
+  "worktree_decision": "not_applicable",
+  "git_operations": [],
+  "blockers": [],
+  "warnings": [
+    "plan path not provided"
+  ],
+  "notes": null,
+  "generated_at": "2026-06-18T09:32:40.376Z"
+}

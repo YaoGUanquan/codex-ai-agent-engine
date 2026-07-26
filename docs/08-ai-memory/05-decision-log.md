@@ -98,3 +98,65 @@
 - Context: User identified a newer upstream commit than the local catalog. The portable parts are human-readable but machine-parseable PRD/plan contracts, source freshness checks, and runtime-boundary classification.
 - Impact: PRD/plan skills now require `format`, `sharded`, AI parse contracts, stable IDs, and origin/fingerprint pairing. `ae-skill-audit` now records `git ls-remote`, `observedCommit`, ref source, inspected files, commit mismatch or unreachable short hash, and classifies portable method, local deterministic mechanism, and runtime-specific behavior.
 - Re-evaluate when: strict artifact validation can be enabled by default after historical PRD/plan artifacts are migrated.
+
+## 2026-07-07: Refresh upstream AE baseline and repair PRD reference completeness
+
+- Date: 2026-07-07
+- Decision: Treat upstream `jiangqiang1996/ai-agent-engine` commit `760cc5b548d3f82c5db764fc01b98d7874867b95` as the current observed baseline for future audits, while syncing only Codex-native PRD reference completeness in this pass.
+- Context: A fresh `git ls-remote` showed the upstream `master` HEAD had advanced. Local `ae-prd` referenced `references/requirements-capture.md`, but plugin source and `.agents` mirror did not include that file.
+- Impact: `ae-prd` now has mirrored `requirements-capture.md` and `handoff.md` references, and source metadata records the observed upstream HEAD. Broader upstream `ae-review` and `ae-work` runtime changes remain deferred until they are rewritten against Codex-available tools.
+- Re-evaluate when: adapting upstream review dispatch, worktree handoff, or plan deepening contracts.
+
+## 2026-07-07: Adapt upstream brainstorm collision and formal web routing
+
+- Date: 2026-07-07
+- Decision: Treat upstream `jiangqiang1996/ai-agent-engine` commit `f0cb655ca76fc5e32b5179e155c84f857a9ec289` as the current observed baseline for this modernization pass, and adapt only portable brainstorm and web workflow methods.
+- Context: Upstream now exposes multi-perspective brainstorm synthesis and a formal `ae-web-forge` style web routing model. Local Codex skills still described frontend work as an initial version and did not encode collision insights or four-question web routing.
+- Impact: `ae-brainstorm` now records perspective matrices, disagreement types, collision insights, blind spots, thinking preservation zones, and deepening directions when useful. `ae-frontend-design` is repositioned as frontend design and UI implementation. `ae-web-app` owns Codex-native four-question routing while browser acceptance remains in `ae-test-browser`.
+- Re-evaluate when: adding a dedicated `ae-design` design-contract skill or creating a separate `ae-web-forge` entrypoint becomes more valuable than strengthening existing skill boundaries.
+
+## 2026-07-07: Add Codex-native ae-design and ae-web-forge entrypoints
+
+- Date: 2026-07-07
+- Decision: Add `ae-design` as a PRD-to-plan design contract skill and `ae-web-forge` as an independent frontend/Web routing entrypoint, while keeping both rewritten for Codex-native skills and artifact roots.
+- Context: Upstream includes richer design-contract and web-forge flows, but its OpenCode-specific paths, sub-agent registry, dynamic Chrome MCP registration, and slash command behavior are not portable to this Codex plugin.
+- Impact: `ae-design` writes design contracts under `docs/ae/designs` with stable IDs, risk-triggered dimensions, explicit omitted dimensions, mapping tables, and document review closure. `ae-web-forge` routes to existing `ae-frontend-design`, `ae-web-app`, `ae-test-browser`, `ae-backend`, and `ae-sql` rather than claiming unavailable `@ui-*` agents.
+- Re-evaluate when: a deterministic design validator is added, Codex exposes stable native sub-agent/runtime contracts, or frontend routing duplication between `ae-web-app` and `ae-web-forge` becomes confusing in real use.
+
+## 2026-07-07: Make ae-web-forge the unified Web routing entrypoint and add design contract checks
+
+- Date: 2026-07-07
+- Decision: `ae-web-forge` owns frontend/Web Q1-Q4 routing. `ae-web-app` is the implementation skill for routed Web app flows. Add `check-design-contract` as the deterministic checker for `docs/ae/designs/**/design.md`.
+- Context: Keeping Q1-Q4 routing in both skills created a predictable long-term ambiguity, and `ae-design` had a template contract without machine validation.
+- Impact: README, metadata, catalog, tests, and skill docs now describe one routing owner. Package checks now include `node scripts/check-design-contract.mjs`, which validates design frontmatter, required sections, stable IDs, explicit omitted dimensions, mapping tables, and consistency fields.
+- Re-evaluate when: design contracts need semantic cross-reference validation across mapping table row values, or users consistently bypass `ae-web-forge` for broad Web intake.
+
+## 2026-07-07: Treat SkillOpt-style self-evolution as audit discipline before runtime
+
+- Date: 2026-07-07
+- Decision: For SkillOpt-like skill optimization frameworks, strengthen `ae-skill-audit` first with a Skill Optimization Pattern Filter. Do not install SkillOpt, create `ae-skill-optimize`, or enable automatic live skill mutation until AE has a held-out replay suite and a validated staged adoption contract.
+- Context: SkillOpt's portable value is its trajectory-driven bounded edit loop, validation gate, rejected-update feedback, and staged proposal discipline. The current AE project has mirror, contract, artifact, and claim checks, but does not yet have a task replay benchmark that can safely accept or reject automatically generated skill edits.
+- Impact: External audits now check trajectory source, bounded edit shape, validation gate, rejected-update handling, staging/adoption policy, and AE validation mapping before recommending any local skill change. Audit reports can adapt useful optimization mechanics as process contracts or template fields while rejecting unsupported runtime import and auto-adoption.
+- Re-evaluate when: repeated audits need the same staged replay workflow, `docs/ae` gains a local held-out task suite, or a future `ae-skill-optimize` plan can prove harmful edits are rejected before live skill files change.
+
+## 2026-07-13: Adapt tiered help and workflow completion guards from upstream
+
+- Date: 2026-07-13
+- Decision: Treat upstream commit `00d7e9ca7594945ac26a46fffc43ccd679cd461b` as the current observed baseline and adapt only capability presentation tiers, deterministic design-contract semantics, and task-loop completion guards.
+- Context: The upstream delta contains useful catalog organization and workflow contracts alongside OpenCode-only sessions, hooks, dynamic MCP, async execution, media fallback, graph telemetry, and agent registries.
+- Impact: AE help groups skills by explicit `core`, `docs`, `tools`, and `meta` metadata without changing routing. Design and task-loop improvements remain Codex-native process and validation contracts.
+- Re-evaluate when: Codex exposes a stable headless registry test surface or a real project artifact requires a broader design declaration grammar.
+
+## 2026-07-22: Adapt upstream validator safety and risk-scaled test design
+
+- Decision: Treat upstream commit `76d832c96a1c810410982bf28b425a3aedb461ab` as the latest observed reference; adopt symbolic-link rejection and conditional test-design methods while retaining the Codex-native runtime boundary.
+- Context: The local artifact and design validators used `statSync` recursive walks, which follow symbolic links. Upstream fixed the same class of directory traversal risk. Its newer test-case contracts add useful scenario-selection methods, but their universal scenario counts and OpenCode subagent execution model do not fit compact Codex design artifacts.
+- Impact: validators skip symbolic links and manifest entries must resolve inside the real design directory. `ae-design` now records a method-tagged, automatable coverage matrix only for triggered API, UI/state, business-rule, data, or authorization structures. Upstream package metadata for this snapshot is `GPL-3.0-or-later`; this repository continues to adapt behavior rather than vendoring upstream source.
+- Re-evaluate when: representative local design artifacts show a need for semantic coverage measurement beyond the current structural contract.
+
+## 2026-07-24: Require an explicit local runtime smoke gate after implementation
+
+- Decision: `ae-work` owns a shared local runtime smoke gate, and `ae-tdd`, `ae-debug`, and `ae-task-loop` route explicit local API/UI smoke requests to it. The gate recognizes start, execute, automatic, smoke, bubble, and local-integration requests as equivalent intent.
+- Context: A completed local restart and explicit smoke request previously stalled on repeated credential handoff questions. Runtime calls were possible; the missing contract was a deterministic transition from focused tests to bounded localhost evidence and a safe credential boundary.
+- Impact: A runnable local read-only request proceeds once restart, target, request fixture, and user-created secret reference are ready. Raw chat credentials must not enter command text, patches, logs, agent-written files, or tool stdin. State-changing calls still require explicit authorization, and 4xx/5xx/transport/business errors block a pass claim.
+- Re-evaluate when: Codex exposes a documented non-persisting secret-input capability, or a target-project contract needs a more specific local service lifecycle policy.

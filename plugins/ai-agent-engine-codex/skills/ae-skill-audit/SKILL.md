@@ -46,6 +46,31 @@ Reject direct ports of runtime-specific behavior unless the current Codex enviro
 
 Freshness failures are audit findings, not blockers by themselves. If `git ls-remote` is unavailable, record `freshnessMethod: unavailable` and the reason. If a requested short hash is not reachable from the inspected ref, record the mismatch and avoid claiming the inspected files are the latest source.
 
+## Evidence And Claim Provenance
+
+When an external repository is used to justify an AE change, record claim provenance before recommending adaptation:
+
+- the claim being reused or challenged;
+- the inspected source file, commit, and section that supports it;
+- whether the proof is direct evidence, a local inference, or an assumption;
+- whether the idea needs an AE evidence ledger, review finding, validation command, or integrity note after implementation;
+- unsupported runtime assumptions such as hooks, plugin marketplaces, automatic agents, or MCP behavior that Codex cannot enforce here.
+
+Do not present popularity metrics, benchmark numbers, installation support, or runtime behavior as current facts without fresh observation. If a claim cannot be re-derived from the inspected source or a command, label it as unverified.
+
+## Skill Optimization Pattern Filter
+
+When auditing a framework that claims to optimize, evolve, train, sleep, replay, or self-improve agent skills, evaluate the optimization loop before recommending any AE change:
+
+- trajectory source: record whether examples come from real sessions, synthetic tasks, benchmark splits, user-provided task files, or unverifiable demos;
+- bounded edit shape: identify whether candidate updates are add, replace, delete, full rewrite, memory append, or live runtime mutation, and whether an edit budget or protected region limits blast radius;
+- validation gate: name the held-out split, replay task, metric, command, or human review signal that decides accept versus reject;
+- rejected-update handling: record whether rejected edits become negative evidence, are retried blindly, or disappear without audit history;
+- staging and adoption: require a staged proposal plus explicit adoption for live skill or memory changes unless the current AE/Codex runtime provides an equivalent validated safety boundary;
+- AE validation mapping: map the proposed adaptation to mirror checks, skill contract checks, claim checks, gate proofs, or a future AE replay suite before calling it safe to adopt.
+
+Treat ungated live mutation, auto-adoption without review, benchmark claims without inspected result files, or optimizer prompts that cannot be separated from runtime-specific harness behavior as blockers for direct adoption. Rewrite useful ideas as an AE process contract, template field, or deferred plan instead.
+
 ## Fit Criteria
 
 Good candidates:
@@ -82,6 +107,7 @@ Return a concise decision report:
 - source freshness evidence,
 - adaptable patterns,
 - deterministic engineering patterns,
+- claim provenance and evidence ledger notes,
 - classification table for portable method, local deterministic mechanism, and runtime-specific behavior,
 - existing AE skills to improve,
 - new skill candidates,

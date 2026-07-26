@@ -1,0 +1,19 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": null,
+  "validation_commands": [
+    "mvn -pl axon-common -Dtest=ExamGenericGradingAnalysisSourceEnricherTest -Dsurefire.failIfNoSpecifiedTests=false test"
+  ],
+  "review_status": "self_review_passed",
+  "worktree_decision": "current_branch",
+  "git_operations": [],
+  "blockers": [],
+  "warnings": [
+    "plan path not provided"
+  ],
+  "notes": null,
+  "generated_at": "2026-06-29T08:13:54.983Z"
+}

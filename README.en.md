@@ -1,6 +1,6 @@
 # AI Agent Engine for Codex
 
-AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style engineering workflows into a Codex workspace. It packages Codex skills and local helper scripts for requirement clarification, planning, implementation, review, validation, Swagger/OpenAPI inspection, handoff, and experience capture.
+AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style engineering workflows into a Codex workspace. It packages Codex skills and local helper scripts for requirement clarification, design contracts, planning, implementation, review, validation, frontend/web routing, Swagger/OpenAPI inspection, handoff, and experience capture.
 
 > Reference project: https://gitee.com/jiangqiang1996/ai-agent-engine<br>
 > This repository references the workflow design and capability model of the Gitee AI Agent Engine project above.<br>
@@ -63,7 +63,8 @@ node scripts/ae-tools.mjs help
 - `ae-help`: list installed AE capabilities and boundaries.
 - `ae-init`: initialize project docs, archive rules, UTF-8 rules, and durable AI memory.
 - `ae-ideate`: generate solution directions, tradeoffs, risks, and next questions.
-- `ae-brainstorm`: clarify requirements and capture acceptance criteria.
+- `ae-brainstorm`: clarify requirements with multi-perspective collision insights and capture acceptance criteria.
+- `ae-design`: create a design contract between PRD and plan for architecture, API, data, UI/UX, tests, and non-functional constraints.
 - `ae-lfg`: run the full flow from requirements to verified delivery.
 - `ae-plan`: create implementation plans without editing product code, including simplest-viable-route checks for implementation-heavy work.
 - `ae-constitution`: create or update durable project governance for plans and reviews.
@@ -73,8 +74,9 @@ node scripts/ae-tools.mjs help
 - `ae-review`: review code or documents with severity-ordered findings first; complexity reviews can use delete, stdlib, native, yagni, and shrink tags.
 - `ae-doc-humanize`: rewrite structured or stiff notes into readable documents.
 - `ae-doc-structure`: turn messy notes into requirements, plans, handoffs, or checklists.
-- `ae-frontend-design`: build a usable first frontend version.
-- `ae-web-app`: implement a web frontend or light full-stack web flow using the repository stack.
+- `ae-frontend-design`: design and implement frontend UI.
+- `ae-web-forge`: unified frontend/web routing entrypoint that selects existing AE skills and closes with browser acceptance.
+- `ae-web-app`: implement Web app interaction, API, and light full-stack flows after `ae-web-forge` routing.
 - `ae-backend`: implement API, service, data, and permission behavior from repository contracts.
 - `ae-debug`: investigate build failures, runtime errors, UI issues, and API incidents systematically.
 - `ae-tdd`: run a red-green-refactor loop when behavior is precise enough for test-first work.
@@ -100,6 +102,12 @@ The helper CLI is available through:
 node scripts/ae-tools.mjs help
 ```
 
+Validate design contracts:
+
+```bash
+node scripts/check-design-contract.mjs
+```
+
 Additional helper commands:
 
 ```bash
@@ -107,7 +115,7 @@ node scripts/ae-tools.mjs ae-graph-build --root scripts
 node scripts/ae-tools.mjs ae-graph-query --root scripts --path ae-tools.mjs
 ```
 
-`ae-graph-build` and `ae-graph-query` are shallow, read-only dependency graph helpers. They scan source files and emit JSON for quick dependency previews. They do not write `.ae/graph.db`, maintain graph freshness, shard a graph schema, or render a preview page.
+`ae-graph-build` and `ae-graph-query` are shallow, read-only dependency graph helpers. They scan source files and emit JSON for quick dependency previews. They do not write `docs/ae/graphs/graph.json` or `.ae/graph.db`, maintain graph freshness, shard a graph schema, or render a preview page.
 
 ## Project-Level Installation
 
@@ -179,7 +187,7 @@ Those repositories are reference inputs. This project rewrites the relevant part
 
 ## Daily Usage
 
-Codex does not auto-register OpenCode-style slash commands. Use the skill name in the request:
+Codex does not provide OpenCode `config.command`-style dynamic slash command registration. This project exposes AE entrypoints as Codex skills: you can invoke names such as `$ae-plan` and `$ae-review` explicitly, or use natural-language requests; in supported Codex App versions, enabled skills may also appear in the `/` command or skill search list. Treat that as skill-backed discoverability, not as OpenCode-style command injection implemented by this repository.
 
 ```text
 Use ae-help to show the current AE capabilities.
@@ -367,11 +375,12 @@ docs/ai-memory/                  # Compatibility pointer after init
 
 ## Important Boundaries
 
-- `/ae-*` names are compatibility labels, not auto-registered Codex slash commands.
-- Reliable trigger style is: `Use ae-work ...`, `Use ae-review ...`, `Use ae-plan ...`.
+- `/ae-*` names are compatibility labels, not Codex commands registered by this repository.
+- Reliable trigger style is: `Use ae-work ...`, `Use ae-review ...`, `Use ae-plan ...`, or selecting an enabled AE skill through `/` / skill search in Codex App versions that surface enabled skills there.
+- Slash-list visibility is Codex skill discoverability and must be verified in the active Codex App; this repository does not claim OpenCode `config.command` parity.
 - This MVP does not provide a real MCP server yet. `.mcp.json` is intentionally empty.
 - Local JSON/YAML OpenAPI parsing works without extra dependencies for common spec structures; complex YAML remains bounded by the lightweight parser.
-- `ae-graph-build` and `ae-graph-query` are shallow read-only scripts, not the full OpenCode graph tool.
+- `ae-graph-build` and `ae-graph-query` are shallow read-only scripts; they do not persist `docs/ae/graphs/graph.json` and are not the full OpenCode graph tool.
 - `ae-merge-branch` is intentionally deferred until `ae-work` has stronger Git evidence and authorization boundaries.
 - Chrome DevTools behavior is routed through existing Browser, Playwright, or available DevTools tools in `ae-test-browser`; this project does not dynamically register OpenCode MCP tools.
 - Git writes, destructive filesystem actions, network fetches, dependency installs, database writes, and browser setup must use Codex's explicit approval model.
@@ -384,6 +393,7 @@ From this repo:
 npm run check
 node --check scripts/ae-tools.mjs
 node --check plugins/ai-agent-engine-codex/scripts/ae-tools.mjs
+node scripts/check-design-contract.mjs
 node scripts/ae-tools.mjs help
 node scripts/ae-tools.mjs ae-graph-build --root scripts
 ```

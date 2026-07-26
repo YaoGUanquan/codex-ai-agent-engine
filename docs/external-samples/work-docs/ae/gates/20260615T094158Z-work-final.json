@@ -1,0 +1,17 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": "docs/00-process/active/class-create-drawer-subject-options/progress.md",
+  "validation_commands": [
+    "mvn -pl axon-common -Dtest=ClassCreateOptionServiceImplTest,ClassCreateServiceImplTest test; mvn -pl axon-chat -am -DskipTests compile; mvn -pl axon-chat -am test (failed: unrelated existing tests)"
+  ],
+  "review_status": "pass",
+  "worktree_decision": "not_applicable",
+  "git_operations": [],
+  "blockers": [],
+  "warnings": [],
+  "notes": null,
+  "generated_at": "2026-06-15T09:41:58.889Z"
+}

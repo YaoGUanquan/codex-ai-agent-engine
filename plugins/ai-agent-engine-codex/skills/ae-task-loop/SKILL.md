@@ -29,7 +29,20 @@ Iterate on an exploratory task until fixed, verified, or clearly blocked.
 5. State the smallest plausible fix hypothesis, then apply only the change needed to test that hypothesis.
 6. Re-run verification and update loop state.
 7. Broaden scope only when the latest evidence invalidates the smaller fix.
-8. Continue until pass, blocked, or iteration limit.
+8. When all success criteria pass after file changes, run the Candidate Success Review Gate before declaring success.
+9. Continue until both completion gates pass, the task is blocked, or the iteration limit is reached.
+
+When a loop changes a local API or UI surface and the user explicitly requests runtime smoke, read [the local runtime smoke gate](../ae-work/references/local-runtime-smoke-gate.md) before treating the loop as complete. A missing gate precondition is an explicit runtime-validation blocker, not a reason to silently omit the smoke.
+
+## Candidate Success Review Gate
+
+Apply this gate only when the loop changed files and objective verification reports that every success criterion passes.
+
+1. Run `ae-review mode:report-only` on the files changed by this loop, using `domain:code` for code or mixed changes and `domain:document` for document-only changes.
+2. Require the success criteria to pass and the review to report no blocking findings. Treat both gates as independent: review cannot imply that verification passed, and passing commands cannot imply that review passed.
+3. If review returns blocking findings inside the original goal, make the smallest supported finding the next fix hypothesis, apply the fix, and re-run objective verification before reviewing another candidate success state.
+4. If review is unavailable or its required scope cannot be inspected, exit as blocked or unverified instead of reporting success.
+5. Findings outside the locked goal remain residual risks and do not expand loop scope unless they invalidate the original goal or make the requested change unsafe.
 
 ## Loop State
 
@@ -39,6 +52,7 @@ Track:
 - success criteria status,
 - validation command and result,
 - changed files,
+- review status and blocking findings for the latest candidate success state,
 - no-progress count,
 - blocker or next fix hypothesis.
 
@@ -48,5 +62,6 @@ For long loops, write progress under `docs/00-process/active/<task>/progress.md`
 
 - Do not change success criteria mid-loop to match the implementation.
 - Do not hide unverifiable criteria; mark them explicitly.
+- Do not use review as a substitute for objective success-criteria verification.
 - Do not remove validation, trust-boundary checks, security controls, or explicit user requirements merely to make the fix smaller.
 - Do not perform Git write operations unless separately requested and authorized.

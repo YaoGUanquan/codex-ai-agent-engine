@@ -1,0 +1,19 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": null,
+  "validation_commands": [
+    "mvn -pl axon-common -Dtest=ExamCompositionPaperPoolDbStoreTest test"
+  ],
+  "review_status": "self_review_pass",
+  "worktree_decision": "existing_dirty_worktree_scoped_edit",
+  "git_operations": [],
+  "blockers": [],
+  "warnings": [
+    "plan path not provided"
+  ],
+  "notes": null,
+  "generated_at": "2026-06-23T07:01:14.351Z"
+}

@@ -1,0 +1,29 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": "docs/ae/plans/2026-06-29-003-external-manifest-to-assignment-grading-plan.md",
+  "archive_path": "docs/00-process/archive/2026-06/external-manifest-to-assignment-grading/",
+  "change": "external create-from-manifest: ROI on sections[].preset, grading_mode=paired_standard, bbox[0] parser, image_info ref size, total_score>0 guard; local smoke passed with jinhua-chinese-v4",
+  "validation_commands": [
+    "mvn -pl axon-common -Dtest=ExamAssignmentGradingServiceImplTest#createTaskFromExternalGenericManifest_mapsExternalManifestAndCreatesTask test",
+    "mvn -pl axon-common -Dtest=ExamAssignmentGradingServiceImplTest#createTaskFromExternalGenericManifest_acceptsSingleRectangleBboxList test",
+    "mvn -pl axon-common -Dtest=ExamAssignmentGradingServiceImplTest#createTaskFromExternalGenericManifest_rejectsZeroTotalScore test",
+    "mvn -pl axon-common -DskipTests compile",
+    "mvn -pl axon-chat -am -DskipTests compile"
+  ],
+  "smoke_evidence": {
+    "input_manifest_id": "jinhua-chinese-v4",
+    "created_manifest_id": "english_g12_20260629154602",
+    "layout_grading_mode": "paired_standard",
+    "layout_roi_ref": "1822x1287",
+    "layout_roi_box": "963/113/753/1091",
+    "layout_shrink": 8,
+    "report": "docs/00-process/archive/2026-06/external-manifest-to-assignment-grading/smoke-report-2026-06-29.md"
+  },
+  "review_status": "self-reviewed",
+  "git_operations": [],
+  "blockers": [],
+  "generated_at": "2026-06-29T22:30:00+08:00"
+}

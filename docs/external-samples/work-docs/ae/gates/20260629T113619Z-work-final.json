@@ -1,0 +1,19 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": null,
+  "validation_commands": [
+    "rg -u docs paper-pool-save-default-type-general; Select-String docs/04-api/2026-06-16-试卷池批改类型字段说明.md 默认保存为"
+  ],
+  "review_status": "pass",
+  "worktree_decision": "current-branch",
+  "git_operations": [],
+  "blockers": [],
+  "warnings": [
+    "plan path not provided"
+  ],
+  "notes": null,
+  "generated_at": "2026-06-29T11:36:19.659Z"
+}

@@ -1,6 +1,6 @@
 {
   "name": "ai-agent-engine-codex",
-  "version": "0.3.0",
+  "version": "0.3.2",
   "description": "Codex-native AE engineering workflow skills for requirements, planning, governance, tasks, implementation, review, validation, and handoff.",
   "author": {
     "name": "AI Agent Engine for Codex maintainers",
@@ -23,7 +23,7 @@
   "interface": {
     "displayName": "AI Agent Engine for Codex",
     "shortDescription": "AE engineering workflow entrypoints for Codex",
-    "longDescription": "AI Agent Engine for Codex adapts AE-style engineering workflows into project-local Codex skills and helper scripts. It references AI Agent Engine, OpenAI plugins, Superpowers, everything-claude-code, and GitHub Spec Kit as workflow inputs, while keeping a Codex-native runtime boundary. Capabilities include project init, ideation, requirement clarification, PRD, governance constitution, full workflow orchestration, planning, task breakdown, work execution, review, frontend and backend work, debugging, TDD, browser validation, SQL, Swagger/OpenAPI summaries, handoff, prompt optimization, experience capture, skill and agent creation, language switching, and plugin updates.",
+    "longDescription": "AI Agent Engine for Codex adapts AE-style engineering workflows into project-local Codex skills and helper scripts. It references AI Agent Engine, OpenAI plugins, Superpowers, everything-claude-code, and GitHub Spec Kit as workflow inputs, while keeping a Codex-native runtime boundary. Capabilities include project init, ideation, requirement clarification, PRD, design contracts, governance constitution, full workflow orchestration, planning, task breakdown, work execution, review, frontend/web routing, frontend and backend work, debugging, TDD, browser validation, SQL, Swagger/OpenAPI summaries, handoff, prompt optimization, experience capture, skill and agent creation, language switching, and plugin updates.",
     "developerName": "AI Agent Engine for Codex maintainers",
     "category": "Coding",
     "capabilities": [

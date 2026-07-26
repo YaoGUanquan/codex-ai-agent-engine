@@ -1,0 +1,17 @@
+{
+  "workflow": "work",
+  "checkpoint": "final",
+  "status": "pass",
+  "worktree": "D:\\codes\\work",
+  "plan_path": "docs/00-process/active/generic-grading-third-party-wrapper/2026-06-16-generic-grading-third-party-wrapper-plan.md",
+  "validation_commands": [
+    "RED: mvn -pl axon-common -Dtest=ExamGenericGradingServiceImplTest#generateExamJson_forcesAsyncAndReturnsOmrJobQueryPath+getOmrTaskStatus_forwardsToGenericGradingTaskDetailEndpoint test failed at testCompile due missing getJobId/getOmrStatus/getAsyncTaskQueryPath/getOmrTaskStatus; GREEN/common: same command passed Tests run: 2; Controller narrow: mvn -pl axon-chat -am -Dtest=ExamGenericGradingControllerTest#getOmrTaskStatus_routesAsyncOmrJobQuery -Dsurefire.failIfNoSpecifiedTests=false test passed Tests run: 1; Common broad: mvn -pl axon-common -Dtest=ExamGenericGradingServiceImplTest,ExamGenericGradingApiEnumTest,ExamGenericGradingUploadTypeEnumTest,OssUploadStsServiceImplTest,ExamThirdPartyGatewayServiceImplTest test passed Tests run: 19; Controller broad: mvn -pl axon-chat -am -Dtest=ExamGenericGradingControllerTest -Dsurefire.failIfNoSpecifiedTests=false test passed Tests run: 4; Compile: mvn -pl axon-common,axon-chat -am -DskipTests compile passed; git diff --check exit 0 with LF/CRLF warnings only"
+  ],
+  "review_status": "not_run",
+  "worktree_decision": "existing-dirty-worktree",
+  "git_operations": [],
+  "blockers": [],
+  "warnings": [],
+  "notes": null,
+  "generated_at": "2026-06-17T06:10:59.456Z"
+}

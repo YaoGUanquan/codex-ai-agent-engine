@@ -1,6 +1,6 @@
 # AI Agent Engine for Codex
 
-AI Agent Engine for Codex 是一个面向 Codex 的项目级工程工作流插件。它把 AE 风格的需求澄清、计划、执行、审查、验证、Swagger/OpenAPI 摘要、交接和经验沉淀能力放到当前项目里，通过 Codex skills 和本地脚本运行。
+AI Agent Engine for Codex 是一个面向 Codex 的项目级工程工作流插件。它把 AE 风格的需求澄清、设计契约、计划、执行、审查、验证、前端/Web 路由、Swagger/OpenAPI 摘要、交接和经验沉淀能力放到当前项目里，通过 Codex skills 和本地脚本运行。
 
 > 参考项目：https://gitee.com/jiangqiang1996/ai-agent-engine<br>
 > 本项目参考了上面这个 Gitee AI Agent Engine 项目的工作流设计和能力模型。<br>
@@ -63,7 +63,8 @@ node scripts/ae-tools.mjs help
 - `ae-help`：查看当前 AE 能力和边界。
 - `ae-init`：初始化项目文档、归档规则、UTF-8 规则和长期 AI 记忆库。
 - `ae-ideate`：生成方案方向、取舍、风险和下一步问题。
-- `ae-brainstorm`：澄清需求并沉淀验收标准。
+- `ae-brainstorm`：通过多视角碰撞澄清需求并沉淀验收标准。
+- `ae-design`：在 PRD 和计划之间沉淀架构、接口、数据、UI/UX、测试与非功能设计契约。
 - `ae-lfg`：从需求到已验证交付的完整流程。
 - `ae-plan`：创建实现计划，不修改业务代码。
 - `ae-constitution`：创建或更新可被计划和审查检查的项目治理原则。
@@ -73,8 +74,9 @@ node scripts/ae-tools.mjs help
 - `ae-review`：按严重度优先审查代码或文档。
 - `ae-doc-humanize`：把结构化或生硬内容改写成更易读的文档。
 - `ae-doc-structure`：把散乱内容整理成需求、计划、交接或检查清单。
-- `ae-frontend-design`：交付可用的前端初版。
-- `ae-web-app`：基于现有仓库技术栈实现 Web 前端或轻量全栈流程。
+- `ae-frontend-design`：前端设计与界面实现。
+- `ae-web-forge`：统一前端/Web 路由入口，选择现有 AE skill 并以浏览器验收收尾。
+- `ae-web-app`：实现由 `ae-web-forge` 路由后的 Web 应用、交互、API 和轻量全栈流程。
 - `ae-backend`：基于仓库契约实现接口、服务、数据和权限逻辑。
 - `ae-debug`：系统化排查构建失败、运行时异常、UI 问题和接口故障。
 - `ae-tdd`：围绕明确行为执行红绿重构式测试驱动开发。
@@ -99,6 +101,12 @@ node scripts/ae-tools.mjs help
 node scripts/ae-tools.mjs help
 ```
 
+设计契约校验：
+
+```bash
+node scripts/check-design-contract.mjs
+```
+
 浅层依赖图辅助命令：
 
 ```bash
@@ -106,7 +114,7 @@ node scripts/ae-tools.mjs ae-graph-build --root scripts
 node scripts/ae-tools.mjs ae-graph-query --root scripts --path ae-tools.mjs
 ```
 
-`ae-graph-build` 和 `ae-graph-query` 是只读浅层依赖图脚本，用于快速预览源码文件、静态导入边和外部依赖。它们不会写入 `.ae/graph.db`，也不提供完整图谱 schema、分片、freshness 或预览页。
+`ae-graph-build` 和 `ae-graph-query` 是只读浅层依赖图脚本，用于快速预览源码文件、静态导入边和外部依赖。它们不会写入 `docs/ae/graphs/graph.json` 或 `.ae/graph.db`，也不提供完整图谱 schema、分片、freshness 或预览页。
 
 ## 项目级安装
 
@@ -177,7 +185,7 @@ node scripts/ae-tools.mjs init
 
 ## 日常使用
 
-Codex 不会自动注册 OpenCode 风格的 slash command。更可靠的方式是在请求中直接写 skill 名称：
+Codex 不提供 OpenCode `config.command` 风格的动态 slash command 注册。当前项目通过 Codex skills 暴露 AE 入口：可以显式写 `$ae-plan`、`$ae-review` 这类 skill 名称，也可以用自然语言触发；在支持的 Codex App 版本中，已启用的 skills 也可能出现在 `/` 命令或 skill 搜索列表中。不要把这种 skill-backed discoverability 理解为本仓库实现了 OpenCode 式命令注入。
 
 ```text
 使用 ae-help 查看当前 AE 能力。
@@ -185,6 +193,23 @@ Codex 不会自动注册 OpenCode 风格的 slash command。更可靠的方式�
 使用 ae-plan 为“带权限校验的文件上传功能”创建实现计划。
 使用 ae-work 执行 docs/ae/plans/2026-05-11-001-file-upload-plan.md。
 使用 ae-review mode:report-only 审查当前变更。
+```
+
+多视角碰撞示例：
+
+```text
+使用 ae-brainstorm，对下面这段观点运行 Perspective Collision Pass，不要急着给结论。
+
+请输出：
+1. 批评者、务实者、创新者、系统视角的 perspective matrix
+2. 事实分歧、价值分歧、假设分歧
+3. 最有价值的 collision insights
+4. blind spots
+5. thinking preservation zone
+6. 1-2 个 deepening directions
+
+观点：
+AI 编程让缺陷静默问题倒逼“验证工程”成为新学科；短期链路压缩和长期总量爆发之间存在投资取舍；“停止思考”和“消灭编程快感”是同一现象的不同价值判断，需要主动设计思考保留区。
 ```
 
 解析 OpenAPI：
@@ -364,11 +389,12 @@ docs/ai-memory/                  # init 后的兼容说明入口
 
 ## 重要边界
 
-- `/ae-*` 是兼容标签，不是自动注册的 Codex slash command。
-- 可靠触发方式是直接说：`使用 ae-work ...`、`使用 ae-review ...`、`使用 ae-plan ...`。
+- `/ae-*` 是兼容标签，不是本仓库注册出的 Codex 命令。
+- 可靠触发方式是直接说：`使用 ae-work ...`、`使用 ae-review ...`、`使用 ae-plan ...`，或在支持的 Codex App 版本中通过 `/` / skill 搜索选择已启用的 AE skill。
+- slash 列表可见性属于 Codex skill discoverability，需要在当前 Codex App 中手工验证；本仓库不声明 OpenCode `config.command` 等价能力。
 - 当前 MVP 还没有真实 MCP server，`.mcp.json` 有意保持为空。
 - 本地 JSON/YAML OpenAPI 可在常见结构下无额外依赖解析；复杂 YAML 仍受轻量 parser 边界限制。
-- `ae-graph-build` 和 `ae-graph-query` 是浅层只读脚本，不是完整 OpenCode 图谱工具。
+- `ae-graph-build` 和 `ae-graph-query` 是浅层只读脚本，不会持久化 `docs/ae/graphs/graph.json`，也不是完整 OpenCode 图谱工具。
 - `ae-merge-branch` 暂缓，等待 `ae-work` 的 Git 证据链、回滚说明和授权边界增强。
 - `ae-chrome-devtools` 不照搬动态 MCP 注册；浏览器验证通过 `ae-test-browser` 路由到 Codex Browser、Playwright 或当前会话已可用的 DevTools 工具。
 - Git 写操作、破坏性文件操作、网络请求、依赖安装、数据库写入、浏览器环境 setup 都必须遵循 Codex 显式授权机制。
@@ -381,6 +407,7 @@ docs/ai-memory/                  # init 后的兼容说明入口
 npm run check
 node --check scripts/ae-tools.mjs
 node --check plugins/ai-agent-engine-codex/scripts/ae-tools.mjs
+node scripts/check-design-contract.mjs
 node scripts/ae-tools.mjs help
 node scripts/ae-tools.mjs ae-graph-build --root scripts
 ```
