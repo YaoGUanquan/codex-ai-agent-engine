@@ -1790,6 +1790,9 @@ test('review-package writes commit list stat summary and diff into an evidence a
     assert.equal(result.inventory.changedFileCount, 1)
     assert.deepEqual(result.inventory.files.map((file) => file.path), ['sample.txt'])
     assert.equal(result.inventory.files[0].role, 'document')
+    assert.equal(result.inventory.files[0].additions, 1)
+    assert.equal(result.inventory.files[0].deletions, 0)
+    assert.equal(result.inventory.files[0].binary, false)
     assert.equal(result.impact.status, 'advisory')
     assert.equal(result.impact.fileLimit, 1)
     assert.equal(result.impact.sourceFilesScanned, 1)
@@ -1839,6 +1842,42 @@ test('review-package retains renamed file identity in its review inventory', () 
     assert.equal(result.inventory.files[0].path, 'new-name.js')
     assert.equal(result.inventory.files[0].previousPath, 'old-name.js')
     assert.match(result.inventory.files[0].status, /^R/)
+    assert.equal(result.inventory.files[0].additions, 0)
+    assert.equal(result.inventory.files[0].deletions, 0)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('review-package marks binary files without invented line counts', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-review-package-binary-'))
+  try {
+    runGit(['init'], tempRoot)
+    runGit(['config', 'user.name', 'Codex Test'], tempRoot)
+    runGit(['config', 'user.email', 'codex@example.com'], tempRoot)
+
+    writeFileSync(join(tempRoot, 'README.md'), '# fixture\n', 'utf8')
+    runGit(['add', 'README.md'], tempRoot)
+    runGit(['commit', '-m', 'initial'], tempRoot)
+    writeFileSync(join(tempRoot, 'sample.bin'), Buffer.from([0, 1, 2, 3]))
+    runGit(['add', 'sample.bin'], tempRoot)
+    runGit(['commit', '-m', 'add binary sample'], tempRoot)
+    const head = runGit(['rev-parse', 'HEAD'], tempRoot).stdout.trim()
+    const base = runGit(['rev-parse', 'HEAD^'], tempRoot).stdout.trim()
+
+    const result = runNodeScriptJson([
+      'scripts/ae-tools.mjs',
+      'review-package',
+      '--base',
+      base,
+      '--head',
+      head,
+    ], tempRoot)
+
+    assert.equal(result.inventory.files[0].path, 'sample.bin')
+    assert.equal(result.inventory.files[0].binary, true)
+    assert.equal(result.inventory.files[0].additions, null)
+    assert.equal(result.inventory.files[0].deletions, null)
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }
