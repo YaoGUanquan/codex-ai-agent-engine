@@ -33,6 +33,12 @@
 - 已完成的过程记录归档到 `docs/00-process/archive/YYYY-MM/<task-name>` 或 `docs/99-archive/YYYY-MM/<topic>`。
 - 长期 AI 记忆记录在 `docs/08-ai-memory`。
 
+## 插件分发版本
+
+- 每次可分发的 AE 插件更新都必须同步递增根 `package.json` 与 `plugins/ai-agent-engine-codex/.codex-plugin/plugin.json` 的 SemVer `version`。
+- 两处版本必须完全一致；更新脚本复制完整插件目录，因此目标项目更新后以插件 manifest 的版本作为已安装版本。
+- 只调整文档而不改变可分发插件内容时，不单独升级插件版本；版本升级必须由回归测试和安装烟测验证。
+
 ## 中文与编码规则
 
 - 文档、JSON、YAML、SQL、脚本和生成文本统一使用 UTF-8，优先 UTF-8 无 BOM。

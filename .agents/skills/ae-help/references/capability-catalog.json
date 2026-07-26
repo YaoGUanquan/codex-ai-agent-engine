@@ -2,8 +2,8 @@
   "source": {
     "name": "AI Agent Engine",
     "url": "https://gitee.com/jiangqiang1996/ai-agent-engine",
-    "observedCommit": "00d7e9ca7594945ac26a46fffc43ccd679cd461b",
-    "license": "GPL-2.0-only"
+    "observedCommit": "76d832c96a1c810410982bf28b425a3aedb461ab",
+    "license": "GPL-3.0-or-later"
   },
   "codexPort": {
     "name": "ai-agent-engine-codex",

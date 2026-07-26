@@ -24,6 +24,8 @@ Investigate a failure systematically before changing code.
 6. Add a regression test or equivalent validation when practical.
 7. Report the observed failure, root-cause evidence, fix, validation, and any remaining unknowns.
 
+When the user explicitly requests a local runtime smoke for a changed API or UI surface, read [the local runtime smoke gate](../ae-work/references/local-runtime-smoke-gate.md). Use it after the failing path is understood; do not treat an authentication or transport failure as proof of the business behavior.
+
 ## Rules
 
 - Do not claim a root cause without evidence from code, logs, commands, or browser behavior.
