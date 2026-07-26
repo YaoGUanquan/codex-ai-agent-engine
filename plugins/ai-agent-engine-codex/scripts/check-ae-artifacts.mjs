@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { isAbsolute, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -171,11 +171,11 @@ function parseScalar(value) {
 
 function walk(root) {
   const files = []
-  for (const entry of readdirSync(root)) {
-    const full = resolve(root, entry)
-    const stat = statSync(full)
-    if (stat.isDirectory()) files.push(...walk(full))
-    else if (stat.isFile()) files.push(full)
+  for (const entry of readdirSync(root, { withFileTypes: true })) {
+    if (entry.isSymbolicLink()) continue
+    const full = resolve(root, entry.name)
+    if (entry.isDirectory()) files.push(...walk(full))
+    else if (entry.isFile()) files.push(full)
   }
   return files
 }

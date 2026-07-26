@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
+import { existsSync, lstatSync, readFileSync, readdirSync, realpathSync } from 'node:fs'
 import { dirname, isAbsolute, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -138,8 +138,24 @@ function validateSplitManifest(path, designFile, sectionBody) {
       errors.push({ path, field: 'splitManifest', message: `Split Manifest file must be Markdown: ${entry}` })
       continue
     }
-    if (!existsSync(candidate) || !statSync(candidate).isFile()) {
+    if (!existsSync(candidate)) {
       errors.push({ path, field: 'splitManifest', message: `Split Manifest file does not exist: ${entry}` })
+      continue
+    }
+    const candidateStat = lstatSync(candidate)
+    if (candidateStat.isSymbolicLink()) {
+      errors.push({ path, field: 'splitManifest', message: `Split Manifest file must not be a symbolic link: ${entry}` })
+      continue
+    }
+    if (!candidateStat.isFile()) {
+      errors.push({ path, field: 'splitManifest', message: `Split Manifest file must be a regular file: ${entry}` })
+      continue
+    }
+    const realDesignDir = realpathSync(designDir)
+    const realCandidate = realpathSync(candidate)
+    const realRelative = relative(realDesignDir, realCandidate)
+    if (realRelative === '..' || realRelative.startsWith(`..${sep}`) || isAbsolute(realRelative)) {
+      errors.push({ path, field: 'splitManifest', message: `Split Manifest file must stay inside the real design directory: ${entry}` })
       continue
     }
     validFiles.push(candidate)
@@ -303,11 +319,11 @@ function unquote(value) {
 
 function walk(root) {
   const files = []
-  for (const entry of readdirSync(root)) {
-    const full = resolve(root, entry)
-    const stat = statSync(full)
-    if (stat.isDirectory()) files.push(...walk(full))
-    else if (stat.isFile()) files.push(toPosix(full))
+  for (const entry of readdirSync(root, { withFileTypes: true })) {
+    if (entry.isSymbolicLink()) continue
+    const full = resolve(root, entry.name)
+    if (entry.isDirectory()) files.push(...walk(full))
+    else if (entry.isFile()) files.push(toPosix(full))
   }
   return files
 }

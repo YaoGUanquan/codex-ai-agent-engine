@@ -2,8 +2,8 @@
 
 Date: 2026-05-11
 Source: https://gitee.com/jiangqiang1996/ai-agent-engine
-Observed source commit: 00d7e9ca7594945ac26a46fffc43ccd679cd461b
-Observed source ref: remote master verified by upstream audit on 2026-07-13.
+Observed source commit: 76d832c96a1c810410982bf28b425a3aedb461ab
+Observed source ref: remote master inspected through the Gitee API on 2026-07-22.
 
 ## Conclusion
 
@@ -165,6 +165,13 @@ Deferred intentionally:
 - The capability catalog now assigns every skill one presentation tier (`core`, `docs`, `tools`, or `meta`) so help output is grouped without changing skill routing or permissions.
 - Codex-native adaptations in this pass strengthen design-contract semantic validation and the `ae-task-loop` completion contract.
 - OpenCode sessions, hooks, dynamic MCP registration, async bash, media fallback, graph telemetry, and designer-agent runtime remain explicitly unsupported.
+
+## 2026-07-22 Safety And Test Contract Refresh
+
+- The upstream `master` commit `76d832c96a1c810410982bf28b425a3aedb461ab` was inspected through the Gitee API after Git TLS negotiation proved intermittent in this environment.
+- Upstream `package.json` now declares `GPL-3.0-or-later` and its `LICENSE` is GPLv3; the local capability catalog records that source fact without changing this repository's own licensing or adding an upstream dependency.
+- This Codex port adopts the portable symbolic-link boundary: recursive artifact and design validation skip links, and Split Manifest entries must remain within the real design directory.
+- `ae-design` now uses a risk-scaled test coverage matrix: it selects equivalence classes, boundary values, decision tables, state transitions, and error guessing only when the design structure warrants them. It intentionally does not import upstream fixed scenario counts, OpenCode agents, command runtime, or automatic coverage measurement.
 
 ## 2026-07-07 Installed Command Wrapper Follow-Up
 

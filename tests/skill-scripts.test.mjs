@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
@@ -89,6 +89,20 @@ test('check-skill-mirror rejects an excluded OpenCode skill in the mirror', () =
     assert.deepEqual(detail.excludedInMirror, ['ae-computer-use-guard/SKILL.md'])
   } finally {
     rmSync(skillDir, { recursive: true, force: true })
+  }
+})
+
+test('runtime and plugin packages expose valid distribution versions', () => {
+  const packageJson = JSON.parse(readFileSync(resolve(repoRoot, 'package.json'), 'utf8'))
+  const pluginManifest = JSON.parse(readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/.codex-plugin/plugin.json'), 'utf8'))
+
+  assert.match(packageJson.version, /^\d+\.\d+\.\d+$/)
+  assert.match(pluginManifest.version, /^\d+\.\d+\.\d+$/)
+  if (packageJson.name === 'ai-agent-engine-opencode') {
+    assert.equal(packageJson.private, true)
+    assert.equal(packageJson.license, 'GPL-3.0-or-later')
+  } else {
+    assert.equal(pluginManifest.version, packageJson.version)
   }
 })
 
@@ -188,6 +202,45 @@ test('task loop dual completion gate requires verification and non-blocking revi
   }
   assert.doesNotMatch(source, /mode=autofix/i)
   assert.doesNotMatch(source, /OpenCode/i)
+})
+
+test('local runtime smoke gate is shared by execution skills without secret transport claims', () => {
+  const referencePaths = [
+    'plugins/ai-agent-engine-codex/skills/ae-work/references/local-runtime-smoke-gate.md',
+    '.agents/skills/ae-work/references/local-runtime-smoke-gate.md',
+  ]
+  const sourceReference = readFileSync(resolve(repoRoot, referencePaths[0]), 'utf8')
+  const mirrorReference = readFileSync(resolve(repoRoot, referencePaths[1]), 'utf8')
+
+  assert.equal(mirrorReference, sourceReference, 'local runtime smoke gate mirror should match plugin source')
+  for (const expectation of [
+    /start, execute, automatically run, smoke test, bubble test, or locally integrate/i,
+    /restart or hot-reload rule/i,
+    /read-only or state-changing/i,
+    /user-controlled local secret reference/i,
+    /proactively create a token-free request template/i,
+    /verified ignored project path or in the operating system temporary directory/i,
+    /report its absolute path and wait for the user to populate it locally and confirm readiness/i,
+    /must not open, read, write, print, or validate the populated reference/i,
+    /pass its absolute path to a client option that consumes the reference without echoing its contents/i,
+    /must not be copied into command text, patches, logs, agent-written files, or tool stdin/i,
+    /Do not repeatedly ask for a prerequisite that the user already confirmed/i,
+    /run the bounded request once by referencing the populated secret path or environment variable/i,
+    /4xx, 5xx, transport failure, or business error/i,
+    /Archive only this sanitized execution evidence/i,
+    /never archive, commit, relocate, or expose a secret reference/i,
+    /not a secret manager/i,
+  ]) {
+    assert.match(sourceReference, expectation, `local runtime smoke gate should include ${expectation}`)
+  }
+  assert.doesNotMatch(sourceReference, /Read-Host|write_stdin/i)
+
+  for (const skillName of ['ae-work', 'ae-tdd', 'ae-debug', 'ae-task-loop']) {
+    const source = readSkillBody('plugins/ai-agent-engine-codex/skills', skillName)
+    const mirror = readSkillBody('.agents/skills', skillName)
+    assert.equal(mirror, source, `${skillName} mirror should match plugin source`)
+    assert.match(source, /local runtime smoke gate/i, `${skillName} should route explicit runtime smoke to the shared gate`)
+  }
 })
 
 test('OCR-inspired review guidance is present in source and mirror skills', () => {
@@ -471,7 +524,7 @@ test('PRD and plan artifact contracts are present in source and mirror skills', 
 })
 
 test('upstream PRD reference sync keeps required references and source freshness current', () => {
-  const expectedUpstreamCommit = '00d7e9ca7594945ac26a46fffc43ccd679cd461b'
+  const expectedUpstreamCommit = '76d832c96a1c810410982bf28b425a3aedb461ab'
   const referencePaths = [
     'plugins/ai-agent-engine-codex/skills/ae-prd/references/requirements-capture.md',
     '.agents/skills/ae-prd/references/requirements-capture.md',
@@ -840,7 +893,8 @@ test('tiered capability help groups every skill and preserves filtered output', 
   }
 
   assert.deepEqual(mirror, source, 'capability catalog mirror should match plugin source')
-  assert.equal(source.source.observedCommit, '00d7e9ca7594945ac26a46fffc43ccd679cd461b')
+  assert.equal(source.source.observedCommit, '76d832c96a1c810410982bf28b425a3aedb461ab')
+  assert.equal(source.source.license, 'GPL-3.0-or-later')
   assert.equal(source.skills.length, Object.values(expectedByTier).flat().length)
   for (const [tier, names] of Object.entries(expectedByTier)) {
     assert.deepEqual(source.skills.filter((skill) => skill.tier === tier).map((skill) => skill.name), names)
@@ -863,15 +917,22 @@ test('tiered capability help groups every skill and preserves filtered output', 
   assert.doesNotMatch(filteredOutput, /### 维护与配置 \(meta\)/)
 })
 
-test('installed language switching updates active skills for all supported modes', () => {
+test('installation smoke validates the active distribution', () => {
   const result = runNodeScript('scripts/check-install-smoke.mjs')
   assert.equal(result.status, 'ok')
+  const packageJson = JSON.parse(readFileSync(resolve(repoRoot, 'package.json'), 'utf8'))
+  if (packageJson.name === 'ai-agent-engine-opencode') {
+    assert.ok(result.verified.includes('project-local-build'))
+    assert.ok(result.verified.includes('activation-rollback'))
+    return
+  }
   assert.deepEqual(result.verifiedLanguageModes, ['bilingual', 'en', 'zh-CN'])
   assert.equal(result.verifiedDefaultProfile, 'beginner+low_resource_2g4core_relay')
   assert.equal(result.verifiedHookPolicy, 'computer_use_requires_hooks')
   assert.equal(result.verifiedLocalToolPolicy, 'video_requires_ffmpeg_ffprobe_checks')
   assert.equal(result.verifiedMultiAgentPolicy, 'multi_agent_auto_analysis_by_default')
   assert.equal(result.verifiedSkillGovernancePolicy, 'source_mirror_metadata_and_path_safety')
+  assert.equal(result.verifiedPluginVersion, packageJson.version)
 })
 
 test('package check script omits OfficeCLI checks', () => {
@@ -882,8 +943,10 @@ test('package check script omits OfficeCLI checks', () => {
   assert.match(checkScript, /node scripts\/check-ae-artifacts\.mjs/)
   assert.match(checkScript, /node scripts\/check-design-contract\.mjs/)
   assert.match(checkScript, /node scripts\/check-skill-contract\.mjs/)
-  assert.match(checkScript, /node scripts\/ae-tools\.mjs ae-graph-build --root scripts/)
-  assert.match(checkScript, /node scripts\/ae-tools\.mjs ae-graph-query --root scripts --path ae-tools\.mjs/)
+  if (packageJson.name !== 'ai-agent-engine-opencode') {
+    assert.match(checkScript, /node scripts\/ae-tools\.mjs ae-graph-build --root scripts/)
+    assert.match(checkScript, /node scripts\/ae-tools\.mjs ae-graph-query --root scripts --path ae-tools\.mjs/)
+  }
 })
 
 test('renderYaml supports PRD, work report, and task loop metadata', () => {
@@ -1429,6 +1492,82 @@ test('design contract semantic validation requires root manifest and owning decl
   }
 })
 
+test('symbolic links are excluded from artifact discovery and design manifests', () => {
+  const artifactRoot = mkdtempSync(join(tmpdir(), 'ae-artifact-link-'))
+  const designRoot = mkdtempSync(join(tmpdir(), 'ae-design-link-'))
+  const artifactOutside = mkdtempSync(join(tmpdir(), 'ae-artifact-outside-'))
+  const designOutside = mkdtempSync(join(tmpdir(), 'ae-design-outside-'))
+  const linkType = process.platform === 'win32' ? 'junction' : 'dir'
+  try {
+    writeAeArtifact(artifactOutside, 'escaped.md', [
+      '---',
+      'type: experience',
+      'date: 2026-07-22',
+      '---',
+      '# Outside artifact',
+      '',
+    ])
+    mkdirSync(join(artifactRoot, 'docs', 'ae'), { recursive: true })
+    symlinkSync(artifactOutside, join(artifactRoot, 'docs', 'ae', 'linked'), linkType)
+    const artifactResult = runAeArtifactCheck(artifactRoot)
+    assert.equal(artifactResult.status, 0, artifactResult.stderr)
+    assert.equal(JSON.parse(artifactResult.stdout).checked, 0, 'linked artifacts must not be scanned')
+
+    const linkedDesignLines = validDesignContractLines().flatMap((line) => line === '  - design.md' ? [line, '  - docs/ae/designs/sample-2026-07-07/linked/api.md'] : [line])
+    writeAeArtifact(designRoot, 'docs/ae/designs/sample-2026-07-07/design.md', linkedDesignLines)
+    writeAeArtifact(designOutside, 'api.md', ['# API shard', '', '### EP-001 - External declaration', ''])
+    symlinkSync(designOutside, join(designRoot, 'docs', 'ae', 'designs', 'sample-2026-07-07', 'linked'), linkType)
+    const designResult = runDesignContractCheck(designRoot)
+    assert.notEqual(designResult.status, 0, 'linked manifest shards must be rejected')
+    const designOutput = JSON.parse(designResult.stderr)
+    assert.ok(designOutput.errors.some((error) => error.field === 'splitManifest' && /symbolic link|real design directory/i.test(error.message)))
+
+    if (process.platform !== 'win32') {
+      const directLinkDesignLines = validDesignContractLines().flatMap((line) => line === '  - design.md' ? [line, '  - api-link.md'] : [line])
+      writeAeArtifact(designRoot, 'docs/ae/designs/direct-link-2026-07-22/design.md', directLinkDesignLines)
+      symlinkSync(join(designOutside, 'api.md'), join(designRoot, 'docs', 'ae', 'designs', 'direct-link-2026-07-22', 'api-link.md'), 'file')
+      const directLinkResult = runDesignContractCheck(designRoot)
+      assert.notEqual(directLinkResult.status, 0, 'direct manifest file links must be rejected')
+      const directLinkOutput = JSON.parse(directLinkResult.stderr)
+      assert.ok(directLinkOutput.errors.some((error) => error.field === 'splitManifest' && /must not be a symbolic link/i.test(error.message)))
+    }
+  } finally {
+    for (const root of [artifactRoot, designRoot, artifactOutside, designOutside]) {
+      rmSync(root, { recursive: true, force: true })
+    }
+  }
+})
+
+test('risk-scaled test design guidance is present in source and mirror skills', () => {
+  const source = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-design')
+  const mirror = readSkillBody('.agents/skills', 'ae-design')
+  const templateSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-design/references/design-contract-template.md'), 'utf8')
+  const templateMirror = readFileSync(resolve(repoRoot, '.agents/skills/ae-design/references/design-contract-template.md'), 'utf8')
+
+  assert.equal(mirror, source, 'ae-design mirror should match plugin source')
+  assert.equal(templateMirror, templateSource, 'ae-design template mirror should match plugin source')
+  for (const expectation of [
+    /Risk-Scaled Test Design/,
+    /equivalence classes/i,
+    /boundary values/i,
+    /decision tables/i,
+    /state transitions/i,
+    /error guessing/i,
+    /only when its triggering structure exists/i,
+    /do not require fixed scenario counts/i,
+  ]) {
+    assert.match(source, expectation, `ae-design should include ${expectation}`)
+  }
+  for (const expectation of [
+    /Test Coverage Matrix/,
+    /Design method/,
+    /Automatable verification signal/,
+    /N\/A when the related dimension is explicitly omitted/,
+  ]) {
+    assert.match(templateSource, expectation, `design template should include ${expectation}`)
+  }
+})
+
 test('graph-build reports shallow local dependencies', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-graph-'))
   try {
@@ -1674,11 +1813,21 @@ test('review-package writes commit list stat summary and diff into an evidence a
       base,
       '--head',
       head,
+      '--with-impact',
+      '--impact-file-limit',
+      '0',
     ], tempRoot)
 
     assert.equal(result.status, 'ok')
     assert.equal(result.base, base)
     assert.equal(result.head, head)
+    assert.equal(result.inventory.changedFileCount, 1)
+    assert.deepEqual(result.inventory.files.map((file) => file.path), ['sample.txt'])
+    assert.equal(result.inventory.files[0].role, 'document')
+    assert.equal(result.impact.status, 'advisory')
+    assert.equal(result.impact.fileLimit, 1)
+    assert.equal(result.impact.sourceFilesScanned, 1)
+    assert.deepEqual(result.impact.seedFiles, ['sample.txt'])
     assert.match(result.artifact.path, /^docs\/ae\/evidence\/artifacts\/review-package\//)
     const artifactBody = readFileSync(join(tempRoot, result.artifact.path), 'utf8')
     assert.match(artifactBody, new RegExp(`# Review package: ${base}\\.\\.${head}`))
@@ -1686,8 +1835,44 @@ test('review-package writes commit list stat summary and diff into an evidence a
     assert.match(artifactBody, /update sample/)
     assert.match(artifactBody, /## Files changed/)
     assert.match(artifactBody, /sample\.txt/)
+    assert.match(artifactBody, /## Review inventory/)
+    assert.match(artifactBody, /## Impact context/)
     assert.match(artifactBody, /## Diff/)
     assert.match(artifactBody, /\+two/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('review-package retains renamed file identity in its review inventory', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-review-package-rename-'))
+  try {
+    runGit(['init'], tempRoot)
+    runGit(['config', 'user.name', 'Codex Test'], tempRoot)
+    runGit(['config', 'user.email', 'codex@example.com'], tempRoot)
+
+    writeFileSync(join(tempRoot, 'old-name.js'), 'export const value = 1\n', 'utf8')
+    runGit(['add', 'old-name.js'], tempRoot)
+    runGit(['commit', '-m', 'initial'], tempRoot)
+    const base = runGit(['rev-parse', 'HEAD'], tempRoot).stdout.trim()
+
+    runGit(['mv', 'old-name.js', 'new-name.js'], tempRoot)
+    runGit(['commit', '-m', 'rename sample'], tempRoot)
+    const head = runGit(['rev-parse', 'HEAD'], tempRoot).stdout.trim()
+
+    const result = runNodeScriptJson([
+      'scripts/ae-tools.mjs',
+      'review-package',
+      '--base',
+      base,
+      '--head',
+      head,
+    ], tempRoot)
+
+    assert.equal(result.inventory.changedFileCount, 1)
+    assert.equal(result.inventory.files[0].path, 'new-name.js')
+    assert.equal(result.inventory.files[0].previousPath, 'old-name.js')
+    assert.match(result.inventory.files[0].status, /^R/)
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }
