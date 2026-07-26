@@ -1118,10 +1118,14 @@ function parseGitNumStat(output) {
   const fields = output.split('\0')
   const stats = new Map()
   for (let index = 0; index < fields.length;) {
-    const additionsRaw = fields[index++]
-    if (!additionsRaw) continue
-    const deletionsRaw = fields[index++]
-    let path = fields[index++]
+    const record = fields[index++]
+    if (!record) continue
+    const firstTab = record.indexOf('\t')
+    const secondTab = record.indexOf('\t', firstTab + 1)
+    if (firstTab < 0 || secondTab < 0) continue
+    const additionsRaw = record.slice(0, firstTab)
+    const deletionsRaw = record.slice(firstTab + 1, secondTab)
+    let path = record.slice(secondTab + 1)
     if (path === '') {
       index += 1
       path = fields[index++]
