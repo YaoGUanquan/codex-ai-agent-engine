@@ -1779,11 +1779,21 @@ test('review-package writes commit list stat summary and diff into an evidence a
       base,
       '--head',
       head,
+      '--with-impact',
+      '--impact-file-limit',
+      '0',
     ], tempRoot)
 
     assert.equal(result.status, 'ok')
     assert.equal(result.base, base)
     assert.equal(result.head, head)
+    assert.equal(result.inventory.changedFileCount, 1)
+    assert.deepEqual(result.inventory.files.map((file) => file.path), ['sample.txt'])
+    assert.equal(result.inventory.files[0].role, 'document')
+    assert.equal(result.impact.status, 'advisory')
+    assert.equal(result.impact.fileLimit, 1)
+    assert.equal(result.impact.sourceFilesScanned, 1)
+    assert.deepEqual(result.impact.seedFiles, ['sample.txt'])
     assert.match(result.artifact.path, /^docs\/ae\/evidence\/artifacts\/review-package\//)
     const artifactBody = readFileSync(join(tempRoot, result.artifact.path), 'utf8')
     assert.match(artifactBody, new RegExp(`# Review package: ${base}\\.\\.${head}`))
@@ -1791,8 +1801,44 @@ test('review-package writes commit list stat summary and diff into an evidence a
     assert.match(artifactBody, /update sample/)
     assert.match(artifactBody, /## Files changed/)
     assert.match(artifactBody, /sample\.txt/)
+    assert.match(artifactBody, /## Review inventory/)
+    assert.match(artifactBody, /## Impact context/)
     assert.match(artifactBody, /## Diff/)
     assert.match(artifactBody, /\+two/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('review-package retains renamed file identity in its review inventory', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-review-package-rename-'))
+  try {
+    runGit(['init'], tempRoot)
+    runGit(['config', 'user.name', 'Codex Test'], tempRoot)
+    runGit(['config', 'user.email', 'codex@example.com'], tempRoot)
+
+    writeFileSync(join(tempRoot, 'old-name.js'), 'export const value = 1\n', 'utf8')
+    runGit(['add', 'old-name.js'], tempRoot)
+    runGit(['commit', '-m', 'initial'], tempRoot)
+    const base = runGit(['rev-parse', 'HEAD'], tempRoot).stdout.trim()
+
+    runGit(['mv', 'old-name.js', 'new-name.js'], tempRoot)
+    runGit(['commit', '-m', 'rename sample'], tempRoot)
+    const head = runGit(['rev-parse', 'HEAD'], tempRoot).stdout.trim()
+
+    const result = runNodeScriptJson([
+      'scripts/ae-tools.mjs',
+      'review-package',
+      '--base',
+      base,
+      '--head',
+      head,
+    ], tempRoot)
+
+    assert.equal(result.inventory.changedFileCount, 1)
+    assert.equal(result.inventory.files[0].path, 'new-name.js')
+    assert.equal(result.inventory.files[0].previousPath, 'old-name.js')
+    assert.match(result.inventory.files[0].status, /^R/)
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }
