@@ -20,7 +20,8 @@ Validate UI behavior in a real browser.
 6. Use browser tools for navigation, snapshots, interaction, screenshots, console errors, and network failures.
 7. Exercise at least one meaningful interaction for each claimed pass path.
 8. Check desktop and mobile viewports when responsive behavior matters.
-9. Report exact pass/fail evidence, screenshots if useful, and unverified areas.
+9. When material motion is in scope, exercise its trigger, confirm the usable completion state, and inspect the reduced-motion behavior when the target and available browser tool support it.
+10. Report exact pass/fail evidence, screenshots if useful, and unverified areas.
 
 ## Rules
 
@@ -28,6 +29,7 @@ Validate UI behavior in a real browser.
 - Prefer accessibility snapshots for interaction targets and screenshots for visual evidence.
 - If the requested host is unreachable, validate the browser toolchain on a known-good page before blaming the app.
 - Include console or network failures when they materially affect the result, even if the visible UI appears correct.
+- For material motion, report an explicit unverified limitation when the target or available browser tool cannot exercise reduced-motion behavior.
 - Route implementation work back to `ae-frontend-design` or `ae-web-app`; this skill is for verification.
 - Do not register or assume dynamic OpenCode MCP tools. Use only browser tools that are already available in the Codex session.
 - Do not create a separate `ae-chrome-devtools` skill unless Codex exposes a stable DevTools tool contract for this repository.

@@ -605,6 +605,39 @@ test('upstream brainstorm and web workflow modernization is reflected in source 
   assert.doesNotMatch(readme, /`ae-frontend-design`：交付可用的前端初版。/)
 })
 
+test('frontend motion governance is reflected in source and mirror skills', () => {
+  const frontendSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-frontend-design')
+  const frontendMirror = readSkillBody('.agents/skills', 'ae-frontend-design')
+  assert.equal(frontendMirror, frontendSource, 'ae-frontend-design mirror should match plugin source')
+  assert.match(frontendSource, /Motion Decision Gate/i)
+  assert.match(frontendSource, /Default to static UI or minimal CSS state feedback/i)
+  assert.match(frontendSource, /Do not prescribe, install, or promote a motion runtime/i)
+
+  const qualitySource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-frontend-design/references/web-ui-quality.md'), 'utf8')
+  const qualityMirror = readFileSync(resolve(repoRoot, '.agents/skills/ae-frontend-design/references/web-ui-quality.md'), 'utf8')
+  assert.equal(qualityMirror, qualitySource, 'web UI quality reference mirror should match plugin source')
+  assert.match(qualitySource, /prefers-reduced-motion/i)
+  assert.match(qualitySource, /usable completion state/i)
+  assert.match(qualitySource, /decorative particle backgrounds/i)
+
+  const browserSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-test-browser')
+  const browserMirror = readSkillBody('.agents/skills', 'ae-test-browser')
+  assert.equal(browserMirror, browserSource, 'ae-test-browser mirror should match plugin source')
+  const acceptanceSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-test-browser/references/browser-acceptance.md'), 'utf8')
+  const acceptanceMirror = readFileSync(resolve(repoRoot, '.agents/skills/ae-test-browser/references/browser-acceptance.md'), 'utf8')
+  assert.equal(acceptanceMirror, acceptanceSource, 'browser acceptance reference mirror should match plugin source')
+  assert.match(acceptanceSource, /material motion/i)
+  assert.match(acceptanceSource, /reduced-motion/i)
+  assert.match(acceptanceSource, /completion state/i)
+  assert.match(acceptanceSource, /unverified/i)
+
+  const forgeSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-web-forge')
+  const forgeMirror = readSkillBody('.agents/skills', 'ae-web-forge')
+  assert.equal(forgeMirror, forgeSource, 'ae-web-forge mirror should match plugin source')
+  assert.match(forgeSource, /Motion decision/)
+  assert.match(forgeSource, /Reduced-motion evidence/)
+})
+
 test('design and web forge skill contracts are present in source, mirror, metadata, and docs', () => {
   const designSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-design')
   const designMirror = readSkillBody('.agents/skills', 'ae-design')
