@@ -160,3 +160,10 @@
 - Context: A completed local restart and explicit smoke request previously stalled on repeated credential handoff questions. Runtime calls were possible; the missing contract was a deterministic transition from focused tests to bounded localhost evidence and a safe credential boundary.
 - Impact: A runnable local read-only request proceeds once restart, target, request fixture, and user-created secret reference are ready. Raw chat credentials must not enter command text, patches, logs, agent-written files, or tool stdin. State-changing calls still require explicit authorization, and 4xx/5xx/transport/business errors block a pass claim.
 - Re-evaluate when: Codex exposes a documented non-persisting secret-input capability, or a target-project contract needs a more specific local service lifecycle policy.
+
+## 2026-07-28: Make frontend motion static-first and evidence-bound
+
+- Decision: Extend `ae-frontend-design`, `ae-web-forge`, and `ae-test-browser` rather than add a motion skill or animation runtime. Default to static UI or minimal state feedback; material motion needs a task-relevant purpose, usable completion state, reduced-motion alternative, and reported acceptance evidence.
+- Context: External frontend references supplied useful design and animation examples, but a generic visual upgrade would conflict with target-project baselines, introduce optional dependencies into plugin scope, and leave accessibility evidence implicit.
+- Impact: Web routing reports now expose motion and reduced-motion fields. Browser acceptance describes an explicit `unverified` result when target-route evidence is unavailable. The distributed source/mirror pair is versioned as `0.3.3` and protected by regression, mirror, contract, artifact, and install-smoke checks.
+- Re-evaluate when: target-project adoption shows a need for a stricter performance budget or a deterministic browser fixture that can exercise `prefers-reduced-motion` across supported toolchains.

@@ -9,6 +9,15 @@ Minimum browser evidence for a claimed pass:
 5. At least one screenshot or equivalent visual confirmation when layout matters.
 6. Desktop and mobile checks when responsive behavior is relevant.
 
+## Material Motion Evidence
+
+When material motion is part of the claimed behavior, add all applicable evidence:
+
+1. The interaction trigger was exercised.
+2. The usable completion state was confirmed without relying on an in-progress animation.
+3. Reduced-motion behavior was exercised when the target exposes it and the available browser tool can inspect or emulate it.
+4. If reduced-motion behavior cannot be exercised, report it as `unverified` with the target or tooling limitation; do not claim that branch passed.
+
 Route selection:
 
 - Use Browser/in-app browser when the task is a local page inspection, manual flow, screenshot, click/type interaction, or quick localhost validation.

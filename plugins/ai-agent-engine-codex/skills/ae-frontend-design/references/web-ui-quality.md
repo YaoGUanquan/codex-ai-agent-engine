@@ -10,3 +10,7 @@ Use this checklist when implementing or reviewing frontend design and UI impleme
 6. Ensure forms show validation feedback where the user can act on it.
 7. Confirm that interactive elements remain stable when async data changes.
 8. Validate in a browser when the UI depends on a dev server, framework runtime, or client-side data flow.
+9. Before adding material motion, record the user-relevant purpose or choose the static alternative; preserve the target design system and visual baseline.
+10. Default to static UI or minimal CSS state feedback. Treat timeline/physics motion, exported animation assets, and 3D/data scenes as conditional target-project choices rather than workflow dependencies.
+11. Provide a `prefers-reduced-motion` or equivalent platform-respecting alternative for material motion, and keep a usable completion state available without waiting for animation.
+12. Do not use decorative particle backgrounds for ordinary application surfaces. Use visual effects only when they communicate a user-relevant state, relationship, or outcome.

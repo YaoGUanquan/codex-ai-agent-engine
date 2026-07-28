@@ -40,3 +40,9 @@
   - Audit solution: `docs/ae/solutions/2026-06-19-claude-code-best-practice-audit.md`
   - Experience: `docs/ae/experience/2026-06-19-claude-code-best-practice-adaptation.md`
   - Process archive: `docs/00-process/archive/2026-06/claude-code-best-practice-audit/`
+- Frontend motion governance:
+  - PRD: `docs/ae/prds/2026-07-28-001-frontend-motion-governance-prd.md`
+  - Plan: `docs/ae/plans/2026-07-28-001-frontend-motion-governance-plan.md`
+  - Work report: `docs/ae/work-reports/2026-07-28-frontend-motion-governance-work-report.md`
+  - Experience: `docs/ae/experience/2026-07-28-frontend-motion-governance.md`
+  - Process archive: `docs/00-process/archive/2026-07/frontend-motion-governance/summary.md`

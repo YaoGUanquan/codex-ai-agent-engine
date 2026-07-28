@@ -116,3 +116,16 @@
   5. If implementation proceeds, update plugin source and `.agents/skills` mirror together, then archive process evidence.
 - Validation: Run `node --test --test-name-pattern "SkillOpt audit filter guidance" tests/skill-scripts.test.mjs`, `node scripts/check-skill-mirror.mjs`, `node scripts/check-skill-contract.mjs`, `node scripts/check-ae-artifacts.mjs`, and `git diff --check`.
 - Known risks: Optimizer demos can hide benchmark leakage, synthetic-only trajectories, broad prompt rewrites, or unsupported runtime harness behavior. Do not create `ae-skill-optimize` until AE has a local replay suite and a gate that rejects harmful skill edits before live files change.
+
+## Frontend motion governance
+
+- Workflow: Add motion-related guidance through the existing design, Web routing, and browser-acceptance skills, with a static-first decision and evidence loop.
+- Use case: A user asks to improve frontend visual motion, animation-library choices, interaction effects, or reduced-motion handling in a Codex-native AE workflow.
+- Steps:
+  1. Preserve the target application's design system and use static UI or minimal state feedback unless material motion has a task-relevant purpose.
+  2. When motion is justified, specify the user-facing purpose, the usable completion state, and the `prefers-reduced-motion` or equivalent fallback.
+  3. Keep libraries, exported animation assets, particles, and 3D as target-project choices; do not add them to the AE plugin merely because they were cited as references.
+  4. Route the decision through `ae-web-forge` and record both the motion decision and reduced-motion evidence.
+  5. Use `ae-test-browser` on a real target route to prove interaction, completion state, reduced-motion behavior, and existing console/network checks; report `unverified` when that route or capability is unavailable.
+- Validation: Run the focused source/mirror regression test, `npm.cmd test`, `npm.cmd run check`, install smoke, artifact/mirror/skill-contract checks, and `git diff --check`.
+- Known risks: A static graph helper is not dynamic runtime proof, and this repository cannot replace target-project browser acceptance for an actual motion-bearing UI.

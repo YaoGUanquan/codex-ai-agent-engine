@@ -55,6 +55,8 @@ Include this summary when the skill drives work:
 - Q2 design input:
 - Q3 backend/API:
 - Q4 visual baseline:
+- Motion decision:
+- Reduced-motion evidence:
 - Selected skills:
 - Browser acceptance:
 - Rework loops:
