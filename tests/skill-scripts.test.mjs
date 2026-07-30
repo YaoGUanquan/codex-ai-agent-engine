@@ -1626,6 +1626,12 @@ test('risk-scaled test design guidance is present in source and mirror skills', 
   assert.equal(templateMirror, templateSource, 'ae-design template mirror should match plugin source')
   for (const expectation of [
     /Risk-Scaled Test Design/,
+    /Existing-Project Evidence/,
+    /repository-wide audit/i,
+    /greenfield design/i,
+    /Test-Case Quality Guards/,
+    /observable expected result/i,
+    /semantically duplicate cases/i,
     /equivalence classes/i,
     /boundary values/i,
     /decision tables/i,
@@ -1637,7 +1643,13 @@ test('risk-scaled test design guidance is present in source and mirror skills', 
     assert.match(source, expectation, `ae-design should include ${expectation}`)
   }
   for (const expectation of [
+    /Existing Project Evidence \(Conditional\)/,
+    /mode: inspected \| bypassed/,
+    /Sanitized conclusion/,
     /Test Coverage Matrix/,
+    /Test-Case Quality Rules/,
+    /semantically duplicate cases/i,
+    /observable response, state, record, or event/i,
     /Design method/,
     /Automatable verification signal/,
     /N\/A when the related dimension is explicitly omitted/,

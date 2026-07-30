@@ -17,6 +17,18 @@ Identify the source in this order:
 
 Write new design artifacts under `docs/ae/designs/<topic>-YYYY-MM-DD/`. Use repository-relative paths only.
 
+## Existing-Project Evidence
+
+When the design applies to an existing repository, perform a lightweight, read-only evidence pass before choosing architecture, paths, dependencies, or reusable components. Skip this pass only when the user explicitly requests a greenfield design or asks not to use repository context; record that bypass and its reason in the design contract.
+
+Inspect only the material needed for the design:
+
+- dependency manifests, build/test configuration, and repository instructions for the established stack and commands;
+- relevant source, tests, and public contracts for module boundaries, naming, error handling, and existing reusable assets;
+- only repository-relative paths and sanitized summaries in the resulting design artifact.
+
+Do not read or record likely secret-bearing paths such as `.env*`, credential stores, private keys, or local authentication files. This is not a repository-wide audit: mark a conclusion `verified`, `inferred`, or `assumed`, preserve unverified gaps, and record a reuse decision or reason not to reuse the inspected asset. When the evidence conflicts with a requested direction, surface it as an explicit design decision instead of silently replacing the local convention.
+
 ## Dimension Selection
 
 Use risk-based dimension triggers before writing content:
@@ -40,6 +52,7 @@ Every design contract must include:
 - stable IDs: `ADR-XXX` for decisions, `EP-XXX` for API endpoints, `T-XXX` for tables or durable data structures, `TC-XXX` for test cases, and `ST-XXX` for UI states;
 - cross-dimension mapping covering API fields to data, API errors to UI states, test cases to contract coverage, and UI components to API endpoints;
 - implementation constraints such as repository paths, build/runtime assumptions, environment variables, dependency boundaries, and feature flags when relevant;
+- conditional existing-project evidence, reuse decisions, and bypass reason when repository context informs the design;
 - acceptance and test-case contracts that downstream `ae-plan`, `ae-work`, and `ae-review` can verify;
 - explicit deferred decisions and explicit omitted dimensions rather than silent defaults.
 
@@ -55,6 +68,12 @@ When `test-cases` is required, select the smallest set of methods that exposes t
 - use error guessing for failure, timeout, concurrency, encoding, and hostile-input risks that the other methods do not cover.
 
 For each critical scenario, record the selected design method, covered stable IDs, and an automatable verification signal. Use each coverage category only when its triggering structure exists: API errors, database constraints, authorization decisions, and UI interactions. For an absent category, use `N/A` with the explicit-omission reason. Do not require fixed scenario counts or invent coverage metrics that the design artifact cannot measure.
+
+## Test-Case Quality Guards
+
+For every designed test case, retain a stable `TC-XXX` ID, link it to the requirement or contract IDs it proves, and state an observable expected result. Do not treat "succeeds", "works", or an implementation detail as a sufficient assertion.
+
+Merge or remove semantically duplicate cases: changed fixture values alone do not justify a separate case when the input condition, expected behavior, and covered IDs are materially the same. Keep separate cases only when they cover a distinct risk, boundary, failure behavior, or contract element. These guards improve test-case signal; they do not impose scenario counts, measured coverage claims, or categories whose trigger is absent.
 
 ## Review Closure
 
