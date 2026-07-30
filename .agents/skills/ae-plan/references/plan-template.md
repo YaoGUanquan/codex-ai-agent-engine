@@ -41,6 +41,20 @@ sharded: false
 - Validation surface:
 - Open questions:
 
+## Validation Evidence (Conditional)
+
+When a public API, persisted data, external service, deployment, or browser boundary exists, use `references/validation-evidence-profile.md`. Record only applicable tiers, their expected signals, preconditions, owner, status, and bounded claim. State `blocked`, `not-applicable`, or `unverified` evidence truthfully; a lower tier cannot prove a higher-tier outcome.
+
+## Contract Value Classification (Conditional)
+
+When a persisted data, public API, security, or external-service boundary exists, identify canonical persisted values, derived or ephemeral representations, caller-controlled input, compatibility fallback or source precedence, and the trust boundary.
+
+## Evidence Matrix (Conditional)
+
+| Acceptance criterion | Applicable tier | Expected signal and bounded claim | Preconditions / owner | Status | Recovery or rollback signal |
+| --- | --- | --- | --- | --- | --- |
+| <criterion> | <tier> | <signal and only what it proves> | <environment or actor> | <status> | <safe stop or recovery signal> |
+
 ## Assumptions
 
 ## Alternatives Considered

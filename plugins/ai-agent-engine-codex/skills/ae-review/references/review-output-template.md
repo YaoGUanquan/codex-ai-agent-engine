@@ -19,6 +19,15 @@ Findings first, ordered by severity.
 - blockingFindings:
   - <P0/P1 or equivalent task-blocking issue reference>
 
+## Evidence Boundaries
+
+- Proven tier and bounded claim: <only when a material validation claim exists>
+- Blocked or unverified proof and residual risk: <only when applicable>
+
+## Known Unrelated Failures
+
+- <failure, evidence, and reason it does not invalidate the scoped result; or none identified>
+
 ## Open Questions
 
 ## Lane Verdicts
