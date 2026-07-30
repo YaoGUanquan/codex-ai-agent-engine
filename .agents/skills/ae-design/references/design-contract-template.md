@@ -52,6 +52,21 @@ sharded: false
 - Explicit omitted dimensions:
 - Cross-dimension dependencies:
 
+## Existing Project Evidence (Conditional)
+
+When the design uses repository context, record the smallest evidence set that affects the design. For a greenfield or no-context request, use `mode: bypassed` and state the user-requested reason.
+
+- mode: inspected | bypassed
+- bypass reason:
+
+| Evidence category | Repository-relative inputs | Sanitized conclusion | Confidence |
+| --- | --- | --- | --- |
+| stack and commands | <manifest/config paths> | <established stack or command> | verified \| inferred \| assumed |
+| structure and conventions | <relevant source/test paths> | <module or coding convention> | verified \| inferred \| assumed |
+| reusable assets | <component/helper/contract paths> | <reuse decision or non-reuse reason> | verified \| inferred \| assumed |
+
+Do not record secrets, credentials, private keys, local authentication values, or absolute paths. This section is not a repository inventory; list only evidence that constrains the design and keep unknown facts explicit.
+
 ## Implementation Constraints
 
 - Repository paths:
@@ -96,6 +111,14 @@ sharded: false
 
 Use equivalence classes and boundary values for constrained inputs; decision tables for multi-condition business rules; state transitions for declared state machines; and error guessing for residual failure risks. Cover API errors, database constraints, authorization decisions, and UI interactions only when their triggering structure exists. Record `N/A when the related dimension is explicitly omitted`, with its reason. Do not require fixed scenario counts or claim that this template measures executed coverage.
 
+### Test-Case Quality Rules
+
+- Every `TC-XXX` must reference the requirement or contract IDs it proves and define an observable expected result.
+- Do not use `succeeds`, `works`, or implementation details as the only expected assertion.
+- Merge semantically duplicate cases; a changed fixture value alone is not a distinct test intent.
+- Keep distinct cases only for different risks, boundaries, failure behavior, or covered contract elements.
+- These rules are qualitative. Do not require fixed scenario counts, measured coverage, or a test category whose trigger is absent.
+
 ### ui-component-to-api-endpoint-mapping
 
 | Component/route | ST ID | EP ID | Data dependency |
@@ -122,7 +145,7 @@ Use equivalence classes and boundary values for constrained inputs; decision tab
 - Priority:
 - Preconditions:
 - Steps:
-- Expected result:
+- Expected result: <observable response, state, record, or event>
 - Covered IDs:
 
 ## Security
