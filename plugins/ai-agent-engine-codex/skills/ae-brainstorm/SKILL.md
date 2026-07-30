@@ -24,7 +24,7 @@ Clarify what should be built. Produce a requirements artifact only when it will 
 2. Scan the repository lightly for existing related behavior, docs, and conventions before making claims.
 3. If the request spans multiple independent systems, decompose it and brainstorm only the first coherent slice.
 4. Ask one question at a time when requirements are unclear; prefer multiple choice when the options are known.
-5. Identify goals, non-goals, users or systems affected, success criteria, edge cases, validation signals, and open questions.
+5. Identify goals, non-goals, users or systems affected, success criteria, edge cases, validation signals, and open questions. When behavior crosses a public API, persisted data, external service, deployment, or browser boundary, identify the smallest applicable validation-evidence tiers and what remains `unverified`.
 6. Track material ambiguity explicitly. Continue clarifying until the remaining ambiguity is low enough that a plan can name files, risks, validation, and rollback without inventing behavior.
 7. Ask at most three clarification questions before recording explicit assumptions; ask fewer when repository evidence is enough.
 8. For design-heavy work, compare 2-3 materially different approaches before converging.
@@ -56,6 +56,7 @@ Before routing to `ae-plan`, make sure the downstream plan will have:
 - non-goals and boundaries,
 - chosen approach when alternatives were considered,
 - validation expectations,
+- applicable validation-evidence tiers and any proof that must remain `unverified` when a boundary requires it,
 - unresolved questions labeled as open rather than assumed.
 - a requirement-quality checklist when the work is S4, externally visible, or likely to be delegated.
 - collision insights, blind spots, and thinking preservation zone notes when those shaped the chosen approach.

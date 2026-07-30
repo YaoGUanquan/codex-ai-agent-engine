@@ -61,6 +61,8 @@ When a PRD includes capability, benchmark, installation, or behavior claims, sep
 - name the expected validation surface for each claim that could affect public docs, skill behavior, install behavior, or runtime support;
 - do not promote inferred implementation details into requirements unless the user explicitly chooses them.
 
+When behavior crosses a public API, persisted data, external service, deployment, or browser boundary, record the smallest applicable validation-evidence tiers, expected signal, preconditions, and any credible proof that remains `unverified`. A lower tier must not imply runtime, browser, or deployment acceptance.
+
 ## Readiness Gate
 
 Before routing to planning, confirm:
@@ -72,6 +74,7 @@ Before routing to planning, confirm:
 - WHAT/WHY are clear before HOW,
 - unresolved questions are visible,
 - validation expectations are known,
+- applicable validation-evidence tiers and unverified proof are visible when a boundary requires them,
 - stable IDs and the consistency check are present when a durable artifact is created.
 
 ## Boundaries

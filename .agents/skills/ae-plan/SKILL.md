@@ -28,6 +28,8 @@ Before writing a plan, verify that these inputs are clear enough:
 
 If any item is materially unclear, ask one focused question or route to `ae-brainstorm`. Do not fill gaps with invented product behavior.
 
+When the plan crosses a public API, persisted data, external service, deployment, or browser boundary, load `references/validation-evidence-profile.md`. Select only the tiers that apply, record their preconditions and bounded claims, and make blocked or `unverified` proof visible. Do not infer a higher-tier result from a lower-tier check.
+
 For tasks with multiple plausible designs, compare 2-3 approaches before selecting one. Keep the comparison short: fit, trade-off, risk, and why the recommended approach wins. When only one viable approach exists, state why the alternatives collapse instead of pretending there was a meaningful choice.
 
 For implementation-heavy plans, include the simplest viable route in that comparison: standard library, framework/native platform capability, existing dependency, deletion/configuration-only change, or the smallest new code path. New dependencies, abstractions, broad refactors, or extra files need a current requirement or repository pattern that justifies owning them now.
@@ -83,6 +85,7 @@ Rules:
 - Include an `AI Parse Contract` section with `canonicalKind: plan`, `humanEquivalent: true`, `stableIdsRequired: true`, and `noImplicitScope: true`.
 - Every implementation unit uses a stable `U*` ID, lists requirement IDs covered, acceptance criteria covered, dependencies, files, forbidden files, validation, rollback signals, and deferred implementation notes.
 - The plan must not introduce product behavior absent from the source requirements; record such gaps as open questions instead.
+- For an applicable evidence boundary, use `references/validation-evidence-profile.md` and map each high-risk acceptance criterion to a proof, owner, status, and recovery or rollback signal.
 
 When the task may benefit from multi-agent execution, make the plan dependency-aware even if multi-agent config is currently disabled:
 

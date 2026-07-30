@@ -22,6 +22,7 @@ Include these only when they materially affect planning:
 - dependencies or assumptions,
 - open questions,
 - alternatives considered.
+- validation-evidence profile for a public API, persisted data, external-service, deployment, or browser boundary.
 
 ## Template
 
@@ -80,6 +81,10 @@ sharded: false
 ### Constraints
 
 - <Business, technical, timing, or resource constraint.>
+
+## Validation Evidence (Conditional)
+
+When a public API, persisted data, external service, deployment, or browser boundary exists, list only the applicable evidence tiers, their expected signals and preconditions, and any proof that remains `blocked` or `unverified`. Do not treat a lower-tier check as evidence of a higher-tier outcome.
 
 ## Key Decisions
 

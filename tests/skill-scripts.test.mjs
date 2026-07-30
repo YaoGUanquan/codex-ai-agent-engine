@@ -533,6 +533,45 @@ test('PRD and plan artifact contracts are present in source and mirror skills', 
   }
 })
 
+test('validation evidence governance is present in source and mirror skills', () => {
+  const profilePaths = [
+    'plugins/ai-agent-engine-codex/skills/ae-plan/references/validation-evidence-profile.md',
+    '.agents/skills/ae-plan/references/validation-evidence-profile.md',
+  ]
+  const profileSource = readFileSync(resolve(repoRoot, profilePaths[0]), 'utf8')
+  const profileMirror = readFileSync(resolve(repoRoot, profilePaths[1]), 'utf8')
+
+  assert.equal(profileMirror, profileSource, 'validation evidence profile mirror should match plugin source')
+  for (const expectation of [
+    /Select the smallest set of tiers/,
+    /A lower tier never proves a higher tier/,
+    /`passed`/, /`failed`/, /`blocked`/, /`not-applicable`/, /`unverified`/,
+    /canonical persisted value/,
+    /derived or ephemeral representation/,
+    /caller-controlled input/,
+    /Acceptance criterion \| Applicable tier \| Expected signal and bounded claim/,
+  ]) {
+    assert.match(profileSource, expectation, `validation evidence profile should include ${expectation}`)
+  }
+
+  const mirroredFiles = [
+    ['plugins/ai-agent-engine-codex/skills/ae-brainstorm/SKILL.md', '.agents/skills/ae-brainstorm/SKILL.md', /smallest applicable validation-evidence tiers/],
+    ['plugins/ai-agent-engine-codex/skills/ae-prd/SKILL.md', '.agents/skills/ae-prd/SKILL.md', /A lower tier must not imply runtime, browser, or deployment acceptance/],
+    ['plugins/ai-agent-engine-codex/skills/ae-prd/references/requirements-capture.md', '.agents/skills/ae-prd/references/requirements-capture.md', /## Validation Evidence \(Conditional\)/],
+    ['plugins/ai-agent-engine-codex/skills/ae-plan/SKILL.md', '.agents/skills/ae-plan/SKILL.md', /validation-evidence-profile\.md/],
+    ['plugins/ai-agent-engine-codex/skills/ae-plan/references/plan-template.md', '.agents/skills/ae-plan/references/plan-template.md', /## Contract Value Classification \(Conditional\)/],
+    ['plugins/ai-agent-engine-codex/skills/ae-review/SKILL.md', '.agents/skills/ae-review/SKILL.md', /Flag an invalid promotion/],
+    ['plugins/ai-agent-engine-codex/skills/ae-review/references/review-output-template.md', '.agents/skills/ae-review/references/review-output-template.md', /## Known Unrelated Failures/],
+  ]
+
+  for (const [sourcePath, mirrorPath, expectation] of mirroredFiles) {
+    const source = readFileSync(resolve(repoRoot, sourcePath), 'utf8')
+    const mirror = readFileSync(resolve(repoRoot, mirrorPath), 'utf8')
+    assert.equal(mirror, source, `${mirrorPath} should match ${sourcePath}`)
+    assert.match(source, expectation, `${sourcePath} should include ${expectation}`)
+  }
+})
+
 test('upstream PRD reference sync keeps required references and source freshness current', () => {
   const expectedUpstreamCommit = '76d832c96a1c810410982bf28b425a3aedb461ab'
   const referencePaths = [
