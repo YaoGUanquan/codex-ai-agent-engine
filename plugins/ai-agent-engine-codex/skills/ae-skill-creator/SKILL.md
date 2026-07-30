@@ -17,10 +17,17 @@ Create or update Codex skills using the local skill-creator standard.
 ## Workflow
 
 1. Use the built-in `skill-creator` guidance when available.
-2. Define trigger examples, scope, reusable resources, and validation.
-3. Create a skill folder with `SKILL.md` and `agents/openai.yaml`.
-4. Keep `SKILL.md` concise and move optional detail into `references/`.
-5. Run the skill validator when available.
+2. Run the Candidate Evaluation Gate before creating, updating, or absorbing a skill from repeated experience.
+3. Define trigger examples, scope, reusable resources, and validation.
+4. Create a skill folder with `SKILL.md` and `agents/openai.yaml` only after the user authorizes the staged proposal.
+5. Keep `SKILL.md` concise and move optional detail into `references/`.
+6. Run the skill validator when available.
+
+## Candidate Evaluation Gate
+
+Before changing a skill from a lesson, audit, or repeated task, record source evidence and run an overlap check against canonical plugin skills, installed mirrors, and relevant durable project guidance. Use [candidate evaluation](references/candidate-evaluation.md) to choose `Create`, `Improve`, `Absorb`, or `Drop`.
+
+`Create`, `Improve`, and `Absorb` produce a staged proposal only. They require explicit user authorization before editing a skill, changing memory, installing a runtime, or generating files. `Drop` records no change request.
 
 ## Extension Routing Matrix
 

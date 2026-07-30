@@ -1,6 +1,6 @@
 {
   "name": "ai-agent-engine-codex",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Codex-native AE engineering workflow skills for requirements, planning, governance, tasks, implementation, review, validation, and handoff.",
   "author": {
     "name": "AI Agent Engine for Codex maintainers",

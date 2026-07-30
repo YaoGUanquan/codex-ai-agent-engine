@@ -14,6 +14,7 @@ Capture reusable project experience after work lands.
 3. Write under `docs/ae/experience/` when the user wants a project artifact.
 4. If the user explicitly asks to update Codex memory, write an ad-hoc memory note following the active memory rules.
 5. Keep secrets, tokens, and private credentials out of the artifact.
+6. When a completed experience may justify a skill change, treat it as candidate evidence, not authorization, and route the proposal through `ae-skill-creator`.
 
 ## Memory Placement
 

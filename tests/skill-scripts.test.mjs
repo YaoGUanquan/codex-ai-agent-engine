@@ -438,6 +438,46 @@ test('SkillOpt audit filter guidance is present in source and mirror skills', ()
   }
 })
 
+test('skill candidate governance is present in source and mirror skills', () => {
+  const creatorSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-skill-creator')
+  const creatorMirror = readSkillBody('.agents/skills', 'ae-skill-creator')
+  assert.equal(creatorMirror, creatorSource, 'ae-skill-creator mirror should match plugin source')
+
+  for (const expectation of [
+    /Candidate Evaluation Gate/i,
+    /source evidence/i,
+    /overlap check/i,
+    /Create.*Improve.*Absorb.*Drop/is,
+    /staged proposal/i,
+    /explicit user authorization/i,
+  ]) {
+    assert.match(creatorSource, expectation, `ae-skill-creator should include ${expectation}`)
+  }
+
+  const candidateReferenceSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-skill-creator/references/candidate-evaluation.md'), 'utf8')
+  const candidateReferenceMirror = readFileSync(resolve(repoRoot, '.agents/skills/ae-skill-creator/references/candidate-evaluation.md'), 'utf8')
+  assert.equal(candidateReferenceMirror, candidateReferenceSource, 'candidate evaluation reference mirror should match plugin source')
+
+  for (const expectation of [
+    /## Candidate Record/,
+    /## Required Checks/,
+    /## Verdicts/,
+    /## Adoption Boundary/,
+    /\| Create \| A distinct repeatable workflow/,
+    /\| Improve \| An existing skill owns the workflow/,
+    /\| Absorb \| The candidate overlaps an existing skill/,
+    /\| Drop \| The evidence is one-off/,
+  ]) {
+    assert.match(candidateReferenceSource, expectation, `candidate evaluation reference should include ${expectation}`)
+  }
+
+  const experienceSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-save-experience')
+  const experienceMirror = readSkillBody('.agents/skills', 'ae-save-experience')
+  assert.equal(experienceMirror, experienceSource, 'ae-save-experience mirror should match plugin source')
+  assert.match(experienceSource, /candidate evidence, not authorization/i)
+  assert.match(experienceSource, /ae-skill-creator/i)
+})
+
 test('PRD and plan artifact contracts are present in source and mirror skills', () => {
   const expectationsByFile = [
     ['plugins/ai-agent-engine-codex/skills/ae-prd/SKILL.md', '.agents/skills/ae-prd/SKILL.md', [
