@@ -1,7 +1,6 @@
 interface:
-  display_name: "AE Static Server"
-  short_description: "Serve local static files for browser preview"
-  default_prompt: "Use $ae-static-server to preview this local static file or directory."
+  display_name: "AE 静态服务器"
+  short_description: "为本地静态文件提供浏览器预览服务"
+  default_prompt: "使用 $ae-static-server 预览这个本地静态文件或目录。"
 policy:
   allow_implicit_invocation: true
-

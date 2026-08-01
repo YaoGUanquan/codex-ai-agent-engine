@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "20260731T074755691Z-634ace824fe7",
+  "evidenceKind": "review-contract",
+  "payload": {
+    "kind": "code",
+    "mode": "report-only",
+    "reviewers": [
+      "correctness-reviewer",
+      "testing-reviewer",
+      "standards-reviewer",
+      "maintainability-reviewer",
+      "coherence-reviewer",
+      "feasibility-reviewer",
+      "evidence-reviewer"
+    ],
+    "targetCoverage": {
+      "code": {
+        "status": "covered",
+        "reviewers": [
+          "correctness-reviewer",
+          "testing-reviewer",
+          "maintainability-reviewer"
+        ]
+      },
+      "document": {
+        "status": "covered",
+        "reviewers": [
+          "coherence-reviewer",
+          "feasibility-reviewer",
+          "evidence-reviewer"
+        ]
+      }
+    },
+    "inputs": {
+      "kind": "code",
+      "mode": "report-only",
+      "targets": "code,document",
+      "write-evidence": true
+    }
+  },
+  "timestamps": {
+    "writtenAt": "2026-07-31T07:47:55.693Z"
+  },
+  "git": {
+    "available": true,
+    "head": "6b0fbda084dc5bc7f2ff9265750cc11f4d403a03",
+    "branch": "codex/codex-security-cli-integration",
+    "statusHash": "3857d7dd03f909674221ba6848abdfae79afd2ca26526725d594429a687fa76a",
+    "dirty": true
+  },
+  "hashes": {
+    "previousRecordHash": "5ac1b33abac2d700d5c726f08b75b538f061ec33dea976512da63d32b6022baf",
+    "payloadHash": "634ace824fe74da479248c908787b53119f2662d0fbeed3ea3598b6db83ba43e",
+    "recordHash": "5c64052c807ee808d5c22a4cc2ee2ea6c068d0df6642a4b935b8c9fd67747722"
+  }
+}

@@ -52,6 +52,14 @@
       "script": "node scripts/ae-tools.mjs claude-delegate --check"
     },
     {
+      "name": "ae-security-scan",
+      "tier": "tools",
+      "entry": "/ae-security-scan",
+      "target": "受控安全扫描",
+      "purpose": "在用户明确授权依赖变更和源代码外发范围后，准备、解释和复扫项目级 OpenAI Codex Security CLI 漏洞扫描。",
+      "script": "node scripts/ae-tools.mjs codex-security-source-check"
+    },
+    {
       "name": "ae-prd",
       "tier": "core",
       "entry": "/ae-prd",
@@ -320,6 +328,11 @@
       "name": "claude-delegate",
       "purpose": "检查或调用本地 Claude Code CLI，默认用于受控分析和 patch 候选方案，不自动写入活动工作区。",
       "script": "node scripts/ae-tools.mjs claude-delegate --check | --prompt-file <path> [--claude-arg <arg>]"
+    },
+    {
+      "name": "codex-security-source-check",
+      "purpose": "只读查询 OpenAI Codex Security 的官方 Git HEAD 与 npm 版本，报告漂移但不安装、更新或同步。",
+      "script": "node scripts/ae-tools.mjs codex-security-source-check"
     },
     {
       "name": "review-contract",

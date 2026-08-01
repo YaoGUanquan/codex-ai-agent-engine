@@ -1,7 +1,6 @@
 interface:
   display_name: "AE Markitdown"
-  short_description: "Convert local files to Markdown"
-  default_prompt: "Use $ae-markitdown to convert this local file to Markdown."
+  short_description: "将本地轻量文件转换为 Markdown"
+  default_prompt: "使用 $ae-markitdown 将这个本地文件转换为 Markdown。"
 policy:
   allow_implicit_invocation: true
-

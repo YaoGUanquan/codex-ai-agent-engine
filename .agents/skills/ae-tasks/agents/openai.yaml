@@ -1,6 +1,6 @@
 interface:
-  display_name: "AE Tasks / AE Tasks"
-  short_description: "Create dependency-ordered implementation task artifacts / Create dependency-ordered implementation task artifacts"
-  default_prompt: "Use $ae-tasks to turn this approved AE plan into implementation tasks. / Use $ae-tasks to turn this approved AE plan into implementation tasks."
+  display_name: "AE 任务拆解"
+  short_description: "根据已批准的 AE 计划创建按依赖顺序排列的实现任务产物"
+  default_prompt: "使用 $ae-tasks 将已批准的 AE 计划拆解为实现任务。"
 policy:
   allow_implicit_invocation: true
