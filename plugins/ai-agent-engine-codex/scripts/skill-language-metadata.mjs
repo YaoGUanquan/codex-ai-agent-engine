@@ -29,12 +29,19 @@ export const skillMetadata = {
     promptEn: 'Use $ae-claude-code to delegate a bounded analysis or patch proposal to local Claude Code CLI.',
     promptZh: '使用 $ae-claude-code 将受限分析或 patch 候选方案委派给本地 Claude Code CLI。',
   },
+  'ae-security-scan': {
+    display: { en: 'AE Security Scan', zh: 'AE 安全扫描' },
+    en: 'Run an opt-in Codex Security CLI scan with approval and evidence boundaries',
+    zh: '在授权、外发范围和证据边界下执行可选的 Codex Security CLI 扫描',
+    promptEn: 'Use $ae-security-scan to prepare an approved security scan for this repository.',
+    promptZh: '使用 $ae-security-scan 为当前仓库准备一次已授权的安全扫描。',
+  },
   'ae-constitution': {
-    display: { en: 'AE Constitution', zh: 'AE Constitution' },
+    display: { en: 'AE Constitution', zh: 'AE 项目治理' },
     en: 'Create durable project governance for AE plans and reviews',
-    zh: 'Create durable project governance for AE plans and reviews',
+    zh: '为 AE 计划和审查创建可持续维护的项目治理原则',
     promptEn: 'Use $ae-constitution to define project governance principles.',
-    promptZh: 'Use $ae-constitution to define project governance principles.',
+    promptZh: '使用 $ae-constitution 定义项目治理原则。',
   },
   'ae-debug': {
     display: { en: 'AE Debug', zh: 'AE 调试排障' },
@@ -212,11 +219,11 @@ export const skillMetadata = {
     promptZh: '使用 $ae-task-loop 循环执行这个探索性任务，直到验证通过或明确阻塞。',
   },
   'ae-tasks': {
-    display: { en: 'AE Tasks', zh: 'AE Tasks' },
+    display: { en: 'AE Tasks', zh: 'AE 任务拆解' },
     en: 'Create dependency-ordered implementation task artifacts',
-    zh: 'Create dependency-ordered implementation task artifacts',
+    zh: '根据已批准的 AE 计划创建按依赖顺序排列的实现任务产物',
     promptEn: 'Use $ae-tasks to turn this approved AE plan into implementation tasks.',
-    promptZh: 'Use $ae-tasks to turn this approved AE plan into implementation tasks.',
+    promptZh: '使用 $ae-tasks 将已批准的 AE 计划拆解为实现任务。',
   },
   'ae-test-browser': {
     display: { en: 'AE Browser Test', zh: 'AE 浏览器验收' },

@@ -12,6 +12,7 @@ docs/ae/gates/*.json
 docs/ae/brainstorms/
 docs/ae/reviews/
 docs/ae/handoffs/
+docs/ae/security-scans/.private/
 
 # Dependencies and build output
 node_modules/

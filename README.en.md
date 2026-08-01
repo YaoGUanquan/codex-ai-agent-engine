@@ -71,6 +71,7 @@ node scripts/ae-tools.mjs help
 - `ae-work`: execute plans after Git/worktree safety checks, using a Minimality Gate before behavior edits.
 - `ae-refactor`: plan behavior-preserving refactors.
 - `ae-review`: review code or documents with severity-ordered findings first; complexity reviews can use delete, stdlib, native, yagni, and shrink tags.
+- `ae-security-scan`: prepare and verify a project-local Codex Security CLI scan only after explicit dependency-change and source-sharing approval.
 - `ae-doc-humanize`: rewrite structured or stiff notes into readable documents.
 - `ae-doc-structure`: turn messy notes into requirements, plans, handoffs, or checklists.
 - `ae-frontend-design`: design and implement frontend UI.
