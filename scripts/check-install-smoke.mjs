@@ -47,6 +47,7 @@ try {
     'plugins/ai-agent-engine-codex/skills/ae-debug/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-tdd/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-claude-code/SKILL.md',
+    'plugins/ai-agent-engine-codex/skills/ae-security-scan/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-markitdown/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-static-server/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-computer-use-guard/SKILL.md',
@@ -66,12 +67,15 @@ try {
     '.agents/skills/ae-debug/agents/openai.yaml',
     '.agents/skills/ae-tdd/agents/openai.yaml',
     '.agents/skills/ae-claude-code/agents/openai.yaml',
+    '.agents/skills/ae-security-scan/agents/openai.yaml',
     '.agents/skills/ae-markitdown/agents/openai.yaml',
     '.agents/skills/ae-static-server/agents/openai.yaml',
     '.agents/skills/ae-computer-use-guard/agents/openai.yaml',
     '.agents/skills/ae-imagegen-prompt/agents/openai.yaml',
     '.agents/skills/ae-video-edit-computer/agents/openai.yaml',
     'docs/ae/templates/ae-skill-profiles.example.yaml',
+    'docs/ae/templates/security-scan-report-template.md',
+    'docs/ae/templates/security-remediation-report-template.md',
     'docs/ae/templates/constitution-template.md',
     'docs/ae/templates/requirements-quality-checklist.md',
     'docs/ae/templates/computer-use-hooks/README.md',
@@ -93,6 +97,23 @@ try {
   }
   if (!existsSync(existingTemplatePath)) {
     throw new Error('Install removed a pre-existing user docs/ae/templates file')
+  }
+  const securityScanTemplate = readFileSync(resolve(targetRoot, 'docs', 'ae', 'templates', 'security-scan-report-template.md'), 'utf8')
+  if (!securityScanTemplate.includes('docs/ae/security-scans/.private/<scan-id>/')) {
+    throw new Error('Installed security scan report template does not preserve the ignored raw-artifact boundary')
+  }
+  if (!securityScanTemplate.includes('Non-sensitive source snapshot identifier:')) {
+    throw new Error('Installed security scan report template does not preserve the comparable snapshot contract')
+  }
+  const securityRemediationTemplate = readFileSync(resolve(targetRoot, 'docs', 'ae', 'templates', 'security-remediation-report-template.md'), 'utf8')
+  if (!securityRemediationTemplate.includes('`draft` | `approved-for-execution` | `executed` | `reconciled`')) {
+    throw new Error('Installed remediation report template does not preserve its lifecycle contract')
+  }
+  if (!securityRemediationTemplate.includes('`canonicalCaseId`') || !securityRemediationTemplate.includes('`new-untriaged`')) {
+    throw new Error('Installed remediation report template does not preserve its case reconciliation contract')
+  }
+  if (!securityRemediationTemplate.includes('must not contain credentials, provider URLs, raw CLI logs')) {
+    throw new Error('Installed remediation report template does not preserve the protected-artifact boundary')
   }
   for (const skillName of staleSkillDirs) {
     const staleSkillDir = resolve(targetRoot, '.agents', 'skills', skillName)
@@ -124,6 +145,7 @@ try {
     throw new Error('Installed recovery command did not inspect the target project root')
   }
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'claude'], { cwd: targetRoot })
+  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'security'], { cwd: targetRoot })
   const artifactResult = JSON.parse(run(process.execPath, [resolve(targetRoot, 'scripts', 'check-ae-artifacts.mjs')], { cwd: targetRoot }).stdout)
   if (artifactResult.status !== 'ok' || artifactResult.targetRoot !== targetRoot) {
     throw new Error('Installed check-ae-artifacts command did not inspect the target project root')
@@ -140,11 +162,12 @@ try {
     ['ae-prd', 'AE PRD'],
     ['ae-work-report', 'AE Work Report'],
     ['ae-task-loop', 'AE Task Loop'],
-    ['ae-constitution', 'AE Constitution'],
-    ['ae-tasks', 'AE Tasks'],
+    ['ae-constitution', 'AE 项目治理 / AE Constitution'],
+    ['ae-tasks', 'AE 任务拆解 / AE Tasks'],
     ['ae-design', 'AE 设计契约 / AE Design'],
     ['ae-web-forge', 'AE Web Forge'],
     ['ae-claude-code', 'AE Claude Code'],
+    ['ae-security-scan', 'AE 安全扫描 / AE Security Scan'],
     ['ae-markitdown', 'AE Markitdown'],
     ['ae-static-server', 'AE 静态服务器 / AE Static Server'],
     ['ae-computer-use-guard', 'AE 电脑控制约束 / AE Computer Use Guard'],
@@ -216,6 +239,7 @@ try {
     ['ae-web-app', 'AE Web App'],
     ['ae-web-forge', 'AE Web Forge'],
     ['ae-claude-code', 'AE Claude Code'],
+    ['ae-security-scan', 'AE Security Scan'],
     ['ae-markitdown', 'AE Markitdown'],
     ['ae-static-server', 'AE Static Server'],
     ['ae-computer-use-guard', 'AE Computer Use Guard'],
@@ -234,12 +258,13 @@ try {
     ['ae-prd', 'AE PRD'],
     ['ae-work-report', 'AE 工作总结'],
     ['ae-task-loop', 'AE 任务循环'],
-    ['ae-constitution', 'AE Constitution'],
-    ['ae-tasks', 'AE Tasks'],
+    ['ae-constitution', 'AE 项目治理'],
+    ['ae-tasks', 'AE 任务拆解'],
     ['ae-design', 'AE 设计契约'],
     ['ae-web-app', 'AE Web 应用开发'],
     ['ae-web-forge', 'AE Web Forge'],
     ['ae-claude-code', 'AE Claude Code'],
+    ['ae-security-scan', 'AE 安全扫描'],
     ['ae-markitdown', 'AE Markitdown'],
     ['ae-static-server', 'AE 静态服务器'],
     ['ae-computer-use-guard', 'AE 电脑控制约束'],
@@ -269,6 +294,7 @@ try {
       'ae-debug',
       'ae-tdd',
       'ae-claude-code',
+      'ae-security-scan',
       'ae-markitdown',
       'ae-static-server',
       'ae-computer-use-guard',
@@ -282,7 +308,7 @@ try {
     verifiedMultiAgentPolicy: 'multi_agent_auto_analysis_by_default',
     verifiedSkillGovernancePolicy: 'source_mirror_metadata_and_path_safety',
     verifiedPluginVersion: installedPluginManifest.version,
-    verifiedCommands: ['recovery', 'claude-delegate', 'markitdown', 'static-server', 'check-ae-artifacts', 'check-design-contract'],
+    verifiedCommands: ['recovery', 'claude-delegate', 'security-help', 'markitdown', 'static-server', 'check-ae-artifacts', 'check-design-contract'],
   }, null, 2))
 } finally {
   cleanupTarget()

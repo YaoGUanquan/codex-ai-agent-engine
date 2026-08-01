@@ -70,6 +70,7 @@ node scripts/ae-tools.mjs help
 - `ae-work`：在 Git/worktree 安全检查后执行计划。
 - `ae-refactor`：规划行为保持型重构。
 - `ae-review`：按严重度优先审查代码或文档。
+- `ae-security-scan`：在依赖变更和源代码外发均获明确授权后，准备和复核项目级 Codex Security CLI 扫描。
 - `ae-doc-humanize`：把结构化或生硬内容改写成更易读的文档。
 - `ae-doc-structure`：把散乱内容整理成需求、计划、交接或检查清单。
 - `ae-frontend-design`：前端设计与界面实现。

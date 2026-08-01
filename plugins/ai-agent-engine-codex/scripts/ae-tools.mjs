@@ -1,10 +1,11 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
+import { existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, realpathSync, statSync, writeFileSync } from 'node:fs'
 import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { createServer } from 'node:http'
+import { inspectCodexSecurityUpstream } from './codex-security-source-check.mjs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -75,6 +76,9 @@ function main() {
       case 'claude-delegate':
         printJson(claudeDelegate(process.cwd(), args))
         break
+      case 'codex-security-source-check':
+        printJson(inspectCodexSecurityUpstream())
+        break
       case 'review-contract':
         printJson(reviewContract(process.cwd(), args))
         break
@@ -96,7 +100,7 @@ function main() {
         printJson(graphQuery(process.cwd(), args))
         break
       default:
-        throw new Error(`Unknown command: ${command}\nAvailable: help, init, recovery, task-analyze, task-brief, review-package, gate, swagger, claude-delegate, review-contract, evidence, markitdown, static-server, ae-graph-build, ae-graph-query`)
+        throw new Error(`Unknown command: ${command}\nAvailable: help, init, recovery, task-analyze, task-brief, review-package, gate, swagger, claude-delegate, codex-security-source-check, review-contract, evidence, markitdown, static-server, ae-graph-build, ae-graph-query`)
     }
   } catch (error) {
     console.error(formatError(error))
@@ -321,8 +325,8 @@ function detectProjectContext(worktree) {
   }
   const repoName = basename(worktree)
   return {
-    name: packageJson?.name || repoName,
-    description: packageJson?.description || null,
+    name: quoteMetadata(packageJson?.name || repoName),
+    description: packageJson?.description ? quoteMetadata(packageJson.description) : null,
     indicators: [...new Set(indicators)].slice(0, 20),
     importantPaths: [...new Set(importantPaths)].slice(0, 20),
     scripts: scripts.slice(0, 20),
@@ -339,7 +343,16 @@ function readOptionalJson(path) {
 
 function formatList(items, fallback = 'TBD') {
   if (!items || items.length === 0) return `- ${fallback}`
-  return items.map((item) => `- ${item}`).join('\n')
+  return items.map((item) => `- ${quoteMetadata(item)}`).join('\n')
+}
+
+function quoteMetadata(value) {
+  const normalized = String(value)
+    .replace(/\r?\n/g, ' ')
+    .replace(/[\u0000-\u001f\u007f]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+  return JSON.stringify(normalized)
 }
 
 function enInitTemplates(context) {
@@ -1655,6 +1668,8 @@ function staticServer(worktree, args) {
   const stat = statSync(targetPath)
   const port = clampInteger(Number(opts.port || 4173), 4173, 1, 65535)
   const host = String(opts.host || '127.0.0.1')
+  if (!isLoopbackHost(host)) throw new Error('static-server only permits loopback hosts')
+  assertPreviewTarget(targetPath)
   const rel = normalizeRelPath(relative(worktree, targetPath)) || '.'
   const urlPath = stat.isDirectory() ? '/' : `/${encodeURI(basename(targetPath))}`
   const base = {
@@ -1675,10 +1690,16 @@ function staticServer(worktree, args) {
   const root = stat.isDirectory() ? targetPath : dirname(targetPath)
   const server = createServer((request, response) => {
     try {
-      const requestPath = decodeURIComponent((request.url || '/').split('?')[0] || '/')
+      let requestPath
+      try {
+        requestPath = decodeURIComponent((request.url || '/').split('?')[0] || '/')
+      } catch {
+        response.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' })
+        response.end('Not found')
+        return
+      }
       const localPath = requestPath === '/' && stat.isFile() ? targetPath : resolve(root, `.${requestPath}`)
-      const relPath = relative(root, localPath)
-      if (relPath.startsWith('..') || isAbsolute(relPath) || !existsSync(localPath) || !statSync(localPath).isFile()) {
+      if (!isSafePreviewFile(root, localPath)) {
         response.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' })
         response.end('Not found')
         return
@@ -1693,6 +1714,48 @@ function staticServer(worktree, args) {
   server.listen(port, host, () => {
     printJson({ ...base, dryRun: false, pid: process.pid })
   })
+}
+
+function assertPreviewTarget(targetPath) {
+  const targetStat = lstatSync(targetPath)
+  if (targetStat.isSymbolicLink() || (!targetStat.isDirectory() && !targetStat.isFile())) {
+    throw new Error('static-server target must be a regular file or directory without symlinks')
+  }
+  if (hasHiddenPathComponent(basename(targetPath))) {
+    throw new Error('static-server target cannot be hidden')
+  }
+  if (!isCanonicalWithin(targetPath, targetPath)) {
+    throw new Error('static-server target must remain within its canonical root')
+  }
+}
+
+function isSafePreviewFile(root, candidate) {
+  if (!existsSync(candidate)) return false
+  const relPath = relative(root, candidate)
+  if (relPath.startsWith('..') || isAbsolute(relPath)) return false
+  if (hasHiddenPathComponent(relPath)) return false
+  const candidateStat = lstatSync(candidate)
+  if (candidateStat.isSymbolicLink() || !candidateStat.isFile()) return false
+  return isCanonicalWithin(root, candidate)
+}
+
+function isCanonicalWithin(root, candidate) {
+  try {
+    const rootReal = realpathSync(root)
+    const candidateReal = realpathSync(candidate)
+    const relPath = relative(rootReal, candidateReal)
+    return !relPath.startsWith('..') && !isAbsolute(relPath)
+  } catch {
+    return false
+  }
+}
+
+function hasHiddenPathComponent(path) {
+  return String(path).split(/[\\/]+/).some((part) => part.startsWith('.'))
+}
+
+function isLoopbackHost(host) {
+  return host === 'localhost' || host === '127.0.0.1' || host === '::1' || host === '[::1]'
 }
 
 function contentType(path) {

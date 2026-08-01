@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE 安全扫描"
+  short_description: "在授权、外发范围和证据边界下执行可选的 Codex Security CLI 扫描"
+  default_prompt: "使用 $ae-security-scan 为当前仓库准备一次已授权的安全扫描。"
+policy:
+  allow_implicit_invocation: true
