@@ -1,6 +1,6 @@
 interface:
-  display_name: "AE 计划生成 (ae-plan) / AE Plan (ae-plan)"
-  short_description: "ae-plan 编码前创建 AE 实现计划 / ae-plan creates AE implementation plans before coding"
-  default_prompt: "使用 $ae-plan 将这个需求转换为实现计划。 / Use $ae-plan to turn this requirement into an implementation plan."
+  display_name: "AE 计划生成 (ae-plan)"
+  short_description: "ae-plan 编码前创建 AE 实现计划"
+  default_prompt: "使用 $ae-plan 将这个需求转换为实现计划。"
 policy:
   allow_implicit_invocation: true
