@@ -56,6 +56,16 @@ node scripts/ae-tools.mjs init --dry-run
 node scripts/ae-tools.mjs help
 ```
 
+## 版本更新记录
+
+### 0.3.7（2026-08-03）
+
+- 退役 `ae-computer-use-guard` 和 `ae-video-edit-computer`，并移除它们的活动镜像、语言元数据、安装期望和 Computer Use hook 模板。更新安装脚本会清理目标项目中这两个旧 skill 目录；本次不提供兼容别名，也不引入新的桌面或视频运行时。
+- `ae-test-browser` 增加“先侦察再操作”、适用时等待 `networkidle`、以及将辅助脚本视为黑盒调用边界的规则。`ae-review` 在提出 `delete` 或 `shrink` 建议前，要求确认行为基线、调用关系和当前设计原因。
+- `ae-prd`、`ae-plan` 和 `ae-review` 模板增加可选的 must-have、deviation 和 verification gap 记录，用既有需求 ID 串联交付条件、批准的偏差与缺失证明；它们不创建自动判定器、后台循环、hook 或运行时注册。
+- 图片提示词流程保留提示词优先的通用能力，不再依赖已退役的 Computer Use 配置。
+- 分发版本同步为 `0.3.7`。该变更已通过 `npm test`、`npm run check`、`node scripts/check-install-smoke.mjs` 和 `git diff --check`；这些检查证明本地分发和静态合同，不代表浏览器、部署或未来模型遵循度的验收。
+
 ## 能力清单
 
 - `ae-help`：查看当前 AE 能力和边界。
@@ -79,9 +89,7 @@ node scripts/ae-tools.mjs help
 - `ae-debug`：系统化排查构建失败、运行时异常、UI 问题和接口故障。
 - `ae-tdd`：围绕明确行为执行红绿重构式测试驱动开发。
 - `ae-test-browser`：用真实浏览器验收 UI 流程。
-- `ae-computer-use-guard`：约束 Codex Computer Use 的截图、上下文、阶段检查点、hooks 门禁和专家配置。
 - `ae-imagegen-prompt`：把视觉想法优化成图片生成提示词，支持参考图角色、生成预算和视频分镜素材；提示词-only 不强制 hooks。
-- `ae-video-edit-computer`：用本地工具优先和受约束的 Computer Use 执行桌面视频剪辑流程；GUI 前检查 hooks，FFmpeg/ffprobe 阶段前检查本地工具。
 - `ae-sql`：生成、审查或执行 SQL，并保留安全边界。
 - `ae-swagger-parser`：摘要或过滤 Swagger/OpenAPI 规格。
 - `ae-handoff`：沉淀任务状态、证据、阻塞点和下一步。
@@ -403,6 +411,7 @@ docs/ai-memory/                  # init 后的兼容说明入口
 npm run check
 node --check scripts/ae-tools.mjs
 node --check plugins/ai-agent-engine-codex/scripts/ae-tools.mjs
+node scripts/check-release-notes.mjs
 node scripts/check-design-contract.mjs
 node scripts/ae-tools.mjs help
 node scripts/ae-tools.mjs ae-graph-build --root scripts

@@ -24,11 +24,9 @@ test('renderYaml emits bilingual metadata for ae-help', () => {
   assert.match(yaml, /short_description: "查看 Codex 中可用的 AE 工作流能力 \/ List AE workflow capabilities for Codex"/)
 })
 
-test('renderYaml supports Computer Use video skills in all language modes', () => {
+test('renderYaml supports image-generation metadata in all language modes', () => {
   const skills = [
-    ['ae-computer-use-guard', 'AE Computer Use Guard', 'AE 电脑控制约束'],
     ['ae-imagegen-prompt', 'AE Imagegen Prompt', 'AE 图片生成提示词'],
-    ['ae-video-edit-computer', 'AE Video Edit Computer', 'AE 电脑剪辑视频'],
   ]
 
   for (const [skillName, englishLabel, chineseLabel] of skills) {
@@ -75,6 +73,31 @@ test('root package and plugin manifest keep synchronized distribution versions',
 
   assert.match(packageJson.version, /^\d+\.\d+\.\d+$/)
   assert.equal(pluginManifest.version, packageJson.version)
+})
+
+test('check-release-notes requires versioned dated README summaries', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-release-notes-'))
+  try {
+    mkdirSync(join(tempRoot, 'plugins', 'ai-agent-engine-codex', '.codex-plugin'), { recursive: true })
+    writeFileSync(join(tempRoot, 'package.json'), JSON.stringify({ version: '1.2.3' }), 'utf8')
+    writeFileSync(join(tempRoot, 'plugins', 'ai-agent-engine-codex', '.codex-plugin', 'plugin.json'), JSON.stringify({ version: '1.2.3' }), 'utf8')
+    writeFileSync(join(tempRoot, 'README.md'), '### 1.2.3（2026-08-03）\n\n- Chinese change summary.\n', 'utf8')
+    writeFileSync(join(tempRoot, 'README.en.md'), '### 1.2.3 (2026-08-03)\n\n- English change summary.\n', 'utf8')
+
+    const valid = runNodeScriptJson(['scripts/check-release-notes.mjs', '--target', tempRoot])
+    assert.equal(valid.status, 'ok')
+    assert.equal(valid.version, '1.2.3')
+
+    writeFileSync(join(tempRoot, 'README.en.md'), '### 1.2.3 (2026-08-03)\n', 'utf8')
+    const invalid = spawnSync(process.execPath, [resolve(repoRoot, 'scripts/check-release-notes.mjs'), '--target', tempRoot], {
+      cwd: repoRoot,
+      encoding: 'utf8',
+    })
+    assert.equal(invalid.status, 1)
+    assert.match(invalid.stderr, /change-summary bullet/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
 })
 
 test('check-skill-language-metadata reports ok', () => {
@@ -131,6 +154,9 @@ test('Ponytail-inspired minimality guidance is present in source and mirror skil
       /`yagni`/,
       /`shrink`/,
       /expected impact/,
+      /behavior baseline/,
+      /relevant call path, import, entrypoint, or consumer/,
+      /design reason for the current shape/,
       /Do not flag narrow tests, trust-boundary validation, security controls, accessibility basics, or explicit user requirements as bloat\./,
     ],
     'ae-plan': [
@@ -709,6 +735,12 @@ test('frontend motion governance is reflected in source and mirror skills', () =
   assert.match(acceptanceSource, /reduced-motion/i)
   assert.match(acceptanceSource, /completion state/i)
   assert.match(acceptanceSource, /unverified/i)
+  assert.match(browserSource, /Reconnoiter before acting/)
+  assert.match(browserSource, /`networkidle`/)
+  assert.match(browserSource, /black box/)
+  assert.match(acceptanceSource, /Reconnaissance And Stability/)
+  assert.match(acceptanceSource, /`networkidle`/)
+  assert.match(acceptanceSource, /black box/)
 
   const forgeSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-web-forge')
   const forgeMirror = readSkillBody('.agents/skills', 'ae-web-forge')
@@ -823,9 +855,7 @@ test('check-install-smoke reports ok and verifies new skills', () => {
     'ae-claude-code',
     'ae-markitdown',
     'ae-static-server',
-    'ae-computer-use-guard',
     'ae-imagegen-prompt',
-    'ae-video-edit-computer',
   ])
 })
 
@@ -1006,9 +1036,6 @@ test('installed language switching updates active skills for all supported modes
   const result = runNodeScript('scripts/check-install-smoke.mjs')
   assert.equal(result.status, 'ok')
   assert.deepEqual(result.verifiedLanguageModes, ['bilingual', 'en', 'zh-CN'])
-  assert.equal(result.verifiedDefaultProfile, 'beginner+low_resource_2g4core_relay')
-  assert.equal(result.verifiedHookPolicy, 'computer_use_requires_hooks')
-  assert.equal(result.verifiedLocalToolPolicy, 'video_requires_ffmpeg_ffprobe_checks')
   assert.equal(result.verifiedMultiAgentPolicy, 'multi_agent_auto_analysis_by_default')
   assert.equal(result.verifiedSkillGovernancePolicy, 'source_mirror_metadata_and_path_safety')
   const packageJson = JSON.parse(readFileSync(resolve(repoRoot, 'package.json'), 'utf8'))
@@ -2541,6 +2568,54 @@ test('AE review output template defines task review verdict fields', () => {
   assert.match(template, /qualityVerdict/i)
   assert.match(template, /cannotVerifyFromDiff/i)
   assert.match(template, /blockingFindings/i)
+})
+
+test('cross-artifact verification vocabulary is conditional and mirrored', () => {
+  const vocabularyFiles = [
+    [
+      'plugins/ai-agent-engine-codex/skills/ae-prd/references/requirements-capture.md',
+      '.agents/skills/ae-prd/references/requirements-capture.md',
+      [
+        /## Must-Haves \(Conditional\)/,
+        /Requirement ID: <R1 or NFR1>/,
+        /Must-have completion condition:/,
+        /Omit it when ordinary requirements and acceptance conditions are sufficient\./,
+      ],
+    ],
+    [
+      'plugins/ai-agent-engine-codex/skills/ae-plan/references/plan-template.md',
+      '.agents/skills/ae-plan/references/plan-template.md',
+      [
+        /## Deviations \(Conditional\)/,
+        /Authority or decision source:/,
+        /Recovery or explicit deferral:/,
+        /## Verification Gaps \(Conditional\)/,
+        /Required proof and missing check:/,
+        /A gap does not pass the requirement and does not approve a deviation\./,
+      ],
+    ],
+    [
+      'plugins/ai-agent-engine-codex/skills/ae-review/references/review-output-template.md',
+      '.agents/skills/ae-review/references/review-output-template.md',
+      [
+        /## Deviations \(Conditional\)/,
+        /Related requirement ID:/,
+        /Impact:/,
+        /## Verification Gaps \(Conditional\)/,
+        /Status: <blocked \| unverified \| failed \| not-applicable>/,
+        /Owner and next action:/,
+      ],
+    ],
+  ]
+
+  for (const [sourcePath, mirrorPath, expectations] of vocabularyFiles) {
+    const source = readFileSync(resolve(repoRoot, sourcePath), 'utf8')
+    const mirror = readFileSync(resolve(repoRoot, mirrorPath), 'utf8')
+    assert.equal(mirror, source, `${mirrorPath} should match ${sourcePath}`)
+    for (const expectation of expectations) {
+      assert.match(source, expectation, `${sourcePath} should include ${expectation}`)
+    }
+  }
 })
 
 function runNodeScript(relativePath) {

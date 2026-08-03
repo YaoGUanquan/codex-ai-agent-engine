@@ -81,9 +81,7 @@ node scripts/ae-tools.mjs help
 - `ae-tdd`: run a red-green-refactor loop when behavior is precise enough for test-first work.
 - `ae-task-loop`: iterate on exploratory fixes with smallest plausible fix hypotheses before broadening scope.
 - `ae-test-browser`: validate UI flows in a real browser.
-- `ae-computer-use-guard`: constrain Codex Computer Use screenshots, context, stage checkpoints, hooks gates, and expert profiles.
 - `ae-imagegen-prompt`: turn visual ideas into image-generation prompts with reference roles, generation budgets, and storyboard assets; prompt-only work does not require hooks.
-- `ae-video-edit-computer`: run desktop video-editing workflows with local tooling first and guarded Computer Use; check hooks before GUI work and FFmpeg/ffprobe before local media stages.
 - `ae-sql`: generate, review, or execute SQL with explicit safety boundaries.
 - `ae-swagger-parser`: summarize or filter Swagger/OpenAPI specs.
 - `ae-handoff`: capture task state, evidence, blockers, and next steps.
@@ -389,6 +387,7 @@ From this repo:
 npm run check
 node --check scripts/ae-tools.mjs
 node --check plugins/ai-agent-engine-codex/scripts/ae-tools.mjs
+node scripts/check-release-notes.mjs
 node scripts/check-design-contract.mjs
 node scripts/ae-tools.mjs help
 node scripts/ae-tools.mjs ae-graph-build --root scripts
@@ -397,6 +396,16 @@ node scripts/ae-tools.mjs ae-graph-build --root scripts
 Validate skills with your local Codex skill validator if available.
 
 See [docs/release-checklist.md](docs/release-checklist.md) before publishing a GitHub release.
+
+## Version Updates
+
+### 0.3.7 (2026-08-03)
+
+- Retired `ae-computer-use-guard` and `ae-video-edit-computer`, including their active mirrors, language metadata, installation expectations, and Computer Use hook templates. The installer removes these stale skill directories from target projects; this change adds neither compatibility aliases nor a desktop or video runtime.
+- `ae-test-browser` now requires reconnaissance before action, `networkidle` when applicable, and black-box treatment for helper scripts. `ae-review` now requires a behavior baseline, call-path evidence, and a local design reason before recommending `delete` or `shrink`.
+- `ae-prd`, `ae-plan`, and `ae-review` templates now offer optional must-have, deviation, and verification-gap records. Existing requirement IDs connect delivery criteria, approved variance, and missing proof; the templates do not add automatic judging, background loops, hooks, or runtime registration.
+- Image-prompt work retains prompt-first general capability without depending on the retired Computer Use configuration.
+- Distribution versions are synchronized at `0.3.7`. The change passed `npm test`, `npm run check`, `node scripts/check-install-smoke.mjs`, and `git diff --check`. These checks establish local distribution and static contracts only, not browser, deployment, or future-model-adherence acceptance.
 
 ## Publishing To GitHub
 

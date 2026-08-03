@@ -16,12 +16,14 @@ Validate UI behavior in a real browser.
    - Playwright for repeatable end-to-end flows, multi-step assertions, viewport checks, console/network capture, or CI-like evidence.
    - DevTools only when an available tool exposes low-level inspection that Browser or Playwright cannot cover.
 4. Start or reuse the dev server when needed.
-5. Confirm the page is nonblank and not obscured by a framework error overlay or blocking modal.
-6. Use browser tools for navigation, snapshots, interaction, screenshots, console errors, and network failures.
-7. Exercise at least one meaningful interaction for each claimed pass path.
-8. Check desktop and mobile viewports when responsive behavior matters.
-9. When material motion is in scope, exercise its trigger, confirm the usable completion state, and inspect the reduced-motion behavior when the target and available browser tool support it.
-10. Report exact pass/fail evidence, screenshots if useful, and unverified areas.
+5. Reconnoiter before acting: load the route, capture its initial state, identify prerequisites and interaction targets, and note any documented helper script without changing application state.
+6. Confirm the page is nonblank and not obscured by a framework error overlay or blocking modal.
+7. When page quiescence matters, wait for `networkidle` with a bounded timeout before taking baseline evidence. If polling, streaming, or long-lived connections prevent it, record that limitation and use stable DOM and relevant network evidence instead.
+8. Use browser tools for navigation, snapshots, interaction, screenshots, console errors, and network failures.
+9. Exercise at least one meaningful interaction for each claimed pass path.
+10. Check desktop and mobile viewports when responsive behavior matters.
+11. When material motion is in scope, exercise its trigger, confirm the usable completion state, and inspect the reduced-motion behavior when the target and available browser tool support it.
+12. Report exact pass/fail evidence, screenshots if useful, and unverified areas.
 
 ## Rules
 
@@ -29,6 +31,7 @@ Validate UI behavior in a real browser.
 - Prefer accessibility snapshots for interaction targets and screenshots for visual evidence.
 - If the requested host is unreachable, validate the browser toolchain on a known-good page before blaming the app.
 - Include console or network failures when they materially affect the result, even if the visible UI appears correct.
+- Invoke a documented project helper script only through its documented interface as a black box. Record its command and exit result, and treat it as supporting evidence rather than browser acceptance.
 - For material motion, report an explicit unverified limitation when the target or available browser tool cannot exercise reduced-motion behavior.
 - Route implementation work back to `ae-frontend-design` or `ae-web-app`; this skill is for verification.
 - Do not register or assume dynamic OpenCode MCP tools. Use only browser tools that are already available in the Codex session.

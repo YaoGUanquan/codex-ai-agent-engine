@@ -64,6 +64,13 @@ sharded: false
 - NFR1. <Performance, security, compatibility, usability, or operational requirement>  
   Acceptance: <How this is checked.>
 
+## Must-Haves (Conditional)
+
+Use this section only for a small set of delivery-critical acceptance criteria. Omit it when ordinary requirements and acceptance conditions are sufficient. Do not create a second requirement ID or repeat the full requirement text.
+
+- Requirement ID: <R1 or NFR1>
+  Must-have completion condition: <Measurable condition that cannot silently slip from the delivery.>
+
 ## Success Criteria
 
 - <How to know the right problem was solved.>
@@ -155,6 +162,7 @@ Before writing the artifact, check:
 - Does every requirement have an `Acceptance:` condition?
 - Are assumptions separated from confirmed facts?
 - Are product blockers separated from planning-time technical questions?
+- Are must-haves present only for delivery-critical criteria, keyed to existing requirement IDs, and expressed as measurable completion conditions?
 - Are implementation details absent unless explicitly required?
 - Are capability, benchmark, installation, or behavior claims tied to evidence or marked as assumptions?
 - Does the consistency check match the actual IDs in the document?
