@@ -17,7 +17,14 @@ try {
   const existingTemplatePath = resolve(existingTemplateDir, 'user-template.md')
   mkdirSync(existingTemplateDir, { recursive: true })
   writeFileSync(existingTemplatePath, 'user-owned template\n', 'utf8')
-  const staleSkillDirs = ['ae-officecli', 'ae-docx', 'ae-xlsx', 'ae-pptx']
+  const staleSkillDirs = [
+    'ae-officecli',
+    'ae-docx',
+    'ae-xlsx',
+    'ae-pptx',
+    'ae-computer-use-guard',
+    'ae-video-edit-computer',
+  ]
   for (const skillName of staleSkillDirs) {
     const staleSkillDir = resolve(targetRoot, '.agents', 'skills', skillName)
     mkdirSync(staleSkillDir, { recursive: true })
@@ -49,9 +56,7 @@ try {
     'plugins/ai-agent-engine-codex/skills/ae-claude-code/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-markitdown/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-static-server/SKILL.md',
-    'plugins/ai-agent-engine-codex/skills/ae-computer-use-guard/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-imagegen-prompt/SKILL.md',
-    'plugins/ai-agent-engine-codex/skills/ae-video-edit-computer/SKILL.md',
     'plugins/ai-agent-engine-codex/scripts/check-ae-artifacts.mjs',
     'plugins/ai-agent-engine-codex/.codex-plugin/plugin.json',
     '.agents/skills/ae-prd/agents/openai.yaml',
@@ -68,15 +73,10 @@ try {
     '.agents/skills/ae-claude-code/agents/openai.yaml',
     '.agents/skills/ae-markitdown/agents/openai.yaml',
     '.agents/skills/ae-static-server/agents/openai.yaml',
-    '.agents/skills/ae-computer-use-guard/agents/openai.yaml',
     '.agents/skills/ae-imagegen-prompt/agents/openai.yaml',
-    '.agents/skills/ae-video-edit-computer/agents/openai.yaml',
     'docs/ae/templates/ae-skill-profiles.example.yaml',
     'docs/ae/templates/constitution-template.md',
     'docs/ae/templates/requirements-quality-checklist.md',
-    'docs/ae/templates/computer-use-hooks/README.md',
-    'docs/ae/templates/computer-use-hooks/hooks.example.json',
-    'docs/ae/templates/computer-use-hooks/pre-tool-use-computer-budget.example.py',
     'scripts/ae-tools.mjs',
     'scripts/set-ae-language.mjs',
     'scripts/check-ae-artifacts.mjs',
@@ -97,7 +97,7 @@ try {
   for (const skillName of staleSkillDirs) {
     const staleSkillDir = resolve(targetRoot, '.agents', 'skills', skillName)
     if (existsSync(staleSkillDir)) {
-      throw new Error(`Install left removed OfficeCLI skill in target mirror: ${skillName}`)
+      throw new Error(`Install left removed skill in target mirror: ${skillName}`)
     }
   }
   for (const staleScriptPath of staleScriptPaths) {
@@ -147,9 +147,7 @@ try {
     ['ae-claude-code', 'AE Claude Code'],
     ['ae-markitdown', 'AE Markitdown'],
     ['ae-static-server', 'AE 静态服务器 / AE Static Server'],
-    ['ae-computer-use-guard', 'AE 电脑控制约束 / AE Computer Use Guard'],
     ['ae-imagegen-prompt', 'AE 图片生成提示词 / AE Imagegen Prompt'],
-    ['ae-video-edit-computer', 'AE 电脑剪辑视频 / AE Video Edit Computer'],
   ]
   for (const [skillName, expectedLabel] of expectedBilingualLabels) {
     const yaml = readFileSync(resolve(targetRoot, '.agents', 'skills', skillName, 'agents', 'openai.yaml'), 'utf8')
@@ -159,24 +157,6 @@ try {
   }
 
   const profileTemplate = readFileSync(resolve(targetRoot, 'docs', 'ae', 'templates', 'ae-skill-profiles.example.yaml'), 'utf8')
-  if (!profileTemplate.includes('server_profile: low_resource')) {
-    throw new Error('Installed profile template does not default to low_resource')
-  }
-  if (!profileTemplate.includes('2G/4-core relay')) {
-    throw new Error('Installed profile template does not explain the 2G/4-core relay default')
-  }
-  if (!profileTemplate.includes('hook_guard:')) {
-    throw new Error('Installed profile template does not include hook_guard defaults')
-  }
-  if (!profileTemplate.includes('deny_computer_use_when_missing: true')) {
-    throw new Error('Installed profile template does not block Computer Use when hooks are missing')
-  }
-  if (!profileTemplate.includes('local_tool_guard:')) {
-    throw new Error('Installed profile template does not include local_tool_guard defaults')
-  }
-  if (!profileTemplate.includes('ffmpeg') || !profileTemplate.includes('ffprobe')) {
-    throw new Error('Installed profile template does not list ffmpeg/ffprobe local tool defaults')
-  }
   if (!profileTemplate.includes('multi_agent:')) {
     throw new Error('Installed profile template does not include multi_agent defaults')
   }
@@ -193,17 +173,6 @@ try {
     throw new Error('Installed profile template does not include path traversal governance defaults')
   }
 
-  const hooksReadme = readFileSync(resolve(targetRoot, 'docs', 'ae', 'templates', 'computer-use-hooks', 'README.md'), 'utf8')
-  if (!hooksReadme.includes('Computer Use') || !hooksReadme.includes('ffmpeg')) {
-    throw new Error('Installed hooks README does not explain Computer Use and local media tool policy')
-  }
-  const hooksJson = JSON.parse(readFileSync(resolve(targetRoot, 'docs', 'ae', 'templates', 'computer-use-hooks', 'hooks.example.json'), 'utf8'))
-  if (hooksJson.policy?.computer_use_requires_hooks !== true) {
-    throw new Error('Installed hooks example does not require hooks for Computer Use')
-  }
-  if (hooksJson.policy?.deny_computer_use_when_missing !== true) {
-    throw new Error('Installed hooks example does not deny Computer Use when hooks are missing')
-  }
 
   run(process.execPath, [resolve(targetRoot, 'scripts', 'set-ae-language.mjs'), '--lang', 'en'], { cwd: targetRoot })
   const expectedEnglishLabels = [
@@ -218,9 +187,7 @@ try {
     ['ae-claude-code', 'AE Claude Code'],
     ['ae-markitdown', 'AE Markitdown'],
     ['ae-static-server', 'AE Static Server'],
-    ['ae-computer-use-guard', 'AE Computer Use Guard'],
     ['ae-imagegen-prompt', 'AE Imagegen Prompt'],
-    ['ae-video-edit-computer', 'AE Video Edit Computer'],
   ]
   for (const [skillName, expectedLabel] of expectedEnglishLabels) {
     const yaml = readFileSync(resolve(targetRoot, '.agents', 'skills', skillName, 'agents', 'openai.yaml'), 'utf8')
@@ -242,9 +209,7 @@ try {
     ['ae-claude-code', 'AE Claude Code'],
     ['ae-markitdown', 'AE Markitdown'],
     ['ae-static-server', 'AE 静态服务器'],
-    ['ae-computer-use-guard', 'AE 电脑控制约束'],
     ['ae-imagegen-prompt', 'AE 图片生成提示词'],
-    ['ae-video-edit-computer', 'AE 电脑剪辑视频'],
   ]
   for (const [skillName, expectedLabel] of expectedChineseLabels) {
     const yaml = readFileSync(resolve(targetRoot, '.agents', 'skills', skillName, 'agents', 'openai.yaml'), 'utf8')
@@ -271,14 +236,9 @@ try {
       'ae-claude-code',
       'ae-markitdown',
       'ae-static-server',
-      'ae-computer-use-guard',
       'ae-imagegen-prompt',
-      'ae-video-edit-computer',
     ],
     verifiedLanguageModes: ['bilingual', 'en', 'zh-CN'],
-    verifiedDefaultProfile: 'beginner+low_resource_2g4core_relay',
-    verifiedHookPolicy: 'computer_use_requires_hooks',
-    verifiedLocalToolPolicy: 'video_requires_ffmpeg_ffprobe_checks',
     verifiedMultiAgentPolicy: 'multi_agent_auto_analysis_by_default',
     verifiedSkillGovernancePolicy: 'source_mirror_metadata_and_path_safety',
     verifiedPluginVersion: installedPluginManifest.version,

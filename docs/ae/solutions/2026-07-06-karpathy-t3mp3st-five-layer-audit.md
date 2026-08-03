@@ -68,7 +68,7 @@ The current project is already close to the five-layer shape:
 
 - Memory: root `AGENTS.md`, `docs/08-ai-memory`, `docs/ai-memory`.
 - Knowledge: `plugins/ai-agent-engine-codex/skills/*` and mirrored `.agents/skills/*`.
-- Guardrail: validation scripts, AE final gates under `docs/ae/gates`, and templates under `docs/ae/templates/computer-use-hooks`; no always-on Codex hook runtime is assumed.
+- Guardrail: validation scripts and AE final gates under `docs/ae/gates`; no always-on Codex hook runtime is assumed.
 - Delegation: `ae-claude-code`, `ae-agent-creator`, and multi-agent plan analysis guidance.
 - Distribution: `.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json`, install and update scripts.
 

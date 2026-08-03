@@ -38,6 +38,7 @@
 - 每次可分发的 AE 插件更新都必须同步递增根 `package.json` 与 `plugins/ai-agent-engine-codex/.codex-plugin/plugin.json` 的 SemVer `version`。
 - 两处版本必须完全一致；更新脚本复制完整插件目录，因此目标项目更新后以插件 manifest 的版本作为已安装版本。
 - 只调整文档而不改变可分发插件内容时，不单独升级插件版本；版本升级必须由回归测试和安装烟测验证。
+- 每次递增可分发版本时，必须在 `README.md` 和 `README.en.md` 追加对应的 `### <version>（YYYY-MM-DD）` 或 `### <version> (YYYY-MM-DD)` 条目，至少说明修改摘要、验证命令及其证明边界；运行 `node scripts/check-release-notes.mjs` 验证版本、日期和摘要映射。
 
 ## 中文与编码规则
 

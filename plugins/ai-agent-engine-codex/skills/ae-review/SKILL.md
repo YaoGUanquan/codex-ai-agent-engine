@@ -83,6 +83,8 @@ Use these tags for concrete findings:
 
 Complexity findings must include location, evidence, what to cut or replace, the concrete replacement, and expected impact. Do not flag narrow tests, trust-boundary validation, security controls, accessibility basics, or explicit user requirements as bloat. Suppress stylistic preferences that do not reduce owned behavior or maintenance risk.
 
+Before proposing a `delete` or `shrink` finding, establish the behavior baseline from requirements, tests, or observed outputs; trace the relevant call path, import, entrypoint, or consumer; and identify the design reason for the current shape from local documentation, code, or history when available. If that evidence is incomplete, report the verification gap instead of recommending removal. Do not infer dead code or redundant protection from local appearance alone.
+
 ## Claim-Integrity Lane
 
 When reviewing documentation, skill instructions, installer docs, benchmark notes, external-audit reports, or delivery evidence, add a claim-integrity lane. This lane checks whether each material claim has current evidence and whether unsupported runtime behavior is being presented as enforced behavior.

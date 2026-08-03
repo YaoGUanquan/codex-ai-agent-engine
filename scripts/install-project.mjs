@@ -22,7 +22,14 @@ const targetArtifactChecker = resolve(targetScripts, 'check-ae-artifacts.mjs')
 const targetDesignContractChecker = resolve(targetScripts, 'check-design-contract.mjs')
 const sourceTemplates = resolve(repoRoot, 'docs', 'ae', 'templates')
 const targetTemplates = resolve(targetRoot, 'docs', 'ae', 'templates')
-const removedSkillNames = ['ae-officecli', 'ae-docx', 'ae-xlsx', 'ae-pptx']
+const removedSkillNames = [
+  'ae-officecli',
+  'ae-docx',
+  'ae-xlsx',
+  'ae-pptx',
+  'ae-computer-use-guard',
+  'ae-video-edit-computer',
+]
 const removedScriptNames = ['check-officecli-available.mjs', 'check-officecli-smoke.mjs']
 const lang = readArg('--lang') || readInstalledLang(targetRoot) || 'bilingual'
 const supportedLangs = new Set(['en', 'zh-CN', 'bilingual'])

@@ -1,6 +1,6 @@
 # Image Generation Budget
 
-Prompt-only image work does not require Codex hooks because it does not use desktop screenshots or `Computer Use`.
+This skill produces prompt specifications and does not operate desktop GUI tools or `Computer Use`.
 
 ## Default Limits
 
@@ -11,11 +11,10 @@ Prompt-only image work does not require Codex hooks because it does not use desk
 | Storyboard frames per planning batch | 4 | 8 planned prompts, generated in separate bounded stages |
 | Reference images per request | role-labeled only | no unlabeled references |
 
-## Require Hooks Only When
+## GUI Boundary
 
-- The workflow hands off to `Computer Use`.
-- A desktop image editor or video editor must be controlled by GUI.
-- The agent would inspect local visual files through repeated screenshots instead of file metadata or explicit user-provided references.
+- A request requiring GUI editing or desktop control is outside this skill and requires a separately authorized workflow.
+- Inspect local visual files through file metadata or explicit user-provided references, not repeated screenshots.
 
 ## Stop Conditions
 

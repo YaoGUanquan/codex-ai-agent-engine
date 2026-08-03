@@ -9,6 +9,14 @@ Minimum browser evidence for a claimed pass:
 5. At least one screenshot or equivalent visual confirmation when layout matters.
 6. Desktop and mobile checks when responsive behavior is relevant.
 
+## Reconnaissance And Stability
+
+Before triggering a workflow, load the route and capture the initial UI, prerequisites, interaction targets, and known failure state. This is reconnaissance, not acceptance evidence by itself.
+
+When the browser tool supports it and page quiescence is relevant, wait for `networkidle` with a bounded timeout before collecting a baseline snapshot. Do not treat `networkidle` as mandatory for pages with polling, streaming, or persistent connections: record the reason it did not settle, then use a stable DOM snapshot plus relevant console and network evidence.
+
+If the project supplies a documented browser helper script, invoke it through its documented command and arguments as a black box. Record the command and exit result; do not modify or infer undocumented internals, and do not promote a successful helper run to browser acceptance without exercising the user flow.
+
 ## Material Motion Evidence
 
 When material motion is part of the claimed behavior, add all applicable evidence:
