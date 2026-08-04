@@ -307,9 +307,29 @@
       "script": "node scripts/check-design-contract.mjs [--target <project>]"
     },
     {
+      "name": "check-memory-knowledge-contract",
+      "purpose": "验证 docs/08-ai-memory/00-registry.json 的声明式记忆元数据、证据关系、路径安全和目标文件完整性。",
+      "script": "node scripts/check-memory-knowledge-contract.mjs [--root <path>]"
+    },
+    {
+      "name": "ae-memory-query",
+      "purpose": "只读检索已登记的 Markdown 记忆；至少指定 topic、path 或 relation 之一，未登记内容不会被扫描。",
+      "script": "node scripts/ae-tools.mjs ae-memory-query [--root <path>] (--topic <topic>|--path <path>|--relation <type>) [--limit 20]"
+    },
+    {
+      "name": "ae-knowledge-map",
+      "purpose": "输出已声明的记忆到 AE 产物关系图，并为每条边保留 declared provenance 和证据路径。",
+      "script": "node scripts/ae-tools.mjs ae-knowledge-map [--root <path>] [--limit 20]"
+    },
+    {
+      "name": "ae-knowledge-query",
+      "purpose": "按路径和方向查询已声明的文档关系；不推断反向关系或源代码依赖。",
+      "script": "node scripts/ae-tools.mjs ae-knowledge-query [--root <path>] --path <path> [--relation <type>] [--direction incoming|outgoing|both]"
+    },
+    {
       "name": "ae-graph-build",
       "purpose": "Build a shallow dependency graph JSON snapshot with freshness metadata for pre-Phase 2 file and import relation preview.",
-      "script": "node scripts/ae-tools.mjs ae-graph-build [--root <path>] [--limit 500]"
+      "script": "node scripts/ae-tools.mjs ae-graph-build [--root <path>] [--limit 500] [--edge-limit <count>]"
     },
     {
       "name": "ae-graph-query",

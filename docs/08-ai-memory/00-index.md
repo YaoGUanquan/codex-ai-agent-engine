@@ -9,6 +9,7 @@
 
 ## 文件导航
 
+- `00-registry.json`：经人工维护的机器可读元数据与证据关系；Markdown 记忆仍是唯一权威来源。
 - `01-project-context.md`：项目定位、技术栈、路径和本地约束。
 - `02-architecture-boundaries.md`：模块边界、职责边界和集成点。
 - `03-key-workflows.md`：长期复用的关键流程。
@@ -21,6 +22,7 @@
 - `10-minimality-review.md`：Ponytail-inspired minimality gate and complexity review adaptation boundaries.
 - `11-ocr-review-guidance.md`：OCR-inspired diff review discipline, rule profiles, deterministic engineering audit, and prompt pattern boundaries.
 - `12-codex-skill-slash-discoverability.md`：Codex skill-backed discoverability decision, wording boundaries, and validation workflow.
+- `13-review-inventory-and-advisory-impact.md`：审查文件清单、顾问式影响分析和证据边界。
 - Frontend motion governance is recorded in `03-key-workflows.md`, `05-decision-log.md`, and `docs/ae/experience/2026-07-28-frontend-motion-governance.md`.
 - `99-prompt-template.md`：初始化或维护记忆库的提示词模板。
 

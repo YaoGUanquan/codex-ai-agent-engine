@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { createServer } from 'node:http'
+import { knowledgeMap, knowledgeQuery, memoryQuery } from './memory-knowledge-contract.mjs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -87,6 +88,18 @@ function main() {
       case 'static-server':
         staticServer(process.cwd(), args)
         break
+      case 'ae-memory-query':
+      case 'memory-query':
+        printContractResult(memoryQuery(process.cwd(), args))
+        break
+      case 'ae-knowledge-map':
+      case 'knowledge-map':
+        printContractResult(knowledgeMap(process.cwd(), args))
+        break
+      case 'ae-knowledge-query':
+      case 'knowledge-query':
+        printContractResult(knowledgeQuery(process.cwd(), args))
+        break
       case 'ae-graph-build':
       case 'graph-build':
         printJson(graphBuild(process.cwd(), args))
@@ -96,7 +109,7 @@ function main() {
         printJson(graphQuery(process.cwd(), args))
         break
       default:
-        throw new Error(`Unknown command: ${command}\nAvailable: help, init, recovery, task-analyze, task-brief, review-package, gate, swagger, claude-delegate, review-contract, evidence, markitdown, static-server, ae-graph-build, ae-graph-query`)
+        throw new Error(`Unknown command: ${command}\nAvailable: help, init, recovery, task-analyze, task-brief, review-package, gate, swagger, claude-delegate, review-contract, evidence, markitdown, static-server, ae-memory-query, ae-knowledge-map, ae-knowledge-query, ae-graph-build, ae-graph-query`)
     }
   } catch (error) {
     console.error(formatError(error))
@@ -1713,8 +1726,13 @@ function contentType(path) {
 function graphBuild(worktree, args) {
   const opts = parseOptions(args)
   const root = opts.root ? safeResolve(worktree, opts.root) : worktree
-  const files = collectSourceFiles(root).slice(0, Number(opts.limit || 500))
+  const fileLimit = graphLimit(opts.limit, 500, '--limit')
+  const edgeLimit = graphLimit(opts['edge-limit'], null, '--edge-limit')
+  const eligibleFiles = collectSourceFiles(root)
+  const files = eligibleFiles.slice(0, fileLimit.effective)
   const graph = buildShallowGraph(root, files)
+  const allEdges = graph.edges
+  graph.edges = edgeLimit.effective === null ? allEdges : allEdges.slice(0, edgeLimit.effective)
   const store = {
     path: 'docs/ae/graphs/graph.json',
     schemaVersion: 1,
@@ -1732,6 +1750,21 @@ function graphBuild(worktree, args) {
     nodes: graph.nodes,
     edges: graph.edges,
     freshness: graphFreshness(worktree, root, graph),
+    limits: {
+      files: {
+        requested: fileLimit.requested,
+        effective: fileLimit.effective,
+        eligible: eligibleFiles.length,
+        returned: files.length,
+        truncated: eligibleFiles.length > files.length,
+      },
+      edges: {
+        requested: edgeLimit.requested,
+        effective: edgeLimit.effective,
+        returned: graph.edges.length,
+        truncated: graph.edges.length < allEdges.length,
+      },
+    },
     store,
     limitations: [
       'static shallow scan only',
@@ -1763,9 +1796,18 @@ function graphQuery(worktree, args) {
     relatedEdges,
     externalDependencies: graph.externalDependencies.filter((dep) => !path || dep.from === path),
     freshness: graph.freshness,
+    limits: graph.limits,
     store: graph.store,
     limitations: graph.limitations,
   }
+}
+
+function graphLimit(value, defaultValue, option) {
+  if (value === undefined) return { requested: null, effective: defaultValue }
+  if (typeof value !== 'string' || !value.trim()) throw new Error(`${option} requires a non-empty value`)
+  const parsed = Number(value)
+  if (!Number.isInteger(parsed) || parsed < 1 || parsed > 10000) throw new Error(`${option} must be an integer from 1 to 10000`)
+  return { requested: parsed, effective: parsed }
 }
 
 function graphFreshness(worktree, root, graph) {
@@ -1984,14 +2026,14 @@ function buildShallowGraph(root, files) {
     for (const dep of deps) {
       if (dep.startsWith('.') || dep.startsWith('/')) {
         const resolved = resolveLocalDependency(file.relativePath, dep, fileSet)
-        if (resolved) edges.push({ from: file.relativePath, to: resolved, type: 'imports', specifier: dep })
+        if (resolved) edges.push({ from: file.relativePath, to: resolved, type: 'imports', specifier: dep, provenance: 'inferred' })
       } else {
         external.push({ from: file.relativePath, dependency: dep })
       }
     }
     for (const reference of extractFiles(text)) {
       if (fileSet.has(reference) && reference !== file.relativePath) {
-        edges.push({ from: file.relativePath, to: reference, type: 'mentions' })
+        edges.push({ from: file.relativePath, to: reference, type: 'mentions', provenance: 'inferred' })
       }
     }
   }
@@ -2764,6 +2806,11 @@ function toPosix(path) {
 
 function printJson(value) {
   console.log(JSON.stringify(value, null, 2))
+}
+
+function printContractResult(result) {
+  printJson(result)
+  if (result.status !== 'ok') process.exitCode = 1
 }
 
 function formatError(error) {

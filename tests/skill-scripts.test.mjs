@@ -840,6 +840,8 @@ test('check-install-smoke reports ok and verifies new skills', () => {
   assert.ok(result.verifiedCommands.includes('claude-delegate'))
   assert.ok(result.verifiedCommands.includes('check-ae-artifacts'))
   assert.ok(result.verifiedCommands.includes('check-design-contract'))
+  assert.ok(result.verifiedCommands.includes('check-memory-knowledge-contract'))
+  assert.ok(result.verifiedCommands.includes('ae-memory-query'))
   assert.deepEqual(result.verifiedSkills, [
     'ae-prd',
     'ae-work-report',
@@ -1049,6 +1051,8 @@ test('package check script omits OfficeCLI checks', () => {
   assert.doesNotMatch(checkScript, /node scripts\/check-officecli-smoke\.mjs/)
   assert.match(checkScript, /node scripts\/check-ae-artifacts\.mjs/)
   assert.match(checkScript, /node scripts\/check-design-contract\.mjs/)
+  assert.match(checkScript, /node scripts\/check-memory-knowledge-contract\.mjs --root \./)
+  assert.match(checkScript, /node scripts\/ae-tools\.mjs ae-memory-query --topic graph/)
   assert.match(checkScript, /node scripts\/check-skill-contract\.mjs/)
   assert.match(checkScript, /node scripts\/ae-tools\.mjs ae-graph-build --root scripts/)
   assert.match(checkScript, /node scripts\/ae-tools\.mjs ae-graph-query --root scripts --path ae-tools\.mjs/)
@@ -1685,6 +1689,262 @@ test('risk-scaled test design guidance is present in source and mirror skills', 
   }
 })
 
+test('memory registry queries return only declared, bounded metadata and relations', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-memory-registry-'))
+  try {
+    writeMemoryFixture(tempRoot)
+    const before = readdirSync(tempRoot).sort()
+    const check = runNodeScriptJson(['scripts/check-memory-knowledge-contract.mjs', '--root', '.'], tempRoot)
+    assert.equal(check.status, 'ok')
+    assert.equal(check.documentCount, 2)
+    assert.equal(check.relationCount, 2)
+
+    const memory = runNodeScriptJson(['scripts/ae-tools.mjs', 'ae-memory-query', '--topic', 'graph', '--relation', 'supports', '--limit', '1', '--excerpt', '32'], tempRoot)
+    assert.equal(memory.status, 'ok')
+    assert.deepEqual(memory.results.map((result) => result.id), ['graph-memory'])
+    assert.equal(memory.results[0].relations[0].provenance, 'declared')
+    assert.equal(memory.limits.truncated, false)
+    assert.ok(memory.results[0].excerpt.length <= 35)
+
+    const map = runNodeScriptJson(['scripts/ae-tools.mjs', 'ae-knowledge-map', '--limit', '1'], tempRoot)
+    assert.equal(map.status, 'ok')
+    assert.equal(map.edges.length, 1)
+    assert.equal(map.limits.truncated, true)
+    assert.equal(map.nodes.length, 2, 'map nodes must be bounded by selected declared edges')
+    assert.ok(map.edges.every((edge) => edge.provenance === 'declared'))
+
+    const query = runNodeScriptJson(['scripts/ae-tools.mjs', 'ae-knowledge-query', '--path', 'docs/ae/references/graph.md', '--direction', 'incoming'], tempRoot)
+    assert.equal(query.status, 'ok')
+    assert.deepEqual(query.edges.map((edge) => edge.from), ['graph-memory'])
+    assert.deepEqual(readdirSync(tempRoot).sort(), before, 'memory commands must not create worktree state')
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('memory registry rejects malformed data and reports no declared match separately', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-memory-registry-'))
+  const invalidRoot = mkdtempSync(join(tmpdir(), 'ae-memory-invalid-'))
+  try {
+    writeMemoryFixture(tempRoot)
+    const noMatch = runNodeScriptJson(['scripts/ae-tools.mjs', 'ae-memory-query', '--topic', 'absent'], tempRoot)
+    assert.equal(noMatch.status, 'ok')
+    assert.deepEqual(noMatch.results, [])
+    assert.deepEqual(noMatch.diagnostics, ['no declared match'])
+
+    mkdirSync(join(invalidRoot, 'docs', '08-ai-memory'), { recursive: true })
+    writeFileSync(join(invalidRoot, 'docs', '08-ai-memory', '00-registry.json'), '{not json', 'utf8')
+    const invalid = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'ae-tools.mjs'), 'ae-memory-query', '--topic', 'graph'], {
+      cwd: invalidRoot,
+      encoding: 'utf8',
+      stdio: 'pipe',
+    })
+    assert.equal(invalid.status, 1)
+    const output = JSON.parse(invalid.stdout)
+    assert.equal(output.status, 'invalid')
+    assert.match(output.diagnostics.join('\n'), /invalid registry JSON/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+    rmSync(invalidRoot, { recursive: true, force: true })
+  }
+})
+
+test('memory registry rejects duplicate, unsafe, dangling, and unsupported declarations', () => {
+  const cases = [
+    ['duplicate id', (registry) => { registry.documents[1].id = registry.documents[0].id }],
+    ['duplicate path', (registry) => { registry.documents[1].path = registry.documents[0].path }],
+    ['missing target', (registry) => { registry.documents[0].path = 'docs/08-ai-memory/missing.md' }],
+    ['outside memory allowlist', (registry) => { registry.documents[0].path = 'docs/00-process/memory.md' }],
+    ['unsupported relation target', (registry) => { registry.relations[0].to = 'docs/00-process/evidence.md' }],
+    ['unsupported relation type', (registry) => { registry.relations[0].type = 'guesses' }],
+    ['missing evidence', (registry) => { delete registry.relations[0].evidence }],
+    ['hidden target path', (registry) => { registry.documents[0].path = 'docs/08-ai-memory/.env.md' }],
+  ]
+
+  for (const [label, mutate] of cases) {
+    const tempRoot = mkdtempSync(join(tmpdir(), 'ae-memory-invalid-'))
+    try {
+      writeMemoryFixture(tempRoot)
+      const registryPath = join(tempRoot, 'docs', '08-ai-memory', '00-registry.json')
+      const registry = JSON.parse(readFileSync(registryPath, 'utf8'))
+      mutate(registry)
+      writeFileSync(registryPath, JSON.stringify(registry), 'utf8')
+      const result = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'check-memory-knowledge-contract.mjs')], {
+        cwd: tempRoot,
+        encoding: 'utf8',
+        stdio: 'pipe',
+      })
+      assert.equal(result.status, 1, label)
+      assert.equal(JSON.parse(result.stdout).status, 'invalid', label)
+    } finally {
+      rmSync(tempRoot, { recursive: true, force: true })
+    }
+  }
+})
+
+test('memory registry preserves UTF-8 and rejects oversized registry or document reads', () => {
+  const utf8Root = mkdtempSync(join(tmpdir(), 'ae-memory-utf8-'))
+  const registryRoot = mkdtempSync(join(tmpdir(), 'ae-memory-large-registry-'))
+  const documentRoot = mkdtempSync(join(tmpdir(), 'ae-memory-large-document-'))
+  try {
+    writeMemoryFixture(utf8Root)
+    const utf8MemoryPath = join(utf8Root, 'docs', '08-ai-memory', '01-memory.md')
+    writeFileSync(utf8MemoryPath, '# 图谱记忆\n这是 UTF-8 内容。\n', 'utf8')
+    const utf8 = runNodeScriptJson(['scripts/ae-tools.mjs', 'ae-memory-query', '--topic', 'graph'], utf8Root)
+    assert.match(utf8.results[0].excerpt, /图谱记忆/)
+
+    writeMemoryFixture(registryRoot)
+    const registryPath = join(registryRoot, 'docs', '08-ai-memory', '00-registry.json')
+    const oversizedRegistry = JSON.parse(readFileSync(registryPath, 'utf8'))
+    oversizedRegistry.padding = 'x'.repeat(300000)
+    writeFileSync(registryPath, JSON.stringify(oversizedRegistry), 'utf8')
+    const oversizedCheck = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'check-memory-knowledge-contract.mjs')], {
+      cwd: registryRoot,
+      encoding: 'utf8',
+      stdio: 'pipe',
+    })
+    assert.equal(oversizedCheck.status, 1)
+    assert.match(JSON.parse(oversizedCheck.stdout).diagnostics.join('\n'), /262144 byte limit/)
+
+    writeMemoryFixture(documentRoot)
+    writeFileSync(join(documentRoot, 'docs', '08-ai-memory', '01-memory.md'), `# Large\n${'x'.repeat(520 * 1024)}`, 'utf8')
+    const oversizedQuery = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'ae-tools.mjs'), 'ae-memory-query', '--topic', 'graph'], {
+      cwd: documentRoot,
+      encoding: 'utf8',
+      stdio: 'pipe',
+    })
+    assert.equal(oversizedQuery.status, 1)
+    assert.match(JSON.parse(oversizedQuery.stdout).diagnostics.join('\n'), /524288 byte limit/)
+  } finally {
+    for (const root of [utf8Root, registryRoot, documentRoot]) rmSync(root, { recursive: true, force: true })
+  }
+})
+
+test('memory registry rejects link path components before reading targets', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-memory-link-'))
+  const outsideRoot = mkdtempSync(join(tmpdir(), 'ae-memory-link-outside-'))
+  const linkType = process.platform === 'win32' ? 'junction' : 'dir'
+  try {
+    mkdirSync(join(tempRoot, 'docs', '08-ai-memory'), { recursive: true })
+    mkdirSync(join(outsideRoot, 'memory'), { recursive: true })
+    writeFileSync(join(outsideRoot, 'memory', 'linked.md'), '# linked\n', 'utf8')
+    symlinkSync(join(outsideRoot, 'memory'), join(tempRoot, 'docs', '08-ai-memory', 'linked'), linkType)
+    writeFileSync(join(tempRoot, 'docs', '08-ai-memory', '00-registry.json'), JSON.stringify({
+      schemaVersion: 1,
+      documents: [{
+        id: 'linked-memory',
+        path: 'docs/08-ai-memory/linked/linked.md',
+        kind: 'memory',
+        role: 'unsafe link fixture',
+        topics: ['link'],
+        reviewStatus: 'current',
+      }],
+      relations: [],
+    }), 'utf8')
+    const result = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'check-memory-knowledge-contract.mjs'), '--root', '.'], {
+      cwd: tempRoot,
+      encoding: 'utf8',
+      stdio: 'pipe',
+    })
+    assert.equal(result.status, 1)
+    const output = JSON.parse(result.stdout)
+    assert.equal(output.status, 'invalid')
+    assert.match(output.diagnostics.join('\n'), /symbolic link or junction/i)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+    rmSync(outsideRoot, { recursive: true, force: true })
+  }
+})
+
+test('memory registry rejects linked --root ancestors before reading a registry', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-memory-root-link-'))
+  const outsideRoot = mkdtempSync(join(tmpdir(), 'ae-memory-root-link-outside-'))
+  const linkType = process.platform === 'win32' ? 'junction' : 'dir'
+  try {
+    writeMemoryFixture(join(outsideRoot, 'scoped'))
+    symlinkSync(outsideRoot, join(tempRoot, 'linked'), linkType)
+    const result = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'check-memory-knowledge-contract.mjs'), '--root', 'linked/scoped'], {
+      cwd: tempRoot,
+      encoding: 'utf8',
+      stdio: 'pipe',
+    })
+    assert.equal(result.status, 1)
+    const output = JSON.parse(result.stdout)
+    assert.equal(output.status, 'invalid')
+    assert.match(output.diagnostics.join('\n'), /symbolic link or junction is not allowed: linked/i)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+    rmSync(outsideRoot, { recursive: true, force: true })
+  }
+})
+
+test('memory and graph commands reject missing values for value-taking options', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-memory-missing-option-'))
+  try {
+    writeMemoryFixture(tempRoot)
+    const contractCases = [
+      ['ae-memory-query', '--topic', 'graph', '--limit'],
+      ['ae-memory-query', '--topic', 'graph', '--excerpt'],
+      ['ae-memory-query', '--topic', '--relation', 'supports'],
+      ['ae-knowledge-query', '--path', 'docs/ae/references/graph.md', '--direction'],
+      ['ae-knowledge-query', '--path', 'docs/ae/references/graph.md', '--relation'],
+      ['ae-knowledge-query', '--path', '--direction', 'incoming'],
+    ]
+    for (const args of contractCases) {
+      const result = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'ae-tools.mjs'), ...args], {
+        cwd: tempRoot,
+        encoding: 'utf8',
+        stdio: 'pipe',
+      })
+      assert.equal(result.status, 1, args.join(' '))
+      const output = JSON.parse(result.stdout)
+      assert.equal(output.status, 'invalid')
+      assert.match(output.diagnostics.join('\n'), /requires a non-empty value/)
+    }
+
+    for (const args of [
+      ['ae-graph-build', '--root', 'src', '--limit', '--no-write'],
+      ['ae-graph-build', '--root', 'src', '--edge-limit', '--no-write'],
+    ]) {
+      const result = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'ae-tools.mjs'), ...args], {
+        cwd: tempRoot,
+        encoding: 'utf8',
+        stdio: 'pipe',
+      })
+      assert.equal(result.status, 1, args.join(' '))
+      assert.match(result.stderr, /requires a non-empty value/)
+    }
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('graph helpers report additive file and explicit edge limits without writing state', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-graph-limits-'))
+  try {
+    mkdirSync(join(tempRoot, 'src'), { recursive: true })
+    writeFileSync(join(tempRoot, 'src', 'main.js'), "import './first.js'\nimport './second.js'\n", 'utf8')
+    writeFileSync(join(tempRoot, 'src', 'first.js'), 'export const first = 1\n', 'utf8')
+    writeFileSync(join(tempRoot, 'src', 'second.js'), 'export const second = 2\n', 'utf8')
+    writeFileSync(join(tempRoot, 'src', 'third.js'), 'export const third = 3\n', 'utf8')
+    const defaultResult = runNodeScriptJson(['scripts/ae-tools.mjs', 'ae-graph-build', '--root', '.', '--no-write'], tempRoot)
+    assert.equal(defaultResult.limits.files.requested, null)
+    assert.equal(defaultResult.limits.files.effective, 500)
+    assert.equal(defaultResult.limits.edges.effective, null)
+    assert.equal(defaultResult.limits.edges.truncated, false)
+
+    const capped = runNodeScriptJson(['scripts/ae-tools.mjs', 'ae-graph-build', '--root', '.', '--limit', '3', '--edge-limit', '1', '--no-write'], tempRoot)
+    assert.equal(capped.limits.files.requested, 3)
+    assert.equal(capped.limits.files.truncated, true)
+    assert.equal(capped.limits.edges.requested, 1)
+    assert.equal(capped.limits.edges.truncated, true)
+    assert.equal(capped.edges.length, 1)
+    assert.equal(existsSync(join(tempRoot, 'docs', 'ae', 'graphs', 'graph.json')), false)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
 test('graph-build reports shallow local dependencies', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-graph-'))
   try {
@@ -1714,6 +1974,7 @@ test('graph-build reports shallow local dependencies', () => {
     assert.equal(existsSync(join(tempRoot, 'docs', 'ae', 'graphs', 'graph.json')), false)
     assert.ok(result.nodes.some((node) => node.path === 'src/main.js'))
     assert.ok(result.edges.some((edge) => edge.from === 'src/main.js' && edge.to === 'src/helper.js' && edge.type === 'imports'))
+    assert.ok(result.edges.every((edge) => edge.provenance === 'inferred'))
     assert.ok(result.externalDependencies.some((dep) => dep.from === 'src/main.js' && dep.dependency === 'node:fs'))
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
@@ -2617,6 +2878,50 @@ test('cross-artifact verification vocabulary is conditional and mirrored', () =>
     }
   }
 })
+
+function writeMemoryFixture(root) {
+  mkdirSync(join(root, 'docs', '08-ai-memory'), { recursive: true })
+  mkdirSync(join(root, 'docs', 'ae', 'references'), { recursive: true })
+  writeFileSync(join(root, 'docs', '08-ai-memory', '01-memory.md'), '# Graph memory\nA declared graph record.\n', 'utf8')
+  writeFileSync(join(root, 'docs', '08-ai-memory', '02-release.md'), '# Release memory\nA declared release record.\n', 'utf8')
+  writeFileSync(join(root, 'docs', 'ae', 'references', 'graph.md'), '# Graph artifact\n', 'utf8')
+  writeFileSync(join(root, 'AGENTS.md'), '# Guidance\n', 'utf8')
+  writeFileSync(join(root, 'docs', '08-ai-memory', '00-registry.json'), JSON.stringify({
+    schemaVersion: 1,
+    documents: [
+      {
+        id: 'graph-memory',
+        path: 'docs/08-ai-memory/01-memory.md',
+        kind: 'memory',
+        role: 'graph fixture',
+        topics: ['graph', 'fixture'],
+        reviewStatus: 'current',
+      },
+      {
+        id: 'release-memory',
+        path: 'docs/08-ai-memory/02-release.md',
+        kind: 'memory',
+        role: 'release fixture',
+        topics: ['release'],
+        reviewStatus: 'reviewed',
+      },
+    ],
+    relations: [
+      {
+        from: 'graph-memory',
+        to: 'docs/ae/references/graph.md',
+        type: 'supports',
+        evidence: { path: 'docs/08-ai-memory/01-memory.md', note: 'Fixture relation is declared in canonical memory.' },
+      },
+      {
+        from: 'release-memory',
+        to: 'AGENTS.md',
+        type: 'documents',
+        evidence: { path: 'docs/08-ai-memory/02-release.md', note: 'Fixture relation documents project guidance.' },
+      },
+    ],
+  }, null, 2), 'utf8')
+}
 
 function runNodeScript(relativePath) {
   const scriptPath = resolve(repoRoot, relativePath)

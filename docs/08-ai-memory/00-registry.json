@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "documents": [
+    {
+      "id": "project-context",
+      "path": "docs/08-ai-memory/01-project-context.md",
+      "kind": "memory",
+      "role": "project profile, stack, and local constraints",
+      "topics": ["project", "plugin", "distribution"],
+      "reviewStatus": "current"
+    },
+    {
+      "id": "architecture-boundaries",
+      "path": "docs/08-ai-memory/02-architecture-boundaries.md",
+      "kind": "memory",
+      "role": "module responsibilities and integration boundaries",
+      "topics": ["architecture", "boundaries", "plugin"],
+      "reviewStatus": "current"
+    },
+    {
+      "id": "key-workflows",
+      "path": "docs/08-ai-memory/03-key-workflows.md",
+      "kind": "memory",
+      "role": "durable engineering and release workflows",
+      "topics": ["workflow", "validation", "release"],
+      "reviewStatus": "current"
+    },
+    {
+      "id": "known-pitfalls",
+      "path": "docs/08-ai-memory/04-known-pitfalls.md",
+      "kind": "memory",
+      "role": "encoding, installation, and workflow pitfalls",
+      "topics": ["pitfalls", "utf-8", "installation"],
+      "reviewStatus": "current"
+    },
+    {
+      "id": "decision-log",
+      "path": "docs/08-ai-memory/05-decision-log.md",
+      "kind": "memory",
+      "role": "durable project decisions",
+      "topics": ["decisions", "governance", "architecture"],
+      "reviewStatus": "current"
+    },
+    {
+      "id": "maintenance-rules",
+      "path": "docs/08-ai-memory/06-agent-maintenance-rules.md",
+      "kind": "maintenance",
+      "role": "rules for maintaining canonical project memory",
+      "topics": ["memory", "maintenance", "governance"],
+      "reviewStatus": "current"
+    },
+    {
+      "id": "computer-use-video-skills",
+      "path": "docs/08-ai-memory/07-computer-use-video-skills.md",
+      "kind": "memory",
+      "role": "stable external capability boundaries",
+      "topics": ["computer-use", "video", "boundaries"],
+      "reviewStatus": "historical"
+    },
+    {
+      "id": "phase-two-tooling",
+      "path": "docs/08-ai-memory/08-phase-two-tooling.md",
+      "kind": "memory",
+      "role": "read-only graph and tooling decisions",
+      "topics": ["graph", "tooling", "read-only"],
+      "reviewStatus": "current"
+    },
+    {
+      "id": "multi-agent-auto-config",
+      "path": "docs/08-ai-memory/09-multi-agent-auto-config.md",
+      "kind": "memory",
+      "role": "multi-agent analysis and safety policy",
+      "topics": ["multi-agent", "configuration", "safety"],
+      "reviewStatus": "current"
+    },
+    {
+      "id": "minimality-review",
+      "path": "docs/08-ai-memory/10-minimality-review.md",
+      "kind": "memory",
+      "role": "complexity and minimality review boundary",
+      "topics": ["review", "minimality", "complexity"],
+      "reviewStatus": "current"
+    },
+    {
+      "id": "ocr-review-guidance",
+      "path": "docs/08-ai-memory/11-ocr-review-guidance.md",
+      "kind": "memory",
+      "role": "diff review and audit guidance",
+      "topics": ["review", "audit", "evidence"],
+      "reviewStatus": "current"
+    },
+    {
+      "id": "skill-discoverability",
+      "path": "docs/08-ai-memory/12-codex-skill-slash-discoverability.md",
+      "kind": "memory",
+      "role": "Codex skill discoverability boundary",
+      "topics": ["skills", "discoverability", "codex"],
+      "reviewStatus": "current"
+    },
+    {
+      "id": "review-inventory",
+      "path": "docs/08-ai-memory/13-review-inventory-and-advisory-impact.md",
+      "kind": "memory",
+      "role": "review inventory and advisory impact guidance",
+      "topics": ["review", "inventory", "impact"],
+      "reviewStatus": "current"
+    }
+  ],
+  "relations": [
+    {
+      "from": "project-context",
+      "to": "AGENTS.md",
+      "type": "documents",
+      "evidence": {
+        "path": "docs/08-ai-memory/01-project-context.md",
+        "note": "The project context records the plugin and mirror paths governed by AGENTS.md."
+      }
+    },
+    {
+      "from": "maintenance-rules",
+      "to": "docs/ae/constitution.md",
+      "type": "governs",
+      "evidence": {
+        "path": "docs/08-ai-memory/06-agent-maintenance-rules.md",
+        "note": "The maintenance rules require durable memory and workflow artifacts to follow project governance."
+      }
+    },
+    {
+      "from": "phase-two-tooling",
+      "to": "docs/ae/references/codex-five-layer-architecture.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/08-phase-two-tooling.md",
+        "note": "The phase-two tooling record describes the graph boundary in the project's layered architecture."
+      }
+    },
+    {
+      "from": "review-inventory",
+      "to": "docs/ae/constitution.md",
+      "type": "supports",
+      "evidence": {
+        "path": "docs/08-ai-memory/13-review-inventory-and-advisory-impact.md",
+        "note": "The review-inventory guidance supports the constitution's traceability and review gates."
+      }
+    }
+  ]
+}
