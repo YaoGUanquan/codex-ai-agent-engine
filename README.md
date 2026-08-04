@@ -58,6 +58,13 @@ node scripts/ae-tools.mjs help
 
 ## 版本更新记录
 
+### 0.3.8（2026-08-04）
+
+- 新增 `docs/08-ai-memory/00-registry.json` 的声明式记忆合同、路径安全校验、`ae-memory-query`、`ae-knowledge-map` 和 `ae-knowledge-query`。Markdown 记忆仍是唯一权威来源；查询只返回已登记元数据和带证据的 declared 关系，不扫描未登记文档。
+- `ae-graph-build` 与 `ae-graph-query` 在保持默认 500 文件、无边数上限行为的同时，新增 `limits` 元数据；只有显式 `--edge-limit` 才截断边。
+- 记忆、知识关系和浅层图命令会拒绝缺少值的取值型参数；`--root` 必须是工作区内不经由符号链接或 junction 的目录，防止读取越界。
+- 安装器会分发记忆合同检查器，安装烟测验证缺失注册表返回结构化非零诊断且不创建状态。未引入 CodeGraph、MCP 自动注册、网络请求、数据库或后台服务。
+
 ### 0.3.7（2026-08-03）
 
 - 退役 `ae-computer-use-guard` 和 `ae-video-edit-computer`，并移除它们的活动镜像、语言元数据、安装期望和 Computer Use hook 模板。更新安装脚本会清理目标项目中这两个旧 skill 目录；本次不提供兼容别名，也不引入新的桌面或视频运行时。
@@ -113,6 +120,19 @@ node scripts/ae-tools.mjs help
 node scripts/check-design-contract.mjs
 ```
 
+记忆与声明式关系校验：
+
+```bash
+node scripts/check-memory-knowledge-contract.mjs
+node scripts/ae-tools.mjs ae-memory-query --topic graph
+node scripts/ae-tools.mjs ae-knowledge-map --limit 20
+node scripts/ae-tools.mjs ae-knowledge-query --path docs/08-ai-memory/08-phase-two-tooling.md --direction outgoing
+```
+
+记忆查询只读取 `docs/08-ai-memory/00-registry.json` 中已登记的 Markdown 和关系；没有命中时只返回 `no declared match`，不会扫描未登记文档。`ae-knowledge-map` 与 `ae-knowledge-query` 仅返回 `declared` 文档关系及其证据。它们不会创建缓存、数据库、图谱文件或 CodeGraph 状态。
+
+所有需要取值的选项必须显式提供非空值，例如 `--limit 20` 和 `--direction outgoing`；缺少值会返回结构化诊断并以非零状态退出。`--root` 仅接受当前工作区内的普通目录，命令会逐段拒绝符号链接或 junction，并验证解析后的路径不离开工作区。
+
 浅层依赖图辅助命令：
 
 ```bash
@@ -120,7 +140,7 @@ node scripts/ae-tools.mjs ae-graph-build --root scripts
 node scripts/ae-tools.mjs ae-graph-query --root scripts --path ae-tools.mjs
 ```
 
-`ae-graph-build` 和 `ae-graph-query` 是只读浅层依赖图脚本，用于快速预览源码文件、静态导入边和外部依赖。它们不会写入 `docs/ae/graphs/graph.json` 或 `.ae/graph.db`，也不提供完整图谱 schema、分片、freshness 或预览页。
+`ae-graph-build` 和 `ae-graph-query` 是只读浅层依赖图脚本，用于快速预览源码文件、静态导入边和外部依赖。输出的 `limits` 会标明文件和边的请求值、有效值、返回数量和截断状态；默认保持 500 文件、无边数上限，只有 `--edge-limit` 才截断边。它们不会写入 `docs/ae/graphs/graph.json` 或 `.ae/graph.db`，也不提供完整图谱 schema、分片、freshness 或预览页。
 
 ## 项目级安装
 

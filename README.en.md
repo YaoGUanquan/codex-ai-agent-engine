@@ -105,6 +105,17 @@ Validate design contracts:
 node scripts/check-design-contract.mjs
 ```
 
+Validate declared memory and documentation relations:
+
+```bash
+node scripts/check-memory-knowledge-contract.mjs
+node scripts/ae-tools.mjs ae-memory-query --topic graph
+node scripts/ae-tools.mjs ae-knowledge-map --limit 20
+node scripts/ae-tools.mjs ae-knowledge-query --path docs/08-ai-memory/08-phase-two-tooling.md --direction outgoing
+```
+
+Memory queries only read registered Markdown and relations from `docs/08-ai-memory/00-registry.json`. A no-match returns only `no declared match`; unregistered documents are not searched. `ae-knowledge-map` and `ae-knowledge-query` return only `declared` relationships with their evidence. None of these commands creates a cache, database, graph file, or CodeGraph state.
+
 Additional helper commands:
 
 ```bash
@@ -112,7 +123,7 @@ node scripts/ae-tools.mjs ae-graph-build --root scripts
 node scripts/ae-tools.mjs ae-graph-query --root scripts --path ae-tools.mjs
 ```
 
-`ae-graph-build` and `ae-graph-query` are shallow, read-only dependency graph helpers. They scan source files and emit JSON for quick dependency previews. They do not write `docs/ae/graphs/graph.json` or `.ae/graph.db`, maintain graph freshness, shard a graph schema, or render a preview page.
+`ae-graph-build` and `ae-graph-query` are shallow, read-only dependency graph helpers. Their additive `limits` object reports requested/effective file and edge limits, returned counts, and truncation. The default remains a 500-file scan with uncapped edges; only `--edge-limit` truncates edges. They do not write `docs/ae/graphs/graph.json` or `.ae/graph.db`, maintain graph freshness, shard a graph schema, or render a preview page.
 
 ## Project-Level Installation
 
@@ -398,6 +409,12 @@ Validate skills with your local Codex skill validator if available.
 See [docs/release-checklist.md](docs/release-checklist.md) before publishing a GitHub release.
 
 ## Version Updates
+
+### 0.3.8 (2026-08-04)
+
+- Added the declared `docs/08-ai-memory/00-registry.json` contract, path-safe validator, `ae-memory-query`, `ae-knowledge-map`, and `ae-knowledge-query`. Markdown memory remains canonical; commands return only registered metadata and evidence-backed declared relations.
+- `ae-graph-build` and `ae-graph-query` now expose additive `limits` metadata while retaining the default 500-file scan and uncapped edge behavior. Edge truncation requires explicit `--edge-limit`.
+- The installer now ships the memory-contract checker, and install smoke verifies that an absent registry produces a structured non-zero diagnostic without creating state. This adds no CodeGraph, MCP auto-registration, network request, database, or background service.
 
 ### 0.3.7 (2026-08-03)
 

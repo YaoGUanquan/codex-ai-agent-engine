@@ -58,6 +58,8 @@ try {
     'plugins/ai-agent-engine-codex/skills/ae-static-server/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-imagegen-prompt/SKILL.md',
     'plugins/ai-agent-engine-codex/scripts/check-ae-artifacts.mjs',
+    'plugins/ai-agent-engine-codex/scripts/check-memory-knowledge-contract.mjs',
+    'plugins/ai-agent-engine-codex/scripts/memory-knowledge-contract.mjs',
     'plugins/ai-agent-engine-codex/.codex-plugin/plugin.json',
     '.agents/skills/ae-prd/agents/openai.yaml',
     '.agents/skills/ae-work-report/agents/openai.yaml',
@@ -81,6 +83,7 @@ try {
     'scripts/set-ae-language.mjs',
     'scripts/check-ae-artifacts.mjs',
     'scripts/check-design-contract.mjs',
+    'scripts/check-memory-knowledge-contract.mjs',
   ]
   for (const relPath of expectedPaths) {
     const fullPath = resolve(targetRoot, relPath)
@@ -131,6 +134,19 @@ try {
   const designContractResult = JSON.parse(run(process.execPath, [resolve(targetRoot, 'scripts', 'check-design-contract.mjs')], { cwd: targetRoot }).stdout)
   if (designContractResult.status !== 'ok' || designContractResult.checked !== 0) {
     throw new Error('Installed check-design-contract command did not return stable no-design JSON')
+  }
+  const memoryCheckResult = runExpectedFailure(process.execPath, [resolve(targetRoot, 'scripts', 'check-memory-knowledge-contract.mjs')], { cwd: targetRoot })
+  const memoryCheckOutput = JSON.parse(memoryCheckResult.stdout)
+  if (memoryCheckOutput.status !== 'invalid' || !memoryCheckOutput.diagnostics.some((item) => /missing path component/i.test(item))) {
+    throw new Error('Installed memory registry checker did not report the documented missing-registry diagnostic')
+  }
+  const memoryQueryResult = runExpectedFailure(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'ae-memory-query', '--topic', 'graph'], { cwd: targetRoot })
+  const memoryQueryOutput = JSON.parse(memoryQueryResult.stdout)
+  if (memoryQueryOutput.status !== 'invalid' || !memoryQueryOutput.diagnostics.some((item) => /missing path component/i.test(item))) {
+    throw new Error('Installed memory query did not report the documented missing-registry diagnostic')
+  }
+  if (existsSync(resolve(targetRoot, 'docs', '08-ai-memory')) || existsSync(resolve(targetRoot, '.codegraph'))) {
+    throw new Error('Installed memory commands created project memory or CodeGraph state without initialization')
   }
   const claudeCheckResult = JSON.parse(run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'claude-delegate', '--check'], { cwd: targetRoot }).stdout)
   if (!['ok', 'skip'].includes(claudeCheckResult.status) || typeof claudeCheckResult.available !== 'boolean') {
@@ -242,7 +258,7 @@ try {
     verifiedMultiAgentPolicy: 'multi_agent_auto_analysis_by_default',
     verifiedSkillGovernancePolicy: 'source_mirror_metadata_and_path_safety',
     verifiedPluginVersion: installedPluginManifest.version,
-    verifiedCommands: ['recovery', 'claude-delegate', 'markitdown', 'static-server', 'check-ae-artifacts', 'check-design-contract'],
+    verifiedCommands: ['recovery', 'claude-delegate', 'markitdown', 'static-server', 'check-ae-artifacts', 'check-design-contract', 'check-memory-knowledge-contract', 'ae-memory-query'],
   }, null, 2))
 } finally {
   cleanupTarget()
@@ -270,6 +286,20 @@ function run(command, args, options = {}) {
   if (result.status === 0) return result
   throw new Error([
     `Command failed: ${command} ${args.join(' ')}`,
+    result.stdout?.trim() || '',
+    result.stderr?.trim() || '',
+  ].filter(Boolean).join('\n'))
+}
+
+function runExpectedFailure(command, args, options = {}) {
+  const result = spawnSync(command, args, {
+    cwd: options.cwd || repoRoot,
+    encoding: 'utf8',
+    stdio: 'pipe',
+  })
+  if (result.status === 1) return result
+  throw new Error([
+    `Command was expected to fail with status 1: ${command} ${args.join(' ')}`,
     result.stdout?.trim() || '',
     result.stderr?.trim() || '',
   ].filter(Boolean).join('\n'))

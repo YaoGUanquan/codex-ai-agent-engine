@@ -4,4 +4,4 @@
 
 英文文档见 [README.en.md](README.en.md)。
 
-> 这个文件保留为兼容入口，避免旧链接失效。正文只维护 `README.md` 和 `README.en.md`。
+> 这个文件保留为兼容入口，避免旧链接失效。正文只维护 `README.md` 和 `README.en.md`；声明式记忆查询、知识关系图和安装验证说明均在这两份正文中维护。
