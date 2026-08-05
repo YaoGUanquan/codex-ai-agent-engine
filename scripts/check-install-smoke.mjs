@@ -52,6 +52,7 @@ try {
     'plugins/ai-agent-engine-codex/skills/ae-web-forge/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-backend/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-debug/SKILL.md',
+    'plugins/ai-agent-engine-codex/skills/ae-reverse-engineering/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-tdd/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-claude-code/SKILL.md',
     'plugins/ai-agent-engine-codex/skills/ae-markitdown/SKILL.md',
@@ -71,6 +72,7 @@ try {
     '.agents/skills/ae-web-forge/agents/openai.yaml',
     '.agents/skills/ae-backend/agents/openai.yaml',
     '.agents/skills/ae-debug/agents/openai.yaml',
+    '.agents/skills/ae-reverse-engineering/agents/openai.yaml',
     '.agents/skills/ae-tdd/agents/openai.yaml',
     '.agents/skills/ae-claude-code/agents/openai.yaml',
     '.agents/skills/ae-markitdown/agents/openai.yaml',
@@ -119,6 +121,7 @@ try {
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'forge'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'backend'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'debug'], { cwd: targetRoot })
+  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'reverse'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'tdd'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'markitdown'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'static'], { cwd: targetRoot })
@@ -160,6 +163,7 @@ try {
     ['ae-tasks', 'AE Tasks'],
     ['ae-design', 'AE 设计契约 / AE Design'],
     ['ae-web-forge', 'AE Web Forge'],
+    ['ae-reverse-engineering', 'AE 授权逆向工程 / AE Authorized Reverse Engineering'],
     ['ae-claude-code', 'AE Claude Code'],
     ['ae-markitdown', 'AE Markitdown'],
     ['ae-static-server', 'AE 静态服务器 / AE Static Server'],
@@ -200,6 +204,7 @@ try {
     ['ae-design', 'AE Design'],
     ['ae-web-app', 'AE Web App'],
     ['ae-web-forge', 'AE Web Forge'],
+    ['ae-reverse-engineering', 'AE Authorized Reverse Engineering'],
     ['ae-claude-code', 'AE Claude Code'],
     ['ae-markitdown', 'AE Markitdown'],
     ['ae-static-server', 'AE Static Server'],
@@ -222,6 +227,7 @@ try {
     ['ae-design', 'AE 设计契约'],
     ['ae-web-app', 'AE Web 应用开发'],
     ['ae-web-forge', 'AE Web Forge'],
+    ['ae-reverse-engineering', 'AE 授权逆向工程'],
     ['ae-claude-code', 'AE Claude Code'],
     ['ae-markitdown', 'AE Markitdown'],
     ['ae-static-server', 'AE 静态服务器'],
@@ -248,6 +254,7 @@ try {
       'ae-web-forge',
       'ae-backend',
       'ae-debug',
+      'ae-reverse-engineering',
       'ae-tdd',
       'ae-claude-code',
       'ae-markitdown',

@@ -172,6 +172,13 @@
       "purpose": "围绕构建失败、运行时异常、UI 问题和接口故障执行系统化排查与验证。"
     },
     {
+      "name": "ae-reverse-engineering",
+      "tier": "core",
+      "entry": "/ae-reverse-engineering",
+      "target": "授权逆向工程",
+      "purpose": "对用户自有或明确授权的二进制、移动端、取证、兼容性或本地训练工件执行防御性逆向分析；先确认范围、工件来源和证据边界，不自动安装工具或注册 MCP。"
+    },
+    {
       "name": "ae-task-loop",
       "tier": "core",
       "entry": "/ae-task-loop",

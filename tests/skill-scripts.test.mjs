@@ -61,6 +61,45 @@ test('renderYaml supports markitdown and static server metadata', () => {
   assert.match(staticServerYaml, /Serve local static files/)
 })
 
+test('authorized reverse engineering skill is discoverable and keeps defensive boundaries', () => {
+  const source = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-reverse-engineering')
+  const mirror = readSkillBody('.agents/skills', 'ae-reverse-engineering')
+  const templateSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-reverse-engineering/references/analysis-report-template.md'), 'utf8')
+  const templateMirror = readFileSync(resolve(repoRoot, '.agents/skills/ae-reverse-engineering/references/analysis-report-template.md'), 'utf8')
+  const metadata = skillMetadata['ae-reverse-engineering']
+  const catalogSource = JSON.parse(readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-help/references/capability-catalog.json'), 'utf8'))
+  const catalogMirror = JSON.parse(readFileSync(resolve(repoRoot, '.agents/skills/ae-help/references/capability-catalog.json'), 'utf8'))
+
+  assert.equal(mirror, source, 'ae-reverse-engineering mirror should match plugin source')
+  assert.equal(templateMirror, templateSource, 'analysis report template mirror should match plugin source')
+  for (const expectation of [
+    /Authorization Gate/,
+    /license bypass/i,
+    /credential theft/i,
+    /detection evasion/i,
+    /active exploitation/i,
+    /target scanning/i,
+    /Do not install tools/i,
+    /register MCP servers/i,
+    /observed.*inferred.*unverified/is,
+    /Do not execute an untrusted artifact/i,
+  ]) {
+    assert.match(source, expectation, `ae-reverse-engineering should include ${expectation}`)
+  }
+  assert.match(templateSource, /Scope And Authorization/)
+  assert.match(templateSource, /SHA-256/)
+  assert.match(templateSource, /observed \/ inferred \/ unverified/)
+  assert.match(renderYaml(metadata, 'en'), /AE Authorized Reverse Engineering/)
+  assert.match(renderYaml(metadata, 'bilingual'), /AE 授权逆向工程 \/ AE Authorized Reverse Engineering/)
+  assert.ok(catalogSource.skills.some((skill) => skill.name === 'ae-reverse-engineering'))
+  assert.ok(catalogMirror.skills.some((skill) => skill.name === 'ae-reverse-engineering'))
+
+  const readme = readFileSync(resolve(repoRoot, 'README.md'), 'utf8')
+  const readmeEn = readFileSync(resolve(repoRoot, 'README.en.md'), 'utf8')
+  assert.match(readme, /`ae-reverse-engineering`：对已授权工件执行防御性逆向分析/)
+  assert.match(readmeEn, /`ae-reverse-engineering`: analyze authorized artifacts defensively/i)
+})
+
 test('check-skill-mirror reports ok', () => {
   const result = runNodeScript('scripts/check-skill-mirror.mjs')
   assert.equal(result.status, 'ok')
@@ -853,6 +892,7 @@ test('check-install-smoke reports ok and verifies new skills', () => {
     'ae-web-forge',
     'ae-backend',
     'ae-debug',
+    'ae-reverse-engineering',
     'ae-tdd',
     'ae-claude-code',
     'ae-markitdown',
@@ -1003,7 +1043,7 @@ test('tiered capability help groups every skill and preserves filtered output', 
   const source = JSON.parse(readFileSync(sourcePath, 'utf8'))
   const mirror = JSON.parse(readFileSync(mirrorPath, 'utf8'))
   const expectedByTier = {
-    core: ['ae-ideate', 'ae-brainstorm', 'ae-prd', 'ae-design', 'ae-lfg', 'ae-plan', 'ae-constitution', 'ae-tasks', 'ae-work', 'ae-refactor', 'ae-review', 'ae-frontend-design', 'ae-web-app', 'ae-web-forge', 'ae-backend', 'ae-debug', 'ae-task-loop', 'ae-tdd', 'ae-test-browser', 'ae-handoff'],
+    core: ['ae-ideate', 'ae-brainstorm', 'ae-prd', 'ae-design', 'ae-lfg', 'ae-plan', 'ae-constitution', 'ae-tasks', 'ae-work', 'ae-refactor', 'ae-review', 'ae-frontend-design', 'ae-web-app', 'ae-web-forge', 'ae-backend', 'ae-debug', 'ae-reverse-engineering', 'ae-task-loop', 'ae-tdd', 'ae-test-browser', 'ae-handoff'],
     docs: ['ae-doc-humanize', 'ae-doc-structure', 'ae-markitdown', 'ae-work-report'],
     tools: ['ae-claude-code', 'ae-sql', 'ae-swagger-parser', 'ae-static-server', 'ae-prompt-optimize', 'ae-save-experience'],
     meta: ['ae-help', 'ae-init', 'ae-skill-creator', 'ae-skill-audit', 'ae-agent-creator', 'ae-update', 'ae-language'],

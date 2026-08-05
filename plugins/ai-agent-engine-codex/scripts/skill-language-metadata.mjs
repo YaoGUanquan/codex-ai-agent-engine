@@ -43,6 +43,13 @@ export const skillMetadata = {
     promptEn: 'Use $ae-debug to investigate this failure.',
     promptZh: '使用 $ae-debug 排查这个故障。',
   },
+  'ae-reverse-engineering': {
+    display: { en: 'AE Authorized Reverse Engineering', zh: 'AE 授权逆向工程' },
+    en: 'Analyze authorized artifacts with defensive scope and reproducible evidence boundaries',
+    zh: '对已授权工件执行防御性逆向分析，并保留可复现的证据边界',
+    promptEn: 'Use $ae-reverse-engineering to analyze this authorized artifact safely.',
+    promptZh: '使用 $ae-reverse-engineering 对这个已授权工件执行安全的逆向分析。',
+  },
   'ae-doc-humanize': {
     display: { en: 'AE Doc Humanize', zh: 'AE 文档人读化' },
     en: 'Rewrite structured or stiff content into readable documents',

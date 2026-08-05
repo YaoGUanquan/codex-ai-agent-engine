@@ -1,0 +1,6 @@
+interface:
+  display_name: "AE 授权逆向工程 / AE Authorized Reverse Engineering"
+  short_description: "对已授权工件执行防御性逆向分析，并保留可复现的证据边界 / Analyze authorized artifacts with defensive scope and reproducible evidence boundaries"
+  default_prompt: "使用 $ae-reverse-engineering 对这个已授权工件执行安全的逆向分析。 / Use $ae-reverse-engineering to analyze this authorized artifact safely."
+policy:
+  allow_implicit_invocation: true
