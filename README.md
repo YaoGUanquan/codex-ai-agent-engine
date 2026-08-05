@@ -58,6 +58,12 @@ node scripts/ae-tools.mjs help
 
 ## 版本更新记录
 
+### 0.3.9（2026-08-04）
+
+- 新增 `ae-reverse-engineering`：面向用户自有或明确授权的二进制、移动端、取证、兼容性和本地训练工件，先确认授权、来源、静态基线和证据边界；禁止许可证绕过、凭据提取、规避、防护绕过、主动利用、扫描以及未经授权的目标交互。
+- 该 skill 不安装工具、不注册 MCP、不写入全局配置、不自动沉淀经验；缺少工具或隔离环境时只给出受控建议并等待显式授权。报告模板区分 observed、inferred 和 unverified 结论。
+- 分发验证使用 `npm.cmd test`、`npm.cmd run check`、`node scripts/check-install-smoke.mjs`、`node scripts/check-release-notes.mjs`、`node scripts/check-ae-artifacts.mjs` 和 `git diff --check`。这些检查只证明本地技能和分发合同；真实工件、工具链、授权环境和未来模型遵循度仍需单独验收。
+
 ### 0.3.8（2026-08-04）
 
 - 新增 `docs/08-ai-memory/00-registry.json` 的声明式记忆合同、路径安全校验、`ae-memory-query`、`ae-knowledge-map` 和 `ae-knowledge-query`。Markdown 记忆仍是唯一权威来源；查询只返回已登记元数据和带证据的 declared 关系，不扫描未登记文档。
@@ -94,6 +100,7 @@ node scripts/ae-tools.mjs help
 - `ae-web-app`：实现由 `ae-web-forge` 路由后的 Web 应用、交互、API 和轻量全栈流程。
 - `ae-backend`：基于仓库契约实现接口、服务、数据和权限逻辑。
 - `ae-debug`：系统化排查构建失败、运行时异常、UI 问题和接口故障。
+- `ae-reverse-engineering`：对已授权工件执行防御性逆向分析，先确认范围、工件来源和可复现证据边界。
 - `ae-tdd`：围绕明确行为执行红绿重构式测试驱动开发。
 - `ae-test-browser`：用真实浏览器验收 UI 流程。
 - `ae-imagegen-prompt`：把视觉想法优化成图片生成提示词，支持参考图角色、生成预算和视频分镜素材；提示词-only 不强制 hooks。

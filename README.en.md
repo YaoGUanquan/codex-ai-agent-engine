@@ -78,6 +78,7 @@ node scripts/ae-tools.mjs help
 - `ae-web-app`: implement Web app interaction, API, and light full-stack flows after `ae-web-forge` routing.
 - `ae-backend`: implement API, service, data, and permission behavior from repository contracts.
 - `ae-debug`: investigate build failures, runtime errors, UI issues, and API incidents systematically.
+- `ae-reverse-engineering`: analyze authorized artifacts defensively with scope, provenance, and reproducible evidence boundaries.
 - `ae-tdd`: run a red-green-refactor loop when behavior is precise enough for test-first work.
 - `ae-task-loop`: iterate on exploratory fixes with smallest plausible fix hypotheses before broadening scope.
 - `ae-test-browser`: validate UI flows in a real browser.
@@ -409,6 +410,12 @@ Validate skills with your local Codex skill validator if available.
 See [docs/release-checklist.md](docs/release-checklist.md) before publishing a GitHub release.
 
 ## Version Updates
+
+### 0.3.9 (2026-08-04)
+
+- Added `ae-reverse-engineering` for user-owned or explicitly authorized binary, mobile, forensic, compatibility, and local training artifacts. It requires authorization, provenance, a static baseline, and evidence boundaries; it excludes license bypass, credential theft, evasion, active exploitation, scanning, and unauthorized target interaction.
+- The skill does not install tools, register MCP servers, change global configuration, or automatically retain experience. Missing tools or isolation are controlled recommendations that require explicit authorization, and the report template separates observed, inferred, and unverified conclusions.
+- Distribution validation uses `npm.cmd test`, `npm.cmd run check`, `node scripts/check-install-smoke.mjs`, `node scripts/check-release-notes.mjs`, `node scripts/check-ae-artifacts.mjs`, and `git diff --check`. These checks prove local skill and distribution contracts only, not real-artifact, toolchain, authorized-environment, or future-model-adherence acceptance.
 
 ### 0.3.8 (2026-08-04)
 
