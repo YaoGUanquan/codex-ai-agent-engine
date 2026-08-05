@@ -82,6 +82,7 @@ node scripts/ae-tools.mjs help
 - `ae-tdd`: run a red-green-refactor loop when behavior is precise enough for test-first work.
 - `ae-task-loop`: iterate on exploratory fixes with smallest plausible fix hypotheses before broadening scope.
 - `ae-test-browser`: validate UI flows in a real browser.
+- `ae-test-api`: verify post-change backend API contracts, risk paths, and tiered evidence while recording a sanitized API Verification Record.
 - `ae-imagegen-prompt`: turn visual ideas into image-generation prompts with reference roles, generation budgets, and storyboard assets; prompt-only work does not require hooks.
 - `ae-sql`: generate, review, or execute SQL with explicit safety boundaries.
 - `ae-swagger-parser`: summarize or filter Swagger/OpenAPI specs.
@@ -410,6 +411,12 @@ Validate skills with your local Codex skill validator if available.
 See [docs/release-checklist.md](docs/release-checklist.md) before publishing a GitHub release.
 
 ## Version Updates
+
+### 0.3.10 (2026-08-05)
+
+- Added `ae-test-api` for post-change backend API bubble testing. It selects endpoints, success/error paths, and conditional contract risks, while keeping static tests, runtime health, authenticated API smoke, browser acceptance, and deployment evidence distinct.
+- Each completed verification writes one sanitized API Verification Record with field provenance, assertion summaries, and unverified boundaries. It excludes bodies, tokens, cookies, private command material, and concrete resource identifiers; long-term knowledge relations require an explicit user request.
+- The skill reuses the existing local-runtime smoke gate as the sole owner of local-call safety. It adds no default HTTP client, generated scripts, lifecycle manager, MCP runtime, external runner, or automatic repair. Distribution validation uses `npm.cmd test`, `npm.cmd run check`, `node scripts/check-install-smoke.mjs`, `node scripts/check-release-notes.mjs`, `node scripts/check-ae-artifacts.mjs`, and `git diff --check`; these checks prove local skill and distribution contracts only, not target-project authenticated API, browser, or deployment acceptance.
 
 ### 0.3.9 (2026-08-04)
 

@@ -100,6 +100,49 @@ test('authorized reverse engineering skill is discoverable and keeps defensive b
   assert.match(readmeEn, /`ae-reverse-engineering`: analyze authorized artifacts defensively/i)
 })
 
+test('API bubble testing skill keeps contract, evidence, and live-call boundaries explicit', () => {
+  const source = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-test-api')
+  const mirror = readSkillBody('.agents/skills', 'ae-test-api')
+  const referenceSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-test-api/references/api-verification-record.md'), 'utf8')
+  const referenceMirror = readFileSync(resolve(repoRoot, '.agents/skills/ae-test-api/references/api-verification-record.md'), 'utf8')
+  const metadata = skillMetadata['ae-test-api']
+  const catalogSource = JSON.parse(readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-help/references/capability-catalog.json'), 'utf8'))
+  const catalogMirror = JSON.parse(readFileSync(resolve(repoRoot, '.agents/skills/ae-help/references/capability-catalog.json'), 'utf8'))
+
+  assert.equal(mirror, source, 'ae-test-api mirror should match plugin source')
+  assert.equal(referenceMirror, referenceSource, 'API verification record reference mirror should match plugin source')
+  for (const expectation of [
+    /API\/interface\/bubble testing/i,
+    /local runtime smoke gate/i,
+    /exactly one sanitized API Verification Record/i,
+    /Do not automatically update/i,
+    /OpenCode agents/i,
+  ]) {
+    assert.match(source, expectation, `ae-test-api should include ${expectation}`)
+  }
+  for (const expectation of [
+    /Contract Source Precedence/,
+    /A passing lower tier cannot satisfy a higher-tier claim/,
+    /\.\.\/\.\.\/ae-work\/references\/local-runtime-smoke-gate\.md/,
+    /Forbidden record content/,
+    /Knowledge Curation/,
+    /The user explicitly requests durable API knowledge/,
+  ]) {
+    assert.match(referenceSource, expectation, `API verification reference should include ${expectation}`)
+  }
+  assert.match(renderYaml(metadata, 'en'), /AE API Test/)
+  assert.match(renderYaml(metadata, 'zh-CN'), /AE 接口测试/)
+  const catalogEntry = catalogSource.skills.find((skill) => skill.name === 'ae-test-api')
+  assert.deepEqual(catalogMirror, catalogSource, 'capability catalog mirror should match plugin source')
+  assert.equal(catalogEntry?.tier, 'core')
+  assert.equal(catalogEntry?.artifactPath, 'docs/ae/evidence/api')
+
+  const readme = readFileSync(resolve(repoRoot, 'README.md'), 'utf8')
+  const readmeEn = readFileSync(resolve(repoRoot, 'README.en.md'), 'utf8')
+  assert.match(readme, /`ae-test-api`：在后端改动后执行接口冒泡测试/)
+  assert.match(readmeEn, /`ae-test-api`: verify post-change backend API contracts/i)
+})
+
 test('check-skill-mirror reports ok', () => {
   const result = runNodeScript('scripts/check-skill-mirror.mjs')
   assert.equal(result.status, 'ok')
@@ -894,6 +937,7 @@ test('check-install-smoke reports ok and verifies new skills', () => {
     'ae-debug',
     'ae-reverse-engineering',
     'ae-tdd',
+    'ae-test-api',
     'ae-claude-code',
     'ae-markitdown',
     'ae-static-server',
@@ -1043,7 +1087,7 @@ test('tiered capability help groups every skill and preserves filtered output', 
   const source = JSON.parse(readFileSync(sourcePath, 'utf8'))
   const mirror = JSON.parse(readFileSync(mirrorPath, 'utf8'))
   const expectedByTier = {
-    core: ['ae-ideate', 'ae-brainstorm', 'ae-prd', 'ae-design', 'ae-lfg', 'ae-plan', 'ae-constitution', 'ae-tasks', 'ae-work', 'ae-refactor', 'ae-review', 'ae-frontend-design', 'ae-web-app', 'ae-web-forge', 'ae-backend', 'ae-debug', 'ae-reverse-engineering', 'ae-task-loop', 'ae-tdd', 'ae-test-browser', 'ae-handoff'],
+    core: ['ae-ideate', 'ae-brainstorm', 'ae-prd', 'ae-design', 'ae-lfg', 'ae-plan', 'ae-constitution', 'ae-tasks', 'ae-work', 'ae-refactor', 'ae-review', 'ae-frontend-design', 'ae-web-app', 'ae-web-forge', 'ae-backend', 'ae-debug', 'ae-reverse-engineering', 'ae-task-loop', 'ae-tdd', 'ae-test-browser', 'ae-test-api', 'ae-handoff'],
     docs: ['ae-doc-humanize', 'ae-doc-structure', 'ae-markitdown', 'ae-work-report'],
     tools: ['ae-claude-code', 'ae-sql', 'ae-swagger-parser', 'ae-static-server', 'ae-prompt-optimize', 'ae-save-experience'],
     meta: ['ae-help', 'ae-init', 'ae-skill-creator', 'ae-skill-audit', 'ae-agent-creator', 'ae-update', 'ae-language'],

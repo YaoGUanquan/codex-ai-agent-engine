@@ -58,6 +58,13 @@ node scripts/ae-tools.mjs help
 
 ## 版本更新记录
 
+### 0.3.10（2026-08-05）
+
+- 新增 `ae-test-api`：用于后端改动后的接口冒泡测试，按变更契约选择端点、成功/错误路径和风险维度，并将静态测试、本地运行、认证接口、浏览器和部署证据严格分级。
+- 每次完成验证写入一份脱敏 API Verification Record，保留字段来源、断言摘要和未验证边界，不保留请求/响应体、令牌、Cookie、私有命令参数或具体资源标识；长期知识图谱关系仅在用户显式要求时写入。
+- 该 skill 复用既有 local-runtime smoke gate 作为唯一的本地请求安全所有者，不引入默认 HTTP 客户端、脚本生成、服务生命周期控制、MCP、外部运行时或自动修复。分发验证使用 `npm.cmd test`、`npm.cmd run check`、`node scripts/check-install-smoke.mjs`、`node scripts/check-release-notes.mjs`、`node scripts/check-ae-artifacts.mjs` 和 `git diff --check`；它们只证明本地技能与分发合同，不代表目标项目的认证 API、浏览器或部署验收。
+- 补充诊断复测：API 冒泡测试定向回归及完整 `npm.cmd test` 均通过（99/99），镜像、语言元数据、技能契约、安装烟测、AE 产物、设计契约和发行说明检查均通过；未调用任何目标项目的真实后端接口。
+
 ### 0.3.9（2026-08-04）
 
 - 新增 `ae-reverse-engineering`：面向用户自有或明确授权的二进制、移动端、取证、兼容性和本地训练工件，先确认授权、来源、静态基线和证据边界；禁止许可证绕过、凭据提取、规避、防护绕过、主动利用、扫描以及未经授权的目标交互。
@@ -103,6 +110,7 @@ node scripts/ae-tools.mjs help
 - `ae-reverse-engineering`：对已授权工件执行防御性逆向分析，先确认范围、工件来源和可复现证据边界。
 - `ae-tdd`：围绕明确行为执行红绿重构式测试驱动开发。
 - `ae-test-browser`：用真实浏览器验收 UI 流程。
+- `ae-test-api`：在后端改动后执行接口冒泡测试，验证契约、风险路径和分级证据，并记录脱敏 API Verification Record。
 - `ae-imagegen-prompt`：把视觉想法优化成图片生成提示词，支持参考图角色、生成预算和视频分镜素材；提示词-only 不强制 hooks。
 - `ae-sql`：生成、审查或执行 SQL，并保留安全边界。
 - `ae-swagger-parser`：摘要或过滤 Swagger/OpenAPI 规格。
