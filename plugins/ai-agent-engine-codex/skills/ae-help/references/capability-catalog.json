@@ -200,6 +200,14 @@
       "purpose": "使用真实浏览器执行 UI 流程、截图、控制台和网络验收。"
     },
     {
+      "name": "ae-test-api",
+      "tier": "core",
+      "entry": "/ae-test-api",
+      "target": "接口冒泡测试",
+      "purpose": "在后端改动后选择相关接口、验证契约与风险路径，并记录脱敏的 API 测试证据；不替代浏览器验收或本地运行安全门。",
+      "artifactPath": "docs/ae/evidence/api"
+    },
+    {
       "name": "ae-sql",
       "tier": "tools",
       "entry": "/ae-sql",

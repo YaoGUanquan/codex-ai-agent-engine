@@ -232,6 +232,13 @@ export const skillMetadata = {
     promptEn: 'Use $ae-test-browser to verify this page flow in a browser.',
     promptZh: '使用 $ae-test-browser 验收这个页面的主要流程。',
   },
+  'ae-test-api': {
+    display: { en: 'AE API Test', zh: 'AE 接口测试' },
+    en: 'Verify backend API contracts and safe post-change bubble-test evidence',
+    zh: '验证后端接口契约和安全的改动后冒泡测试证据',
+    promptEn: 'Use $ae-test-api to verify this backend API change and record evidence.',
+    promptZh: '使用 $ae-test-api 对这次后端接口改动进行冒泡测试并记录证据。',
+  },
   'ae-update': {
     display: { en: 'AE Update', zh: 'AE 更新插件' },
     en: 'Update the project-local AE for Codex installation',
