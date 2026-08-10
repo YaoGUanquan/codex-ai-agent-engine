@@ -1031,7 +1031,15 @@ test('claude-delegate sends default prompts through stdin', () => {
 
     const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'claude-delegate', '--prompt', 'AE_CLAUDE_OK', '--command', shimPath])
     assert.equal(result.status, 'ok')
-    assert.deepEqual(result.args, ['-p'])
+    assert.deepEqual(result.args, [
+      '-p',
+      '--output-format', 'json',
+      '--no-session-persistence',
+      '--permission-mode', 'plan',
+      '--tools', 'Read,Grep,Glob',
+      '--allowed-tools', 'Read,Grep,Glob',
+      '--disable-slash-commands',
+    ])
     assert.match(result.stdout, /shim-prompt:AE_CLAUDE_OK/)
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })

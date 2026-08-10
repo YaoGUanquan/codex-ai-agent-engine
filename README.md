@@ -58,6 +58,12 @@ node scripts/ae-tools.mjs help
 
 ## 版本更新记录
 
+### 0.3.11（2026-08-06）
+
+- 在安装 OpenAI 的 `codex@openai-codex` Claude Code 插件后，加固 `ae-claude-code`：默认委派子进程输出 JSON、不持久化会话、使用 `plan` 权限、仅允许 `Read,Grep,Glob`，并禁用 slash commands。
+- 明确调用方向：官方插件让交互式 Claude Code 通过 `/codex:*` 调用 Codex，并不让 Codex 控制 Claude Code。Claude 到 Codex 的转移和审查使用官方插件；Codex 到 Claude 的委派仍是独立、只读的第二意见通道。
+- 分发验证使用 `npm.cmd test`、`npm.cmd run check`、`node scripts/check-install-smoke.mjs`、`node scripts/check-release-notes.mjs` 和 `git diff --check`。这些检查只证明本地技能和分发合同，不证明未来 Claude/Codex 交互运行、认证状态、配额或目标项目验收。
+
 ### 0.3.10（2026-08-05）
 
 - 新增 `ae-test-api`：用于后端改动后的接口冒泡测试，按变更契约选择端点、成功/错误路径和风险维度，并将静态测试、本地运行、认证接口、浏览器和部署证据严格分级。

@@ -1451,7 +1451,15 @@ function claudeDelegateInvocation(opts, prompt) {
   const configured = arrayOpt(opts['claude-arg'])
   if (configured.length > 0) return { args: configured, input: prompt }
   return {
-    args: ['-p'],
+    args: [
+      '-p',
+      '--output-format', 'json',
+      '--no-session-persistence',
+      '--permission-mode', 'plan',
+      '--tools', 'Read,Grep,Glob',
+      '--allowed-tools', 'Read,Grep,Glob',
+      '--disable-slash-commands',
+    ],
     input: prompt,
   }
 }
