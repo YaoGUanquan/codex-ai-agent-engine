@@ -412,6 +412,12 @@ See [docs/release-checklist.md](docs/release-checklist.md) before publishing a G
 
 ## Version Updates
 
+### 0.3.11 (2026-08-06)
+
+- Hardened `ae-claude-code` after installing OpenAI's `codex@openai-codex` Claude Code plugin: its default delegated child now emits JSON without session persistence, runs in `plan` mode with `Read,Grep,Glob` only, and disables slash commands.
+- Documented the directional boundary: the official plugin lets an interactive Claude Code session invoke Codex through `/codex:*`; it does not let Codex control Claude Code. Claude-to-Codex transfer and review use the official plugin, while Codex-to-Claude delegation remains a separate read-only second-opinion lane.
+- Distribution validation uses `npm.cmd test`, `npm.cmd run check`, `node scripts/check-install-smoke.mjs`, `node scripts/check-release-notes.mjs`, and `git diff --check`. These checks prove local skill and distribution contracts only; they do not prove a future Claude/Codex interactive run, authentication state, quota, or target-project acceptance.
+
 ### 0.3.10 (2026-08-05)
 
 - Added `ae-test-api` for post-change backend API bubble testing. It selects endpoints, success/error paths, and conditional contract risks, while keeping static tests, runtime health, authenticated API smoke, browser acceptance, and deployment evidence distinct.
