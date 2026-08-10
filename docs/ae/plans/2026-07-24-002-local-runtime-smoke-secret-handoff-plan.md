@@ -171,3 +171,11 @@ Document review must verify the user-mediated secret boundary and the plan must 
 - Review: coherence, feasibility, and evidence review found no blocking issue.
 - Validation: focused contract test, `npm.cmd test` (82/82), `npm.cmd run check`, artifact checks, mirror checks, installation smoke, and `git diff --check` passed.
 - Residual risk: future agents must still select a target-specific ignored or operating-system temporary path and a client whose error output does not disclose configuration contents.
+
+## Follow-up (2026-08-10)
+
+- Follow-up PRD: `docs/ae/prds/2026-08-10-api-smoke-fillable-request-config-prd.md`
+- Follow-up plan: `docs/ae/plans/2026-08-10-003-api-smoke-fillable-request-config-plan.md`
+- Hardening: require a non-empty UTF-8 fillable template with `REPLACE_WITH_LOCAL_TOKEN`, method/path, and fill steps; forbid empty files and unsafe PowerShell redirection for non-ASCII request-config text.
+- Shared reference: `plugins/ai-agent-engine-codex/skills/ae-work/references/request-config-template.md` and its `.agents` mirror.
+- Distributable version: `0.3.17`.

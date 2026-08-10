@@ -224,6 +224,7 @@ Explicitly omitted. A target UI that consumes a changed API remains a separate `
 
 - Classify all record fields as metadata, assertion summary, or prohibited data before writing.
 - A user-controlled secret reference may be named only by status, never path or contents.
+- When a credential reference is missing, create a non-empty UTF-8 fillable request-config template from `ae-work/references/request-config-template.md` with `REPLACE_WITH_LOCAL_TOKEN`; do not create an empty file or read the populated reference.
 - State-changing verification requires the shared gate's explicit authorization; record the operation classification, not an authorization token or raw request.
 - Sanitization failure blocks record creation and the success claim until a safe summary can be produced.
 

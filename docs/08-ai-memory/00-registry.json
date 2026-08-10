@@ -142,6 +142,87 @@
         "path": "docs/08-ai-memory/13-review-inventory-and-advisory-impact.md",
         "note": "The review-inventory guidance supports the constitution's traceability and review gates."
       }
+    },
+    {
+      "from": "key-workflows",
+      "to": "docs/ae/plans/2026-08-10-003-api-smoke-fillable-request-config-plan.md",
+      "type": "implements",
+      "evidence": {
+        "path": "docs/08-ai-memory/03-key-workflows.md",
+        "note": "The authenticated API smoke handoff workflow implements the fillable request-config plan."
+      }
+    },
+    {
+      "from": "known-pitfalls",
+      "to": "docs/ae/experience/2026-08-10-api-smoke-fillable-request-config.md",
+      "type": "records",
+      "evidence": {
+        "path": "docs/08-ai-memory/04-known-pitfalls.md",
+        "note": "The request-config encoding and empty-file pitfalls are recorded in the completed experience note."
+      }
+    },
+    {
+      "from": "decision-log",
+      "to": "docs/ae/prds/2026-08-10-api-smoke-fillable-request-config-prd.md",
+      "type": "documents",
+      "evidence": {
+        "path": "docs/08-ai-memory/05-decision-log.md",
+        "note": "The 2026-08-10 decision documents the fillable UTF-8 request-config PRD requirements."
+      }
+    },
+    {
+      "from": "decision-log",
+      "to": "docs/ae/designs/api-bubble-testing-skill-2026-08-05/design.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/05-decision-log.md",
+        "note": "The fillable-template decision references the API bubble testing design security boundary it extends."
+      }
+    },
+    {
+      "from": "key-workflows",
+      "to": "docs/ae/plans/2026-08-10-002-personal-marketplace-global-plugin-plan.md",
+      "type": "implements",
+      "evidence": {
+        "path": "docs/08-ai-memory/03-key-workflows.md",
+        "note": "The global migration workflow implements the per-user personal marketplace distribution plan."
+      }
+    },
+    {
+      "from": "known-pitfalls",
+      "to": "docs/ae/experience/2026-08-10-global-project-install-migration.md",
+      "type": "records",
+      "evidence": {
+        "path": "docs/08-ai-memory/04-known-pitfalls.md",
+        "note": "The global AE pitfalls are grounded by the verified migration experience and its discovery boundaries."
+      }
+    },
+    {
+      "from": "decision-log",
+      "to": "docs/ae/prds/2026-08-10-global-project-install-migration.md",
+      "type": "documents",
+      "evidence": {
+        "path": "docs/08-ai-memory/05-decision-log.md",
+        "note": "The global runtime and project-data locality decision documents the migration requirements."
+      }
+    },
+    {
+      "from": "decision-log",
+      "to": "docs/ae/designs/global-project-install-migration-2026-08-10/design.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/05-decision-log.md",
+        "note": "The global migration decision references the design contract for manifest, recovery, and plugin activation."
+      }
+    },
+    {
+      "from": "project-context",
+      "to": "docs/ae/references/global-ae-install-contract.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/01-project-context.md",
+        "note": "The project distribution boundary is defined by the global AE install contract."
+      }
     }
   ]
 }

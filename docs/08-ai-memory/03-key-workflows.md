@@ -129,3 +129,29 @@
   5. Use `ae-test-browser` on a real target route to prove interaction, completion state, reduced-motion behavior, and existing console/network checks; report `unverified` when that route or capability is unavailable.
 - Validation: Run the focused source/mirror regression test, `npm.cmd test`, `npm.cmd run check`, install smoke, artifact/mirror/skill-contract checks, and `git diff --check`.
 - Known risks: A static graph helper is not dynamic runtime proof, and this repository cannot replace target-project browser acceptance for an actual motion-bearing UI.
+
+## Authenticated API smoke request-config handoff
+
+- Workflow: When `ae-test-api` or another smoke-gate consumer needs an authenticated local request and no secret reference exists, create a fillable token-free request config first.
+- Use case: Backend bubble testing needs a short-lived local token without pasting it into chat.
+- Steps:
+  1. Read `ae-work/references/local-runtime-smoke-gate.md` and `ae-work/references/request-config-template.md`.
+  2. Write a non-empty UTF-8 without BOM config at a verified ignored path or OS temp directory; include method, URL/path, non-secret headers, numbered fill steps, and `REPLACE_WITH_LOCAL_TOKEN`.
+  3. Never create an empty file or write non-ASCII config text through PowerShell `Out-File`, default `Set-Content`, or shell redirection.
+  4. Report the absolute path once and wait for the user to replace the placeholder locally, then confirm readiness in chat without pasting the token.
+  5. Invoke the client by absolute path only; do not open, read, print, validate, archive, move, or delete the populated reference.
+- Validation: `node --test --test-name-pattern "API bubble testing|local runtime smoke gate" tests/skill-scripts.test.mjs`, `node scripts/check-skill-mirror.mjs`, `node scripts/check-release-notes.mjs`.
+- Known risks: Local checks prove the workflow contract only; they do not prove a target-project authenticated smoke succeeded.
+
+## 从项目级安装切换到用户级全局 AE
+
+- 工作流：将当前用户的 AE 运行时和 Codex 插件注册为单一全局分发，同时退役指定项目中的项目级运行时副本。
+- 使用场景：多个项目已经运行过项目级 AE，用户希望所有 consumer 项目复用同一版本，而不搬迁项目文档和知识。
+- 步骤：
+  1. 在分发源仓库创建只包含当前用户项目根的 manifest；不要让安装器扫描 `D:\codes` 或猜测项目名。
+  2. 用同一份 manifest 运行 `preview --retire-modified`，审阅每个 consumer 的组件、归属和 `owned` 状态。
+  3. 用 preview 返回的 operation ID、confirmation 和同样的 `--retire-modified` 执行显式 apply；该选项表示先完整备份，再退役修改过或未知的历史副本。
+  4. 迁移成功后从目标项目根运行用户级 dispatcher，并在新的 Codex 任务中用 `codex plugin list` 检查 `ai-agent-engine-codex@personal`。
+  5. 保留项目根中的 `AGENTS.md`、`docs/**`、AI memory、图谱和 archive；备份/journal 也默认保留，只有显式 purge 才删除。
+- 验证：逐项目检查项目级 plugin、wrapper、`ae-*` skill 和 AE marketplace 条目均不存在；比较迁移前后的 `AGENTS.md` 与 `docs/**` 指纹；运行 dispatcher smoke；确认 source/deferred 项目未被修改。
+- 已知风险：源仓库可同时显示本地开发 skill 与 personal 插件，这是开发例外；已打开的 Codex 桌面任务不会热刷新 skill 清单。每个操作系统用户有独立 `$HOME`，安装器不会修改其他用户目录。

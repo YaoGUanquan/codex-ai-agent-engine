@@ -58,10 +58,28 @@ node scripts/ae-tools.mjs help
 
 ## 版本更新记录
 
+### 0.3.17（2026-08-10）
+- 强化 `ae-test-api` 与共享 local-runtime smoke gate 的认证冒烟交接：必须生成非空、可填写的 UTF-8（无 BOM）请求配置模板，包含方法、路径、填写步骤和 `REPLACE_WITH_LOCAL_TOKEN`，禁止空文件与不安全的 PowerShell 重定向写中文配置。
+- 新增 `request-config-template` 参考作为唯一模板形状；agent 只交付路径，不读取用户填好的 token。验证：`node --test --test-name-pattern "API bubble testing|local runtime smoke gate" tests/skill-scripts.test.mjs`、`node scripts/check-skill-mirror.mjs`、`node scripts/check-release-notes.mjs`。这些检查只证明技能与分发合同，不代表目标项目的真实认证接口验收。
+
+### 0.3.16（2026-08-10）
+- `recovery-failed` 操作不可执行 purge，必须先通过 `recover --operation <id>` 恢复到 `rolled-back`；避免尚未恢复的备份被提前删除。验证新增此恢复生命周期回归用例。
+
+### 0.3.15（2026-08-10）
+- Windows 全局 apply 通过 `cmd.exe` 安全调用 Codex CLI，并先执行 `codex plugin marketplace add $HOME --json`，再执行插件安装；两个 CLI 步骤均写入 journal，任一步失败都会回滚安装器拥有的文件。
+
+### 0.3.14（2026-08-10）
+- 全局 apply 现在会通过当前用户的 personal marketplace 发布 `ai-agent-engine-codex`，并调用 `codex plugin add ai-agent-engine-codex@personal --json`；不会修改 Codex cache 或客户端私有注册表。
+- 安装器会备份旧的用户级 AE skill 副本而不重新激活重复 skill；confirmation digest 同时绑定 `--retire-modified`。验证覆盖个人插件发布、保留第三方 marketplace 条目和 CLI 注册失败后的安装器文件回滚；真实客户端可见性须以 `codex plugin list` 单独确认。
+
+### 0.3.13（2026-08-10）
+
+- 全局迁移改为显式 manifest，不再根据本机路径或项目名推导 consumer；项目级组件默认通过指纹验证后才会备份并退役。
+- 新增 `--retire-modified`：在 apply 的 operation ID 与 confirmation 之外，单独授权完整备份后退役修改过或未知的 AE 组件；由安装器 journal 创建的全局 runtime 可事务式升级。
+
 ### 0.3.12（2026-08-10）
 
 - 新增每用户全局 AE 分发：用户级 dispatcher 以确定的项目根运行，项目 `docs`、记忆、图谱和 archive 保持原位。
-- 新增预览、显式 apply、整批回滚、恢复与显式 purge 生命周期；首批仅包含 7 个 consumer，分发源仓库和 `D:\codes\work` 被强制排除。
 - 验证使用 `npm.cmd test`、`npm.cmd run check`、全局 preview smoke 与隔离 apply fixture。它们证明本地分发合同，不授权或证明真实 consumer 的 apply 结果。
 - 已在新的 `codex-cli 0.146.1` 会话中验证 `$HOME/.agents/skills` 的发现与探针调用；已打开的 Codex 桌面任务不会热刷新其启动时的 skill 清单。
 
@@ -123,7 +141,7 @@ node scripts/ae-tools.mjs help
 - `ae-reverse-engineering`：对已授权工件执行防御性逆向分析，先确认范围、工件来源和可复现证据边界。
 - `ae-tdd`：围绕明确行为执行红绿重构式测试驱动开发。
 - `ae-test-browser`：用真实浏览器验收 UI 流程。
-- `ae-test-api`：在后端改动后执行接口冒泡测试，验证契约、风险路径和分级证据，并记录脱敏 API Verification Record。
+- `ae-test-api`：在后端改动后执行接口冒泡测试，验证契约、风险路径和分级证据，并记录脱敏 API Verification Record；认证冒烟缺 token 时生成非空 UTF-8 可填写请求配置模板（`REPLACE_WITH_LOCAL_TOKEN`），由用户本地替换后按路径引用。
 - `ae-imagegen-prompt`：把视觉想法优化成图片生成提示词，支持参考图角色、生成预算和视频分镜素材；提示词-only 不强制 hooks。
 - `ae-sql`：生成、审查或执行 SQL，并保留安全边界。
 - `ae-swagger-parser`：摘要或过滤 Swagger/OpenAPI 规格。
@@ -203,6 +221,53 @@ node scripts/install-project.mjs --target /path/to/your/codex-project --lang en
 - `scripts/ae-tools.mjs`
 - `scripts/update-ae-codex.mjs`
 - `scripts/set-ae-language.mjs`
+
+## 从项目级安装迁移到用户级全局安装
+
+全局安装只集中 AE 运行时和 skills，不迁移项目数据。每个项目的 `AGENTS.md`、`docs/**`、AI 记忆、图谱和 archive 均保留在项目根目录。
+
+在分发仓库中先生成只读预览。该命令不会写入、删除或移动任何文件：
+
+```powershell
+Set-Location 'D:\codes\ph-AI-Agent-Engine'
+$preview = node scripts\install-global.mjs preview | ConvertFrom-Json
+$preview.projects | Format-Table root, role, components
+```
+
+只安装或更新当前用户的全局插件时，直接使用上述默认 preview 的 operation ID 与 confirmation：
+
+```powershell
+node scripts\install-global.mjs apply --apply --operation $preview.operationId --confirm $preview.confirmation
+```
+
+默认 preview 只安装当前用户的全局插件，不会扫描或删除项目级副本。若要把项目级安装切换为全局安装，先创建显式 manifest；manifest 可以指向任意当前用户有权访问的项目根，不依赖本机 `D:\codes` 或固定项目名。确认 preview 中目标项目的每个组件都标记为 `owned: true` 后，才执行同一份 manifest 的 apply：
+
+```json
+{
+  "projects": [
+    { "root": "D:\\codes\\work", "role": "consumer" }
+  ]
+}
+```
+
+```powershell
+$manifest = 'C:\temp\ae-consumers.json'
+$preview = node scripts\install-global.mjs preview --manifest $manifest --retire-modified | ConvertFrom-Json
+$preview.projects | Format-Table root, role, components
+node scripts\install-global.mjs apply --manifest $manifest --retire-modified --apply --operation $preview.operationId --confirm $preview.confirmation
+```
+
+默认情况下，任何 `owned: false`、`deferred` 或未知组件都会阻止 apply；不要手工删除项目级文件。`--retire-modified` 必须同时出现在 preview 和 apply 中，它表示“先完整备份，再退役已修改或无法指纹确认的历史 AE 副本”。迁移只处理 manifest 中的 consumer；分发源仓库和 deferred 项目必须排除。`docs/**`、`AGENTS.md`、AI memory、图谱和 archive 始终留在各自项目根目录。备份与 journal 默认保留，只有显式 `purge --operation <id> --apply` 才删除。
+
+成功后，从任意项目根运行用户级 dispatcher，并在新的 Codex 会话中检查个人插件：
+
+```powershell
+node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" help
+node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" init --project-root (Get-Location).Path
+codex plugin list
+```
+
+每个操作系统用户都有自己的 `$HOME`、dispatcher、备份和 personal marketplace；安装器不会扫描或修改其他用户的目录，也不会直接修改 `.codex/plugins/cache`。开发源仓库可同时看到本地 `.agents/skills` 与“个人”插件，这是有意保留的开发例外；consumer 项目迁移后只应使用用户级个人插件。
 
 ## 初始化项目文档和记忆库
 

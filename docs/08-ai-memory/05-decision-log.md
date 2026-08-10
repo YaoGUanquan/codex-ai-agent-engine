@@ -167,3 +167,17 @@
 - Context: External frontend references supplied useful design and animation examples, but a generic visual upgrade would conflict with target-project baselines, introduce optional dependencies into plugin scope, and leave accessibility evidence implicit.
 - Impact: Web routing reports now expose motion and reduced-motion fields. Browser acceptance describes an explicit `unverified` result when target-route evidence is unavailable. The distributed source/mirror pair is versioned as `0.3.3` and protected by regression, mirror, contract, artifact, and install-smoke checks.
 - Re-evaluate when: target-project adoption shows a need for a stricter performance budget or a deterministic browser fixture that can exercise `prefers-reduced-motion` across supported toolchains.
+
+## 2026-08-10: Require fillable UTF-8 request-config templates for authenticated API smoke
+
+- Decision: Keep the user-mediated token-free smoke handoff, but require a shared non-empty fillable request-config template with `REPLACE_WITH_LOCAL_TOKEN`, method/path, and numbered fill steps. Write UTF-8 without BOM through a UTF-8-safe writer; forbid empty files and unsafe PowerShell redirection for non-ASCII config text. `ae-test-api` routes to the shared template and does not fork the smoke gate.
+- Context: Agents previously created empty credential files or encoding-broken Chinese fill instructions, so users could not complete authenticated bubble testing safely.
+- Impact: Distributable version `0.3.17` adds `request-config-template.md`, hardens the shared gate and `ae-test-api`, and records durable workflow/pitfall/decision memory plus declared knowledge relations.
+- Re-evaluate when: a deterministic template generator becomes necessary, or Codex exposes a documented non-persisting secret-input capability that replaces file handoff.
+
+## 2026-08-10: Keep AE runtime global per user and project knowledge local
+
+- Decision: A global install owns only the current user's dispatcher, skills, personal marketplace plugin source, operation journal, and backups. Each consumer retains its own `AGENTS.md`, `docs/**`, AI memory, graph, archive, and Git history. Project-level AE runtime files are retired only from an explicit manifest; modified or unknown historical copies require `--retire-modified` and are fully backed up first.
+- Context: Project-level installs had accumulated different plugin versions and historical documentation. Centralizing docs would break project portability, links, ownership, and recovery; automatic path scanning would also make the installer unusable for other users.
+- Impact: The default global preview is read-only and source-only. Consumer cleanup is opt-in, portable across user home locations, and bounded to exact AE paths. Backups and journals remain until `purge --operation <id> --apply`; the source repository keeps its local mirror as a development exception, and deferred projects remain untouched.
+- Re-evaluate when: Codex exposes a stable user-level plugin discovery contract that removes the need for the personal marketplace source/dispatcher split, or a separate approved cross-project knowledge product is designed.

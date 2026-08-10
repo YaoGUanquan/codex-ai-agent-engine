@@ -82,7 +82,7 @@ node scripts/ae-tools.mjs help
 - `ae-tdd`: run a red-green-refactor loop when behavior is precise enough for test-first work.
 - `ae-task-loop`: iterate on exploratory fixes with smallest plausible fix hypotheses before broadening scope.
 - `ae-test-browser`: validate UI flows in a real browser.
-- `ae-test-api`: verify post-change backend API contracts, risk paths, and tiered evidence while recording a sanitized API Verification Record.
+- `ae-test-api`: verify post-change backend API contracts, risk paths, and tiered evidence while recording a sanitized API Verification Record. When an authenticated smoke lacks a local secret reference, create a non-empty UTF-8 fillable request-config template with `REPLACE_WITH_LOCAL_TOKEN` for the user to edit locally.
 - `ae-imagegen-prompt`: turn visual ideas into image-generation prompts with reference roles, generation budgets, and storyboard assets; prompt-only work does not require hooks.
 - `ae-sql`: generate, review, or execute SQL with explicit safety boundaries.
 - `ae-swagger-parser`: summarize or filter Swagger/OpenAPI specs.
@@ -160,6 +160,51 @@ The installer writes these paths inside the target project:
 - `scripts/ae-tools.mjs`
 - `scripts/update-ae-codex.mjs`
 - `scripts/set-ae-language.mjs`
+
+## Migrate From Project-Level To Per-User Global Installation
+
+Global installation publishes the AE skills as one current-user personal Codex plugin while retaining a private dispatcher. Each project's `AGENTS.md`, `docs/**`, AI memory, graph, and archive remain in that project root.
+
+Generate a read-only preview from the distribution repository. It does not write, delete, or move files:
+
+```powershell
+Set-Location 'D:\codes\ph-AI-Agent-Engine'
+$preview = node scripts\install-global.mjs preview | ConvertFrom-Json
+$preview.projects | Format-Table root, role, components
+```
+
+To install or update only the current user's global plugin, apply that default preview directly:
+
+```powershell
+node scripts\install-global.mjs apply --apply --operation $preview.operationId --confirm $preview.confirmation
+```
+
+The default preview/apply installs the global plugin for the current user and never scans project roots. To switch a project-level install to the global install, create an explicit manifest. Manifest roots are caller-supplied paths for the current user; the installer does not infer `D:\\codes` or fixed project names. Inspect the preview, then use that same manifest for apply:
+
+```json
+{
+  "projects": [
+    { "root": "D:\\codes\\work", "role": "consumer" }
+  ]
+}
+```
+
+```powershell
+$manifest = 'C:\temp\ae-consumers.json'
+$preview = node scripts\install-global.mjs preview --manifest $manifest --retire-modified | ConvertFrom-Json
+$preview.projects | Format-Table root, role, components
+node scripts\install-global.mjs apply --manifest $manifest --retire-modified --apply --operation $preview.operationId --confirm $preview.confirmation
+```
+
+By default, an `owned: false`, `deferred`, or unknown component blocks apply. Do not manually delete project-level files. Pass `--retire-modified` to both preview and apply only when you explicitly accept complete backup before retiring modified or unknown historical AE components. Migration only touches declared `consumer` roots; project `docs/**`, `AGENTS.md`, AI memory, graph, and archive stay in place. Backups and journals remain until an explicit `purge --operation <id> --apply`. The distribution source and deferred roots are always excluded. After a successful migration, invoke the per-user dispatcher from any project root:
+
+```powershell
+node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" help
+node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" init --project-root (Get-Location).Path
+codex plugin list
+```
+
+Each operating-system user has an independent `$HOME`, dispatcher, backup area, and personal marketplace. The distribution source may intentionally show both its local development skills and the personal plugin; migrated consumer projects should use only the personal plugin. The installer never edits `.codex/plugins/cache`.
 
 ## Initialize Project Docs And Memory
 
@@ -412,10 +457,29 @@ See [docs/release-checklist.md](docs/release-checklist.md) before publishing a G
 
 ## Version Updates
 
+### 0.3.17 (2026-08-10)
+- Hardened `ae-test-api` and the shared local-runtime smoke gate credential handoff: agents must create a non-empty UTF-8 (no BOM) fillable request-config template with method, path, fill steps, and `REPLACE_WITH_LOCAL_TOKEN`, and must not leave empty files or write non-ASCII configs through unsafe PowerShell redirection.
+- Added the `request-config-template` reference as the canonical template shape; agents hand off only the absolute path and never read the user-populated token. Validation: `node --test --test-name-pattern "API bubble testing|local runtime smoke gate" tests/skill-scripts.test.mjs`, `node scripts/check-skill-mirror.mjs`, and `node scripts/check-release-notes.mjs`. These checks prove skill and distribution contracts only, not target-project authenticated API acceptance.
+
+### 0.3.16 (2026-08-10)
+- A `recovery-failed` operation cannot be purged until `recover --operation <id>` reaches `rolled-back`, preventing deletion of the only backup before recovery succeeds. Validation adds this recovery-lifecycle regression case.
+
+### 0.3.15 (2026-08-10)
+- On Windows, global apply invokes the Codex CLI through `cmd.exe`, explicitly registers the user marketplace with `codex plugin marketplace add $HOME --json`, then installs the plugin. Both CLI steps are journaled and installer-owned files roll back if either step fails.
+
+### 0.3.14 (2026-08-10)
+
+- Global apply now publishes `ai-agent-engine-codex` through the current user's personal marketplace and calls `codex plugin add ai-agent-engine-codex@personal --json`; it does not patch the Codex cache or client registry.
+- The installer backs up legacy user-level AE skill copies rather than reactivating duplicate skills, and its confirmation digest now binds `--retire-modified`. Validation covers successful personal publication, retained marketplace entries, and installer-owned file rollback after a CLI-registration failure; real client visibility is verified separately with `codex plugin list`.
+
+### 0.3.13 (2026-08-10)
+
+- Global migration now uses an explicit manifest instead of deriving consumers from local paths or project names; project components are backed up and retired only after fingerprint verification by default.
+- Added `--retire-modified`, a separate authorization in addition to apply operation ID and confirmation for full-backup retirement of modified or unknown AE components. A global runtime created by an installer journal can upgrade transactionally.
+
 ### 0.3.12 (2026-08-10)
 
 - Added per-user global AE distribution with a deterministic dispatcher while keeping project docs, memory, graph, and archives in their original project roots.
-- Added preview, explicit apply, batch rollback, recovery, and explicit purge lifecycle. The first batch contains only seven consumers; the distribution source and `D:\codes\work` are excluded.
 - Validation uses `npm.cmd test`, `npm.cmd run check`, a global preview smoke, and an isolated apply fixture. These prove the local distribution contract only; they neither authorize nor prove an actual consumer apply.
 - Verified `$HOME/.agents/skills` discovery and probe invocation in a fresh `codex-cli 0.146.1` session. An already-open Codex desktop task does not hot-reload its startup skill catalog.
 

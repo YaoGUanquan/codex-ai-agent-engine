@@ -1,6 +1,6 @@
 {
   "name": "ai-agent-engine-codex",
-  "version": "0.3.12",
+  "version": "0.3.17",
   "private": false,
   "type": "module",
   "description": "Codex-native AE-style workflow skills referencing https://gitee.com/jiangqiang1996/ai-agent-engine.",

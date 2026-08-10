@@ -88,7 +88,7 @@ Existing files are skipped by default. `--force` only overwrites files that cont
 
 ## Global Install
 
-Global distribution keeps project data local. It writes only the current user's `$HOME/.agents/skills` and `$HOME/.agents/ai-agent-engine-codex` runtime; it does not centralize `docs`, AI memory, graph, archive, or `AGENTS.md`.
+Global distribution keeps project data local. It maintains the current user's `$HOME/.agents/ai-agent-engine-codex` dispatcher, publishes `$HOME/plugins/ai-agent-engine-codex`, then asks the Codex CLI to install it from `$HOME/.agents/plugins/marketplace.json`; it does not centralize `docs`, AI memory, graph, archive, or `AGENTS.md`.
 
 From a clone of this repository, preview before changing anything:
 
@@ -96,24 +96,44 @@ From a clone of this repository, preview before changing anything:
 node scripts\install-global.mjs preview
 ```
 
-The preview lists seven approved first-batch consumers, the source-repository exclusion, and the deferred project. It performs no writes. Apply is deliberately separate and requires the preview's operation ID and confirmation value:
+The default preview lists only the source-repository exclusion. Consumers come from an explicit manifest, and preview performs no writes. Apply is deliberately separate and requires the preview's operation ID and confirmation value:
 
 ```powershell
 node scripts\install-global.mjs apply --apply --operation <preview-id> --confirm <preview-confirmation>
 ```
 
-The installer backs up verified project AE components and user-level AE skills, activates global skills last, and rolls the whole batch back on failure. Backups and journals remain until an explicit terminal-operation purge:
+The default apply installs the personal plugin for the current user; it does not discover or retire project copies. To switch a project-level install to the global install, use an explicit manifest. The manifest is portable and may contain any project roots owned by the current user; it is not derived from a fixed `D:\\codes` list:
+
+```json
+{
+  "projects": [
+    { "root": "D:\\codes\\work", "role": "consumer" }
+  ]
+}
+```
+
+```powershell
+$manifest = 'C:\temp\ae-consumers.json'
+$preview = node scripts\install-global.mjs preview --manifest $manifest --retire-modified | ConvertFrom-Json
+$preview.projects | Format-Table root, role, components
+node scripts\install-global.mjs apply --manifest $manifest --retire-modified --apply --operation $preview.operationId --confirm $preview.confirmation
+```
+
+`--retire-modified` must be present in both preview and apply. It is the explicit authorization to make a complete backup before retiring modified or unknown historical AE components. The installer backs up verified project AE components and legacy user-level AE skills, publishes the personal plugin, explicitly registers the current user's marketplace with `codex plugin marketplace add $HOME --json`, then calls `codex plugin add ai-agent-engine-codex@personal --json`. It never patches the Codex cache or moves `docs/**`, `AGENTS.md`, AI memory, graph, or archive. Backups and journals remain until an explicit terminal-operation purge:
 
 ```powershell
 node scripts\install-global.mjs purge --operation <operation-id>
 node scripts\install-global.mjs purge --operation <operation-id> --apply
 ```
 
+An operation recorded as `recovery-failed` is not purgeable. Run `recover --operation <operation-id>` until it reaches `rolled-back` before purging its backup.
+
 Once installed, invoke the user-level dispatcher from a project directory:
 
 ```powershell
 node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" help
 node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" init --project-root (Get-Location).Path
+codex plugin list
 ```
 
 ## Update Existing Project Install

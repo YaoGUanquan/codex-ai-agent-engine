@@ -39,7 +39,18 @@ test('global install apply preserves project docs and retains operation backup u
     const home = join(tempRoot, 'home')
     const project = join(tempRoot, 'consumer')
     const manifestPath = join(tempRoot, 'manifest.json')
+    const registrationCalls = []
+    const commandRunner = (request) => {
+      registrationCalls.push(request)
+      return { status: 0, stdout: '{"status":"installed"}', stderr: '' }
+    }
     mkdirSync(home, { recursive: true })
+    mkdirSync(join(home, '.agents', 'plugins'), { recursive: true })
+    writeFileSync(join(home, '.agents', 'plugins', 'marketplace.json'), JSON.stringify({
+      name: 'personal',
+      interface: { displayName: 'Personal' },
+      plugins: [{ name: 'third-party', source: { source: 'local', path: './plugins/third-party' } }],
+    }), 'utf8')
     cpSync(join(repoRoot, 'plugins', 'ai-agent-engine-codex', 'skills', 'ae-help'), join(home, '.agents', 'skills', 'ae-help'), { recursive: true })
     mkdirSync(join(project, 'docs', '08-ai-memory'), { recursive: true })
     writeFileSync(join(project, 'docs', '08-ai-memory', 'history.md'), 'project history stays here\n', 'utf8')
@@ -60,7 +71,7 @@ test('global install apply preserves project docs and retains operation backup u
     assert.equal(preview.projects[0].role, 'consumer')
     let injectedFailure
     try {
-      runGlobalInstall(['apply', '--home', home, '--manifest', manifestPath, '--apply', '--operation', preview.operationId, '--confirm', preview.confirmation, '--fail-at', 'cleanup-consumers'], { repoRoot })
+      runGlobalInstall(['apply', '--home', home, '--manifest', manifestPath, '--apply', '--operation', preview.operationId, '--confirm', preview.confirmation, '--fail-at', 'cleanup-consumers'], { repoRoot, commandRunner })
     } catch (error) {
       injectedFailure = error
     }
@@ -71,12 +82,21 @@ test('global install apply preserves project docs and retains operation backup u
     assert.equal(existsSync(join(home, '.agents', 'ai-agent-engine-codex', 'staging', preview.operationId)), false)
 
     const successPreview = runGlobalInstall(['preview', '--home', home, '--manifest', manifestPath], { repoRoot })
-    const applied = runGlobalInstall(['apply', '--home', home, '--manifest', manifestPath, '--apply', '--operation', successPreview.operationId, '--confirm', successPreview.confirmation], { repoRoot })
+    const applied = runGlobalInstall(['apply', '--home', home, '--manifest', manifestPath, '--apply', '--operation', successPreview.operationId, '--confirm', successPreview.confirmation], { repoRoot, commandRunner })
     assert.equal(applied.status, 'completed')
     assert.equal(readFileSync(join(project, 'docs', '08-ai-memory', 'history.md'), 'utf8'), docsBefore)
     assert.equal(existsSync(join(project, 'plugins', 'ai-agent-engine-codex')), false)
     assert.equal(existsSync(join(project, '.agents', 'skills', 'ae-help')), false)
-    assert.equal(existsSync(join(home, '.agents', 'skills', 'ae-help')), true)
+    assert.equal(existsSync(join(home, '.agents', 'skills', 'ae-help')), false)
+    assert.equal(existsSync(join(home, 'plugins', 'ai-agent-engine-codex')), true)
+    assert.equal(readFileSync(join(home, 'plugins', 'ai-agent-engine-codex', '.codex-plugin', 'plugin.json'), 'utf8'), readFileSync(join(repoRoot, 'plugins', 'ai-agent-engine-codex', '.codex-plugin', 'plugin.json'), 'utf8'))
+    const personalMarketplace = JSON.parse(readFileSync(join(home, '.agents', 'plugins', 'marketplace.json'), 'utf8'))
+    assert.equal(personalMarketplace.name, 'personal')
+    assert.deepEqual(personalMarketplace.plugins.map((entry) => entry.name), ['third-party', 'ai-agent-engine-codex'])
+    assert.deepEqual(registrationCalls, [
+      { command: 'codex', args: ['plugin', 'marketplace', 'add', home, '--json'], homeRoot: home },
+      { command: 'codex', args: ['plugin', 'add', 'ai-agent-engine-codex@personal', '--json'], homeRoot: home },
+    ])
     assert.equal(existsSync(applied.journal), true)
     assert.equal(existsSync(applied.backupRoot), true)
     assert.equal(existsSync(join(applied.backupRoot, 'user-skills', 'ae-help')), true)
@@ -92,6 +112,85 @@ test('global install apply preserves project docs and retains operation backup u
     const purgePreview = runGlobalInstall(['purge', '--home', home, '--operation', successPreview.operationId], { repoRoot })
     assert.equal(purgePreview.status, 'purge-preview')
     assert.equal(existsSync(applied.backupRoot), true)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('global install rolls back personal plugin publication when Codex registration fails', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-global-plugin-failure-'))
+  try {
+    const home = join(tempRoot, 'home')
+    mkdirSync(home, { recursive: true })
+    mkdirSync(join(home, '.agents', 'skills', 'ae-local-modified'), { recursive: true })
+    writeFileSync(join(home, '.agents', 'skills', 'ae-local-modified', 'SKILL.md'), 'local modification\n', 'utf8')
+    const preview = runGlobalInstall(['preview', '--home', home], { repoRoot })
+    assert.throws(() => runGlobalInstall(['apply', '--home', home, '--retire-modified', '--apply', '--operation', preview.operationId, '--confirm', preview.confirmation], {
+      repoRoot,
+      commandRunner: () => ({ status: 0, stdout: '', stderr: '' }),
+    }), /retirement authorization/)
+    const authorizedPreview = runGlobalInstall(['preview', '--home', home, '--retire-modified'], { repoRoot })
+    let failure
+    try {
+      runGlobalInstall(['apply', '--home', home, '--retire-modified', '--apply', '--operation', authorizedPreview.operationId, '--confirm', authorizedPreview.confirmation], {
+        repoRoot,
+        commandRunner: () => ({ status: 1, stdout: '', stderr: 'simulated Codex failure' }),
+      })
+    } catch (error) {
+      failure = error
+    }
+    assert.equal(failure?.operation?.status, 'rolled-back')
+    assert.equal(existsSync(join(home, 'plugins', 'ai-agent-engine-codex')), false)
+    assert.equal(existsSync(join(home, '.agents', 'plugins', 'marketplace.json')), false)
+    assert.equal(existsSync(join(home, '.agents', 'ai-agent-engine-codex', 'runtime', 'plugin')), false)
+    assert.equal(existsSync(join(home, '.agents', 'ai-agent-engine-codex', 'bin', 'ae.mjs')), false)
+    assert.equal(existsSync(join(home, '.agents', 'skills', 'ae-local-modified', 'SKILL.md')), true)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('global install rolls back when marketplace registration fails before plugin add', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-global-marketplace-failure-'))
+  try {
+    const home = join(tempRoot, 'home')
+    mkdirSync(home, { recursive: true })
+    const preview = runGlobalInstall(['preview', '--home', home, '--retire-modified'], { repoRoot })
+    const calls = []
+    let failure
+    try {
+      runGlobalInstall(['apply', '--home', home, '--retire-modified', '--apply', '--operation', preview.operationId, '--confirm', preview.confirmation], {
+        repoRoot,
+        commandRunner: (request) => {
+          calls.push(request)
+          return { status: 1, stdout: '', stderr: 'simulated marketplace failure' }
+        },
+      })
+    } catch (error) {
+      failure = error
+    }
+    assert.equal(failure?.operation?.status, 'rolled-back')
+    assert.match(failure?.message || '', /marketplace registration failed/)
+    assert.equal(calls.length, 1)
+    assert.equal(calls[0].args[0], 'plugin')
+    assert.equal(calls[0].args[1], 'marketplace')
+    assert.equal(existsSync(join(home, 'plugins', 'ai-agent-engine-codex')), false)
+    assert.equal(existsSync(join(home, '.agents', 'plugins', 'marketplace.json')), false)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('global install does not purge a recovery-failed operation', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-global-recovery-purge-'))
+  try {
+    const home = join(tempRoot, 'home')
+    const operation = '11111111-1111-4111-8111-111111111111'
+    const journal = join(home, '.agents', 'ai-agent-engine-codex', 'operations', `${operation}.json`)
+    mkdirSync(join(home, '.agents', 'ai-agent-engine-codex', 'operations'), { recursive: true })
+    writeFileSync(journal, JSON.stringify({ id: operation, status: 'recovery-failed' }), 'utf8')
+    assert.throws(() => runGlobalInstall(['purge', '--home', home, '--operation', operation], { repoRoot }), /before recovery completes/)
+    assert.equal(existsSync(journal), true)
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }
@@ -201,6 +300,8 @@ test('API bubble testing skill keeps contract, evidence, and live-call boundarie
   for (const expectation of [
     /API\/interface\/bubble testing/i,
     /local runtime smoke gate/i,
+    /request config template/i,
+    /REPLACE_WITH_LOCAL_TOKEN/,
     /exactly one sanitized API Verification Record/i,
     /Do not automatically update/i,
     /OpenCode agents/i,
@@ -211,6 +312,8 @@ test('API bubble testing skill keeps contract, evidence, and live-call boundarie
     /Contract Source Precedence/,
     /A passing lower tier cannot satisfy a higher-tier claim/,
     /\.\.\/\.\.\/ae-work\/references\/local-runtime-smoke-gate\.md/,
+    /\.\.\/\.\.\/ae-work\/references\/request-config-template\.md/,
+    /REPLACE_WITH_LOCAL_TOKEN/,
     /Forbidden record content/,
     /Knowledge Curation/,
     /The user explicitly requests durable API knowledge/,
@@ -374,16 +477,27 @@ test('local runtime smoke gate is shared by execution skills without secret tran
     'plugins/ai-agent-engine-codex/skills/ae-work/references/local-runtime-smoke-gate.md',
     '.agents/skills/ae-work/references/local-runtime-smoke-gate.md',
   ]
+  const templatePaths = [
+    'plugins/ai-agent-engine-codex/skills/ae-work/references/request-config-template.md',
+    '.agents/skills/ae-work/references/request-config-template.md',
+  ]
   const sourceReference = readFileSync(resolve(repoRoot, referencePaths[0]), 'utf8')
   const mirrorReference = readFileSync(resolve(repoRoot, referencePaths[1]), 'utf8')
+  const sourceTemplate = readFileSync(resolve(repoRoot, templatePaths[0]), 'utf8')
+  const mirrorTemplate = readFileSync(resolve(repoRoot, templatePaths[1]), 'utf8')
 
   assert.equal(mirrorReference, sourceReference, 'local runtime smoke gate mirror should match plugin source')
+  assert.equal(mirrorTemplate, sourceTemplate, 'request config template mirror should match plugin source')
   for (const expectation of [
     /start, execute, automatically run, smoke test, bubble test, or locally integrate/i,
     /restart or hot-reload rule/i,
     /read-only or state-changing/i,
     /user-controlled local secret reference/i,
     /proactively create a token-free request template/i,
+    /request-config-template\.md/,
+    /UTF-8 without BOM/i,
+    /never create an empty or comments-only file/i,
+    /REPLACE_WITH_LOCAL_TOKEN/,
     /verified ignored project path or in the operating system temporary directory/i,
     /report its absolute path and wait for the user to populate it locally and confirm readiness/i,
     /must not open, read, write, print, or validate the populated reference/i,
@@ -398,9 +512,20 @@ test('local runtime smoke gate is shared by execution skills without secret tran
   ]) {
     assert.match(sourceReference, expectation, `local runtime smoke gate should include ${expectation}`)
   }
+  for (const expectation of [
+    /UTF-8 without BOM/i,
+    /REPLACE_WITH_LOCAL_TOKEN/,
+    /Fill steps/i,
+    /填写步骤/,
+    /header = "Authorization: Bearer REPLACE_WITH_LOCAL_TOKEN"/,
+    /Never create an empty file/i,
+    /PowerShell `Out-File`/,
+  ]) {
+    assert.match(sourceTemplate, expectation, `request config template should include ${expectation}`)
+  }
   assert.doesNotMatch(sourceReference, /Read-Host|write_stdin/i)
 
-  for (const skillName of ['ae-work', 'ae-tdd', 'ae-debug', 'ae-task-loop']) {
+  for (const skillName of ['ae-work', 'ae-tdd', 'ae-debug', 'ae-task-loop', 'ae-test-api']) {
     const source = readSkillBody('plugins/ai-agent-engine-codex/skills', skillName)
     const mirror = readSkillBody('.agents/skills', skillName)
     assert.equal(mirror, source, `${skillName} mirror should match plugin source`)

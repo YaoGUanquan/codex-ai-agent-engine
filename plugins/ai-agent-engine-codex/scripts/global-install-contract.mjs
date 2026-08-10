@@ -4,7 +4,7 @@ import { homedir } from 'node:os'
 import { basename, isAbsolute, relative, resolve, sep } from 'node:path'
 
 export const pluginName = 'ai-agent-engine-codex'
-export const terminalOperationStates = new Set(['completed', 'rolled-back', 'recovery-failed'])
+export const terminalOperationStates = new Set(['completed', 'rolled-back'])
 export const consumerComponentPaths = [
   `plugins/${pluginName}`,
   'scripts/ae-tools.mjs',
@@ -24,22 +24,20 @@ export function userPaths(home = homedir()) {
     skillsRoot: resolve(agentsRoot, 'skills'),
     runtimeRoot: resolve(agentsRoot, pluginName),
     operationsRoot: resolve(agentsRoot, pluginName, 'operations'),
+    personalPluginsRoot: resolve(homeRoot, 'plugins'),
+    personalPluginRoot: resolve(homeRoot, 'plugins', pluginName),
+    personalMarketplace: resolve(agentsRoot, 'plugins', 'marketplace.json'),
   }
 }
 
 export function buildFirstBatchManifest(repoRoot) {
   const sourceRoot = verifiedDirectory(repoRoot, 'distribution source root')
-  const parent = resolve(sourceRoot, '..')
-  const consumers = ['ph-92wailian', 'ph-AionUi', 'ph-centent', 'ph-fromour', 'ph-Lingcard', 'ph-tranform', 'ph-uumit']
-    .map((name) => ({ root: resolve(parent, name), role: 'consumer' }))
   return {
     schemaVersion: 1,
     previewOnly: true,
     sourceRoot,
     projects: [
-      ...consumers,
       { root: sourceRoot, role: 'distribution-source' },
-      { root: resolve(parent, 'work'), role: 'deferred' },
     ],
   }
 }
@@ -47,15 +45,13 @@ export function buildFirstBatchManifest(repoRoot) {
 export function normalizeManifest(manifest, { repoRoot, home = homedir(), allowCustomConsumers = false } = {}) {
   const paths = userPaths(home)
   const sourceRoot = verifiedDirectory(repoRoot, 'distribution source root')
-  const fixed = buildFirstBatchManifest(sourceRoot)
-  const byRoot = new Map(fixed.projects.map((item) => [canonicalExistingOrAbsolute(item.root), item.role]))
   const projects = []
   for (const item of manifest?.projects || []) {
     if (!item || typeof item.root !== 'string') throw new Error('manifest projects must contain root strings')
     const root = canonicalExistingOrAbsolute(item.root)
-    const role = deriveRole(root, { sourceRoot, fixedRoles: byRoot, requestedRole: item.role, allowCustomConsumers })
+    const role = deriveRole(root, { sourceRoot, requestedRole: item.role, allowCustomConsumers })
     if (projects.some((project) => project.root === root)) throw new Error(`manifest contains duplicate root: ${root}`)
-    if (root === paths.homeRoot || root === paths.agentsRoot || root === paths.runtimeRoot) throw new Error(`protected path cannot be a project root: ${root}`)
+    if ([paths.homeRoot, paths.agentsRoot, paths.runtimeRoot, paths.personalPluginsRoot, paths.personalPluginRoot].includes(root)) throw new Error(`protected path cannot be a project root: ${root}`)
     if (isForeignHomePath(root, paths.homeRoot)) throw new Error(`project root belongs to another user home: ${root}`)
     projects.push({ root, role })
   }
@@ -63,10 +59,8 @@ export function normalizeManifest(manifest, { repoRoot, home = homedir(), allowC
   return { schemaVersion: 1, sourceRoot, homeRoot: paths.homeRoot, projects }
 }
 
-export function deriveRole(root, { sourceRoot, fixedRoles = new Map(), requestedRole, allowCustomConsumers = false }) {
+export function deriveRole(root, { sourceRoot, requestedRole, allowCustomConsumers = false }) {
   if (overlaps(root, sourceRoot)) return 'distribution-source'
-  const fixedRole = fixedRoles.get(root)
-  if (fixedRole) return fixedRole
   if (requestedRole === 'deferred') return 'deferred'
   if (allowCustomConsumers && requestedRole === 'consumer') return 'consumer'
   throw new Error(`root is not an approved consumer: ${root}`)

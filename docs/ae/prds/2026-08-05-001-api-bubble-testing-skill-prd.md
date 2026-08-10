@@ -40,7 +40,7 @@ After backend development, the AE catalog has no dedicated API-level verificatio
 **Live Request Safety And Reporting**
 
 - R5. Any live local API call must use the existing local-runtime smoke gate as its sole safety owner.
-  Acceptance: `ae-test-api` delegates restart/hot-reload confirmation, read-only versus state-changing classification, authorization, and user-controlled secret-reference handling to the shared gate and does not reproduce conflicting guidance.
+  Acceptance: `ae-test-api` delegates restart/hot-reload confirmation, read-only versus state-changing classification, authorization, and user-controlled secret-reference handling to the shared gate and does not reproduce conflicting guidance. When a credential reference is missing, it creates a non-empty UTF-8 fillable request-config template from the shared `request-config-template` reference.
 - R6. The skill must report useful, non-sensitive API evidence.
   Acceptance: its report records endpoint and method, operation classification, non-secret fixture class, expected and actual signal, HTTP and business outcome, a reproducible sanitized command form or observation, evidence tier, unverified proof, and known unrelated failures; mutation tests use isolated synthetic data and, where the API exposes a read surface, confirm the effect through that surface; it excludes credentials, private headers, raw secret references, private response data, and raw command lines that contain such material.
 - R7. The skill must route implementation and diagnosis to existing owners.

@@ -25,7 +25,7 @@ An authenticated local smoke may need a short-lived token. The user wants the te
 ## Requirements
 
 - R1. When an authenticated local smoke lacks a credential reference, the workflow must create a token-free request template in a verified ignored project path or the operating-system temporary directory and report its absolute path.
-  Acceptance: the source and mirror gate both require automatic template creation, a credential placeholder, and an absolute-path handoff.
+  Acceptance: the source and mirror gate both require automatic template creation, a credential placeholder, and an absolute-path handoff. Follow-up hardening (2026-08-10) requires the template to be non-empty, UTF-8 without BOM, and shaped by `request-config-template.md` with `REPLACE_WITH_LOCAL_TOKEN`.
 - R2. The user must populate the template locally and explicitly confirm readiness before an authenticated request is sent.
   Acceptance: the workflow does not request a raw credential in chat or continue before the readiness confirmation.
 - R3. After the local handoff, the workflow must invoke the HTTP client by reference only and must not inspect, print, validate, archive, move, or delete the populated reference.

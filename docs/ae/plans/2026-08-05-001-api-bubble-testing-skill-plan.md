@@ -182,3 +182,9 @@ If any distribution check fails, do not release. Remove the new paired skill dir
 ## Handoff
 
 Execute U1-U3 serially on the confirmed `main` worktree. Run a final `ae-review domain:code mode:report-only` after validations; do not commit or push unless later explicitly requested.
+
+## Follow-up (2026-08-10)
+
+- Authenticated smoke handoff usability was hardened in `docs/ae/plans/2026-08-10-003-api-smoke-fillable-request-config-plan.md`.
+- `ae-test-api` now requires the shared fillable request-config template instead of an empty credential file.
+- Distributable version for that follow-up: `0.3.17`.

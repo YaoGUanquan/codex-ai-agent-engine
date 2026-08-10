@@ -84,7 +84,7 @@ node scripts/ae-tools.mjs init --dry-run --lang zh-CN
 
 ## 全局安装
 
-全局分发只全局化运行时，不集中项目数据。它只写入当前用户的 `$HOME/.agents/skills` 与 `$HOME/.agents/ai-agent-engine-codex`；每个项目的 `docs`、AI 记忆、图谱、archive 和 `AGENTS.md` 都保留在原项目根。
+全局分发不集中项目数据。它维护当前用户的 `$HOME/.agents/ai-agent-engine-codex` dispatcher，将插件发布到 `$HOME/plugins/ai-agent-engine-codex`，并通过 `$HOME/.agents/plugins/marketplace.json` 调用 Codex CLI 安装；每个项目的 `docs`、AI 记忆、图谱、archive 和 `AGENTS.md` 都保留在原项目根。
 
 在本仓库 clone 中，先执行只读预览：
 
@@ -92,13 +92,30 @@ node scripts/ae-tools.mjs init --dry-run --lang zh-CN
 node scripts\install-global.mjs preview
 ```
 
-预览会列出已批准的 7 个首批 consumer、分发源排除项和 deferred 项，不会写入或删除文件。真正 apply 必须单独提供预览输出中的 operation ID 与 confirmation：
+默认预览只列出分发源排除项；consumer 必须通过显式 manifest 提供，不会写入或删除文件。真正 apply 必须单独提供预览输出中的 operation ID 与 confirmation：
 
 ```powershell
 node scripts\install-global.mjs apply --apply --operation <preview-id> --confirm <preview-confirmation>
 ```
 
-安装器会备份经验证的项目级 AE 组件和用户级 AE skill，最后才激活全局 skill；任一步失败会整批回滚。备份与 journal 默认保留，只能显式清理终态操作：
+上面的默认 apply 会为当前用户安装全局插件，不会扫描或删除任何项目级副本。若要把项目级安装切换为全局安装，先创建明确清单；清单由当前用户提供项目根，不根据固定的 `D:\\codes` 或项目名推导：
+
+```json
+{
+  "projects": [
+    { "root": "D:\\codes\\work", "role": "consumer" }
+  ]
+}
+```
+
+```powershell
+$manifest = 'C:\temp\ae-consumers.json'
+$preview = node scripts\install-global.mjs preview --manifest $manifest --retire-modified | ConvertFrom-Json
+$preview.projects | Format-Table root, role, components
+node scripts\install-global.mjs apply --manifest $manifest --retire-modified --apply --operation $preview.operationId --confirm $preview.confirmation
+```
+
+`--retire-modified` 必须同时出现在 preview 与 apply 中，表示先完整备份再退役已修改或未知的历史 AE 副本。安装器只处理清单中的 `consumer`，不会移动 `docs/**`、`AGENTS.md`、AI 记忆、图谱或 archive；分发源和 deferred 项目始终排除。它会备份经验证的项目级 AE 组件和旧的用户级 AE skill，发布个人插件后调用 `codex plugin add ai-agent-engine-codex@personal --json`。它不会直接修改 Codex cache；任一步失败会整批回滚。备份与 journal 默认保留，只能显式清理终态操作：
 
 ```powershell
 node scripts\install-global.mjs purge --operation <operation-id>
@@ -110,6 +127,7 @@ node scripts\install-global.mjs purge --operation <operation-id> --apply
 ```powershell
 node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" help
 node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" init --project-root (Get-Location).Path
+codex plugin list
 ```
 
 ## 更新当前项目安装

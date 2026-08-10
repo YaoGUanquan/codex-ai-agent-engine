@@ -24,6 +24,8 @@
 - `12-codex-skill-slash-discoverability.md`：Codex skill-backed discoverability decision, wording boundaries, and validation workflow.
 - `13-review-inventory-and-advisory-impact.md`：审查文件清单、顾问式影响分析和证据边界。
 - Frontend motion governance is recorded in `03-key-workflows.md`, `05-decision-log.md`, and `docs/ae/experience/2026-07-28-frontend-motion-governance.md`.
+- Authenticated API smoke fillable request-config handoff is recorded in `03-key-workflows.md`, `04-known-pitfalls.md`, `05-decision-log.md`, and `docs/ae/experience/2026-08-10-api-smoke-fillable-request-config.md`.
+- Per-user global AE migration, project-data locality, and personal-plugin discovery are recorded in `03-key-workflows.md`, `04-known-pitfalls.md`, `05-decision-log.md`, and `docs/ae/experience/2026-08-10-global-project-install-migration.md`.
 - `99-prompt-template.md`：初始化或维护记忆库的提示词模板。
 
 ## 维护规则
