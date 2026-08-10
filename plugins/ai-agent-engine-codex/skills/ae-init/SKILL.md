@@ -24,14 +24,14 @@ This skill is intentionally conservative. It turns "initialize this project" int
 4. Run a preview first:
 
 ```powershell
-node scripts/ae-tools.mjs init --dry-run
+node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" init --dry-run
 ```
 
 5. Choose language from the user request or existing project language:
 
 ```powershell
-node scripts/ae-tools.mjs init --lang zh-CN
-node scripts/ae-tools.mjs init --lang bilingual
+node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" init --lang zh-CN
+node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" init --lang bilingual
 ```
 
 Use the default only when no project signal or user preference points to Chinese or bilingual templates.
@@ -39,7 +39,7 @@ Use the default only when no project signal or user preference points to Chinese
 6. Run the real init only after the target project and language are clear:
 
 ```powershell
-node scripts/ae-tools.mjs init
+node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" init
 ```
 
 7. Verify the result by checking the command JSON plus the expected core paths: `AGENTS.md`, `docs/ae`, `docs/00-process`, `docs/08-ai-memory`, and `docs/ai-memory`.
@@ -51,7 +51,7 @@ node scripts/ae-tools.mjs init
 - Existing non-managed files are preserved.
 - The init command reports created, skipped, and updated files clearly.
 - The generated `AGENTS.md` and docs contain the AE init marker where overwrite safety depends on it.
-- A minimal validation command ran, such as `node scripts/ae-tools.mjs help` or a dry-run/init JSON inspection.
+- A minimal validation command ran, such as `node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" help` or a dry-run/init JSON inspection.
 
 ## Rules
 

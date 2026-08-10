@@ -1,14 +1,101 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
+import { chmodSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 
 import { renderYaml, skillMetadata } from '../plugins/ai-agent-engine-codex/scripts/skill-language-metadata.mjs'
+import { runGlobalInstall } from '../plugins/ai-agent-engine-codex/scripts/global-install.mjs'
+import { normalizeManifest } from '../plugins/ai-agent-engine-codex/scripts/global-install-contract.mjs'
+import { resolveProjectRoot } from '../plugins/ai-agent-engine-codex/scripts/project-root.mjs'
 
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
+
+test('global dispatcher resolves the nearest project marker and requires an explicit root for unmarked init', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-project-root-'))
+  try {
+    const project = join(tempRoot, 'project')
+    const nested = join(project, 'packages', 'nested')
+    mkdirSync(join(project, '.git'), { recursive: true })
+    mkdirSync(nested, { recursive: true })
+    assert.equal(resolveProjectRoot({ cwd: nested, command: 'recovery' }).root, project)
+    assert.throws(() => resolveProjectRoot({ cwd: tempRoot, command: 'init' }), /AE_PROJECT_ROOT_REQUIRED/)
+    assert.equal(resolveProjectRoot({ cwd: tempRoot, explicitRoot: tempRoot, command: 'init' }).root, tempRoot)
+    assert.throws(() => resolveProjectRoot({ cwd: tempRoot, explicitRoot: tempRoot, command: 'recovery' }), /AE_PROJECT_ROOT_REQUIRED/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('global manifest rejects another Windows user home', { skip: process.platform !== 'win32' }, () => {
+  assert.throws(() => normalizeManifest({ projects: [{ root: 'C:\\Users\\another-user\\project', role: 'consumer' }] }, { repoRoot, home: 'C:\\Users\\yaogu', allowCustomConsumers: true }), /another user home/)
+})
+
+test('global install apply preserves project docs and retains operation backup until explicit purge', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-global-install-'))
+  try {
+    const home = join(tempRoot, 'home')
+    const project = join(tempRoot, 'consumer')
+    const manifestPath = join(tempRoot, 'manifest.json')
+    mkdirSync(home, { recursive: true })
+    cpSync(join(repoRoot, 'plugins', 'ai-agent-engine-codex', 'skills', 'ae-help'), join(home, '.agents', 'skills', 'ae-help'), { recursive: true })
+    mkdirSync(join(project, 'docs', '08-ai-memory'), { recursive: true })
+    writeFileSync(join(project, 'docs', '08-ai-memory', 'history.md'), 'project history stays here\n', 'utf8')
+    const docsBefore = readFileSync(join(project, 'docs', '08-ai-memory', 'history.md'), 'utf8')
+    cpSync(join(repoRoot, 'plugins', 'ai-agent-engine-codex'), join(project, 'plugins', 'ai-agent-engine-codex'), { recursive: true })
+    cpSync(join(repoRoot, 'plugins', 'ai-agent-engine-codex', 'skills', 'ae-help'), join(project, '.agents', 'skills', 'ae-help'), { recursive: true })
+    mkdirSync(join(project, 'scripts'), { recursive: true })
+    writeFileSync(join(project, 'scripts', 'ae-tools.mjs'), "import '../plugins/ai-agent-engine-codex/scripts/ae-tools.mjs'\n", 'utf8')
+    mkdirSync(join(project, '.agents', 'plugins'), { recursive: true })
+    writeFileSync(join(project, '.agents', 'plugins', 'marketplace.json'), JSON.stringify({ plugins: [
+      { name: 'third-party', source: { source: 'local', path: './plugins/third-party' } },
+      { name: 'ai-agent-engine-codex', source: { source: 'local', path: './plugins/ai-agent-engine-codex' } },
+    ] }), 'utf8')
+    writeFileSync(manifestPath, JSON.stringify({ projects: [{ root: project, role: 'consumer' }] }), 'utf8')
+
+    const preview = runGlobalInstall(['preview', '--home', home, '--manifest', manifestPath], { repoRoot })
+    assert.equal(preview.status, 'preview')
+    assert.equal(preview.projects[0].role, 'consumer')
+    let injectedFailure
+    try {
+      runGlobalInstall(['apply', '--home', home, '--manifest', manifestPath, '--apply', '--operation', preview.operationId, '--confirm', preview.confirmation, '--fail-at', 'cleanup-consumers'], { repoRoot })
+    } catch (error) {
+      injectedFailure = error
+    }
+    assert.equal(injectedFailure?.operation?.status, 'rolled-back')
+    assert.equal(readFileSync(join(project, 'docs', '08-ai-memory', 'history.md'), 'utf8'), docsBefore)
+    assert.equal(existsSync(join(project, 'plugins', 'ai-agent-engine-codex')), true)
+    assert.equal(existsSync(join(home, '.agents', 'skills', 'ae-help')), true)
+    assert.equal(existsSync(join(home, '.agents', 'ai-agent-engine-codex', 'staging', preview.operationId)), false)
+
+    const successPreview = runGlobalInstall(['preview', '--home', home, '--manifest', manifestPath], { repoRoot })
+    const applied = runGlobalInstall(['apply', '--home', home, '--manifest', manifestPath, '--apply', '--operation', successPreview.operationId, '--confirm', successPreview.confirmation], { repoRoot })
+    assert.equal(applied.status, 'completed')
+    assert.equal(readFileSync(join(project, 'docs', '08-ai-memory', 'history.md'), 'utf8'), docsBefore)
+    assert.equal(existsSync(join(project, 'plugins', 'ai-agent-engine-codex')), false)
+    assert.equal(existsSync(join(project, '.agents', 'skills', 'ae-help')), false)
+    assert.equal(existsSync(join(home, '.agents', 'skills', 'ae-help')), true)
+    assert.equal(existsSync(applied.journal), true)
+    assert.equal(existsSync(applied.backupRoot), true)
+    assert.equal(existsSync(join(applied.backupRoot, 'user-skills', 'ae-help')), true)
+    assert.equal(existsSync(join(home, '.agents', 'ai-agent-engine-codex', 'staging', successPreview.operationId)), false)
+    const dispatcher = spawnSync(process.execPath, [join(home, '.agents', 'ai-agent-engine-codex', 'bin', 'ae.mjs'), 'init', '--dry-run', '--project-root', project], {
+      cwd: project,
+      encoding: 'utf8',
+    })
+    assert.equal(dispatcher.status, 0, dispatcher.stderr)
+    assert.equal(JSON.parse(dispatcher.stdout).status, 'dry-run')
+    const marketplace = JSON.parse(readFileSync(join(project, '.agents', 'plugins', 'marketplace.json'), 'utf8'))
+    assert.deepEqual(marketplace.plugins.map((entry) => entry.name), ['third-party'])
+    const purgePreview = runGlobalInstall(['purge', '--home', home, '--operation', successPreview.operationId], { repoRoot })
+    assert.equal(purgePreview.status, 'purge-preview')
+    assert.equal(existsSync(applied.backupRoot), true)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
 
 test('renderYaml emits implementation metadata for ae-web-app', () => {
   const yaml = renderYaml(skillMetadata['ae-web-app'], 'zh-CN')
@@ -1825,6 +1912,7 @@ test('memory registry rejects malformed data and reports no declared match separ
     assert.deepEqual(noMatch.diagnostics, ['no declared match'])
 
     mkdirSync(join(invalidRoot, 'docs', '08-ai-memory'), { recursive: true })
+    mkdirSync(join(invalidRoot, 'docs', 'ae'), { recursive: true })
     writeFileSync(join(invalidRoot, 'docs', '08-ai-memory', '00-registry.json'), '{not json', 'utf8')
     const invalid = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'ae-tools.mjs'), 'ae-memory-query', '--topic', 'graph'], {
       cwd: invalidRoot,
@@ -2105,6 +2193,7 @@ test('graph helper documentation states that graph snapshots are not persisted',
 test('review-contract selects reviewers and writes evidence ledger records', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-review-contract-'))
   try {
+    mkdirSync(join(tempRoot, 'docs', 'ae'), { recursive: true })
     const result = runNodeScriptJson([
       'scripts/ae-tools.mjs',
       'review-contract',

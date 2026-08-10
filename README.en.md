@@ -412,6 +412,13 @@ See [docs/release-checklist.md](docs/release-checklist.md) before publishing a G
 
 ## Version Updates
 
+### 0.3.12 (2026-08-10)
+
+- Added per-user global AE distribution with a deterministic dispatcher while keeping project docs, memory, graph, and archives in their original project roots.
+- Added preview, explicit apply, batch rollback, recovery, and explicit purge lifecycle. The first batch contains only seven consumers; the distribution source and `D:\codes\work` are excluded.
+- Validation uses `npm.cmd test`, `npm.cmd run check`, a global preview smoke, and an isolated apply fixture. These prove the local distribution contract only; they neither authorize nor prove an actual consumer apply.
+- Verified `$HOME/.agents/skills` discovery and probe invocation in a fresh `codex-cli 0.146.1` session. An already-open Codex desktop task does not hot-reload its startup skill catalog.
+
 ### 0.3.11 (2026-08-06)
 
 - Hardened `ae-claude-code` after installing OpenAI's `codex@openai-codex` Claude Code plugin: its default delegated child now emits JSON without session persistence, runs in `plan` mode with `Read,Grep,Glob` only, and disables slash commands.

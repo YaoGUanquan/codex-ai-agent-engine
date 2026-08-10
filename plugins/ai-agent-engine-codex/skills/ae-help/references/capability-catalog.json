@@ -17,7 +17,7 @@
       "entry": "/ae-help",
       "target": "查看当前能力",
       "purpose": "查看本地 AE for Codex 已安装的工作流入口和使用边界。",
-      "script": "node scripts/ae-tools.mjs help [query]"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' help [query]"
     },
     {
       "name": "ae-init",
@@ -25,7 +25,7 @@
       "entry": "/ae-init",
       "target": "初始化项目",
       "purpose": "初始化当前项目的 AGENTS.md、AE 工作流目录、过程文档、归档规则、UTF-8 中文处理规则和长期 AI 记忆库。",
-      "script": "node scripts/ae-tools.mjs init [--lang en|zh-CN|bilingual] [--dry-run] [--force]",
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' init [--lang en|zh-CN|bilingual] [--dry-run] [--force]",
       "artifactPath": "AGENTS.md, docs/ae, docs/00-process, docs/08-ai-memory"
     },
     {
@@ -49,7 +49,7 @@
       "entry": "/ae-claude-code",
       "target": "Claude Code CLI 委派",
       "purpose": "将本地 Claude Code CLI 作为受控外部 worker，用于只读分析、审查或 patch 候选方案；Codex 仍负责审查、应用和验证。",
-      "script": "node scripts/ae-tools.mjs claude-delegate --check"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' claude-delegate --check"
     },
     {
       "name": "ae-prd",
@@ -73,7 +73,7 @@
       "entry": "/ae-lfg",
       "target": "默认全流程",
       "purpose": "从需求澄清到计划、实现、审查、验证和交付证据的完整流程。",
-      "script": "node scripts/ae-tools.mjs recovery"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' recovery"
     },
     {
       "name": "ae-plan",
@@ -105,7 +105,7 @@
       "entry": "/ae-work",
       "target": "计划执行",
       "purpose": "在 Git/工作区安全检查后执行计划或窄范围任务，并保留验证证据。",
-      "script": "node scripts/ae-tools.mjs task-analyze --mode plan --plan <path>"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' task-analyze --mode plan --plan <path>"
     },
     {
       "name": "ae-refactor",
@@ -120,7 +120,7 @@
       "entry": "/ae-review",
       "target": "代码或文档审查",
       "purpose": "执行分层代码或文档审查，按严重度优先输出问题。",
-      "script": "node scripts/ae-tools.mjs gate --workflow work --checkpoint final"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' gate --workflow work --checkpoint final"
     },
     {
       "name": "ae-doc-humanize",
@@ -220,7 +220,7 @@
       "entry": "/ae-swagger-parser",
       "target": "Swagger/OpenAPI 摘要",
       "purpose": "摘要或过滤 Swagger/OpenAPI JSON/YAML 规格，不调用业务接口。",
-      "script": "node scripts/ae-tools.mjs swagger <source> [method:GET] [path:/x] [tag:users] [keyword:login] [mode:detail]"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' swagger <source> [method:GET] [path:/x] [tag:users] [keyword:login] [mode:detail]"
     },
     {
       "name": "ae-markitdown",
@@ -228,7 +228,7 @@
       "entry": "/ae-markitdown",
       "target": "Local file to Markdown",
       "purpose": "Convert lightweight local files such as HTML, CSV, TSV, JSON, YAML, XML, text, and Markdown into Markdown without fetching remote URLs.",
-      "script": "node scripts/ae-tools.mjs markitdown <file> [--format json|csv|html|text]"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' markitdown <file> [--format json|csv|html|text]"
     },
     {
       "name": "ae-static-server",
@@ -236,7 +236,7 @@
       "entry": "/ae-static-server",
       "target": "Static preview server",
       "purpose": "Serve a local static file or directory for quick browser preview; use --dry-run to plan the URL without starting a process.",
-      "script": "node scripts/ae-tools.mjs static-server <file-or-directory> [--port 4173] [--dry-run]"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' static-server <file-or-directory> [--port 4173] [--dry-run]"
     },
     {
       "name": "ae-handoff",
@@ -309,7 +309,7 @@
     {
       "name": "init",
       "purpose": "初始化当前项目的 Codex 项目说明、AE 工作流目录、过程文档、归档规则、UTF-8 中文处理规则和长期 AI 记忆库文档。",
-      "script": "node scripts/ae-tools.mjs init [--lang en|zh-CN|bilingual] [--dry-run] [--force]"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' init [--lang en|zh-CN|bilingual] [--dry-run] [--force]"
     },
     {
       "name": "check-ae-artifacts",
@@ -329,62 +329,62 @@
     {
       "name": "ae-memory-query",
       "purpose": "只读检索已登记的 Markdown 记忆；至少指定 topic、path 或 relation 之一，未登记内容不会被扫描。",
-      "script": "node scripts/ae-tools.mjs ae-memory-query [--root <path>] (--topic <topic>|--path <path>|--relation <type>) [--limit 20]"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' ae-memory-query [--root <path>] (--topic <topic>|--path <path>|--relation <type>) [--limit 20]"
     },
     {
       "name": "ae-knowledge-map",
       "purpose": "输出已声明的记忆到 AE 产物关系图，并为每条边保留 declared provenance 和证据路径。",
-      "script": "node scripts/ae-tools.mjs ae-knowledge-map [--root <path>] [--limit 20]"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' ae-knowledge-map [--root <path>] [--limit 20]"
     },
     {
       "name": "ae-knowledge-query",
       "purpose": "按路径和方向查询已声明的文档关系；不推断反向关系或源代码依赖。",
-      "script": "node scripts/ae-tools.mjs ae-knowledge-query [--root <path>] --path <path> [--relation <type>] [--direction incoming|outgoing|both]"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' ae-knowledge-query [--root <path>] --path <path> [--relation <type>] [--direction incoming|outgoing|both]"
     },
     {
       "name": "ae-graph-build",
       "purpose": "Build a shallow dependency graph JSON snapshot with freshness metadata for pre-Phase 2 file and import relation preview.",
-      "script": "node scripts/ae-tools.mjs ae-graph-build [--root <path>] [--limit 500] [--edge-limit <count>]"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' ae-graph-build [--root <path>] [--limit 500] [--edge-limit <count>]"
     },
     {
       "name": "ae-graph-query",
       "purpose": "Query the shallow dependency graph by path or keyword and report freshness metadata.",
-      "script": "node scripts/ae-tools.mjs ae-graph-query [--root <path>] (--path <file>|--keyword <text>)"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' ae-graph-query [--root <path>] (--path <file>|--keyword <text>)"
     },
     {
       "name": "claude-delegate",
       "purpose": "检查或调用本地 Claude Code CLI，默认用于受控分析和 patch 候选方案，不自动写入活动工作区。",
-      "script": "node scripts/ae-tools.mjs claude-delegate --check | --prompt-file <path> [--claude-arg <arg>]"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' claude-delegate --check | --prompt-file <path> [--claude-arg <arg>]"
     },
     {
       "name": "review-contract",
       "purpose": "Generate a deterministic AE review contract with selected reviewers, target coverage, and optional evidence-ledger record.",
-      "script": "node scripts/ae-tools.mjs review-contract --kind code --mode report-only --targets code,document [--write-evidence]"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' review-contract --kind code --mode report-only --targets code,document [--write-evidence]"
     },
     {
       "name": "task-brief",
       "purpose": "Extract one AE implementation unit from a plan into a file artifact for low-context handoff.",
-      "script": "node scripts/ae-tools.mjs task-brief --plan <path> --unit U1 [--out <path>]"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' task-brief --plan <path> --unit U1 [--out <path>]"
     },
     {
       "name": "review-package",
       "purpose": "Write a task or branch review bundle with commit list, diff stat, and contextual diff into an evidence artifact.",
-      "script": "node scripts/ae-tools.mjs review-package --base <ref> --head <ref> [--out <path>]"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' review-package --base <ref> --head <ref> [--out <path>]"
     },
     {
       "name": "evidence",
       "purpose": "Read or write lightweight AE evidence ledger records under docs/ae/evidence.",
-      "script": "node scripts/ae-tools.mjs evidence read"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' evidence read"
     },
     {
       "name": "markitdown",
       "purpose": "Convert a local lightweight file to Markdown.",
-      "script": "node scripts/ae-tools.mjs markitdown <file>"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' markitdown <file>"
     },
     {
       "name": "static-server",
       "purpose": "Serve a local static file or directory for browser preview.",
-      "script": "node scripts/ae-tools.mjs static-server <path> --port 4173 [--dry-run]"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' static-server <path> --port 4173 [--dry-run]"
     }
   ],
   "artifactPaths": {

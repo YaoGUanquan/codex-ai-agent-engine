@@ -38,13 +38,13 @@ Then decide with the user when needed:
 For a plan file, run:
 
 ```powershell
-node scripts/ae-tools.mjs task-analyze --mode plan --plan <path>
+node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" task-analyze --mode plan --plan <path>
 ```
 
 For a plain task, run:
 
 ```powershell
-node scripts/ae-tools.mjs task-analyze --mode scan --task "<description>"
+node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" task-analyze --mode scan --task "<description>"
 ```
 
 Use the result to choose inline, serial, or parallel execution. Spawn sub-agents only when the user explicitly allowed parallel agent work and file ownership is disjoint. Use `references/work-subagent-template.md` for delegated prompts.
@@ -125,7 +125,7 @@ Read `references/shipping-workflow.md` before final response.
 When ready, run a final gate, for example:
 
 ```powershell
-node scripts/ae-tools.mjs gate --workflow work --checkpoint final --plan <path> --validation "npm test" --review-status not_run --worktree-decision rejected --write-proof
+node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" gate --workflow work --checkpoint final --plan <path> --validation "npm test" --review-status not_run --worktree-decision rejected --write-proof
 ```
 
 Final response sections: completed, verified, unverified/unable to verify, Git operations, gate result, residual risks.

@@ -13,13 +13,13 @@ Serve a local static file or directory for browser preview.
 2. For URL planning without starting a long-running process, run:
 
 ```powershell
-node scripts/ae-tools.mjs static-server <file-or-directory> --port 4173 --dry-run
+node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" static-server <file-or-directory> --port 4173 --dry-run
 ```
 
 3. To start a preview server, run without `--dry-run`:
 
 ```powershell
-node scripts/ae-tools.mjs static-server <file-or-directory> --port 4173
+node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" static-server <file-or-directory> --port 4173
 ```
 
 4. Keep the process running only when the user needs a live preview. If browser validation is required, route to `ae-test-browser` after the server URL is available.

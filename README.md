@@ -58,6 +58,13 @@ node scripts/ae-tools.mjs help
 
 ## 版本更新记录
 
+### 0.3.12（2026-08-10）
+
+- 新增每用户全局 AE 分发：用户级 dispatcher 以确定的项目根运行，项目 `docs`、记忆、图谱和 archive 保持原位。
+- 新增预览、显式 apply、整批回滚、恢复与显式 purge 生命周期；首批仅包含 7 个 consumer，分发源仓库和 `D:\codes\work` 被强制排除。
+- 验证使用 `npm.cmd test`、`npm.cmd run check`、全局 preview smoke 与隔离 apply fixture。它们证明本地分发合同，不授权或证明真实 consumer 的 apply 结果。
+- 已在新的 `codex-cli 0.146.1` 会话中验证 `$HOME/.agents/skills` 的发现与探针调用；已打开的 Codex 桌面任务不会热刷新其启动时的 skill 清单。
+
 ### 0.3.11（2026-08-06）
 
 - 在安装 OpenAI 的 `codex@openai-codex` Claude Code 插件后，加固 `ae-claude-code`：默认委派子进程输出 JSON、不持久化会话、使用 `plan` 权限、仅允许 `Read,Grep,Glob`，并禁用 slash commands。

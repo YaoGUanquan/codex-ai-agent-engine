@@ -7,7 +7,7 @@ Before final response:
 3. Run the narrowest meaningful validation commands, then broader validation if appropriate.
 4. Record exact evidence for pass, fail, or blocked results.
 5. Run review or explain why review was not run.
-6. Run `node scripts/ae-tools.mjs gate --workflow work --checkpoint final ...` or perform equivalent gate checks.
+6. Run `node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" gate --workflow work --checkpoint final ...` or perform equivalent gate checks.
 7. Report completed work, validation, unverified areas, Git operations, gate status, and residual risks.
 
 Do not claim tests passed unless commands actually ran and succeeded.
