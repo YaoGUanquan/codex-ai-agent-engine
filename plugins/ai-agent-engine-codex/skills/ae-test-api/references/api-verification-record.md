@@ -51,7 +51,7 @@ A passing lower tier cannot satisfy a higher-tier claim.
 
 ## Live Call Boundary
 
-Before a live local API call, read `../../ae-work/references/local-runtime-smoke-gate.md`. Do not duplicate or weaken its restart, authorization, secret-reference, request classification, or failure handling rules.
+Before a live local API call, read `../../ae-work/references/local-runtime-smoke-gate.md` and, when a credential handoff is needed, `../../ae-work/references/request-config-template.md`. Do not duplicate or weaken their restart, authorization, secret-reference, request-template, request classification, or failure handling rules. The handoff file must be a non-empty UTF-8 fillable template with `REPLACE_WITH_LOCAL_TOKEN`; never leave the user an empty script.
 
 For an explicitly authorized mutation, use an isolated synthetic fixture class and clean up only through the target's supported pattern when appropriate. If the API exposes a read surface, record a sanitized read-back assertion. If it does not, state the hidden-effect limitation; do not substitute direct database state for a public API claim.
 

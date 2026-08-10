@@ -17,8 +17,9 @@ Verify a changed backend API surface with the target repository's existing contr
 6. Cover the happy path plus applicable validation/error behavior. Conditionally assess authentication, authorization, persistence, idempotency/retry, pagination, concurrency, and external-service effects from the changed contract.
 7. Reuse existing target tests, fixtures, and clients. Prefer isolated synthetic data. When an explicitly authorized mutation is exercised and a read surface exists, verify its effect through that API read surface.
 8. For any live local call, read [the local runtime smoke gate](../ae-work/references/local-runtime-smoke-gate.md). It is the sole owner of restart state, authorization, secret references, and read-only versus state-changing execution.
-9. Write or update exactly one sanitized API Verification Record under `docs/ae/evidence/api/` for the completed verification. Use the reference template; preserve only contract metadata and assertion summaries.
-10. Route product changes to `ae-backend` or `ae-work`, red-green work to `ae-tdd`, failures to `ae-debug` or `ae-task-loop`, OpenAPI inspection to `ae-swagger-parser`, and UI acceptance to `ae-test-browser`.
+9. When an authenticated smoke lacks a local secret reference, create a non-empty UTF-8 token-free fillable template from [the request config template](../ae-work/references/request-config-template.md), report its absolute path, and wait for the user to replace `REPLACE_WITH_LOCAL_TOKEN` locally. Do not create an empty config file or ask the user to invent the request shape.
+10. Write or update exactly one sanitized API Verification Record under `docs/ae/evidence/api/` for the completed verification. Use the reference template; preserve only contract metadata and assertion summaries.
+11. Route product changes to `ae-backend` or `ae-work`, red-green work to `ae-tdd`, failures to `ae-debug` or `ae-task-loop`, OpenAPI inspection to `ae-swagger-parser`, and UI acceptance to `ae-test-browser`.
 
 ## Rules
 

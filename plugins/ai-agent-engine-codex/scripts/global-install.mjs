@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 import { closeSync, cpSync, existsSync, fsyncSync, mkdirSync, openSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from 'node:fs'
+import { spawnSync } from 'node:child_process'
 import { basename, dirname, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createHash } from 'node:crypto'
+import { homedir } from 'node:os'
 import {
   aeSkillComponents,
   allowedConsumerComponents,
@@ -12,20 +14,19 @@ import {
   normalizeManifest,
   operationId,
   pluginName,
-  terminalOperationStates,
   userPaths,
 } from './global-install-contract.mjs'
 
 const scriptRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const defaultSourceRoot = resolve(scriptRoot, '..', '..')
 
-export function runGlobalInstall(argv = process.argv.slice(2), { repoRoot = defaultSourceRoot } = {}) {
+export function runGlobalInstall(argv = process.argv.slice(2), { repoRoot = defaultSourceRoot, commandRunner = defaultCommandRunner } = {}) {
   const [command = 'preview', ...args] = argv
   const opts = parseOptions(args)
   const home = opts.home || undefined
   const paths = userPaths(home)
   if (command === 'preview') return preview({ opts, repoRoot, paths })
-  if (command === 'apply') return apply({ opts, repoRoot, paths })
+  if (command === 'apply') return apply({ opts, repoRoot, paths, commandRunner })
   if (command === 'recover') return recover({ opts, paths })
   if (command === 'purge') return purge({ opts, paths })
   throw new Error('Usage: global-install <preview|apply|recover|purge> [--manifest <path>] [--home <path>]')
@@ -38,9 +39,11 @@ function preview({ opts, repoRoot, paths }) {
   return {
     status: 'preview',
     operationId: operation,
-    confirmation: confirmationFor(normalized),
+    confirmation: confirmationFor(normalized, opts),
     homeRoot: paths.homeRoot,
     runtimeRoot: paths.runtimeRoot,
+    personalPluginRoot: paths.personalPluginRoot,
+    personalMarketplace: paths.personalMarketplace,
     projects: normalized.projects.map((project) => ({
       root: project.root,
       role: project.role,
@@ -50,25 +53,26 @@ function preview({ opts, repoRoot, paths }) {
       'Preview does not modify files.',
       'Apply requires --apply --operation <preview-id> --confirm <confirmation>; operation IDs are recorded only when apply begins.',
       'Project docs, AGENTS.md, source code, distribution-source, and deferred roots are outside the cleanup set.',
+      'Modified or unknown components require the additional --retire-modified authorization and are always backed up before retirement.',
     ],
   }
 }
 
-function apply({ opts, repoRoot, paths }) {
+function apply({ opts, repoRoot, paths, commandRunner }) {
   if (opts.apply !== true || !opts.operation || !opts.confirm) {
     throw new Error('apply requires --apply --operation <preview-id> --confirm <preview-confirmation>')
   }
   recoverInterrupted(paths)
   const manifest = loadManifest(opts.manifest, repoRoot)
   const normalized = normalizeManifest(manifest, { repoRoot, home: paths.homeRoot, allowCustomConsumers: Boolean(opts.manifest) })
-  if (opts.confirm !== confirmationFor(normalized)) throw new Error('preview confirmation does not match the current manifest and source root')
+  if (opts.confirm !== confirmationFor(normalized, opts)) throw new Error('preview confirmation does not match the current manifest, source root, or retirement authorization')
   const operation = { id: opts.operation, status: 'in-progress', phase: 'preflight', createdAt: new Date().toISOString(), paths, sourceRoot: normalized.sourceRoot, manifest: normalized, changes: [], failAt: opts['fail-at'] || null }
   const journal = journalPath(paths, operation.id)
   if (existsSync(journal)) throw new Error(`operation journal already exists: ${operation.id}`)
   operation.journal = journal
   try {
-    ensureUserTargetsAreSafe(paths, repoRoot)
-    preflightConsumers(normalized, repoRoot)
+    ensureUserTargetsAreSafe(paths, repoRoot, opts)
+    preflightConsumers(normalized, repoRoot, opts)
     operation.protectedProjectState = captureProtectedProjectState(normalized.projects)
     writeJournal(journal, operation)
     operation.phase = 'stage-runtime'
@@ -79,16 +83,22 @@ function apply({ opts, repoRoot, paths }) {
     backupExistingUserSkills(operation)
     writeJournal(journal, operation)
     injectFailure(operation, 'backup-user-skills')
+    operation.phase = 'backup-global-runtime'
+    backupExistingGlobalRuntime(operation, repoRoot)
+    writeJournal(journal, operation)
+    injectFailure(operation, 'backup-global-runtime')
     operation.phase = 'cleanup-consumers'
     for (const project of normalized.projects.filter((item) => item.role === 'consumer')) cleanConsumer(operation, project.root, repoRoot)
     verifyProtectedProjectState(operation.protectedProjectState)
     writeJournal(journal, operation)
     injectFailure(operation, 'cleanup-consumers')
-    operation.phase = 'activate-global-skills'
+    operation.phase = 'activate-global-runtime'
     activateGlobalRuntime(operation, repoRoot)
     verifyProtectedProjectState(operation.protectedProjectState)
+    operation.phase = 'register-codex-plugin'
+    registerCodexPlugin(operation, commandRunner)
     removeStage(operation)
-    injectFailure(operation, 'activate-global-skills')
+    injectFailure(operation, 'register-codex-plugin')
     operation.status = 'completed'
     operation.phase = 'completed'
     writeJournal(journal, operation)
@@ -118,7 +128,7 @@ function recover({ opts, paths }) {
   const journal = journalPath(paths, opts.operation)
   if (!existsSync(journal)) throw new Error(`operation journal not found: ${opts.operation}`)
   const operation = readJson(journal)
-  if (terminalOperationStates.has(operation.status)) return report(operation)
+  if (operation.status === 'completed' || operation.status === 'rolled-back') return report(operation)
   rollback(operation)
   operation.status = 'rolled-back'
   operation.phase = 'rolled-back'
@@ -131,7 +141,7 @@ function purge({ opts, paths }) {
   const journal = journalPath(paths, opts.operation)
   if (!existsSync(journal)) throw new Error(`operation journal not found: ${opts.operation}`)
   const operation = readJson(journal)
-  if (!terminalOperationStates.has(operation.status)) throw new Error(`cannot purge non-terminal operation: ${operation.status}`)
+  if (!['completed', 'rolled-back'].includes(operation.status)) throw new Error(`cannot purge operation before recovery completes: ${operation.status}`)
   const backupRoot = backupPath(paths, opts.operation)
   if (opts.apply !== true) return { status: 'purge-preview', operationId: opts.operation, journal, backupRoot, operationStatus: operation.status }
   if (existsSync(backupRoot)) rmSync(backupRoot, { recursive: true, force: false })
@@ -153,33 +163,84 @@ function recoverInterrupted(paths) {
   }
 }
 
-function ensureUserTargetsAreSafe(paths, repoRoot) {
-  if (!isInside(paths.homeRoot, paths.agentsRoot) || !isInside(paths.homeRoot, paths.runtimeRoot)) throw new Error('global paths escape the current user home')
-  if (resolve(repoRoot) === paths.runtimeRoot || isInside(paths.runtimeRoot, resolve(repoRoot))) throw new Error('distribution source must not overlap the user runtime root')
+function ensureUserTargetsAreSafe(paths, repoRoot, opts) {
+  if (!isInside(paths.homeRoot, paths.agentsRoot) || !isInside(paths.homeRoot, paths.runtimeRoot) || !isInside(paths.homeRoot, paths.personalPluginsRoot) || !isInside(paths.homeRoot, paths.personalPluginRoot) || !isInside(paths.homeRoot, paths.personalMarketplace)) throw new Error('global paths escape the current user home')
+  if (resolve(repoRoot) === paths.runtimeRoot || isInside(paths.runtimeRoot, resolve(repoRoot)) || resolve(repoRoot) === paths.personalPluginRoot || isInside(paths.personalPluginRoot, resolve(repoRoot))) throw new Error('distribution source must not overlap a user runtime or plugin root')
+  const expectedRuntimeEntries = new Set(['operations', 'backups', 'staging', 'runtime', 'bin'])
   const unexpectedRuntimeEntries = existsSync(paths.runtimeRoot)
-    ? readDirectory(paths.runtimeRoot).filter((name) => name !== 'operations' && name !== 'backups' && name !== 'staging')
+    ? readDirectory(paths.runtimeRoot).filter((name) => !expectedRuntimeEntries.has(name))
     : []
   if (readDirectory(resolve(paths.runtimeRoot, 'staging')).length > 0) unexpectedRuntimeEntries.push('staging')
-  if (unexpectedRuntimeEntries.length > 0) {
+  if (unexpectedRuntimeEntries.length > 0 || !knownGlobalRuntime(paths, repoRoot)) {
+    if (opts['retire-modified'] === true) return
     throw new Error('existing global runtime is protected; recovery or explicit future update support is required')
+  }
+  if (!knownPersonalPlugin(paths, repoRoot) || !knownPersonalMarketplace(paths)) {
+    if (opts['retire-modified'] === true) return
+    throw new Error('existing personal Codex plugin source or marketplace entry is protected; use --retire-modified only after reviewing its backup')
   }
   const sourceSkills = resolve(repoRoot, 'plugins', pluginName, 'skills')
   for (const target of aeSkillComponents(paths.skillsRoot)) {
     const source = resolve(sourceSkills, basename(target))
     if (!existsSync(source) || fingerprintPath(target).sha256 !== fingerprintPath(source).sha256) {
+      if (opts['retire-modified'] === true) continue
       throw new Error(`existing user skill is unknown or modified: ${target}`)
     }
   }
 }
 
-function preflightConsumers(manifest, repoRoot) {
+function knownPersonalPlugin(paths, repoRoot) {
+  if (!existsSync(paths.personalPluginRoot)) return true
+  const source = resolve(repoRoot, 'plugins', pluginName)
+  if (fingerprintPath(paths.personalPluginRoot).sha256 === fingerprintPath(source).sha256) return true
+  return wasCreatedByCompletedOperation(paths, paths.personalPluginRoot)
+}
+
+function knownPersonalMarketplace(paths) {
+  if (!existsSync(paths.personalMarketplace)) return true
+  const marketplace = readJson(paths.personalMarketplace)
+  if (marketplace?.name !== 'personal' || !Array.isArray(marketplace.plugins)) return false
+  const entries = marketplace.plugins.filter((entry) => entry?.name === pluginName)
+  return entries.length <= 1 && (entries.length === 0 || isExpectedPersonalEntry(entries[0]))
+}
+
+function wasCreatedByCompletedOperation(paths, target) {
+  return readDirectory(paths.operationsRoot)
+    .filter((name) => name.endsWith('.json'))
+    .some((name) => {
+      const operation = readJson(resolve(paths.operationsRoot, name))
+      return operation.status === 'completed' && (operation.changes || []).some((change) => change.target === target && change.kind === 'created')
+    })
+}
+
+function preflightConsumers(manifest, repoRoot, opts) {
   for (const project of manifest.projects) {
     if (project.role !== 'consumer') continue
     if (project.root === manifest.sourceRoot || !existsSync(project.root)) throw new Error(`consumer root is invalid: ${project.root}`)
     for (const component of inspectConsumer(project.root, repoRoot)) {
-      if (!component.owned) throw new Error(`consumer component is unknown or modified: ${component.path}`)
+      if (!component.owned && opts['retire-modified'] !== true) throw new Error(`consumer component is unknown or modified: ${component.path}`)
     }
   }
+}
+
+function knownGlobalRuntime(paths, repoRoot) {
+  if (!existsSync(paths.runtimeRoot)) return true
+  const runtime = resolve(paths.runtimeRoot, 'runtime')
+  const bin = resolve(paths.runtimeRoot, 'bin', 'ae.mjs')
+  if (!existsSync(runtime) && !existsSync(bin)) return true
+  const plugin = resolve(runtime, 'plugin')
+  const source = resolve(repoRoot, 'plugins', pluginName)
+  if (!existsSync(plugin) || !existsSync(bin) || !readFileSync(bin, 'utf8').includes("await import('../runtime/plugin/scripts/ae-tools.mjs')")) return false
+  if (fingerprintPath(plugin).sha256 === fingerprintPath(source).sha256) return true
+  return wasCreatedByCompletedOperation(paths, plugin)
+}
+
+function backupExistingGlobalRuntime(operation, repoRoot) {
+  const runtime = resolve(operation.paths.runtimeRoot, 'runtime')
+  const bin = resolve(operation.paths.runtimeRoot, 'bin')
+  if (existsSync(runtime)) moveToBackup(operation, runtime, 'global-runtime/runtime')
+  if (existsSync(bin)) moveToBackup(operation, bin, 'global-runtime/bin')
+  if (existsSync(operation.paths.personalPluginRoot)) moveToBackup(operation, operation.paths.personalPluginRoot, 'personal-plugin-source')
 }
 
 function inspectConsumer(root, repoRoot) {
@@ -258,15 +319,95 @@ function activateGlobalRuntime(operation, repoRoot) {
   operation.changes.push({ source: null, target: bin, backup: null, kind: 'created' })
   writeJournal(operation.journal, operation)
   writeFileSync(bin, '#!/usr/bin/env node\nimport { fileURLToPath } from \'node:url\'\nprocess.env.AE_RUNTIME_ROOT = fileURLToPath(new URL(\'../\', import.meta.url))\nawait import(\'../runtime/plugin/scripts/ae-tools.mjs\')\n', 'utf8')
-  for (const name of readDirectory(resolve(runtimePlugin, 'skills'))) {
-    const source = resolve(runtimePlugin, 'skills', name)
-    if (!existsSync(source) || !basename(name).startsWith('ae-')) continue
-    const target = resolve(operation.paths.skillsRoot, name)
+  const personalPlugin = operation.paths.personalPluginRoot
+  mkdirSync(dirname(personalPlugin), { recursive: true })
+  operation.changes.push({ source: null, target: personalPlugin, backup: null, kind: 'created' })
+  writeJournal(operation.journal, operation)
+  cpSync(stagedPlugin, personalPlugin, { recursive: true, errorOnExist: true })
+  if (fingerprintPath(personalPlugin).sha256 !== fingerprintPath(stagedPlugin).sha256) throw new Error('personal plugin fingerprint mismatch')
+  writePersonalMarketplace(operation)
+}
+
+function writePersonalMarketplace(operation) {
+  const target = operation.paths.personalMarketplace
+  const existing = existsSync(target) ? readJson(target) : { name: 'personal', interface: { displayName: 'Personal' }, plugins: [] }
+  if (existing?.name !== 'personal' || !Array.isArray(existing.plugins)) throw new Error(`personal marketplace is invalid: ${target}`)
+  const entries = existing.plugins.filter((entry) => entry?.name === pluginName)
+  if (entries.length > 1 || (entries.length === 1 && !isExpectedPersonalEntry(entries[0]))) throw new Error(`personal marketplace AE entry is unknown or modified: ${target}`)
+  const next = {
+    ...existing,
+    plugins: [...existing.plugins.filter((entry) => entry?.name !== pluginName), personalMarketplaceEntry()],
+  }
+  replaceFileWithBackup(operation, target, `${JSON.stringify(next, null, 2)}\n`, 'personal-marketplace.json')
+}
+
+function personalMarketplaceEntry() {
+  return {
+    name: pluginName,
+    source: { source: 'local', path: `./plugins/${pluginName}` },
+    policy: { installation: 'AVAILABLE', authentication: 'ON_INSTALL' },
+    category: 'Coding',
+  }
+}
+
+function isExpectedPersonalEntry(entry) {
+  return entry?.source?.source === 'local' && entry?.source?.path === `./plugins/${pluginName}`
+}
+
+function replaceFileWithBackup(operation, target, content, backupRelative) {
+  if (!existsSync(target)) {
     mkdirSync(dirname(target), { recursive: true })
     operation.changes.push({ source: null, target, backup: null, kind: 'created' })
     writeJournal(operation.journal, operation)
-    cpSync(source, target, { recursive: true, errorOnExist: true })
+    writeFileSync(target, content, 'utf8')
+    return
   }
+  const fingerprint = fingerprintPath(target)
+  const backup = resolve(backupPath(operation.paths, operation.id), backupRelative)
+  mkdirSync(dirname(backup), { recursive: true })
+  cpSync(target, backup, { errorOnExist: true })
+  if (fingerprintPath(backup).sha256 !== fingerprint.sha256) throw new Error(`marketplace backup fingerprint mismatch: ${target}`)
+  operation.changes.push({ source: target, target, backup, fingerprint, kind: 'replaced' })
+  writeJournal(operation.journal, operation)
+  writeFileSync(target, content, 'utf8')
+}
+
+function registerCodexPlugin(operation, commandRunner) {
+  if (resolve(operation.paths.homeRoot) !== resolve(homedir()) && commandRunner === defaultCommandRunner) {
+    throw new Error('a non-current --home requires an injected Codex command runner')
+  }
+  const marketplaceRequest = {
+    command: 'codex',
+    args: ['plugin', 'marketplace', 'add', operation.paths.homeRoot, '--json'],
+    homeRoot: operation.paths.homeRoot,
+  }
+  const marketplaceResult = commandRunner(marketplaceRequest)
+  operation.codexPluginRegistration = {
+    marketplace: { command: marketplaceRequest.command, args: marketplaceRequest.args, status: marketplaceResult?.status ?? null },
+  }
+  writeJournal(operation.journal, operation)
+  if (!marketplaceResult || marketplaceResult.status !== 0) {
+    throw new Error(`Codex marketplace registration failed: ${String(marketplaceResult?.stderr || marketplaceResult?.stdout || 'unknown runner failure').trim()}`)
+  }
+  const pluginRequest = { command: 'codex', args: ['plugin', 'add', `${pluginName}@personal`, '--json'], homeRoot: operation.paths.homeRoot }
+  const pluginResult = commandRunner(pluginRequest)
+  operation.codexPluginRegistration.plugin = { command: pluginRequest.command, args: pluginRequest.args, status: pluginResult?.status ?? null }
+  writeJournal(operation.journal, operation)
+  if (!pluginResult || pluginResult.status !== 0) throw new Error(`Codex plugin registration failed: ${String(pluginResult?.stderr || pluginResult?.stdout || 'unknown runner failure').trim()}`)
+}
+
+function defaultCommandRunner({ command, args }) {
+  if (process.platform === 'win32') {
+    const commandLine = [command, ...args].map((value) => quoteWindowsArg(value)).join(' ')
+    return spawnSync(process.env.ComSpec || 'cmd.exe', ['/d', '/s', '/c', commandLine], { encoding: 'utf8', stdio: 'pipe', windowsHide: true })
+  }
+  return spawnSync(command, args, { encoding: 'utf8', stdio: 'pipe' })
+}
+
+function quoteWindowsArg(value) {
+  const text = String(value)
+  if (!/[\s"]/.test(text)) return text
+  return `"${text.replace(/(\\*)"/g, '$1$1\\"').replace(/(\\+)$/g, '$1$1')}"`
 }
 
 function moveToBackup(operation, source, backupRelative) {
@@ -290,7 +431,10 @@ function rollback(operation) {
     }
     if (!change.backup || !existsSync(change.backup)) throw new Error(`backup is missing: ${change.backup}`)
     if (change.kind === 'replaced' && existsSync(change.target)) rmSync(change.target, { force: false })
-    else if (existsSync(change.target)) throw new Error(`refusing to overwrite unexpected restore target: ${change.target}`)
+    else if (existsSync(change.target)) {
+      if (fingerprintPath(change.target)?.kind === 'directory' && readDirectory(change.target).length === 0) rmSync(change.target, { recursive: true, force: false })
+      else throw new Error(`refusing to overwrite unexpected restore target: ${change.target}`)
+    }
     mkdirSync(dirname(change.target), { recursive: true })
     cpSync(change.backup, change.target, { recursive: true, errorOnExist: true })
     if (fingerprintPath(change.target).sha256 !== change.fingerprint.sha256) throw new Error(`restore fingerprint mismatch: ${change.target}`)
@@ -321,8 +465,8 @@ function loadManifest(path, repoRoot) {
   return path ? readJson(resolve(path)) : buildFirstBatchManifest(repoRoot)
 }
 
-function confirmationFor(manifest) {
-  return createHash('sha256').update(JSON.stringify(manifest)).digest('hex')
+function confirmationFor(manifest, opts = {}) {
+  return createHash('sha256').update(JSON.stringify({ manifest, retireModified: opts['retire-modified'] === true })).digest('hex')
 }
 
 function injectFailure(operation, phase) {
@@ -362,7 +506,7 @@ function parseOptions(args) {
     const arg = args[index]
     if (!arg.startsWith('--')) throw new Error(`unknown argument: ${arg}`)
     const key = arg.slice(2)
-    if (['apply'].includes(key)) { opts[key] = true; continue }
+    if (['apply', 'retire-modified'].includes(key)) { opts[key] = true; continue }
     const value = args[index + 1]
     if (!value || value.startsWith('--')) throw new Error(`${arg} requires a value`)
     opts[key] = value
