@@ -27,7 +27,7 @@ Supported mode markers:
 For a branch or commit range, create a review package before drawing conclusions:
 
 ```powershell
-node scripts/ae-tools.mjs review-package --base <base-ref> --head <head-ref> --with-impact
+node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" review-package --base <base-ref> --head <head-ref> --with-impact
 ```
 
 Treat the returned `inventory.files` as the complete changed-file review set. Every file must either be reviewed or be listed in the final result as excluded with a concrete reason. Do not silently omit configuration, documentation, tests, renames, binary files, or untracked artifacts that are in the selected scope.
@@ -55,7 +55,7 @@ Read `references/review-personas.md`. Use the smallest useful reviewer set. Do n
 When reviewer selection is non-trivial, generate a deterministic contract before dispatching lanes:
 
 ```powershell
-node scripts/ae-tools.mjs review-contract --kind code --mode report-only --targets code,document --write-evidence
+node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" review-contract --kind code --mode report-only --targets code,document --write-evidence
 ```
 
 Use the returned reviewers and target coverage as the review routing baseline. The command writes lightweight evidence under `docs/ae/evidence` only when `--write-evidence` is present.
@@ -139,7 +139,7 @@ When a review is used as a delivery gate, preserve enough proof for later checks
 - include the changed-file inventory, explicit exclusions, and whether advisory impact context was used for range/commit reviews;
 - cite validation commands exactly;
 - when `review-contract --write-evidence` was used, mention the returned evidence path;
-- use `node scripts/ae-tools.mjs evidence read` to inspect existing evidence records before relying on them.
+- use `node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" evidence read` to inspect existing evidence records before relying on them.
 
 ## Second-Model Evidence
 

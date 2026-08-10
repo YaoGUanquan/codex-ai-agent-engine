@@ -9,7 +9,7 @@ List and explain the Codex-native AI Agent Engine entrypoints in the local displ
 
 ## Workflow
 
-1. Run `node scripts/ae-tools.mjs help` from the repository that contains this plugin. If the user gave a query, append it as plain arguments.
+1. Run `node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" help` from the repository that contains this plugin. If the user gave a query, append it as plain arguments.
 2. Return the script output directly unless the user asked for a tailored recommendation.
 3. If the script is unavailable, read `references/capability-catalog.json` and summarize the matching capability in Chinese when the local metadata is Chinese.
 

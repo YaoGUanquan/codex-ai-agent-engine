@@ -88,9 +88,33 @@ Existing files are skipped by default. `--force` only overwrites files that cont
 
 ## Global Install
 
-Global install is not recommended by default because Codex project skill loading and marketplace behavior may vary by environment. Prefer project-level install.
+Global distribution keeps project data local. It writes only the current user's `$HOME/.agents/skills` and `$HOME/.agents/ai-agent-engine-codex` runtime; it does not centralize `docs`, AI memory, graph, archive, or `AGENTS.md`.
 
-If the user explicitly asks for global install, stop and ask which Codex global plugin directory they want to use. Do not guess or write to global paths without confirmation.
+From a clone of this repository, preview before changing anything:
+
+```powershell
+node scripts\install-global.mjs preview
+```
+
+The preview lists seven approved first-batch consumers, the source-repository exclusion, and the deferred project. It performs no writes. Apply is deliberately separate and requires the preview's operation ID and confirmation value:
+
+```powershell
+node scripts\install-global.mjs apply --apply --operation <preview-id> --confirm <preview-confirmation>
+```
+
+The installer backs up verified project AE components and user-level AE skills, activates global skills last, and rolls the whole batch back on failure. Backups and journals remain until an explicit terminal-operation purge:
+
+```powershell
+node scripts\install-global.mjs purge --operation <operation-id>
+node scripts\install-global.mjs purge --operation <operation-id> --apply
+```
+
+Once installed, invoke the user-level dispatcher from a project directory:
+
+```powershell
+node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" help
+node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" init --project-root (Get-Location).Path
+```
 
 ## Update Existing Project Install
 

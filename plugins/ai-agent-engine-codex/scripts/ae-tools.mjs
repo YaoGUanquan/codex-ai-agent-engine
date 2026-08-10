@@ -6,6 +6,7 @@ import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { createServer } from 'node:http'
 import { knowledgeMap, knowledgeQuery, memoryQuery } from './memory-knowledge-contract.mjs'
+import { resolveProjectRoot } from './project-root.mjs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -45,68 +46,77 @@ const multiAgentModes = new Set(['suggest', 'review_only', 'auto'])
 const multiAgentEnabledValues = new Set(['auto', true, false])
 
 function main() {
-  const [command, ...args] = process.argv.slice(2)
+  const [command, ...rawArgs] = process.argv.slice(2)
   try {
+    const { args, projectRoot, bypassRootDiscovery } = globalInvocation(command, rawArgs)
+    const worktree = command === 'help' || command === undefined || command === 'swagger' || command === 'markitdown' || command === 'static-server' || bypassRootDiscovery
+      ? process.cwd()
+      : resolveProjectRoot({
+        cwd: process.cwd(),
+        explicitRoot: projectRoot,
+        command,
+        globalRoot: process.env.AE_RUNTIME_ROOT || null,
+      }).root
     switch (command) {
       case 'help':
       case undefined:
         printHelp(args.join(' ').trim())
         break
       case 'recovery':
-        printJson(recovery(process.cwd()))
+        printJson(recovery(worktree))
         break
       case 'init':
-        printJson(initProject(process.cwd(), args))
+        printJson(initProject(worktree, args))
         break
       case 'task-analyze':
-        printJson(taskAnalyze(process.cwd(), args))
+        printJson(taskAnalyze(worktree, args))
         break
       case 'task-brief':
-        printJson(taskBrief(process.cwd(), args))
+        printJson(taskBrief(worktree, args))
         break
       case 'review-package':
-        printJson(reviewPackage(process.cwd(), args))
+        printJson(reviewPackage(worktree, args))
         break
       case 'gate':
-        printJson(gate(process.cwd(), args))
+        printJson(gate(worktree, args))
         break
       case 'swagger':
         printSwagger(args)
         break
       case 'claude-delegate':
-        printJson(claudeDelegate(process.cwd(), args))
+        printJson(claudeDelegate(worktree, args))
         break
       case 'review-contract':
-        printJson(reviewContract(process.cwd(), args))
+        printJson(reviewContract(worktree, args))
         break
       case 'evidence':
-        printJson(evidenceCommand(process.cwd(), args))
+        printJson(evidenceCommand(worktree, args))
         break
       case 'markitdown':
-        printJson(markitdown(process.cwd(), args))
+        printJson(markitdown(worktree, args))
         break
       case 'static-server':
-        staticServer(process.cwd(), args)
+        staticServer(worktree, args)
         break
       case 'ae-memory-query':
       case 'memory-query':
-        printContractResult(memoryQuery(process.cwd(), args))
+        printContractResult(memoryQuery(worktree, args))
         break
       case 'ae-knowledge-map':
       case 'knowledge-map':
-        printContractResult(knowledgeMap(process.cwd(), args))
+        printContractResult(knowledgeMap(worktree, args))
         break
       case 'ae-knowledge-query':
       case 'knowledge-query':
-        printContractResult(knowledgeQuery(process.cwd(), args))
+        printContractResult(knowledgeQuery(worktree, args))
         break
       case 'ae-graph-build':
       case 'graph-build':
-        printJson(graphBuild(process.cwd(), args))
+        printJson(graphBuild(worktree, args))
         break
       case 'ae-graph-query':
       case 'graph-query':
-        printJson(graphQuery(process.cwd(), args))
+        printJson(graphQuery(worktree, args))
         break
       default:
         throw new Error(`Unknown command: ${command}\nAvailable: help, init, recovery, task-analyze, task-brief, review-package, gate, swagger, claude-delegate, review-contract, evidence, markitdown, static-server, ae-memory-query, ae-knowledge-map, ae-knowledge-query, ae-graph-build, ae-graph-query`)
@@ -115,6 +125,30 @@ function main() {
     console.error(formatError(error))
     process.exitCode = 1
   }
+}
+
+function globalInvocation(command, rawArgs) {
+  if (command === 'help' || command === undefined || command === 'swagger' || command === 'markitdown' || command === 'static-server') return { args: rawArgs, projectRoot: null }
+  const args = []
+  let projectRoot = null
+  for (let index = 0; index < rawArgs.length; index++) {
+    const arg = rawArgs[index]
+    if (arg === '--project-root') {
+      const value = rawArgs[index + 1]
+      if (!value || value.startsWith('--')) throw new Error('AE_PROJECT_ROOT_REQUIRED: --project-root requires a directory')
+      projectRoot = value
+      index++
+      continue
+    }
+    if (arg.startsWith('--project-root=')) {
+      projectRoot = arg.slice('--project-root='.length)
+      if (!projectRoot) throw new Error('AE_PROJECT_ROOT_REQUIRED: --project-root requires a directory')
+      continue
+    }
+    args.push(arg)
+  }
+  if (!projectRoot && args.some((arg) => arg === '--root' || arg.startsWith('--root='))) return { args, projectRoot: null, bypassRootDiscovery: true }
+  return { args, projectRoot }
 }
 
 function printHelp(query) {

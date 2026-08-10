@@ -84,9 +84,33 @@ node scripts/ae-tools.mjs init --dry-run --lang zh-CN
 
 ## 全局安装
 
-默认不建议全局安装，因为 Codex 的项目级 skill/marketplace 加载行为更可控。
+全局分发只全局化运行时，不集中项目数据。它只写入当前用户的 `$HOME/.agents/skills` 与 `$HOME/.agents/ai-agent-engine-codex`；每个项目的 `docs`、AI 记忆、图谱、archive 和 `AGENTS.md` 都保留在原项目根。
 
-如果用户明确要求全局安装，先停止并询问用户要写入哪个 Codex 全局插件目录。不要猜测路径，也不要在未确认时写入全局目录。
+在本仓库 clone 中，先执行只读预览：
+
+```powershell
+node scripts\install-global.mjs preview
+```
+
+预览会列出已批准的 7 个首批 consumer、分发源排除项和 deferred 项，不会写入或删除文件。真正 apply 必须单独提供预览输出中的 operation ID 与 confirmation：
+
+```powershell
+node scripts\install-global.mjs apply --apply --operation <preview-id> --confirm <preview-confirmation>
+```
+
+安装器会备份经验证的项目级 AE 组件和用户级 AE skill，最后才激活全局 skill；任一步失败会整批回滚。备份与 journal 默认保留，只能显式清理终态操作：
+
+```powershell
+node scripts\install-global.mjs purge --operation <operation-id>
+node scripts\install-global.mjs purge --operation <operation-id> --apply
+```
+
+安装成功后，在项目目录使用用户级 dispatcher：
+
+```powershell
+node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" help
+node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" init --project-root (Get-Location).Path
+```
 
 ## 更新当前项目安装
 

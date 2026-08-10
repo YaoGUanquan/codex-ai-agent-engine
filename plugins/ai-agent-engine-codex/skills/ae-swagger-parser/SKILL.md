@@ -13,7 +13,7 @@ Summarize or inspect Swagger/OpenAPI specs without calling business APIs.
 2. For local files, run:
 
 ```powershell
-node scripts/ae-tools.mjs swagger <source> method:POST keyword:login mode:detail
+node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" swagger <source> method:POST keyword:login mode:detail
 ```
 
 3. For remote URLs, use Codex network/browsing approval rules. Do not fetch remote specs with shell unless authorized.

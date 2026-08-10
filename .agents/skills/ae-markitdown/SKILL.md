@@ -13,7 +13,7 @@ Convert local workspace files into Markdown for review, planning, archival, or L
 2. For supported lightweight formats, run:
 
 ```powershell
-node scripts/ae-tools.mjs markitdown <file> [--format html|csv|tsv|json|yaml|xml|text|markdown]
+node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" markitdown <file> [--format html|csv|tsv|json|yaml|xml|text|markdown]
 ```
 
 3. Use the returned `markdown` field as the normalized content. Preserve the `file`, `format`, and `fileSize` metadata when citing conversion evidence.
