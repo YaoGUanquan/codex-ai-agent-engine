@@ -523,7 +523,7 @@ node scripts/ae-tools.mjs ae-graph-build --root scripts
 5. ~~**补齐弱覆盖脚本的测试**~~（**已完成 0.3.20**）：`tests/install-scripts.test.mjs`（6 例，覆盖 set-repository / install-project / update-project）。
 6. ~~**控制默认 check 的耗时**~~（**已完成 0.3.20**）：install-smoke 移入 `check:smoke`，日常 `npm run check` 为轻量层。
 
-2026-08-11 **前后端技能对称优化（0.3.21）** 已落地：后端六语言指导、FE/BE 契约检查表、debug 边界速查、`ae-sql` 安全清单；见 `docs/ae/experience/2026-08-11-fullstack-skill-optimization.md`。2026-08-11 **前端技能优化（0.3.18 / 0.3.19）** 见 `docs/ae/experience/2026-08-11-frontend-skill-optimization.md`。仍待推进的方向：
+2026-08-11 **前后端技能对称优化（0.3.21）** 已落地：后端六语言指导、FE/BE 契约检查表、debug 边界速查、`ae-sql` 安全清单；见 `docs/ae/experience/2026-08-11-fullstack-skill-optimization.md`。2026-08-11 **前端技能优化（0.3.18 / 0.3.19）** 见 `docs/ae/experience/2026-08-11-frontend-skill-optimization.md`。剩余第 7、10 两项为**按需触发的挂起项**：策略与触发条件已定，触发命中前无主动待办。2026-08-11 复核确认两项触发均未命中（`npm test` 125/125 全绿、前端契约文件仍为 3 份、未收到可归因的旧栈缺陷）：
 
 7. **旧版本前端栈适配**（策略已定，按需触发）：`svelte-guidance.md` 与 `angular-guidance.md` 以 Svelte 5 runes、Angular standalone/signals 为基线，Vue 指引以 Composition API 为主；命中 Svelte 4 stores、NgModule、Options API 等旧式栈时沿用"匹配仓库既有风格"兜底。不预先堆满对照条目；当真实旧栈项目出现一次可归因的细则未命中缺陷时，仅为受影响框架补最小对照条目（届时属插件内容变更，须按规则递增版本）。触发信号见 `docs/08-ai-memory/05-decision-log.md` 的 2026-08-11 前端栈指导决策。
 8. ~~**版本记录拆分**~~（**已完成，2026-08-11 本批**）：历史条目迁移至 `CHANGELOG.md` / `CHANGELOG.en.md`（完整历史），README 仅保留最近 5 条，`scripts/check-release-notes.mjs` 锁定窗口上限、CHANGELOG 链接与子集关系；见 `docs/ae/plans/2026-08-11-006-governance-batch-four-plan.md`。
