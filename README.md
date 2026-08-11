@@ -58,6 +58,12 @@ node scripts/ae-tools.mjs help
 
 ## 版本更新记录
 
+### 0.3.22（2026-08-11）
+- 知识库治理第一批：`docs/ae/prds/` 为需求正典目录；`ae-brainstorm` 持久化需求时复用 `ae-prd` 捕获契约并写入 `docs/ae/prds/`，删除重复的 `requirements-capture.md`；`recovery` 扫描 PRD 产物；init 创建 `docs/ae/prds` 且不再创建 `docs/ai-memory` 兼容指针（存量项目不动）。
+- `review-package` 改为指纹产物（提交列表、diffstat、清单、base/head SHA 与 `git diff -U10` 重建命令），不再嵌入全量 diff 正文；init/archive 模板与 `docs/00-process/templates/archive-rules.md` 新增 gate/evidence 3 个月保留策略。
+- 新增 `docs/external-samples/README.md` 登记样本语料用途与保留条件。
+- 验证：`node scripts/check-skill-mirror.mjs`、`node scripts/check-release-notes.mjs`、`npm test`、`npm run check`、`npm run check:smoke`。这些检查只证明 CLI、技能文档与分发合同一致，不代表目标项目 init 或审查工作流的运行时验收。
+
 ### 0.3.21（2026-08-11）
 - 全栈技能对称优化：`ae-backend` 新增 Java/Go/Python/C/C++/C# 六份语言指导，工作流增加按仓库技术栈选读步骤，其他后端语言仍回退仓库既有约定。
 - 契约与边界：`api-contract-checklist.md` 扩充 Frontend-Backend Alignment 章节；`ae-web-app` 与 `ae-web-forge` 路由至共享契约检查表；`ae-debug` 新增 Backend Failure Quick Map 与 Frontend-Backend Boundary Quick Map。
@@ -306,8 +312,9 @@ node scripts/ae-tools.mjs init
 - `AGENTS.md`：面向 Codex 的项目说明；
 - `docs/ae`：计划、审查、交接、经验等 AE 工作流产物；
 - `docs/00-process`：执行中的过程笔记、归档规则和过程模板；
-- `docs/08-ai-memory`：标准长期项目 AI 记忆库；
-- `docs/ai-memory`：兼容旧骨架的说明入口。
+- `docs/08-ai-memory`：标准长期项目 AI 记忆库。
+
+需求正典目录为 `docs/ae/prds`。自 0.3.22 起，init 不再创建 `docs/ai-memory` 兼容目录；存量项目中已有的该目录保持原样。
 
 默认不会覆盖已有文件。只有在使用 `--force` 且文件包含 AE init marker 时，才会覆盖受管文件。
 
@@ -525,8 +532,9 @@ docs/codex-port-analysis.md      # OpenCode 到 Codex 的迁移分析
 docs/ae/                         # init 后的 AE 工作流产物
 docs/00-process/                 # init 后的过程笔记、模板和归档规则
 docs/08-ai-memory/               # init 后的标准长期 AI 记忆库
-docs/ai-memory/                  # init 后的兼容说明入口
 ```
+
+自 0.3.22 起 init 不再创建 `docs/ai-memory/`；历史项目可能仍保留该兼容入口。
 
 ## 重要边界
 
@@ -575,7 +583,7 @@ node scripts/ae-tools.mjs ae-graph-build --root scripts
 8. **版本记录拆分**：README 版本条目持续增长（0.3.x 已近 20 条）且中英双份维护，正文越来越长。方向：将历史条目迁移到 `CHANGELOG.md` 或 `docs/`，README 仅保留最近数个版本，同步调整 `scripts/check-release-notes.mjs` 的校验目标与对应测试断言。
 9. **过程文档归档纪律**：`docs/00-process/active/` 下存在已完成或阶段性停滞的任务目录（如 personal-marketplace-global-plugin）。方向：按 AGENTS.md 归档规则移入 `docs/00-process/archive/YYYY-MM/<task>` 或 `docs/99-archive/`，保持 active 目录只反映真正进行中的工作。
 10. **前端质量契约的交叉一致性**（评估项）：`web-ui-quality.md` 可访问性基线、`ae-review` 的 Frontend Components / Styles 镜头、`browser-acceptance.md` 键盘可操作性项之间的对应关系目前靠人工维护。方向：若前端条目继续增长，先评估一份轻量映射说明或 contract 检查的收益，再决定是否实现，避免为一次性映射引入长期校验负担。
-11. **知识库治理（下一批 0.3.22）**：需求单通道（`docs/ae/prds/` 正典）、init 停建 `docs/ai-memory` 兼容指针、review-package 指纹化、gate/evidence 归档规则、`external-samples` 登记。见 `docs/ae/prds/2026-08-11-knowledge-base-governance-prd.md`；维护者知识图谱见 `docs/ae/graphs/maintainer-artifact-graph.md`。
+11. ~~**知识库治理（下一批 0.3.22）**~~（**已完成 0.3.22**）：见 `docs/ae/prds/2026-08-11-knowledge-base-governance-prd.md` 与 `docs/ae/experience/`（维护者知识图谱见 `docs/ae/graphs/maintainer-artifact-graph.md`）。
 
 推进原则：涉及可分发插件内容（`plugins/ai-agent-engine-codex/`）的改动必须同步递增双份 SemVer 版本并补 README 版本记录；纯仓库侧（根 `scripts/`、`tests/`、文档）的重构不升版本，但必须以 `npm run check` 加 `npm test` 全绿为交付门槛。
 

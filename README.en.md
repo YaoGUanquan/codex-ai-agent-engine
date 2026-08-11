@@ -220,7 +220,8 @@ This creates:
 - `docs/ae`: AE workflow artifacts such as plans, reviews, handoffs, and experience notes;
 - `docs/00-process`: active process notes, archive rules, and reusable process templates;
 - `docs/08-ai-memory`: durable project AI memory;
-- `docs/ai-memory`: compatibility pointer for earlier scaffolds.
+
+The canonical requirements directory is `docs/ae/prds`. Starting in 0.3.22, init no longer creates the legacy `docs/ai-memory` compatibility directory; existing projects keep that directory if it is already present.
 
 Existing files are skipped by default. `--force` only overwrites files that contain the AE init marker.
 
@@ -422,8 +423,9 @@ docs/codex-port-analysis.md      # Migration analysis from OpenCode to Codex
 docs/ae/                         # AE workflow artifacts after init
 docs/00-process/                 # Active process notes, templates, and archive rules after init
 docs/08-ai-memory/               # Durable project AI memory after init
-docs/ai-memory/                  # Compatibility pointer after init
 ```
+
+Starting in 0.3.22, init no longer creates `docs/ai-memory/`; older projects may still retain that compatibility entry.
 
 ## Important Boundaries
 
@@ -472,11 +474,17 @@ The **2026-08-11 fullstack skill symmetry release (0.3.21)** landed backend lang
 8. **Release-notes extraction**: README version entries keep growing (nearly 20 under 0.3.x) and are maintained bilingually, making the README long. Direction: move historical entries to `CHANGELOG.md` or `docs/`, keep only the latest few versions in the README, and adjust the `scripts/check-release-notes.mjs` validation target and matching test assertions accordingly.
 9. **Process-document archiving discipline**: `docs/00-process/active/` contains finished or stalled task directories (such as personal-marketplace-global-plugin). Direction: archive them into `docs/00-process/archive/YYYY-MM/<task>` or `docs/99-archive/` per the AGENTS.md rules so the active directory only reflects genuinely in-flight work.
 10. **Cross-consistency of frontend quality contracts** (evaluation item): the accessibility baseline in `web-ui-quality.md`, the Frontend Components / Styles lens in `ae-review`, and the keyboard-operability item in `browser-acceptance.md` are currently kept aligned manually. Direction: if frontend entries keep growing, first evaluate whether a lightweight mapping note or contract check pays for itself before implementing one, to avoid a permanent validation burden for a one-off mapping.
-11. **Knowledge-base governance (next batch 0.3.22)**: single requirements channel (`docs/ae/prds/` canonical), stop creating `docs/ai-memory` compatibility pointers on init, fingerprint review-package artifacts, gate/evidence retention rules, and `external-samples` registry. See `docs/ae/prds/2026-08-11-knowledge-base-governance-prd.md`; maintainer knowledge graph at `docs/ae/graphs/maintainer-artifact-graph.md`.
+11. ~~**Knowledge-base governance (next batch 0.3.22)**~~ (**completed in 0.3.22**): see `docs/ae/prds/2026-08-11-knowledge-base-governance-prd.md` and `docs/ae/experience/` (maintainer knowledge graph at `docs/ae/graphs/maintainer-artifact-graph.md`).
 
 Working rule: any change that touches distributable plugin content (`plugins/ai-agent-engine-codex/`) must bump both SemVer versions and add README release notes; repository-side refactors (root `scripts/`, `tests/`, docs) do not bump the version but must ship with `npm run check` and `npm test` fully green.
 
 ## Version Updates
+
+### 0.3.22 (2026-08-11)
+- Knowledge-base governance batch one: `docs/ae/prds/` is the canonical requirements directory; `ae-brainstorm` reuses the `ae-prd` capture contract and writes durable requirements to `docs/ae/prds/`, removing the duplicate `requirements-capture.md`; `recovery` scans PRD artifacts; init provisions `docs/ae/prds` and no longer creates the legacy `docs/ai-memory` compatibility pointer (existing projects are unchanged).
+- `review-package` now emits fingerprint artifacts (commit list, diffstat, inventory, base/head SHA, and a `git diff -U10` rebuild command) instead of embedding the full diff body; init/archive templates and `docs/00-process/templates/archive-rules.md` add a three-month gate/evidence retention policy.
+- Added `docs/external-samples/README.md` to register sample corpus purpose and retention rules.
+- Validation: `node scripts/check-skill-mirror.mjs`, `node scripts/check-release-notes.mjs`, `npm test`, `npm run check`, and `npm run check:smoke`. These checks prove CLI, skill docs, and distribution contracts only, not target-project init or review workflow runtime acceptance.
 
 ### 0.3.21 (2026-08-11)
 - Fullstack skill symmetry: `ae-backend` adds six language guidance files (Java, Go, Python, C, C++, C#), the workflow now selects guidance by repository stack, and other backend languages still fall back to existing repository conventions.
