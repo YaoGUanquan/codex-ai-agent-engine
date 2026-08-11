@@ -152,6 +152,10 @@ node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-
 
 The updater preserves the existing installed metadata language when possible; if it cannot detect one, it defaults to bilingual metadata. To override it, add `--lang en`, `--lang zh-CN`, or `--lang bilingual`.
 
+After the files are updated, the updater automatically runs a conservative maintenance pass through the freshly installed CLI (`tidy --apply`: archive done process notes, remove empty task directories, move expired gate/evidence files per the retention policy, and report oversized memory files). It never archives merely stale notes. Add `--no-tidy` to skip maintenance; the result appears in the update output as `maintenance` and a failed pass never blocks the update itself.
+
+After the files are updated, the updater automatically runs a conservative maintenance pass through the freshly installed CLI (`tidy --apply`: archive done process notes, remove empty task directories, move expired gate/evidence files per the retention policy, and report oversized memory files). It never archives merely stale notes. Add `--no-tidy` to skip maintenance; the result appears in the update output as `maintenance` and a failed pass never blocks the update itself.
+
 ## Configure Multi-Agent Auto Mode
 
 After updating from the merged `main` branch, the latest profile template is available at `docs/ae/templates/ae-skill-profiles.example.yaml`. The updater does not overwrite `.codex/ae-skill-profiles.yaml`, because that file is a local runtime policy.

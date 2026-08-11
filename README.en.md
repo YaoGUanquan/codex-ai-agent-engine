@@ -324,6 +324,8 @@ The updater preserves the installed language metadata when possible; if it canno
 node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-agent-engine.git --branch main --lang bilingual
 ```
 
+After the files are updated, the updater automatically runs a conservative maintenance pass (`tidy --apply`: archive done process notes, remove empty task directories, move expired gate/evidence files, report oversized memory files; never stale archiving). Add `--no-tidy` to skip it; the result appears in the update output as `maintenance`.
+
 Or ask a Codex agent:
 
 ```text
@@ -479,6 +481,19 @@ The **2026-08-11 fullstack skill symmetry release (0.3.21)** landed backend lang
 Working rule: any change that touches distributable plugin content (`plugins/ai-agent-engine-codex/`) must bump both SemVer versions and add README release notes; repository-side refactors (root `scripts/`, `tests/`, docs) do not bump the version but must ship with `npm run check` and `npm test` fully green.
 
 ## Version Updates
+
+### 0.3.24 (2026-08-11)
+- Upgrade `tidy` archive conflicts from skip to lossless file-by-file merge: when the target exists, missing files move in, identical files deduplicate, and same-name different-content files arrive with a `.from-active-<date>` suffix; the emptied source directory is removed. Add a `memoryBudget` report (default 15KB, `--memory-budget-kb`; report-only, memory files are never moved).
+- Post-update auto maintenance: after installing files, `update-project` runs `tidy --apply` through the target's `scripts/ae-tools.mjs` (done notes, empty dirs, expired evidence; never stale archiving) and reports the summary under `maintenance` in the update output; `--no-tidy` skips it; a missing CLI or failed pass degrades to skipped without blocking the update. INSTALL (both languages), the README update section, and the `ae-update` skill document the behavior.
+- Governance execution: the two same-name archive conflicts in the work reference project were merged clean, a memory-distillation handoff now waits in that project for its own sessions, and Light Path / collision calibration signals were added to the 0.3.23 experience note.
+- Verification: `npm test` (five new cases covering merge, memory budget, and auto maintenance), `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`. These prove CLI behavior and distribution contracts; auto maintenance is evidenced by local git-repository simulation and does not represent end-to-end updates against real remotes.
+
+### 0.3.23 (2026-08-11)
+- Add the `tidy` maintenance command: classifies `docs/00-process/active/` notes (done/empty/stale/archived-pointer/active) and detects expired evidence under `docs/ae/gates/` and `docs/ae/evidence/artifacts/` against the retention window (default 3 months); dry-run by default, `--apply` archives done notes, removes empty dirs, and moves expired evidence while rewriting ledger references; `--archive-stale`, `--stale-days`, and `--retention-months` tune the policy; existing archive targets are skipped safely.
+- Fix `parseOptions`: repeated `--key value` flags accumulate into arrays, so `gate --validation` records every validation command separately.
+- Four skill refinements: the `ae-prd` capture template gains a `## Perspective Collision (Conditional)` landing section and `ae-brainstorm` gains deterministic collision triggers (skip S1-S2 single-direction tasks, four perspectives by default) with an explicit landing rule; `ae-review` gains a Light Path (at most 3 files, no public API/data/security/dependency boundary, not a delivery gate -> single lane without review-package/review-contract) plus persona quick selection; `ae-brainstorm`/`ae-prd`/`ae-review` point their evidence-tier wording at the single definition in `ae-plan/references/validation-evidence-profile.md`; `ae-handoff` and `ae-lfg` share one handoff routing rule (task-scoped handoffs in the process directory, standalone cross-session handoffs in `docs/ae/handoffs/`).
+- Memory maintenance rule templates (en/zh-CN) and this repository's rules gain a size-and-distillation budget (about 15KB per file, yearly decision-log rotation, quarterly reviewStatus pass, archive retired topics).
+- Verification: `npm test` (new gate accumulation and tidy cases, 121 total), `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`. These prove CLI behavior, skill docs, and distribution contracts stay consistent; the tidy runs on this repository and the work reference project are evidenced by command JSON output and do not represent runtime acceptance of other projects.
 
 ### 0.3.22 (2026-08-11)
 - Knowledge-base governance batch one: `docs/ae/prds/` is the canonical requirements directory; `ae-brainstorm` reuses the `ae-prd` capture contract and writes durable requirements to `docs/ae/prds/`, removing the duplicate `requirements-capture.md`; `recovery` scans PRD artifacts; init provisions `docs/ae/prds` and no longer creates the legacy `docs/ai-memory` compatibility pointer (existing projects are unchanged).

@@ -23,6 +23,7 @@ Include these only when they materially affect planning:
 - open questions,
 - alternatives considered.
 - validation-evidence profile for a public API, persisted data, external-service, deployment, or browser boundary.
+- perspective collision outcomes when a collision pass shaped the scope.
 
 ## Template
 
@@ -92,6 +93,10 @@ Use this section only for a small set of delivery-critical acceptance criteria. 
 ## Validation Evidence (Conditional)
 
 When a public API, persisted data, external service, deployment, or browser boundary exists, list only the applicable evidence tiers, their expected signals and preconditions, and any proof that remains `blocked` or `unverified`. Do not treat a lower-tier check as evidence of a higher-tier outcome.
+
+## Perspective Collision (Conditional)
+
+<Include only when a collision pass shaped this PRD: perspectives used, disagreement types (fact, value, assumption), 1-2 collision insights, blind spots, and the thinking preservation zone.>
 
 ## Key Decisions
 

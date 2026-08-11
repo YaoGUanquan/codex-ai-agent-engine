@@ -28,9 +28,38 @@ try {
   const installer = resolve(tempRoot, 'scripts', 'install-project.mjs')
   if (!existsSync(installer)) fail(`Installer not found in cloned repository: ${installer}`)
   run(process.execPath, [installer, '--target', targetRoot, '--lang', lang])
-  console.log(JSON.stringify({ status: 'updated', targetRoot, repo, branch, lang }, null, 2))
+  const maintenance = args.includes('--no-tidy')
+    ? { status: 'skipped', reason: 'maintenance disabled by --no-tidy' }
+    : runPostUpdateMaintenance(targetRoot)
+  console.log(JSON.stringify({ status: 'updated', targetRoot, repo, branch, lang, maintenance }, null, 2))
 } finally {
   rmSync(tempRoot, { recursive: true, force: true })
+}
+
+// Post-update maintenance: run the freshly installed CLI's conservative tidy pass
+// (done/empty notes, expired evidence, memory budget report; never --archive-stale).
+// Maintenance failures degrade to a visible skip and never block the update itself.
+function runPostUpdateMaintenance(targetRoot) {
+  const cli = resolve(targetRoot, 'scripts', 'ae-tools.mjs')
+  if (!existsSync(cli)) return { status: 'skipped', reason: 'scripts/ae-tools.mjs not found in target project' }
+  const result = spawnSync(process.execPath, [cli, 'tidy', '--apply'], { cwd: targetRoot, encoding: 'utf8', stdio: 'pipe', shell: false })
+  if (result.error) return { status: 'skipped', reason: `tidy failed to start: ${result.error.message}` }
+  if (result.status !== 0) {
+    return { status: 'skipped', reason: `tidy exited with ${result.status}`, stderr: String(result.stderr || '').trim().slice(0, 500) }
+  }
+  try {
+    const report = JSON.parse(result.stdout)
+    return {
+      status: 'applied',
+      archivedTasks: report.applied?.archivedTasks ?? [],
+      removedEmptyDirs: report.applied?.removedEmptyDirs ?? [],
+      movedEvidence: report.applied?.movedEvidence ?? [],
+      ledgerRewrites: report.applied?.ledgerRewrites ?? 0,
+      memoryBudget: report.memoryBudget ?? null,
+    }
+  } catch {
+    return { status: 'skipped', reason: 'tidy output was not parseable JSON' }
+  }
 }
 
 function readArg(name) {

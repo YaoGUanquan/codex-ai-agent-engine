@@ -13,10 +13,12 @@ Update the project-local AE for Codex installation.
 2. Explain that update uses Git/network operations and may replace project-local `plugins/ai-agent-engine-codex`, `.agents/skills/ae-*`, and AE wrapper scripts.
 3. Request approval before network fetch, clone, pull, or destructive replacement when required by Codex rules.
 4. Run `node scripts/update-ae-codex.mjs --repo <url> --branch <branch> --lang <lang>` after approval.
-5. Validate with `npm run check` or the narrowest equivalent available.
+5. After installing files, the updater automatically runs a conservative maintenance pass through the target's `scripts/ae-tools.mjs` (`tidy --apply`: archive done process notes, remove empty task dirs, move expired gate/evidence files, report oversized memory files; never stale archiving). Pass `--no-tidy` to skip it; the update summary reports the result under `maintenance`.
+6. Validate with `npm run check` or the narrowest equivalent available.
 
 ## Rules
 
 - Do not run update against placeholder repository URLs.
 - Preserve the user's selected display language when possible.
-- Report changed paths and validation results.
+- Report changed paths, the `maintenance` summary, and validation results.
+- A skipped or failed maintenance pass never blocks the update; surface its reason instead.

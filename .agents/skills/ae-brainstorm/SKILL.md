@@ -24,7 +24,7 @@ Clarify what should be built. Produce a requirements artifact only when it will 
 2. Scan the repository lightly for existing related behavior, docs, and conventions before making claims.
 3. If the request spans multiple independent systems, decompose it and brainstorm only the first coherent slice.
 4. Ask one question at a time when requirements are unclear; prefer multiple choice when the options are known.
-5. Identify goals, non-goals, users or systems affected, success criteria, edge cases, validation signals, and open questions. When behavior crosses a public API, persisted data, external service, deployment, or browser boundary, identify the smallest applicable validation-evidence tiers and what remains `unverified`.
+5. Identify goals, non-goals, users or systems affected, success criteria, edge cases, validation signals, and open questions. When behavior crosses a public API, persisted data, external service, deployment, or browser boundary, identify the smallest applicable validation-evidence tiers and what remains `unverified`. Tier definitions and status vocabulary live in `../ae-plan/references/validation-evidence-profile.md`.
 6. Track material ambiguity explicitly. Continue clarifying until the remaining ambiguity is low enough that a plan can name files, risks, validation, and rollback without inventing behavior.
 7. Ask at most three clarification questions before recording explicit assumptions; ask fewer when repository evidence is enough.
 8. For design-heavy work, compare 2-3 materially different approaches before converging.
@@ -36,7 +36,7 @@ Clarify what should be built. Produce a requirements artifact only when it will 
 
 ## Perspective Collision Pass
 
-Use this pass when the request has competing value judgments, product/engineering tradeoffs, or a vague "which direction is better" shape. Keep it lightweight for small tasks.
+Run this pass when the request has competing value judgments, an unresolved direction choice, or an S3+/design-heavy shape. Skip it for S1-S2 tasks with a single viable direction. Keep it lightweight: at most four perspectives by default.
 
 - Build a perspective matrix with at least critic, pragmatist, innovator, and systems perspectives when the topic is broad enough.
 - Classify disagreements as fact disagreement, value disagreement, or assumption disagreement instead of flattening all conflict into pros and cons.
@@ -45,7 +45,7 @@ Use this pass when the request has competing value judgments, product/engineerin
 - Preserve a thinking preservation zone: decisions where human taste, domain judgment, or long-term strategy should not be over-compressed into automation.
 - End with 1-2 deepening directions that can become PRD questions, design constraints, validation work, or plan risks.
 
-Do not let the collision pass replace requirements. It is evidence for choosing scope, assumptions, validation expectations, and open questions.
+Do not let the collision pass replace requirements. It is evidence for choosing scope, assumptions, validation expectations, and open questions. Record durable outcomes in the requirements artifact's `## Perspective Collision (Conditional)` section instead of leaving them only in chat.
 
 ## Requirements Readiness
 

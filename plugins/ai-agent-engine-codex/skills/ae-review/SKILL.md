@@ -22,6 +22,10 @@ Supported mode markers:
 - `mode:autofix`: apply only deterministic fixes after reporting internally.
 - `mode:headless`: concise pipeline review.
 
+## Light Path
+
+Use the light path only when all of these hold: the scope is diff-like and touches at most 3 files, no public API, persisted data, security, or dependency boundary is crossed, and the review is not a delivery gate. On the light path, skip `review-package` and `review-contract`, review every changed file in a single reviewer lane (correctness, testing, convention fit), and return findings plus a verdict directly. Fall back to the full flow as soon as a boundary crossing, a delivery-gate requirement, or a suspected P0/P1 finding appears.
+
 ## Deterministic Review Preparation
 
 For a branch or commit range, create a review package before drawing conclusions:
@@ -50,7 +54,7 @@ For diff-like scopes:
 
 ## Persona Selection
 
-Read `references/review-personas.md`. Use the smallest useful reviewer set. Do not spawn sub-agents unless the user explicitly requested/allowed parallel agent work. If sub-agents are allowed, each reviewer is read-only and must return evidence-backed findings.
+Read `references/review-personas.md`. Use the smallest useful reviewer set. Quick selection: a code diff starts with correctness, testing, standards, and maintainability; add security, api-contract, reliability, data-migrations, or performance only when the matching trigger exists; a document starts with coherence and feasibility plus content-conditional lenses. Do not spawn sub-agents unless the user explicitly requested/allowed parallel agent work. If sub-agents are allowed, each reviewer is read-only and must return evidence-backed findings.
 
 When reviewer selection is non-trivial, generate a deterministic contract before dispatching lanes:
 
@@ -97,7 +101,7 @@ Flag findings for:
 - source-derived text or code whose license boundary is missing or incompatible;
 - corrections or retractions that should be recorded under `docs/ae/integrity/`.
 
-For material validation claims, also verify that the cited proof tier matches its bounded claim. Flag an invalid promotion from static inspection, a focused test, or a build to runtime, authenticated service, browser, or deployment acceptance. When data/API/security boundaries exist, verify that canonical persisted values, derived or ephemeral representations, caller-controlled input, trust boundaries, and intentional source precedence are not conflated. Keep known unrelated failures in an explicit output field with the reason they do not invalidate the scoped result.
+For material validation claims, also verify that the cited proof tier matches its bounded claim. Flag an invalid promotion from static inspection, a focused test, or a build to runtime, authenticated service, browser, or deployment acceptance. When data/API/security boundaries exist, verify that canonical persisted values, derived or ephemeral representations, caller-controlled input, trust boundaries, and intentional source precedence are not conflated. Keep known unrelated failures in an explicit output field with the reason they do not invalidate the scoped result. Tier definitions and status vocabulary live in `../ae-plan/references/validation-evidence-profile.md`.
 
 Claim-integrity findings must name the claim, the source path, the missing or contradictory evidence, and the fix: add evidence, mark as an assumption, rewrite as a process contract, or remove the claim.
 

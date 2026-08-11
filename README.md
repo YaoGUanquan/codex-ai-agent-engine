@@ -58,6 +58,19 @@ node scripts/ae-tools.mjs help
 
 ## 版本更新记录
 
+### 0.3.24（2026-08-11）
+- `tidy` 归档冲突从"跳过"升级为无损按文件合并：目标已存在时缺失文件移入、内容相同去重、同名不同内容带 `.from-active-<日期>` 后缀并入，源目录清空后删除；新增 `memoryBudget` 报告（默认 15KB，`--memory-budget-kb` 可调，仅报告、永不移动记忆文件）。
+- 更新后自动维护：`update-project` 安装完成后通过目标项目的 `scripts/ae-tools.mjs` 自动执行 `tidy --apply`（done 记录、空目录、超期证据；永不 stale 归档），摘要并入更新输出 `maintenance` 字段；`--no-tidy` 跳过；CLI 缺失或执行失败降级为 skipped 且不阻断更新。INSTALL 双语、README 更新章节与 `ae-update` skill 同步说明。
+- 治理执行：work 参照项目 2 个同名归档冲突目录经合并清零，记忆蒸馏交接（memory-distillation）已放入该项目待其会话收尾后执行；Light Path 与碰撞触发的校准信号补入 0.3.23 经验笔记。
+- 验证：`npm test`（新增冲突合并、记忆预算、自动维护共 5 个用例）、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`。这些检查证明 CLI 行为与分发合同一致；更新自动维护以本地 git 仓库模拟为证据边界，不代表真实远端仓库的端到端更新验收。
+
+### 0.3.23（2026-08-11）
+- 新增 `tidy` 维护命令：对 `docs/00-process/active/` 过程记录做五态分类（done/empty/stale/archived-pointer/active），对 `docs/ae/gates/` 与 `docs/ae/evidence/artifacts/` 按保留期（默认 3 个月）检测超期证据；默认 dry-run，`--apply` 归档 done 记录、删除空目录、迁移超期证据并同步重写 ledger 引用；`--archive-stale`、`--stale-days`、`--retention-months` 控制口径；归档目标已存在时安全跳过。
+- 修整 `parseOptions`：重复 `--key value` 累积为数组，`gate --validation` 多次传参逐条记录验证命令。
+- skill 精修四项：`ae-prd` capture 模板新增 `## Perspective Collision (Conditional)` 落点小节，`ae-brainstorm` 碰撞段增加确定性触发条件（S1-S2 单一方向跳过、默认至多四视角）并指明落点；`ae-review` 新增 Light Path 轻量档（≤3 文件、不跨公共 API/数据/安全/依赖边界、非交付门禁时免 review-package/review-contract 单 lane 直审）与 persona 速选提示；`ae-brainstorm`/`ae-prd`/`ae-review` 的证据分层词汇统一指向 `ae-plan/references/validation-evidence-profile.md` 唯一定义；`ae-handoff` 与 `ae-lfg` 统一交接路由（任务内交接进过程目录，跨会话独立交接进 `docs/ae/handoffs/`）。
+- 记忆维护规则模板（en/zh-CN）与本仓规则新增体积与蒸馏预算（单文件约 15KB、决策日志按年轮换、季度 reviewStatus 盘点、退役主题归档）。
+- 验证：`npm test`（新增 gate 累积与 tidy 用例，共 121 项）、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`。这些检查证明 CLI 行为、技能文档与分发合同一致；tidy 对本仓与 work 参照项目的实际治理以命令 JSON 输出为证据，不代表其他项目的运行时验收。
+
 ### 0.3.22（2026-08-11）
 - 知识库治理第一批：`docs/ae/prds/` 为需求正典目录；`ae-brainstorm` 持久化需求时复用 `ae-prd` 捕获契约并写入 `docs/ae/prds/`，删除重复的 `requirements-capture.md`；`recovery` 扫描 PRD 产物；init 创建 `docs/ae/prds` 且不再创建 `docs/ai-memory` 兼容指针（存量项目不动）。
 - `review-package` 改为指纹产物（提交列表、diffstat、清单、base/head SHA 与 `git diff -U10` 重建命令），不再嵌入全量 diff 正文；init/archive 模板与 `docs/00-process/templates/archive-rules.md` 新增 gate/evidence 3 个月保留策略。
@@ -432,6 +445,8 @@ node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-
 ```bash
 node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-agent-engine.git --branch main --lang bilingual
 ```
+
+文件更新完成后，更新脚本会自动执行一次保守维护（`tidy --apply`：归档 done 过程记录、删除空任务目录、迁移超期 gate/evidence 证据、报告超预算记忆文件，不归档仅"陈旧"的记录）。追加 `--no-tidy` 可跳过；结果在更新输出的 `maintenance` 字段中。
 
 也可以让 Codex 代理执行：
 

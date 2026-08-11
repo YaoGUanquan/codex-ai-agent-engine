@@ -14,6 +14,7 @@ import { reviewContract, reviewPackage } from './ae-tools/review.mjs'
 import { staticServer } from './ae-tools/static-server.mjs'
 import { printSwagger } from './ae-tools/swagger.mjs'
 import { taskAnalyze, taskBrief } from './ae-tools/tasks.mjs'
+import { tidy } from './ae-tools/tidy.mjs'
 import { formatError, printContractResult, printJson } from './ae-tools/utils.mjs'
 
 function main() {
@@ -35,6 +36,9 @@ function main() {
         break
       case 'recovery':
         printJson(recovery(worktree))
+        break
+      case 'tidy':
+        printJson(tidy(worktree, args))
         break
       case 'init':
         printJson(initProject(worktree, args))
@@ -90,7 +94,7 @@ function main() {
         printJson(graphQuery(worktree, args))
         break
       default:
-        throw new Error(`Unknown command: ${command}\nAvailable: help, init, recovery, task-analyze, task-brief, review-package, gate, swagger, claude-delegate, review-contract, evidence, markitdown, static-server, ae-memory-query, ae-knowledge-map, ae-knowledge-query, ae-graph-build, ae-graph-query`)
+        throw new Error(`Unknown command: ${command}\nAvailable: help, init, recovery, tidy, task-analyze, task-brief, review-package, gate, swagger, claude-delegate, review-contract, evidence, markitdown, static-server, ae-memory-query, ae-knowledge-map, ae-knowledge-query, ae-graph-build, ae-graph-query`)
     }
   } catch (error) {
     console.error(formatError(error))

@@ -146,6 +146,8 @@ node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-
 
 更新脚本会尽量保留当前已经安装的技能列表语言；如果无法识别，默认使用双语元数据。要显式覆盖，可追加 `--lang en`、`--lang zh-CN` 或 `--lang bilingual`。
 
+文件更新完成后，更新脚本会通过刚安装的 CLI 自动执行一次保守维护（`tidy --apply`：归档状态为 done 的过程记录、删除空任务目录、按保留策略迁移超期 gate/evidence 证据、报告超预算记忆文件），不会归档仅仅"陈旧"的记录。追加 `--no-tidy` 可跳过；结果在更新输出的 `maintenance` 字段中，维护失败不会阻断更新本身。
+
 ## 配置多 agent auto 模式
 
 从已合并的 `main` 分支更新后，最新配置模板会出现在 `docs/ae/templates/ae-skill-profiles.example.yaml`。更新脚本不会覆盖 `.codex/ae-skill-profiles.yaml`，因为它是项目本地运行策略。

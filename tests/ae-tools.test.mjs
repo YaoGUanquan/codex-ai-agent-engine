@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, utimesSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
@@ -916,6 +916,174 @@ test('init provisions the canonical prds directory and stops creating the legacy
     assert.ok(result.created_directories.includes('docs/ae/prds'), 'init should provision docs/ae/prds')
     assert.ok(!result.created_directories.includes('docs/ai-memory'), 'init should not create the legacy docs/ai-memory pointer')
     assert.ok(!result.created_files.includes('docs/ai-memory/README.md'), 'init should not write the legacy compatibility README')
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('gate records each repeated validation flag separately', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-gate-validation-'))
+  try {
+    mkdirSync(join(tempRoot, 'docs', 'ae'), { recursive: true })
+    const result = runNodeScriptJson([
+      'scripts/ae-tools.mjs',
+      'gate',
+      '--workflow', 'work',
+      '--checkpoint', 'final',
+      '--validation', 'npm run check',
+      '--validation', 'npm test',
+      '--review-status', 'approve',
+    ], tempRoot)
+    assert.deepEqual(result.validation_commands, ['npm run check', 'npm test'], 'repeated --validation flags should accumulate')
+    assert.equal(result.status, 'pass')
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+function buildTidyFixture() {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-tidy-'))
+  const activeRoot = join(tempRoot, 'docs', '00-process', 'active')
+  const oldDate = new Date(Date.now() - 100 * 24 * 60 * 60 * 1000)
+
+  mkdirSync(join(activeRoot, 'done-task'), { recursive: true })
+  writeFileSync(join(activeRoot, 'done-task', 'progress.md'), '# done-task\n\n- 状态：`done`\n', 'utf8')
+
+  mkdirSync(join(activeRoot, 'empty-task'), { recursive: true })
+
+  mkdirSync(join(activeRoot, 'pointer-task'), { recursive: true })
+  writeFileSync(join(activeRoot, 'pointer-task', 'progress.md'), '# pointer-task\n\n- **状态：** archived\n', 'utf8')
+
+  mkdirSync(join(activeRoot, 'stale-task'), { recursive: true })
+  const stalePath = join(activeRoot, 'stale-task', 'progress.md')
+  writeFileSync(stalePath, '# stale-task\n\nno status marker here\n', 'utf8')
+  utimesSync(stalePath, oldDate, oldDate)
+
+  mkdirSync(join(activeRoot, 'live-task'), { recursive: true })
+  writeFileSync(join(activeRoot, 'live-task', 'progress.md'), '# live-task\n\n- Status: active\n', 'utf8')
+
+  mkdirSync(join(tempRoot, 'docs', 'ae', 'gates'), { recursive: true })
+  writeFileSync(join(tempRoot, 'docs', 'ae', 'gates', '20260101T000000Z-work-final.json'), '{"status":"pass"}\n', 'utf8')
+  const recentGate = `${new Date().toISOString().replace(/[-:]/g, '').replace(/\..*$/, 'Z')}-work-final.json`
+  writeFileSync(join(tempRoot, 'docs', 'ae', 'gates', recentGate), '{"status":"pass"}\n', 'utf8')
+
+  mkdirSync(join(tempRoot, 'docs', 'ae', 'evidence', 'artifacts', 'review-contract'), { recursive: true })
+  writeFileSync(join(tempRoot, 'docs', 'ae', 'evidence', 'artifacts', 'review-contract', '20260101T000000Z-old.json'), '{"kind":"review-contract"}\n', 'utf8')
+  writeFileSync(join(tempRoot, 'docs', 'ae', 'evidence', 'ledger.jsonl'), JSON.stringify({
+    kind: 'review-contract',
+    artifact: 'docs/ae/evidence/artifacts/review-contract/20260101T000000Z-old.json',
+  }) + '\n', 'utf8')
+
+  return { tempRoot, recentGate }
+}
+
+test('tidy dry-run classifies process notes and expired evidence without changing files', () => {
+  const { tempRoot } = buildTidyFixture()
+  try {
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'tidy'], tempRoot)
+    assert.equal(result.status, 'dry-run')
+    const states = new Map(result.processNotes.map((note) => [note.task, note.state]))
+    assert.equal(states.get('done-task'), 'done')
+    assert.equal(states.get('empty-task'), 'empty')
+    assert.equal(states.get('pointer-task'), 'archived-pointer')
+    assert.equal(states.get('stale-task'), 'stale')
+    assert.equal(states.get('live-task'), 'active')
+    assert.equal(result.expiredEvidence.length, 2, 'old gate and old review-contract artifact should be expired')
+    assert.ok(existsSync(join(tempRoot, 'docs', 'ae', 'gates', '20260101T000000Z-work-final.json')), 'dry-run must not move files')
+    assert.ok(existsSync(join(tempRoot, 'docs', '00-process', 'active', 'done-task', 'progress.md')), 'dry-run must not archive notes')
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('tidy apply archives done notes, removes empty dirs, moves expired evidence, and rewrites the ledger', () => {
+  const { tempRoot, recentGate } = buildTidyFixture()
+  try {
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'tidy', '--apply'], tempRoot)
+    assert.equal(result.status, 'applied')
+
+    assert.ok(!existsSync(join(tempRoot, 'docs', '00-process', 'active', 'done-task')), 'done task should leave active/')
+    const doneNote = result.processNotes.find((note) => note.task === 'done-task')
+    assert.ok(existsSync(join(tempRoot, doneNote.archiveTarget, 'progress.md')), 'done task should be archived with its files')
+    assert.ok(!existsSync(join(tempRoot, 'docs', '00-process', 'active', 'empty-task')), 'empty task dir should be removed')
+    assert.ok(existsSync(join(tempRoot, 'docs', '00-process', 'active', 'stale-task')), 'stale task stays without --archive-stale')
+    assert.ok(existsSync(join(tempRoot, 'docs', '00-process', 'active', 'pointer-task')), 'archived-pointer dirs are kept')
+    assert.ok(existsSync(join(tempRoot, 'docs', '00-process', 'active', 'live-task')), 'active task stays')
+
+    assert.ok(!existsSync(join(tempRoot, 'docs', 'ae', 'gates', '20260101T000000Z-work-final.json')), 'expired gate should move')
+    assert.ok(existsSync(join(tempRoot, 'docs', 'ae', 'archive', 'gates', '2026-01', '20260101T000000Z-work-final.json')), 'expired gate should land in the archive month dir')
+    assert.ok(existsSync(join(tempRoot, 'docs', 'ae', 'gates', recentGate)), 'recent gate stays')
+    assert.ok(existsSync(join(tempRoot, 'docs', 'ae', 'archive', 'evidence', 'artifacts', 'review-contract', '2026-01', '20260101T000000Z-old.json')), 'expired artifact should land in the archive month dir')
+
+    const ledgerLines = readFileSync(join(tempRoot, 'docs', 'ae', 'evidence', 'ledger.jsonl'), 'utf8').trim().split('\n')
+    for (const line of ledgerLines) {
+      const record = JSON.parse(line)
+      assert.equal(record.artifact, 'docs/ae/archive/evidence/artifacts/review-contract/2026-01/20260101T000000Z-old.json', 'ledger reference should follow the moved artifact')
+    }
+
+    const second = runNodeScriptJson(['scripts/ae-tools.mjs', 'tidy', '--apply'], tempRoot)
+    assert.equal(second.expiredEvidence.length, 0, 'second apply should find nothing expired')
+    assert.ok(!second.processNotes.some((note) => ['done', 'empty'].includes(note.state)), 'second apply should find no done or empty notes')
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('tidy merges a done note into an existing archive target file by file', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-tidy-merge-'))
+  try {
+    mkdirSync(join(tempRoot, 'docs', 'ae'), { recursive: true })
+    const activeDir = join(tempRoot, 'docs', '00-process', 'active', 'merge-task')
+    mkdirSync(activeDir, { recursive: true })
+    writeFileSync(join(activeDir, 'progress.md'), '# merge-task\n\n- 状态：`done`\n', 'utf8')
+    writeFileSync(join(activeDir, 'same.md'), 'identical content\n', 'utf8')
+    writeFileSync(join(activeDir, 'extra.md'), 'only in active\n', 'utf8')
+
+    const monthKey = new Date().toISOString().slice(0, 7)
+    const archiveDir = join(tempRoot, 'docs', '00-process', 'archive', monthKey, 'merge-task')
+    mkdirSync(archiveDir, { recursive: true })
+    writeFileSync(join(archiveDir, 'progress.md'), 'different archived progress\n', 'utf8')
+    writeFileSync(join(archiveDir, 'same.md'), 'identical content\n', 'utf8')
+
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'tidy', '--apply'], tempRoot)
+    const note = result.processNotes.find((entry) => entry.task === 'merge-task')
+    assert.equal(note.action, 'merged', 'existing archive targets should merge instead of skipping')
+    assert.ok(!existsSync(activeDir), 'merged source dir should be removed')
+    assert.ok(existsSync(join(archiveDir, 'extra.md')), 'files missing from the archive should move in')
+    assert.equal(readFileSync(join(archiveDir, 'progress.md'), 'utf8'), 'different archived progress\n', 'existing archive files must not be overwritten')
+    assert.ok(!existsSync(join(archiveDir, 'same.md.from-active-' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '.md')), 'identical files should deduplicate, not duplicate')
+    const renamed = readdirSync(archiveDir).filter((name) => /^progress\.from-active-\d{8}\.md$/.test(name))
+    assert.equal(renamed.length, 1, 'conflicting content should arrive with a dated suffix')
+    assert.equal(readFileSync(join(archiveDir, renamed[0]), 'utf8'), '# merge-task\n\n- 状态：`done`\n', 'suffixed file should carry the active content')
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('tidy reports memory files that exceed the size budget', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-tidy-memory-'))
+  try {
+    mkdirSync(join(tempRoot, 'docs', 'ae'), { recursive: true })
+    mkdirSync(join(tempRoot, 'docs', '08-ai-memory'), { recursive: true })
+    writeFileSync(join(tempRoot, 'docs', '08-ai-memory', 'big.md'), `# big\n${'x'.repeat(20 * 1024)}`, 'utf8')
+    writeFileSync(join(tempRoot, 'docs', '08-ai-memory', 'small.md'), '# small\n', 'utf8')
+
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'tidy'], tempRoot)
+    assert.equal(result.memoryBudget.budgetKb, 15)
+    assert.deepEqual(result.memoryBudget.oversized.map((entry) => entry.path), ['docs/08-ai-memory/big.md'])
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('tidy archives stale notes only when --archive-stale is set', () => {
+  const { tempRoot } = buildTidyFixture()
+  try {
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'tidy', '--apply', '--archive-stale'], tempRoot)
+    assert.equal(result.status, 'applied')
+    assert.ok(!existsSync(join(tempRoot, 'docs', '00-process', 'active', 'stale-task')), 'stale task should be archived with --archive-stale')
+    const staleNote = result.processNotes.find((note) => note.task === 'stale-task')
+    assert.ok(existsSync(join(tempRoot, staleNote.archiveTarget, 'progress.md')), 'stale task files should land in the archive')
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }

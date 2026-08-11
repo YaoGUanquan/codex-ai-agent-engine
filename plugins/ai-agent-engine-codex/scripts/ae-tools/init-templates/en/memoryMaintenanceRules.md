@@ -18,3 +18,10 @@
 - At task close, decide whether new durable knowledge was created.
 - If yes, update the smallest relevant memory file and mention it in the final response.
 - If no, state that no AI memory update was needed.
+
+## Size And Distillation Budget
+
+- When a single memory file exceeds roughly 15KB, distill or split the topic before appending more.
+- Rotate `05-decision-log.md` yearly: start a new file or archive last year's entries under `docs/99-archive/`, updating `00-index.md` and `00-registry.json`.
+- Review `00-registry.json` `reviewStatus` quarterly: confirm entries that are still valid, and distill then archive stale topics.
+- Move topic files for retired features into the archive instead of keeping them in the memory root.

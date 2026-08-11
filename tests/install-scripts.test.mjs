@@ -155,9 +155,85 @@ test('update-project clones a local repository and delegates to its installer', 
     assert.match(result.stdout, /"status": "updated"/)
     assert.match(result.stdout, /"lang": "en"/)
 
+    const summary = parseLastJson(result.stdout)
+    assert.equal(summary.maintenance.status, 'skipped', 'maintenance should degrade gracefully when the target has no ae-tools CLI')
+
     const marker = JSON.parse(readFileSync(join(targetRoot, 'install-args.json'), 'utf8'))
     assert.equal(marker.target, targetRoot)
     assert.equal(marker.lang, 'en')
+  } finally {
+    rmSync(remoteRoot, { recursive: true, force: true })
+    rmSync(targetRoot, { recursive: true, force: true })
+  }
+})
+
+test('update-project runs post-update tidy maintenance through the installed CLI', () => {
+  const remoteRoot = makeTempDir('ae-update-tidy-remote-')
+  const targetRoot = makeTempDir('ae-update-tidy-target-')
+  try {
+    mkdirSync(join(remoteRoot, 'scripts'), { recursive: true })
+    // Fixture installer drops a stub ae-tools CLI into the target so the
+    // post-update maintenance hook has something real to invoke.
+    writeFileSync(join(remoteRoot, 'scripts', 'install-project.mjs'), [
+      '#!/usr/bin/env node',
+      "import { mkdirSync, writeFileSync } from 'node:fs'",
+      "import { join } from 'node:path'",
+      'const args = process.argv.slice(2)',
+      "const target = args[args.indexOf('--target') + 1]",
+      "mkdirSync(join(target, 'scripts'), { recursive: true })",
+      'const stub = [',
+      "  '#!/usr/bin/env node',",
+      "  \"import { writeFileSync } from 'node:fs'\",",
+      "  \"writeFileSync('tidy-args.json', JSON.stringify(process.argv.slice(2)), 'utf8')\",",
+      "  \"console.log(JSON.stringify({ status: 'applied', applied: { archivedTasks: ['fixture-task'], removedEmptyDirs: [], movedEvidence: [], ledgerRewrites: 0 }, memoryBudget: { budgetKb: 15, oversized: [] } }))\",",
+      "  '',",
+      "].join('\\n')",
+      "writeFileSync(join(target, 'scripts', 'ae-tools.mjs'), stub, 'utf8')",
+      '',
+    ].join('\n'), 'utf8')
+    runGit(['init', '-b', 'main'], remoteRoot)
+    runGit(['add', '.'], remoteRoot)
+    runGit(['-c', 'user.email=fixture@example.com', '-c', 'user.name=Fixture', 'commit', '-m', 'fixture installer with cli stub'], remoteRoot)
+
+    const result = runScript('scripts/update-project.mjs', ['--repo', remoteRoot, '--target', targetRoot, '--lang', 'en'], repoRoot)
+    assert.equal(result.status, 0, result.stderr)
+    const summary = parseLastJson(result.stdout)
+    assert.equal(summary.maintenance.status, 'applied')
+    assert.deepEqual(summary.maintenance.archivedTasks, ['fixture-task'])
+    assert.equal(summary.maintenance.memoryBudget.budgetKb, 15)
+
+    const tidyArgs = JSON.parse(readFileSync(join(targetRoot, 'tidy-args.json'), 'utf8'))
+    assert.deepEqual(tidyArgs, ['tidy', '--apply'], 'maintenance must run tidy --apply without --archive-stale')
+  } finally {
+    rmSync(remoteRoot, { recursive: true, force: true })
+    rmSync(targetRoot, { recursive: true, force: true })
+  }
+})
+
+test('update-project skips post-update maintenance when --no-tidy is set', () => {
+  const remoteRoot = makeTempDir('ae-update-notidy-remote-')
+  const targetRoot = makeTempDir('ae-update-notidy-target-')
+  try {
+    mkdirSync(join(remoteRoot, 'scripts'), { recursive: true })
+    writeFileSync(join(remoteRoot, 'scripts', 'install-project.mjs'), [
+      '#!/usr/bin/env node',
+      "import { mkdirSync, writeFileSync } from 'node:fs'",
+      "import { join } from 'node:path'",
+      'const args = process.argv.slice(2)',
+      "const target = args[args.indexOf('--target') + 1]",
+      "mkdirSync(join(target, 'scripts'), { recursive: true })",
+      "writeFileSync(join(target, 'scripts', 'ae-tools.mjs'), '#!/usr/bin/env node\\nthrow new Error(\"must not run\")\\n', 'utf8')",
+      '',
+    ].join('\n'), 'utf8')
+    runGit(['init', '-b', 'main'], remoteRoot)
+    runGit(['add', '.'], remoteRoot)
+    runGit(['-c', 'user.email=fixture@example.com', '-c', 'user.name=Fixture', 'commit', '-m', 'fixture installer'], remoteRoot)
+
+    const result = runScript('scripts/update-project.mjs', ['--repo', remoteRoot, '--target', targetRoot, '--lang', 'en', '--no-tidy'], repoRoot)
+    assert.equal(result.status, 0, result.stderr)
+    const summary = parseLastJson(result.stdout)
+    assert.equal(summary.maintenance.status, 'skipped')
+    assert.match(summary.maintenance.reason, /--no-tidy/)
   } finally {
     rmSync(remoteRoot, { recursive: true, force: true })
     rmSync(targetRoot, { recursive: true, force: true })
