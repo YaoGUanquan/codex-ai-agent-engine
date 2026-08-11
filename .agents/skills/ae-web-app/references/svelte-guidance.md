@@ -18,6 +18,16 @@ Check these before claiming an interactive change is done:
 4. Async races: prefer the repository's load-function pattern over component-mount fetches, and guard param-driven fetching against out-of-order responses.
 5. Props flow: use `$bindable` props or component events per the repository contract instead of mutating parent state implicitly.
 
+## Svelte 4 Counterparts
+
+When the repository is on Svelte 4 or store-based patterns, apply the same traps with legacy syntax:
+
+1. Derived state: use `derived` stores or `$:` reactive declarations instead of copying values through subscriptions; runes such as `$derived` do not exist in Svelte 4.
+2. Effect discipline: side effects live in `$:` statements or `onMount`; register cleanup in `onDestroy` or the `onMount` return for subscriptions, timers, and listeners.
+3. Store hygiene: prefer `$store` auto-subscriptions over manual `subscribe`; never leave a manual `subscribe` without its `unsubscribe`.
+4. Props flow: use `export let` props with `createEventDispatcher` events instead of `$bindable` or callback props.
+5. Do not mix runes syntax into a Svelte 4 repository; keep the existing store and reactive-statement style.
+
 ## SvelteKit And SSR Boundaries
 
 1. Keep server-only code in `+server` routes, `+page.server` files, or `$lib/server`, never imported into client components.

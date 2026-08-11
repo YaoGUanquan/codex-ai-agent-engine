@@ -20,6 +20,17 @@ Check these before claiming an interactive change is done:
 5. Props flow: keep one-way data flow; emit events instead of mutating props, and follow the `v-model` or `defineModel` contracts the repository already uses.
 6. Async races: guard fetches driven by route params or inputs against out-of-order responses, and handle route param changes when a routed component instance is reused.
 
+## Options API Counterparts
+
+When the repository uses the Options API, apply the same traps with legacy syntax:
+
+1. Derived state: use `computed:` options instead of a `watch:` handler that copies values into `data`.
+2. Watch discipline: give `watch:` handlers explicit sources; enable `deep` or `immediate` deliberately, not by default.
+3. Props flow: keep one-way flow with `props` plus `$emit`, following the v-model contract the repository already uses (`value`/`input` on Vue 2, `modelValue`/`update:modelValue` on Vue 3); do not mutate props or parent state directly.
+4. State layer: reuse the existing store bindings such as Vuex or Pinia `mapState`/`mapActions` helpers instead of introducing composables beside them.
+5. Vue 2 reactivity limits: when the repository is still on Vue 2, added root-level properties and array index writes are not reactive; use the repository's established pattern such as object replacement or `Vue.set`.
+6. Do not mix `<script setup>` blocks into Options API modules; match the existing file style.
+
 ## Nuxt And SSR Boundaries
 
 When the repository uses Nuxt or another SSR setup:
