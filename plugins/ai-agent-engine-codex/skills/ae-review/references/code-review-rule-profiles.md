@@ -46,6 +46,21 @@ Check for:
 
 Do not require memoization unless the change creates measurable or structurally obvious render cost.
 
+## Frontend Components / Styles
+
+Use this lens when the reviewed scope changes Vue, Svelte, Angular, or other component files, templates, or styles.
+
+Check for:
+
+- framework reactivity mistakes in changed components: Vue reactive destructuring without `toRefs`/`storeToRefs`, Svelte effects that copy state instead of deriving it, Angular manual subscriptions without teardown or OnPush-invisible in-place mutation,
+- list rendering without stable keys or track expressions when the changed list can reorder, insert, or delete,
+- click handlers added to non-interactive elements without keyboard and focus equivalents when the diff owns that markup,
+- accessibility affordances removed or weakened by the diff: labels, roles, alt text, focus outlines, or contrast-critical styles,
+- style changes with global side effects: selectors leaking outside the component boundary, z-index escalation, or hardcoded dimensions that break existing responsive behavior,
+- user-controlled content reaching `innerHTML`-style sinks or sensitive data written to client-side storage.
+
+Anchor findings in the framework the repository actually uses; do not flag idiomatic patterns merely for differing from another framework's conventions.
+
 ## package.json
 
 Check for:
