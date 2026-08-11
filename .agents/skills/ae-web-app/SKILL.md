@@ -13,7 +13,7 @@ Build or extend a web application using the existing repository stack and conven
 2. Inspect the web stack, routing, component system, state or data layer, auth boundary, and local dev commands.
 3. Confirm the target route, user workflow, data dependencies, and validation surface before editing.
 4. Determine whether the implementation is frontend-only app wiring, backend-assisted web work, or a small full-stack flow.
-5. When the repository uses React-compatible tooling, read `references/react-guidance.md`.
+5. Read the framework guidance matching the repository stack: `references/react-guidance.md` for React-compatible tooling, `references/vue-guidance.md` for Vue, `references/svelte-guidance.md` for Svelte or SvelteKit, `references/angular-guidance.md` for Angular. For other stacks, follow the repository's existing conventions without inventing a new structure.
 6. Implement using the existing framework and local conventions for components, styling, routing, forms, state, data fetching, and error handling.
 7. When the task spans backend endpoints or persistence, coordinate with `ae-backend` and `ae-sql` rather than hand-waving the server side.
 8. Before final signoff, read `references/deployment-readiness.md` when the work affects runtime config, routing, build output, or release readiness.

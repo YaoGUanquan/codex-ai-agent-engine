@@ -30,6 +30,7 @@ Design and implement frontend UI surfaces using the repository's existing stack,
 ## Design Rules
 
 - Build the actual usable experience, not a marketing landing page, unless requested.
+- Meet the accessibility baseline in `references/web-ui-quality.md`: semantic structure, labeled controls, keyboard reachability with visible focus, and readable contrast.
 - Keep operational tools dense, calm, and scannable.
 - Ensure text fits containers on desktop and mobile.
 - Use real assets or generated bitmap assets when the interface needs visual content.

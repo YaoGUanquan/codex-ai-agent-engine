@@ -8,6 +8,7 @@ Minimum browser evidence for a claimed pass:
 4. No blocking console or network failure on the claimed happy path.
 5. At least one screenshot or equivalent visual confirmation when layout matters.
 6. Desktop and mobile checks when responsive behavior is relevant.
+7. Keyboard operability of the primary control when form usability or accessibility behavior is part of the claim.
 
 ## Reconnaissance And Stability
 

@@ -58,6 +58,17 @@ node scripts/ae-tools.mjs help
 
 ## 版本更新记录
 
+### 0.3.19（2026-08-11）
+- 补齐前端技术栈覆盖：`ae-web-app` 新增 `svelte-guidance.md`（Svelte 5 runes/SvelteKit：`$derived` 优先、`$effect` 清理、keyed each、load 函数与 `$lib/server` 边界）与 `angular-guidance.md`（standalone/signals：async pipe 或 `takeUntilDestroyed` 订阅治理、OnPush 可见性、`@for` track、typed forms、`switchMap` 竞态取消、SSR 守卫），SKILL 工作流按 React/Vue/Svelte/Angular 四栈选读，其他栈回退到沿用仓库既有约定。
+- 非前端 skill 的前端适配：`ae-review` 评审规则画像新增「Frontend Components / Styles」镜头（Vue/Svelte/Angular 响应性错误、列表 key/track、非交互元素点击无键盘等效、diff 削弱可访问性、样式全局泄漏、`innerHTML` 类注入点），并保留"以仓库实际框架为准"的抑制规则；`ae-tdd` 工作流新增前端测试挂载点指引（沿用既有 runner 与组件测试库、断言用户可见行为、jsdom 不证明真实浏览器行为并路由到 `ae-test-browser`）。
+- 经评估未改动：`local-runtime-smoke-gate` 已覆盖 UI 面；`ae-plan` 的浏览器验收要求由 `ae-lfg`/`ae-web-forge` 管道承担，不重复内联。
+- 验证：`node scripts/check-skill-mirror.mjs`、`node scripts/check-skill-contract.mjs`、`node scripts/check-skill-language-metadata.mjs`、`node scripts/check-release-notes.mjs`、`node scripts/check-install-smoke.mjs`、`npm test`。这些检查只证明技能文档、镜像与分发合同一致，不代表任何目标前端项目的运行时或浏览器验收。
+
+### 0.3.18（2026-08-11）
+- 面向前端开发强化技能参考：`ae-web-app` 的 React 指引扩充为结构约定、常见缺陷（派生状态、effect 纪律、列表 key、请求竞态、受控输入、按需 memo）、Next.js/SSR 边界、用户可见状态四部分，并新增同构的 `vue-guidance.md`（Vue 3/Nuxt：响应性丢失、computed 优先、`v-for` key、props 单向流、SSR 边界）；SKILL 工作流按仓库技术栈选读对应指引。
+- `ae-frontend-design` 质量清单与设计规则补充可访问性基线（语义结构、控件标签、键盘可达与焦点可见、对比度、alt 文本）、响应式断点验证与异步加载布局稳定性；`ae-web-app` 部署就绪清单新增前端性能不回退项；`ae-debug` 新增前端故障速查表（空白页、hydration、CORS/认证、缓存、样式、环境差异）；`ae-test-browser` 最低验收证据新增主控件键盘可操作性。
+- 验证：`node scripts/check-skill-mirror.mjs`、`node scripts/check-skill-contract.mjs`、`node scripts/check-skill-language-metadata.mjs`、`node scripts/check-release-notes.mjs`、`node scripts/check-install-smoke.mjs`、`npm test`。这些检查只证明技能文档、镜像与分发合同一致，不代表任何目标前端项目的运行时、浏览器或部署验收。
+
 ### 0.3.17（2026-08-10）
 - 强化 `ae-test-api` 与共享 local-runtime smoke gate 的认证冒烟交接：必须生成非空、可填写的 UTF-8（无 BOM）请求配置模板，包含方法、路径、填写步骤和 `REPLACE_WITH_LOCAL_TOKEN`，禁止空文件与不安全的 PowerShell 重定向写中文配置。
 - 新增 `request-config-template` 参考作为唯一模板形状；agent 只交付路径，不读取用户填好的 token。验证：`node --test --test-name-pattern "API bubble testing|local runtime smoke gate" tests/skill-scripts.test.mjs`、`node scripts/check-skill-mirror.mjs`、`node scripts/check-release-notes.mjs`。这些检查只证明技能与分发合同，不代表目标项目的真实认证接口验收。
@@ -544,6 +555,13 @@ node scripts/ae-tools.mjs ae-graph-build --root scripts
 4. **抽取共享 path 校验工具**：`check-ae-artifacts.mjs` 与 `check-design-contract.mjs` 中重复的 `readArg` / `isRepositoryRelativePath` / `toPosix` 等 helper 抽到插件内共享模块；同时加强 `check-install-smoke.mjs` 的 `ensureInsideRepo` 对 Windows 跨盘符绝对路径的拒绝。
 5. **补齐弱覆盖脚本的测试**：`set-repository.mjs`、`update-project.mjs`（可用本地 file:// 仓库模拟 clone）、`install-project.mjs` 的直接单测。
 6. **控制默认 check 的耗时**：完整 install-smoke 较重，可移入 `check:smoke` 层，日常开发跑轻量层，发布前跑全量。
+
+以上 1-6 项为结构性债务，正在独立的 structural-debt-refactor 流程中推进，完成后随其自身的版本记录与验证证据落地。2026-08-11 前端技能优化（0.3.18 / 0.3.19）落地后，新增以下方向：
+
+7. **旧版本前端栈适配**：`svelte-guidance.md` 与 `angular-guidance.md` 以 Svelte 5 runes、Angular standalone/signals 为基线，Vue 指引以 Composition API 为主；命中 Svelte 4 stores、NgModule、Options API 等旧式栈时依赖"匹配仓库既有风格"的兜底规则，细则命中率下降。方向：在真实旧栈项目暴露不足时按需补充对照条目，不预先堆满。
+8. **版本记录拆分**：README 版本条目持续增长（0.3.x 已近 20 条）且中英双份维护，正文越来越长。方向：将历史条目迁移到 `CHANGELOG.md` 或 `docs/`，README 仅保留最近数个版本，同步调整 `scripts/check-release-notes.mjs` 的校验目标与对应测试断言。
+9. **过程文档归档纪律**：`docs/00-process/active/` 下存在已完成或阶段性停滞的任务目录（如 personal-marketplace-global-plugin）。方向：按 AGENTS.md 归档规则移入 `docs/00-process/archive/YYYY-MM/<task>` 或 `docs/99-archive/`，保持 active 目录只反映真正进行中的工作。
+10. **前端质量契约的交叉一致性**（评估项）：`web-ui-quality.md` 可访问性基线、`ae-review` 的 Frontend Components / Styles 镜头、`browser-acceptance.md` 键盘可操作性项之间的对应关系目前靠人工维护。方向：若前端条目继续增长，先评估一份轻量映射说明或 contract 检查的收益，再决定是否实现，避免为一次性映射引入长期校验负担。
 
 推进原则：涉及可分发插件内容（`plugins/ai-agent-engine-codex/`）的改动必须同步递增双份 SemVer 版本并补 README 版本记录；纯仓库侧（根 `scripts/`、`tests/`、文档）的重构不升版本，但必须以 `npm run check` 加 `npm test` 全绿为交付门槛。
 
