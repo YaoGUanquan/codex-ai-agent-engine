@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { relative, resolve } from 'node:path'
+import { isAbsolute, relative, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { randomUUID } from 'node:crypto'
@@ -285,7 +285,8 @@ function cleanupTarget() {
 
 function ensureInsideRepo(path) {
   const relativePath = relative(repoRoot, path)
-  if (relativePath.startsWith('..') || relativePath === '') {
+  // On Windows, relative() returns an absolute path when the target sits on another drive.
+  if (relativePath === '' || relativePath.startsWith('..') || isAbsolute(relativePath) || /^[A-Za-z]:/.test(relativePath)) {
     throw new Error(`Refusing to operate outside repo root: ${path}`)
   }
 }

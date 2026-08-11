@@ -1,11 +1,12 @@
 #!/usr/bin/env node
-import { existsSync, readFileSync, readdirSync } from 'node:fs'
-import { isAbsolute, relative, resolve } from 'node:path'
+import { existsSync, readFileSync } from 'node:fs'
+import { relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { hasField, isRepositoryRelativePath, looksLikePath, parseFrontmatter, readArg, toPosix, walkFiles } from './artifact-check-utils.mjs'
 
 const repoRoot = resolve(fileURLToPath(new URL('../../..', import.meta.url)))
 const args = process.argv.slice(2)
-const targetRoot = resolve(readArg('--target') || repoRoot)
+const targetRoot = resolve(readArg(args, '--target') || repoRoot)
 const artifactRoot = resolve(targetRoot, 'docs', 'ae')
 const strict = args.includes('--strict')
 
@@ -23,7 +24,7 @@ const errors = []
 let checked = 0
 
 if (existsSync(artifactRoot)) {
-  for (const file of walk(artifactRoot)) {
+  for (const file of walkFiles(artifactRoot)) {
     if (!file.endsWith('.md')) continue
     const content = readFileSync(file, 'utf8')
     const frontmatter = parseFrontmatter(content)
@@ -137,62 +138,3 @@ function isOnOrAfterContractStart(value) {
   return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && value >= contractStartDate
 }
 
-function hasField(data, key) {
-  return Object.prototype.hasOwnProperty.call(data, key)
-}
-
-function parseFrontmatter(content) {
-  if (!content.startsWith('---\n') && !content.startsWith('---\r\n')) return null
-  const normalized = content.replace(/\r\n/g, '\n')
-  const end = normalized.indexOf('\n---\n', 4)
-  if (end < 0) return null
-  const block = normalized.slice(4, end)
-  const data = {}
-  for (const line of block.split('\n')) {
-    if (!line.trim() || line.trim().startsWith('#')) continue
-    const index = line.indexOf(':')
-    if (index < 0) continue
-    const key = line.slice(0, index).trim()
-    const raw = line.slice(index + 1).trim()
-    data[key] = parseScalar(raw)
-  }
-  return data
-}
-
-function parseScalar(value) {
-  if (value === 'true') return true
-  if (value === 'false') return false
-  if (value === 'null') return null
-  if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-    return value.slice(1, -1)
-  }
-  return value
-}
-
-function walk(root) {
-  const files = []
-  for (const entry of readdirSync(root, { withFileTypes: true })) {
-    if (entry.isSymbolicLink()) continue
-    const full = resolve(root, entry.name)
-    if (entry.isDirectory()) files.push(...walk(full))
-    else if (entry.isFile()) files.push(full)
-  }
-  return files
-}
-
-function readArg(name) {
-  const index = args.indexOf(name)
-  return index >= 0 ? args[index + 1] : null
-}
-
-function isRepositoryRelativePath(value) {
-  return typeof value === 'string' && value.length > 0 && !isAbsolute(value) && !/^[a-zA-Z]:[\\/]/.test(value) && !value.split(/[\\/]+/).includes('..')
-}
-
-function looksLikePath(value) {
-  return typeof value === 'string' && /[\\/]/.test(value)
-}
-
-function toPosix(value) {
-  return value.replace(/\\/g, '/')
-}
