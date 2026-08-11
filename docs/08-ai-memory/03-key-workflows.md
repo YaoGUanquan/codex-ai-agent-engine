@@ -177,7 +177,7 @@
   1. 保持 `ae-web-forge` 四问题路由；视觉-only 走 `ae-frontend-design`，含 API/状态走 `ae-web-app`。
   2. 在 `ae-web-app/references/` 按四段结构维护框架指导（structure / defect traps / SSR boundary / user-facing states）。
   3. 扩展 `web-ui-quality.md`（可访问性、响应式、布局稳定性）；必要时更新 `ae-review`、`ae-tdd`、`ae-debug` 镜头。
-  4. 插件源与 `.agents/skills` 逐字节镜像；可分发内容变更时递增 SemVer 与 README 版本记录。
+  4. 插件源与 `.agents/skills` 逐字节镜像；可分发内容变更时递增 SemVer 与 README/CHANGELOG 版本条目。
 - 验证：`check-skill-mirror`、`check-skill-contract`、`npm test`、`check-install-smoke`。
 - 已知风险：现代 idioms 基线下旧栈命中率下降；jsdom 不能替代 `ae-test-browser`。
 
@@ -190,7 +190,7 @@
   2. 逐文件同步到 `.agents/skills/<skill>/`（插件源为分发正典）。
   3. 未覆盖的后端/前端栈保持「沿用仓库既有约定」回退。
   4. 跨前后端契约对齐引用 `ae-backend/references/api-contract-checklist.md`。
-  5. 递增 SemVer + README 版本记录；运行 mirror/contract/release-notes/test/check:all。
+  5. 递增 SemVer + README/CHANGELOG 版本条目（README 窗口 5 条）；运行 mirror/contract/release-notes/test/check:all。
 - 验证：`node scripts/check-skill-mirror.mjs`、`npm test`、`npm run check:all`。
 - 已知风险：证明边界仅为技能文档与分发合同一致，不代表 consumer 项目运行时验收。
 

@@ -4,7 +4,7 @@ Use these paths in target repositories. They are AE workflow conventions, not Co
 
 | Artifact | Path | Notes |
 | --- | --- | --- |
-| Requirements | docs/ae/brainstorms/*-requirements.md | Product behavior, scope, success criteria, unresolved questions. |
+| Requirements | docs/ae/prds/*-prd.md | Product behavior, scope, success criteria, unresolved questions. Legacy requirements may remain under docs/ae/brainstorms/*-requirements.md. |
 | Plans | docs/ae/plans/*-plan.md | Implementation units, dependencies, files, validation, risks. |
 | Reviews | docs/ae/reviews/<run-id>/ | Findings, reviewer outputs, synthesis, metadata. |
 | Gates | docs/ae/gates/*.json | Delivery proof or blocked gate result. |
@@ -21,10 +21,12 @@ Requirements files should include:
 
 ```yaml
 ---
-type: brainstorm
+type: prd
 status: drafted
 date: YYYY-MM-DD
 topic: short-kebab-topic
+format: human-readable-requirements
+sharded: false
 ---
 ```
 
@@ -36,7 +38,7 @@ type: plan
 status: drafted
 date: YYYY-MM-DD
 title: short-kebab-title
-origin: docs/ae/brainstorms/example-requirements.md
+origin: docs/ae/prds/example-prd.md
 originFingerprint: YYYY-MM-DD-topic
 ---
 ```

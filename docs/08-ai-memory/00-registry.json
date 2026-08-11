@@ -448,6 +448,24 @@
         "path": "docs/08-ai-memory/06-agent-maintenance-rules.md",
         "note": "Memory size-and-distillation budgets were introduced in batch two and reported by tidy memoryBudget."
       }
+    },
+    {
+      "from": "decision-log",
+      "to": "docs/ae/prds/2026-08-11-governance-batch-four-prd.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/05-decision-log.md",
+        "note": "The release-notes split and archive-closeout decision references the batch-four PRD."
+      }
+    },
+    {
+      "from": "decision-log",
+      "to": "docs/ae/experience/2026-08-11-governance-batch-four.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/05-decision-log.md",
+        "note": "The batch-four decision links to the delivery experience note, including the deferred frontend-contract evaluation."
+      }
     }
   ]
 }

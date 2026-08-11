@@ -41,7 +41,7 @@
       "entry": "/ae-brainstorm",
       "target": "需求澄清",
       "purpose": "澄清需求、范围、碰撞洞见、验收标准和开放问题，必要时沉淀需求文档。",
-      "artifactPath": "docs/ae/brainstorms"
+      "artifactPath": "docs/ae/prds"
     },
     {
       "name": "ae-claude-code",

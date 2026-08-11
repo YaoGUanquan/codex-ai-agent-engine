@@ -36,7 +36,7 @@ Remove-Item -Recurse -Force $tmp
 
 The default install should produce bilingual skill-list metadata, for example `AE 帮助 / AE Help`.
 
-Before committing the release, confirm `README.md` and `README.en.md` each contain the current version's level-three heading, ISO date, and change-summary bullets. `node scripts/check-release-notes.mjs` enforces this mapping but does not prove runtime or deployment acceptance.
+Before committing the release, confirm `README.md`, `README.en.md`, `CHANGELOG.md`, and `CHANGELOG.en.md` each contain the current version's level-three heading, ISO date, and change-summary bullets. Keep at most the latest five version entries in each README, move older entries to the matching changelog, and keep the README link to its changelog. `node scripts/check-release-notes.mjs` enforces this mapping but does not prove runtime or deployment acceptance.
 
 4. Verify the multi-agent profile template and default policy:
 

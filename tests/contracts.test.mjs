@@ -24,26 +24,64 @@ test('root package and plugin manifest keep synchronized distribution versions',
   assert.equal(pluginManifest.version, packageJson.version)
 })
 
-test('check-release-notes requires versioned dated README summaries', () => {
+test('check-release-notes requires READMEs and changelogs to share the release-note contract', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-release-notes-'))
+  const zhEntry = (version, date = '2026-08-03') => `### ${version}（${date}）\n\n- 中文变更摘要 ${version}。\n\n`
+  const enEntry = (version, date = '2026-08-03') => `### ${version} (${date})\n\n- English change summary ${version}.\n\n`
+  const writeDoc = (name, content) => writeFileSync(join(tempRoot, name), content, 'utf8')
+  const writeValidFixture = () => {
+    writeDoc('README.md', `完整历史见 [CHANGELOG.md](CHANGELOG.md)。\n\n${zhEntry('1.2.3')}`)
+    writeDoc('README.en.md', `Full history: [CHANGELOG.en.md](CHANGELOG.en.md).\n\n${enEntry('1.2.3')}`)
+    writeDoc('CHANGELOG.md', `# 版本更新记录\n\n${zhEntry('1.2.3')}${zhEntry('1.2.2', '2026-08-02')}`)
+    writeDoc('CHANGELOG.en.md', `# Changelog\n\n${enEntry('1.2.3')}${enEntry('1.2.2', '2026-08-02')}`)
+  }
+  const runInvalid = () => spawnSync(process.execPath, [resolve(repoRoot, 'scripts/check-release-notes.mjs'), '--target', tempRoot], {
+    cwd: repoRoot,
+    encoding: 'utf8',
+  })
+
   try {
     mkdirSync(join(tempRoot, 'plugins', 'ai-agent-engine-codex', '.codex-plugin'), { recursive: true })
     writeFileSync(join(tempRoot, 'package.json'), JSON.stringify({ version: '1.2.3' }), 'utf8')
     writeFileSync(join(tempRoot, 'plugins', 'ai-agent-engine-codex', '.codex-plugin', 'plugin.json'), JSON.stringify({ version: '1.2.3' }), 'utf8')
-    writeFileSync(join(tempRoot, 'README.md'), '### 1.2.3（2026-08-03）\n\n- Chinese change summary.\n', 'utf8')
-    writeFileSync(join(tempRoot, 'README.en.md'), '### 1.2.3 (2026-08-03)\n\n- English change summary.\n', 'utf8')
 
+    writeValidFixture()
     const valid = runNodeScriptJson(['scripts/check-release-notes.mjs', '--target', tempRoot])
     assert.equal(valid.status, 'ok')
     assert.equal(valid.version, '1.2.3')
+    assert.deepEqual(valid.changelogs, ['CHANGELOG.md', 'CHANGELOG.en.md'])
 
-    writeFileSync(join(tempRoot, 'README.en.md'), '### 1.2.3 (2026-08-03)\n', 'utf8')
-    const invalid = spawnSync(process.execPath, [resolve(repoRoot, 'scripts/check-release-notes.mjs'), '--target', tempRoot], {
-      cwd: repoRoot,
-      encoding: 'utf8',
-    })
+    writeValidFixture()
+    writeDoc('README.en.md', 'Full history: [CHANGELOG.en.md](CHANGELOG.en.md).\n\n### 1.2.3 (2026-08-03)\n')
+    let invalid = runInvalid()
     assert.equal(invalid.status, 1)
     assert.match(invalid.stderr, /change-summary bullet/)
+
+    writeValidFixture()
+    writeDoc('CHANGELOG.en.md', `# Changelog\n\n${enEntry('1.2.2', '2026-08-02')}`)
+    invalid = runInvalid()
+    assert.equal(invalid.status, 1)
+    assert.match(invalid.stderr, /CHANGELOG\.en\.md must contain a level-three 1\.2\.3 entry/)
+
+    writeValidFixture()
+    const sixVersions = ['1.2.3', '1.2.2', '1.2.1', '1.2.0', '1.1.9', '1.1.8']
+    writeDoc('README.md', `完整历史见 [CHANGELOG.md](CHANGELOG.md)。\n\n${sixVersions.map((entry) => zhEntry(entry)).join('')}`)
+    writeDoc('CHANGELOG.md', `# 版本更新记录\n\n${sixVersions.map((entry) => zhEntry(entry)).join('')}`)
+    invalid = runInvalid()
+    assert.equal(invalid.status, 1)
+    assert.match(invalid.stderr, /README\.md keeps at most 5 version entries/)
+
+    writeValidFixture()
+    writeDoc('README.md', `版本历史。\n\n${zhEntry('1.2.3')}`)
+    invalid = runInvalid()
+    assert.equal(invalid.status, 1)
+    assert.match(invalid.stderr, /README\.md must link to CHANGELOG\.md/)
+
+    writeValidFixture()
+    writeDoc('README.md', `完整历史见 [CHANGELOG.md](CHANGELOG.md)。\n\n${zhEntry('1.2.3')}${zhEntry('1.2.1', '2026-08-01')}`)
+    invalid = runInvalid()
+    assert.equal(invalid.status, 1)
+    assert.match(invalid.stderr, /README\.md version 1\.2\.1 is missing from CHANGELOG\.md/)
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }
