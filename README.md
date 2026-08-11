@@ -60,6 +60,11 @@ node scripts/ae-tools.mjs help
 
 完整历史见 [CHANGELOG.md](CHANGELOG.md)；本节仅保留最近 5 个版本，发布时超出窗口的条目迁移到 CHANGELOG。
 
+### 0.3.26（2026-08-11）
+- 前端指导补旧栈最小对照节：`svelte-guidance.md` 增 Svelte 4（stores 与 `$:` 反应语句）对照、`angular-guidance.md` 增 NgModule 时代对照、`vue-guidance.md` 增 Options API 对照，均与现代基线同文件并存，文件首行 stack-conditional 语句与"匹配仓库既有风格"兜底不变；新增回归用例锁定对照节与镜像一致（先红后绿）。
+- 新建维护者映射说明 `docs/ae/references/frontend-quality-contract-map.md`：登记 `web-ui-quality.md`、`ae-review` Frontend Components / Styles 镜头、`browser-acceptance.md` 之间 5 组对应关系、两处空档与既有测试锁；映射为描述性文档，不构成第 4 份契约面，不建校验脚本。本批为路线图第 7、10 条的提前收尾（用户决定，原触发条件未命中；见决策日志 2026-08-11 条目）。
+- 验证：`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`。这些检查证明技能文档、镜像与分发合同一致，不代表任何目标项目对旧栈框架（Svelte 4 / NgModule / Options API）的运行时验收。
+
 ### 0.3.25（2026-08-11）
 - 统一需求产物目录声明：能力目录中 `ae-brainstorm` 的 `artifactPath` 由 `docs/ae/brainstorms` 改为 `docs/ae/prds`；`ae-help` 工件契约的 Requirements 行与需求 frontmatter 示例改用 `docs/ae/prds` 与 `ae-prd` 捕获形状（`type: prd`），计划 `origin` 示例同步，并注明 legacy 需求可保留在 brainstorms；`ae-review` 文档评审默认搜索范围加入 `docs/ae/prds`。顶层 `artifactPaths` 与 init 模板自 0.3.22 已正确，保持不变；`docs/ae/brainstorms` 仍为探索性记录目录（`artifactPaths.ideas`）。
 - 新增回归断言锁定目录声明一致性（catalog、工件契约、scope-detection 的源与镜像）；work 参照项目存量 `docs/ae/README.md` 的旧目录说明已同步修正（init 存量文件，插件更新不会自动重写）。
@@ -83,12 +88,6 @@ node scripts/ae-tools.mjs help
 - `review-package` 改为指纹产物（提交列表、diffstat、清单、base/head SHA 与 `git diff -U10` 重建命令），不再嵌入全量 diff 正文；init/archive 模板与 `docs/00-process/templates/archive-rules.md` 新增 gate/evidence 3 个月保留策略。
 - 新增 `docs/external-samples/README.md` 登记样本语料用途与保留条件。
 - 验证：`node scripts/check-skill-mirror.mjs`、`node scripts/check-release-notes.mjs`、`npm test`、`npm run check`、`npm run check:smoke`。这些检查只证明 CLI、技能文档与分发合同一致，不代表目标项目 init 或审查工作流的运行时验收。
-
-### 0.3.21（2026-08-11）
-- 全栈技能对称优化：`ae-backend` 新增 Java/Go/Python/C/C++/C# 六份语言指导，工作流增加按仓库技术栈选读步骤，其他后端语言仍回退仓库既有约定。
-- 契约与边界：`api-contract-checklist.md` 扩充 Frontend-Backend Alignment 章节；`ae-web-app` 与 `ae-web-forge` 路由至共享契约检查表；`ae-debug` 新增 Backend Failure Quick Map 与 Frontend-Backend Boundary Quick Map。
-- `ae-sql` 新增 `sql-safety-checklist.md`（操作风险分级与安全约束），SKILL 工作流挂载该清单。
-- 验证：`node scripts/check-skill-mirror.mjs`、`node scripts/check-skill-contract.mjs`、`node scripts/check-release-notes.mjs`、`node scripts/check-install-smoke.mjs`、`npm test`。这些检查只证明技能文档、镜像与分发合同一致，不代表任何目标项目的 API、数据库或部署验收。
 
 ## 能力清单
 
@@ -523,13 +522,20 @@ node scripts/ae-tools.mjs ae-graph-build --root scripts
 5. ~~**补齐弱覆盖脚本的测试**~~（**已完成 0.3.20**）：`tests/install-scripts.test.mjs`（6 例，覆盖 set-repository / install-project / update-project）。
 6. ~~**控制默认 check 的耗时**~~（**已完成 0.3.20**）：install-smoke 移入 `check:smoke`，日常 `npm run check` 为轻量层。
 
-2026-08-11 **前后端技能对称优化（0.3.21）** 已落地：后端六语言指导、FE/BE 契约检查表、debug 边界速查、`ae-sql` 安全清单；见 `docs/ae/experience/2026-08-11-fullstack-skill-optimization.md`。2026-08-11 **前端技能优化（0.3.18 / 0.3.19）** 见 `docs/ae/experience/2026-08-11-frontend-skill-optimization.md`。剩余第 7、10 两项为**按需触发的挂起项**：策略与触发条件已定，触发命中前无主动待办。2026-08-11 复核确认两项触发均未命中（`npm test` 125/125 全绿、前端契约文件仍为 3 份、未收到可归因的旧栈缺陷）：
+2026-08-11 **前后端技能对称优化（0.3.21）** 已落地：后端六语言指导、FE/BE 契约检查表、debug 边界速查、`ae-sql` 安全清单；见 `docs/ae/experience/2026-08-11-fullstack-skill-optimization.md`。2026-08-11 **前端技能优化（0.3.18 / 0.3.19）** 见 `docs/ae/experience/2026-08-11-frontend-skill-optimization.md`。剩余第 7、10 两项原为按需触发的挂起项；2026-08-11 复核触发未命中后，用户决定提前收尾，两项已随 **0.3.26** 完成：
 
-7. **旧版本前端栈适配**（策略已定，按需触发）：`svelte-guidance.md` 与 `angular-guidance.md` 以 Svelte 5 runes、Angular standalone/signals 为基线，Vue 指引以 Composition API 为主；命中 Svelte 4 stores、NgModule、Options API 等旧式栈时沿用"匹配仓库既有风格"兜底。不预先堆满对照条目；当真实旧栈项目出现一次可归因的细则未命中缺陷时，仅为受影响框架补最小对照条目（届时属插件内容变更，须按规则递增版本）。触发信号见 `docs/08-ai-memory/05-decision-log.md` 的 2026-08-11 前端栈指导决策。
+7. ~~**旧版本前端栈适配**~~（**已完成 0.3.26**）：`svelte-guidance.md`、`angular-guidance.md`、`vue-guidance.md` 各补最小旧栈对照节（Svelte 4 stores、NgModule 时代、Options API），与现代基线同文件并存，"匹配仓库既有风格"兜底与首行 stack-conditional 语句不变；回归用例锁定对照节与镜像。原按需触发策略由用户于 2026-08-11 决定提前执行（触发条件未命中），见 `docs/08-ai-memory/05-decision-log.md`。残余风险：对照条目为无真实缺陷驱动的预写，粒度是否够用待首个真实旧栈项目检验；不足时按决策日志仅为受影响框架扩展。
 8. ~~**版本记录拆分**~~（**已完成，2026-08-11 本批**）：历史条目迁移至 `CHANGELOG.md` / `CHANGELOG.en.md`（完整历史），README 仅保留最近 5 条，`scripts/check-release-notes.mjs` 锁定窗口上限、CHANGELOG 链接与子集关系；见 `docs/ae/plans/2026-08-11-006-governance-batch-four-plan.md`。
 9. ~~**过程文档归档纪律**~~（**已完成，2026-08-11 本批**）：4 个已完成或指针任务目录并入 `docs/00-process/archive/2026-08/`，active 目录只保留真正进行中的工作；tidy 对 archived-pointer 的保守保留策略未变，本仓收尾为一次性手动归档。
-10. **前端质量契约的交叉一致性**（已评估，暂缓实现）：`web-ui-quality.md` 可访问性基线、`ae-review` 的 Frontend Components / Styles 镜头、`browser-acceptance.md` 键盘可操作性项之间约 5 组对应关系，motion/reduced-motion 关键词已被 `tests/skills-docs.test.mjs` 锁定，自 0.3.18/0.3.19 引入以来零漂移，暂不新建映射说明或 contract 检查。复评触发：出现第 4 份前端契约文件、发生一次实际漂移缺陷、或前端条目再次批量增长；届时先做轻量映射说明而非校验脚本。评估记录见 `docs/08-ai-memory/05-decision-log.md` 的 2026-08-11 治理批次四条目。
+10. ~~**前端质量契约的交叉一致性**~~（**已完成 0.3.26 批，仓库侧**）：轻量映射说明落地 `docs/ae/references/frontend-quality-contract-map.md`，登记 `web-ui-quality.md`、`ae-review` Frontend Components / Styles 镜头、`browser-acceptance.md` 之间 5 组对应关系、两处空档与既有测试锁；映射为描述性文档，不构成第 4 份契约面，仍不建校验脚本。评估与提前收尾记录见 `docs/08-ai-memory/05-decision-log.md`。残余风险：映射依赖人工维护——编辑三份契约文件时须按图核对对应组，这是不建校验脚本决策的已接受成本。
 11. ~~**知识库治理（下一批 0.3.22）**~~（**已完成 0.3.22**）：见 `docs/ae/prds/2026-08-11-knowledge-base-governance-prd.md` 与 `docs/ae/experience/`（维护者知识图谱见 `docs/ae/graphs/maintainer-artifact-graph.md`）。
+
+2026-08-11 **全量技能盘点（40 个 skill 逐一审查）** 完成：五层结构（工作流主链 10 / 实现车道 9 / 验证车道 2 / 独立工具 8 / 元治理 11）整体健康，路由边界、证据分层词汇与交接路由复核一致，既有治理项无回退；完整证据、发现与批次对比见 `docs/ae/solutions/2026-08-11-skill-portfolio-optimization-audit.md`。新增事项如下（12 先行、13-14 同批升版本、15 按需触发）：
+
+12. **跨技能引用链接校验扩展**（仓库侧，不升版本，建议先行）：`scripts/check-skill-contract.mjs` 目前只校验指向 `SKILL.md` 的链接；`local-runtime-smoke-gate.md`、`api-contract-checklist.md`、`validation-evidence-profile.md` 等被 8+ 个技能跨目录引用的 references 无链接守护，重命名或移动即静默断链。扩展校验到 SKILL.md 与 references 中全部相对 `.md` 链接（可选覆盖反引号引用路径），并补 README 能力清单 ↔ capability-catalog ↔ 技能目录的名称集合级断言，TDD 覆盖正反例。
+13. **运行时入口口径统一**（插件内容，升版本）：12 个技能文件与 capability-catalog 共 46 处命令示例硬编码全局 dispatcher 路径 `$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs`，而 README 推荐的项目级安装只提供 `scripts/ae-tools.mjs` 入口，技能文档仅 2 处提到该回退。新增一条共享「运行时入口解析」说明（项目 wrapper 优先、全局 dispatcher 回退，两者 CLI 契约一致），统一全部命令示例并以 contract 测试锁定形式。
+14. **ae-help 工件契约表补全**（插件内容，与 13 同批）：`artifact-contract.md` 路径表缺 `docs/ae/designs`、`docs/ae/tasks`、`docs/ae/evidence`、`docs/ae/integrity`、`docs/ae/experience`、`docs/ae/work-reports`、`docs/ae/constitution.md` 七类实际在用产物的行；补全并写明 `solutions`（外部审计/方案研究）与 `experience`（自身工作复盘）的目录边界，纳入 0.3.25 已建立的目录声明回归断言。
+15. **按需触发项**（策略已定，命中前无主动待办）：`ae-review` 七段 lane 细则外移 references（触发：再新增 lane 或出现一次 lane 指引被跳过的实际缺陷）；`ae-refactor` 补重构方法论 reference——行为基线、特征化测试、接缝分析、增量策略（触发：真实重构任务出现一次可归因的方法论缺口，届时属插件内容变更须升版本）；工作流主链技能各 1 张「场景卡」最小回放清单落 `docs/ae/templates/`（触发：0.4.x 大版本前，或出现一次技能指引被跳过导致的交付缺陷）。
 
 推进原则：涉及可分发插件内容（`plugins/ai-agent-engine-codex/`）的改动必须同步递增双份 SemVer 版本，并在 README 与 CHANGELOG 各追加版本条目（README 仅保留最近 5 条，超出窗口的条目迁移到 CHANGELOG）；纯仓库侧（根 `scripts/`、`tests/`、文档）的重构不升版本，但必须以 `npm run check` 加 `npm test` 全绿为交付门槛。
 

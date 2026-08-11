@@ -1147,6 +1147,27 @@ test('backend language guidance and fullstack contract alignment are present in 
   assert.match(sqlChecklistSource, /## Migration Safety/)
 })
 
+test('legacy frontend stack counterparts are present in source and mirror skills', () => {
+  const counterpartFiles = [
+    ['svelte-guidance.md', /## Svelte 4 Counterparts/, [/`derived` stores/, /createEventDispatcher/, /do not exist in Svelte 4/]],
+    ['angular-guidance.md', /## NgModule-Era Counterparts/, [/takeUntil\(destroy\$\)/, /trackBy/, /loadChildren/]],
+    ['vue-guidance.md', /## Options API Counterparts/, [/`computed:` options/, /Vue\.set/, /`<script setup>` blocks/]],
+  ]
+  for (const [fileName, sectionHeading, expectations] of counterpartFiles) {
+    const sourcePath = `plugins/ai-agent-engine-codex/skills/ae-web-app/references/${fileName}`
+    const mirrorPath = `.agents/skills/ae-web-app/references/${fileName}`
+    const source = readFileSync(resolve(repoRoot, sourcePath), 'utf8')
+    const mirror = readFileSync(resolve(repoRoot, mirrorPath), 'utf8')
+    assert.equal(mirror, source, `${mirrorPath} should match ${sourcePath}`)
+    assert.match(source, /Apply this guidance only when the repository uses/, `${fileName} should stay stack-conditional`)
+    assert.match(source, /## Common Defect Traps/, `${fileName} should keep the defect-trap section`)
+    assert.match(source, sectionHeading, `${fileName} should include its legacy counterpart section`)
+    for (const expectation of expectations) {
+      assert.match(source, expectation, `${fileName} should include ${expectation}`)
+    }
+  }
+})
+
 test('cross-artifact verification vocabulary is conditional and mirrored', () => {
   const vocabularyFiles = [
     [

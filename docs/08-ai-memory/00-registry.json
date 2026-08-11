@@ -484,6 +484,24 @@
         "path": "docs/08-ai-memory/04-known-pitfalls.md",
         "note": "The registry relation-target boundary pitfall is grounded by the distillation experience note."
       }
+    },
+    {
+      "from": "decision-log",
+      "to": "docs/ae/prds/2026-08-11-frontend-legacy-and-contract-map-prd.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/05-decision-log.md",
+        "note": "The early-completion decision for roadmap items 7 and 10 references the batch PRD."
+      }
+    },
+    {
+      "from": "decision-log",
+      "to": "docs/ae/references/frontend-quality-contract-map.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/05-decision-log.md",
+        "note": "The early-completion decision records the descriptive frontend quality contract map as the item-10 deliverable."
+      }
     }
   ]
 }
