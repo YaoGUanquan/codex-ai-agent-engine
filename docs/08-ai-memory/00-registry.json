@@ -223,6 +223,51 @@
         "path": "docs/08-ai-memory/01-project-context.md",
         "note": "The project distribution boundary is defined by the global AE install contract."
       }
+    },
+    {
+      "from": "architecture-boundaries",
+      "to": "docs/ae/references/ae-tools-module-layout.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/02-architecture-boundaries.md",
+        "note": "The ae-tools command-module DAG and maintainer rules are recorded in the module layout reference."
+      }
+    },
+    {
+      "from": "key-workflows",
+      "to": "docs/ae/plans/2026-08-11-001-structural-debt-refactor-plan.md",
+      "type": "implements",
+      "evidence": {
+        "path": "docs/08-ai-memory/03-key-workflows.md",
+        "note": "The layered check and ae-tools module maintenance workflow implements the structural debt refactor plan."
+      }
+    },
+    {
+      "from": "known-pitfalls",
+      "to": "docs/ae/experience/2026-08-11-structural-debt-refactor.md",
+      "type": "records",
+      "evidence": {
+        "path": "docs/08-ai-memory/04-known-pitfalls.md",
+        "note": "ESM circular-import and node --check limitations are grounded by the refactor experience."
+      }
+    },
+    {
+      "from": "decision-log",
+      "to": "docs/ae/plans/2026-08-11-001-structural-debt-refactor-plan.md",
+      "type": "documents",
+      "evidence": {
+        "path": "docs/08-ai-memory/05-decision-log.md",
+        "note": "The 2026-08-11 ae-tools split decision documents the completed structural debt refactor plan."
+      }
+    },
+    {
+      "from": "phase-two-tooling",
+      "to": "docs/ae/references/ae-tools-module-layout.md",
+      "type": "supports",
+      "evidence": {
+        "path": "docs/08-ai-memory/08-phase-two-tooling.md",
+        "note": "Graph helpers now live in ae-tools/graph.mjs; the module layout reference complements shallow graph queries."
+      }
     }
   ]
 }

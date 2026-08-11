@@ -1,10 +1,13 @@
 ---
 type: plan
-status: active
+status: completed
 date: 2026-08-11
 title: structural-debt-refactor
 format: human-readable-plan
 sharded: false
+completedAt: 2026-08-11
+commit: 315db38
+version: 0.3.20
 ---
 
 # 结构性债务重构计划（2026-08-11）
@@ -71,3 +74,12 @@ sharded: false
 - 风险：ae-tools 拆分引入行为回归。缓解：测试通过 CLI 黑盒覆盖大部分命令；拆分保持函数体不改动，仅移动与导入。
 - 风险：模板外部化改变生成字节。缓解：占位替换后逐字节对齐原模板（含换行）；用 init dry-run/实际生成对比。
 - 回滚：所有改动在工作区内按单元提交前可用 git 恢复；不触碰其他未提交改动。
+
+## Completion Record (2026-08-11)
+
+- Delivered on `main` as commit `315db38`, version **0.3.20**.
+- Experience: `docs/ae/experience/2026-08-11-structural-debt-refactor.md`
+- Process archive: `docs/00-process/archive/2026-08/structural-debt-refactor/summary.md`
+- Module layout reference: `docs/ae/references/ae-tools-module-layout.md`
+- Follow-up: import-cycle regression guard added to `tests/ae-tools.test.mjs` (112 tests).
+- Final validation: `npm run check:all`, `npm test` — all green; pushed to `origin/main`.

@@ -6,10 +6,17 @@ This memory is repo-specific for `ai-agent-engine-codex`.
 ## Shallow Graph Helpers
 
 - `ae-graph-build` and `ae-graph-query` are helper CLI commands under `node scripts/ae-tools.mjs`.
+- Implementation lives in `plugins/ai-agent-engine-codex/scripts/ae-tools/graph.mjs`; the dispatcher is `plugins/ai-agent-engine-codex/scripts/ae-tools.mjs`.
 - They are shallow, read-only JSON tools for quick dependency previews.
 - They scan source files, infer static import edges, detect file mentions, and report external dependencies.
 - They intentionally do not write `.ae/graph.db`, maintain freshness, shard graph data, define a persistent graph schema, or render a preview page.
 - Promote them to a full MCP-backed graph tool only after schema, write approval, freshness, sharding, and preview requirements are explicit.
+
+## Maintainer module layout (not a persisted graph)
+
+- The command-module DAG for ae-tools is documented in `docs/ae/references/ae-tools-module-layout.md`.
+- `tests/ae-tools.test.mjs` enforces acyclic local imports among `ae-tools/*.mjs`.
+- Use `ae-graph-query --root plugins/ai-agent-engine-codex/scripts --path ae-tools.mjs --no-write` for advisory static edges at runtime; do not treat it as proof of complete dynamic resolution.
 
 ## Merge Branch Deferral
 

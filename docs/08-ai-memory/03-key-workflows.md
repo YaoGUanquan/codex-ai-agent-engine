@@ -155,3 +155,16 @@
   5. 保留项目根中的 `AGENTS.md`、`docs/**`、AI memory、图谱和 archive；备份/journal 也默认保留，只有显式 purge 才删除。
 - 验证：逐项目检查项目级 plugin、wrapper、`ae-*` skill 和 AE marketplace 条目均不存在；比较迁移前后的 `AGENTS.md` 与 `docs/**` 指纹；运行 dispatcher smoke；确认 source/deferred 项目未被修改。
 - 已知风险：源仓库可同时显示本地开发 skill 与 personal 插件，这是开发例外；已打开的 Codex 桌面任务不会热刷新 skill 清单。每个操作系统用户有独立 `$HOME`，安装器不会修改其他用户目录。
+
+## 分层 check 与 ae-tools 模块维护
+
+- 工作流：日常开发跑轻量 check，发布前跑全量烟测；向 `ae-tools/` 新增命令时保持分层 DAG 并通过循环导入守卫。
+- 使用场景：修改 `plugins/ai-agent-engine-codex/scripts/`、根 `scripts/` 或 `tests/` 后需要快速语法/契约/安装回归。
+- 步骤：
+  1. 日常：`npm run check`（`check:syntax` glob 扫描全部 `.mjs` + `check:contracts` 镜像/契约/记忆/图谱预览）。
+  2. 发布或插件分发前：`npm run check:all`（追加 `check:smoke` 项目级与全局安装烟测）。
+  3. 新增 `ae-tools` 命令模块时，只从更低层 import；共享 helper 放 `utils.mjs` 或 `artifact-check-utils.mjs`；维护者布局见 `docs/ae/references/ae-tools-module-layout.md`。
+  4. Init 模板变更走 `ae-tools/init-templates/` 外部 UTF-8 文件 + 占位替换；对比三语 init 基线或 dry-run 验证字节一致。
+  5. 测试按域维护：`tests/ae-tools.test.mjs`、`tests/contracts.test.mjs`、`tests/global-install.test.mjs`、`tests/skills-docs.test.mjs`、`tests/install-scripts.test.mjs`。
+- 验证：`npm run check:all`、`npm test`（含 `acyclic layered import graph` 守卫）、`node scripts/check-release-notes.mjs`。
+- 已知风险：`node --check` 不检测 ESM 循环导入；仅靠语法扫描无法发现模块 DAG 破坏。

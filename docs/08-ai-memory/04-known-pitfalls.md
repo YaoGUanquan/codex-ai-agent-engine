@@ -25,9 +25,29 @@
 - Do not expose `ae-merge-branch` as a skill until Git write authorization, rollback, and evidence requirements are explicitly stronger.
 - Do not assume OpenCode dynamic Chrome DevTools MCP registration exists in Codex. Route browser checks through `ae-test-browser` and the browser tools actually available in the session.
 
+## ae-tools 模块与 ESM 导入
+
+- `node --check` 与 `check:syntax` 只做单文件语法解析，**不能**发现 `ae-tools/*.mjs` 之间的循环 import；必须在 `npm test` 中保留 DAG 守卫。
+- 新增命令模块时禁止 `utils.mjs` import 任何同级模块；`utils` 是基础层。
+- Init 模板文件若带 UTF-8 BOM，循环导入守卫的正则可能漏读首行 import；模板与测试读取时应剥离 BOM。
+- 不要在未验证行为基线前删除 `review.mjs` 对 `graph.mjs` 的共享 import（如 `buildShallowGraph`）；当前 DAG 是有意设计，不是待消除耦合。
+
 ## 全局 AE 与项目数据边界
 
 - 全局安装只统一 dispatcher、skills 和 personal Codex plugin；`AGENTS.md`、`docs/**`、AI memory、图谱和 archive 仍按项目根保存，不能迁移到用户目录。
 - 默认 global preview 不发现 consumer，也不自动卸载项目级副本；项目退役必须使用显式 manifest，并在 preview/apply 中同时传 `--retire-modified` 才能处理修改或未知的历史 AE 副本。
 - 不要直接操作 `.codex/plugins/cache`，也不要手工删除项目级文件。安装器只删除经过归属与指纹验证的 AE 路径，并保留备份和 journal 直到用户显式 purge。
 - 在分发源仓库中同时看到本地 `.agents/skills` 与 personal plugin 属于预期开发例外；这不代表 consumer 项目仍有项目级残留。
+
+## 结构性重构与 check 分层
+
+- 默认 `npm run check` 不含 install-smoke；发布前必须额外跑 `npm run check:smoke` 或 `npm run check:all`。
+- `ae-tools/` 模块之间禁止循环导入；`node --check` 无法检测 ESM 循环，依赖 `tests/ae-tools.test.mjs` 守卫。
+- 根 `scripts/update-project.mjs` 必须是薄包装；若在根目录复制完整实现，将与 `install-project.mjs` 写入目标项目的包装路径漂移。
+- install-smoke 临时目录 `.tmp-install-smoke-checks/` 已 gitignore；异常中断可能留下 UUID 子目录，可安全删除。
+
+## 全栈 skill 与并行会话
+
+- 多会话共享工作区时，对 `package.json`、`README` 仅做字段级或追加式编辑；skill 文件集合应零交集或明确归属。
+- `check-skill-mirror` 失败通常因只改了插件源或只改了 `.agents/skills` 之一。
+- 语言指导按仓库栈选读；对未覆盖语言强行套用 Java/Go 等指导会发明与仓库不一致的结构。

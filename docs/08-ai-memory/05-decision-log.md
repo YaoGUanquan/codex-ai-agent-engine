@@ -181,3 +181,50 @@
 - Context: Project-level installs had accumulated different plugin versions and historical documentation. Centralizing docs would break project portability, links, ownership, and recovery; automatic path scanning would also make the installer unusable for other users.
 - Impact: The default global preview is read-only and source-only. Consumer cleanup is opt-in, portable across user home locations, and bounded to exact AE paths. Backups and journals remain until `purge --operation <id> --apply`; the source repository keeps its local mirror as a development exception, and deferred projects remain untouched.
 - Re-evaluate when: Codex exposes a stable user-level plugin discovery contract that removes the need for the personal marketplace source/dispatcher split, or a separate approved cross-project knowledge product is designed.
+
+## 2026-08-11: Frontend stack guidance as parallel reference files
+
+- Date: 2026-08-11
+- Decision: Extend existing frontend skills with parallel framework references (`react`/`vue`/`svelte`/`angular-guidance.md`) and optional non-frontend lenses (`ae-review` FE profile, `ae-tdd` harness notes, `ae-debug` quick map) instead of new entrypoint skills. Legacy or niche stacks fall back to matching repository conventions.
+- Context: Frontend implementation guidance was too thin for React and absent for other frameworks; accessibility and browser proof boundaries were implicit.
+- Impact: Distributable versions 0.3.18–0.3.19; committed as `a51ef3c`. Experience: `docs/ae/experience/2026-08-11-frontend-skill-optimization.md`.
+- Re-evaluate when: legacy Svelte 4 / NgModule / Options API projects show repeated checklist misses, or a fifth mainstream framework needs a dedicated reference.
+
+## 2026-08-11: Fullstack skill symmetry via backend language guidance and FE/BE contract checklist
+
+- Date: 2026-08-11
+- Decision: Mirror the frontend reference shape on the backend with six priority language guides (Java, Go, Python, C, C++, C#), expand `api-contract-checklist.md` for implementation-layer FE/BE alignment, add backend and boundary debug quick maps, and add `ae-sql` safety checklist. Other backend languages keep framework-agnostic fallback.
+- Context: Backend references were ~26 lines with no language traps; contract alignment existed only in design artifacts.
+- Impact: Distributable version 0.3.21; plan `docs/ae/plans/2026-08-11-002-fullstack-skill-optimization-plan.md`; experience `docs/ae/experience/2026-08-11-fullstack-skill-optimization.md`.
+- Re-evaluate when: OpenAPI-driven contract tests become a first-class AE skill or niche backend stacks need dedicated references beyond convention fallback.
+
+## 2026-08-11: Layer repository checks and split ae-tools without changing CLI contracts
+
+- Date: 2026-08-11
+- Decision: Split the ~2860-line `ae-tools.mjs` into layered modules under `scripts/ae-tools/`, externalize init templates, extract `artifact-check-utils.mjs`, layer `npm run check` into syntax/contracts/smoke/all, split tests by domain, and bump distributable version to **0.3.20**. Keep root thin wrappers unchanged.
+- Context: A repository scan found duplicate `update-project.mjs`, missing gitignore for smoke temp dirs, and `check-claims` outside the default check chain (fixed in commit `781d4f6` before the larger refactor).
+- Impact: Maintainer layout documented in `docs/ae/references/ae-tools-module-layout.md`; import-cycle regression guard in tests; install-smoke moved to `check:smoke`. Commit `315db38` on `main`.
+- Re-evaluate when: a new command family makes the module count unwieldy again, or Codex provides a first-class plugin CLI packaging model.
+
+## 2026-08-11: Fullstack skill parity via language guides and FE/BE contract checklist
+
+- Date: 2026-08-11
+- Decision: Extend `ae-backend` with six primary language guides (Java, Go, Python, C, C++, C#) and stack-detection workflow; expand `api-contract-checklist.md` for frontend-backend alignment; add backend and boundary quick maps to `ae-debug`; add `sql-safety-checklist.md` to `ae-sql`; wire `ae-web-app` and `ae-web-forge`. Bump to **0.3.21**.
+- Context: Frontend skills already had four framework guides while backend references were ~26 lines with no language-level guidance.
+- Impact: Mirror sync (127 files), skill contract checks pass; proof boundary is documentation and distribution contract only. Experience: `docs/ae/experience/2026-08-11-fullstack-skill-optimization.md`.
+- Re-evaluate when: real legacy-stack projects show insufficient fallback coverage, or contract checklist growth warrants a dedicated validator.
+
+## 2026-08-11: Maintainer knowledge graph lives in registry plus curated markdown
+
+- Date: 2026-08-11
+- Decision: Keep shallow `ae-graph-build` read-only (no `graph.json` persistence); maintain cross-artifact links in `docs/08-ai-memory/00-registry.json` and a human curator map at `docs/ae/graphs/maintainer-artifact-graph.md` with directory README explaining boundaries.
+- Context: Users need durable links between plans, experiences, memory, and post-split code layout without violating the graph-helper read-only contract.
+- Impact: `docs/ae/graphs/README.md` documents query commands and artifact types; registry relations extended for August 2026 deliveries. Next batch: knowledge-base governance PRD (`0.3.22`) for PRD single channel and review-package fingerprinting.
+- Re-evaluate when: a deterministic tidy/archival command exists, or review evidence fingerprint format changes.
+
+## 2026-08-11: Split ae-tools by command modules and layer repository checks
+
+- Decision: Split the ~2860-line `ae-tools.mjs` into fifteen command modules under `plugins/ai-agent-engine-codex/scripts/ae-tools/`, externalize init templates to UTF-8 files with placeholder substitution, layer `npm run check` into syntax/contracts/smoke tiers, split the monolithic test file by domain, extract `artifact-check-utils.mjs`, and guard the module DAG with a regression test instead of adding barrels or dependency injection.
+- Context: Structural debt made check strings and tests hard to maintain; `node --check` cannot detect ESM circular imports between new modules.
+- Impact: Distributable version **0.3.20**; root thin wrapper unchanged; daily `npm run check` excludes heavy install-smoke; `docs/ae/references/ae-tools-module-layout.md` records the maintainer contract; experience at `docs/ae/experience/2026-08-11-structural-debt-refactor.md`.
+- Re-evaluate when: a second consumer needs shared graph primitives outside `review`/`tasks`, or module count makes the single `utils.mjs` foundation unwieldy.
