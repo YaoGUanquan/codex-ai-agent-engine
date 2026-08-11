@@ -12,9 +12,10 @@ Generate, review, or execute SQL with explicit safety boundaries.
 1. Identify database type, target environment, tables, and whether the request is read-only or write.
 2. Verify schema from repo entities, migrations, DDL, or user-provided database metadata before writing SQL.
 3. When the repo indicates Postgres or Supabase, also inspect migrations, indexes, and policy or RLS implications when relevant.
-4. For read-only queries, return ready-to-run SQL and explain assumptions.
-5. For writes, migrations, deletes, production access, or remote DB calls, require explicit user confirmation and follow Codex escalation rules.
-6. Provide rollback or verification SQL for any data-changing statement.
+4. Classify the operation risk tier with `references/sql-safety-checklist.md` before generating or reviewing any write, migration, or DDL statement.
+5. For read-only queries, return ready-to-run SQL and explain assumptions.
+6. For writes, migrations, deletes, production access, or remote DB calls, require explicit user confirmation and follow Codex escalation rules.
+7. Provide rollback or verification SQL for any data-changing statement.
 
 ## Rules
 
