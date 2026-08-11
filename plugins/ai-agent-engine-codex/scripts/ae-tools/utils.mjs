@@ -21,14 +21,14 @@ export function parseOptions(args) {
       const keyValue = arg.slice(2)
       const eq = keyValue.indexOf('=')
       if (eq >= 0) {
-        opts[keyValue.slice(0, eq)] = keyValue.slice(eq + 1)
+        appendOption(opts, keyValue.slice(0, eq), keyValue.slice(eq + 1))
       } else {
         const next = args[i + 1]
         if (next && !next.startsWith('--')) {
-          opts[keyValue] = next
+          appendOption(opts, keyValue, next)
           i++
         } else {
-          opts[keyValue] = true
+          appendOption(opts, keyValue, true)
         }
       }
     } else {
@@ -41,6 +41,17 @@ export function parseOptions(args) {
     }
   }
   return opts
+}
+
+// Repeated flags accumulate into arrays so commands like `gate --validation A --validation B`
+// record every occurrence instead of keeping only the last one.
+function appendOption(opts, key, value) {
+  if (!(key in opts)) {
+    opts[key] = value
+    return
+  }
+  if (Array.isArray(opts[key])) opts[key].push(value)
+  else opts[key] = [opts[key], value]
 }
 
 export function arrayOpt(value) {

@@ -20,3 +20,4 @@ Generate useful options before requirements are fixed.
 - Do not invent business facts, stakeholders, or hidden constraints.
 - Keep speculation labeled as speculation.
 - Prefer repo-grounded options when a codebase is present.
+- If the direction is already chosen and needs role-based stress testing instead of new options, route to the Perspective Collision Pass in `ae-brainstorm`.

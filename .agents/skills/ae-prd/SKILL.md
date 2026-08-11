@@ -61,7 +61,7 @@ When a PRD includes capability, benchmark, installation, or behavior claims, sep
 - name the expected validation surface for each claim that could affect public docs, skill behavior, install behavior, or runtime support;
 - do not promote inferred implementation details into requirements unless the user explicitly chooses them.
 
-When behavior crosses a public API, persisted data, external service, deployment, or browser boundary, record the smallest applicable validation-evidence tiers, expected signal, preconditions, and any credible proof that remains `unverified`. A lower tier must not imply runtime, browser, or deployment acceptance.
+When behavior crosses a public API, persisted data, external service, deployment, or browser boundary, record the smallest applicable validation-evidence tiers, expected signal, preconditions, and any credible proof that remains `unverified`. A lower tier must not imply runtime, browser, or deployment acceptance. Tier definitions and status vocabulary live in `../ae-plan/references/validation-evidence-profile.md`.
 
 ## Readiness Gate
 

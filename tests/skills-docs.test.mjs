@@ -606,6 +606,48 @@ test('brainstorm delegates durable requirements capture to the ae-prd contract',
   assert.match(source, /docs\/ae\/prds/, 'brainstorm should name the canonical prds location')
 })
 
+test('governance batch two refinements are present and mirrored', () => {
+  const expectationsByFile = [
+    ['plugins/ai-agent-engine-codex/skills/ae-prd/references/requirements-capture.md', '.agents/skills/ae-prd/references/requirements-capture.md', [
+      /## Perspective Collision \(Conditional\)/,
+    ]],
+    ['plugins/ai-agent-engine-codex/skills/ae-brainstorm/SKILL.md', '.agents/skills/ae-brainstorm/SKILL.md', [
+      /Skip it for S1-S2 tasks with a single viable direction/,
+      /at most four perspectives/,
+      /## Perspective Collision \(Conditional\)/,
+      /validation-evidence-profile\.md/,
+    ]],
+    ['plugins/ai-agent-engine-codex/skills/ae-ideate/SKILL.md', '.agents/skills/ae-ideate/SKILL.md', [
+      /Perspective Collision Pass/,
+    ]],
+    ['plugins/ai-agent-engine-codex/skills/ae-review/SKILL.md', '.agents/skills/ae-review/SKILL.md', [
+      /## Light Path/,
+      /at most 3 files/,
+      /Fall back to the full flow/,
+      /validation-evidence-profile\.md/,
+    ]],
+    ['plugins/ai-agent-engine-codex/skills/ae-prd/SKILL.md', '.agents/skills/ae-prd/SKILL.md', [
+      /validation-evidence-profile\.md/,
+    ]],
+    ['plugins/ai-agent-engine-codex/skills/ae-handoff/SKILL.md', '.agents/skills/ae-handoff/SKILL.md', [
+      /docs\/00-process\/active\/<task>\/handoff\.md/,
+      /docs\/ae\/handoffs\//,
+    ]],
+    ['plugins/ai-agent-engine-codex/skills/ae-lfg/SKILL.md', '.agents/skills/ae-lfg/SKILL.md', [
+      /standalone cross-session handoffs without a task directory go to `docs\/ae\/handoffs\/`/,
+    ]],
+  ]
+
+  for (const [sourcePath, mirrorPath, expectations] of expectationsByFile) {
+    const source = readFileSync(resolve(repoRoot, sourcePath), 'utf8')
+    const mirror = readFileSync(resolve(repoRoot, mirrorPath), 'utf8')
+    assert.equal(mirror, source, `${mirrorPath} should match ${sourcePath}`)
+    for (const expectation of expectations) {
+      assert.match(source, expectation, `${sourcePath} should include ${expectation}`)
+    }
+  }
+})
+
 test('validation evidence governance is present in source and mirror skills', () => {
   const profilePaths = [
     'plugins/ai-agent-engine-codex/skills/ae-plan/references/validation-evidence-profile.md',

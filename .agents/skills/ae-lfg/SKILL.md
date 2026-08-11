@@ -61,7 +61,7 @@ For S4 work, keep concise evidence in `docs/00-process/active/<task>/` when the 
 
 - `progress.md` for checkpoint summaries,
 - `ledger.jsonl` for structured step, command, result, and evidence records,
-- `handoff.md` when transferring to another branch, worktree, thread, or later session.
+- `handoff.md` when transferring to another branch, worktree, thread, or later session; standalone cross-session handoffs without a task directory go to `docs/ae/handoffs/` (see ae-handoff).
 
 Do not create process artifacts for tiny one-shot fixes unless they improve handoff or auditability.
 
