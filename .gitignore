@@ -5,6 +5,9 @@ upstream-ai-agent-engine/
 /.opencode/
 /ae/
 
+# Temporary install smoke-test workspaces
+.tmp-install-smoke-checks/
+
 # Runtime artifacts created by AE workflows in target projects
 .ae/
 .codex/ae-skill-profiles.yaml
