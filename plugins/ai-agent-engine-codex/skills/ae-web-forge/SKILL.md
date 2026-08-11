@@ -23,7 +23,7 @@ Answer the questions in order and record the result in the work summary:
 | --- | --- | --- |
 | Q1 existing route or second-development? | Does the task modify an existing page, route, component, HTML file, or user-provided target? | Read the current implementation first and preserve structure unless replacement is requested. |
 | Q2 design input? | Is there no design input, a screenshot, a Figma URL, a written visual spec, or an existing visual baseline? | Use `ae-frontend-design` for focused UI creation or visual matching. Preserve design input as a constraint. |
-| Q3 backend or API interaction? | Does the task need state, forms, API calls, auth, persistence, or error handling? | Use `ae-web-app`; coordinate `ae-backend` or `ae-sql` when server or data contracts change. |
+| Q3 backend or API interaction? | Does the task need state, forms, API calls, auth, persistence, or error handling? | Use `ae-web-app`; coordinate `ae-backend` or `ae-sql` when server or data contracts change, and hold both sides to the API contract checklist in `ae-backend`. |
 | Q4 visual baseline? | For Q1=yes, should current visuals be preserved or intentionally replaced? | Preserve by default; redesign only when requested or required by the goal. |
 
 Typical outcomes:

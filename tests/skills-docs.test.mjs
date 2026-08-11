@@ -559,19 +559,6 @@ test('PRD and plan artifact contracts are present in source and mirror skills', 
       /originFingerprint/,
       /Consistency Check/i,
     ]],
-    [
-      'plugins/ai-agent-engine-codex/skills/ae-brainstorm/references/requirements-capture.md',
-      '.agents/skills/ae-brainstorm/references/requirements-capture.md',
-      [
-        /format: human-readable-requirements/,
-        /canonicalKind: requirements/,
-        /stableIdsRequired: true/,
-        /R1/,
-        /NFR1/,
-        /D1/,
-        /requirementsCount/,
-      ],
-    ],
     ['plugins/ai-agent-engine-codex/skills/ae-plan/SKILL.md', '.agents/skills/ae-plan/SKILL.md', [
       /format: human-readable-plan/,
       /sharded: false/,
@@ -602,6 +589,21 @@ test('PRD and plan artifact contracts are present in source and mirror skills', 
       assert.match(source, expectation, `${sourcePath} should include ${expectation}`)
     }
   }
+})
+
+test('brainstorm delegates durable requirements capture to the ae-prd contract', () => {
+  for (const legacyPath of [
+    'plugins/ai-agent-engine-codex/skills/ae-brainstorm/references/requirements-capture.md',
+    '.agents/skills/ae-brainstorm/references/requirements-capture.md',
+  ]) {
+    assert.ok(!existsSync(resolve(repoRoot, legacyPath)), `${legacyPath} should be removed; ae-prd owns the requirements capture contract`)
+  }
+
+  const source = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-brainstorm')
+  const mirror = readSkillBody('.agents/skills', 'ae-brainstorm')
+  assert.equal(mirror, source, 'ae-brainstorm mirror should match plugin source')
+  assert.match(source, /\.\.\/ae-prd\/references\/requirements-capture\.md/, 'brainstorm should reuse the ae-prd capture contract')
+  assert.match(source, /docs\/ae\/prds/, 'brainstorm should name the canonical prds location')
 })
 
 test('validation evidence governance is present in source and mirror skills', () => {
@@ -1001,6 +1003,77 @@ test('AE review output template defines task review verdict fields', () => {
   assert.match(template, /qualityVerdict/i)
   assert.match(template, /cannotVerifyFromDiff/i)
   assert.match(template, /blockingFindings/i)
+})
+
+test('backend language guidance and fullstack contract alignment are present in source and mirror skills', () => {
+  const guidanceFiles = [
+    'java-guidance.md',
+    'go-guidance.md',
+    'python-guidance.md',
+    'c-guidance.md',
+    'cpp-guidance.md',
+    'csharp-guidance.md',
+  ]
+  for (const fileName of guidanceFiles) {
+    const sourcePath = `plugins/ai-agent-engine-codex/skills/ae-backend/references/${fileName}`
+    const mirrorPath = `.agents/skills/ae-backend/references/${fileName}`
+    const source = readFileSync(resolve(repoRoot, sourcePath), 'utf8')
+    const mirror = readFileSync(resolve(repoRoot, mirrorPath), 'utf8')
+    assert.equal(mirror, source, `${mirrorPath} should match ${sourcePath}`)
+    assert.match(source, /Apply this guidance only when the repository uses/, `${fileName} should stay stack-conditional`)
+    assert.match(source, /## Common Defect Traps/, `${fileName} should keep the defect-trap section`)
+    assert.match(source, /## Error And Response Contract/, `${fileName} should keep the error contract section`)
+  }
+
+  const backendSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-backend')
+  const backendMirror = readSkillBody('.agents/skills', 'ae-backend')
+  assert.equal(backendMirror, backendSource, 'ae-backend mirror should match plugin source')
+  for (const expectation of [
+    /java-guidance\.md/,
+    /go-guidance\.md/,
+    /python-guidance\.md/,
+    /c-guidance\.md/,
+    /cpp-guidance\.md/,
+    /csharp-guidance\.md/,
+    /For other backend languages, follow the repository's existing conventions/,
+    /Frontend-Backend Alignment/,
+  ]) {
+    assert.match(backendSource, expectation, `ae-backend should include ${expectation}`)
+  }
+
+  const checklistSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-backend/references/api-contract-checklist.md'), 'utf8')
+  const checklistMirror = readFileSync(resolve(repoRoot, '.agents/skills/ae-backend/references/api-contract-checklist.md'), 'utf8')
+  assert.equal(checklistMirror, checklistSource, 'api contract checklist mirror should match plugin source')
+  for (const expectation of [
+    /## Frontend-Backend Alignment/,
+    /camelCase versus snake_case/,
+    /UTC ISO 8601/,
+    /ae-swagger-parser/,
+    /ae-test-api/,
+  ]) {
+    assert.match(checklistSource, expectation, `api contract checklist should include ${expectation}`)
+  }
+
+  const webAppSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-web-app')
+  assert.match(webAppSource, /\.\.\/ae-backend\/references\/api-contract-checklist\.md/, 'ae-web-app should route the API seam to the shared contract checklist')
+  const forgeSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-web-forge')
+  assert.match(forgeSource, /API contract checklist in `ae-backend`/, 'ae-web-forge should hold both sides to the shared contract checklist')
+
+  const debugWorkflowSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-debug/references/debugging-workflow.md'), 'utf8')
+  const debugWorkflowMirror = readFileSync(resolve(repoRoot, '.agents/skills/ae-debug/references/debugging-workflow.md'), 'utf8')
+  assert.equal(debugWorkflowMirror, debugWorkflowSource, 'debugging workflow mirror should match plugin source')
+  assert.match(debugWorkflowSource, /## Backend Failure Quick Map/)
+  assert.match(debugWorkflowSource, /## Frontend-Backend Boundary Quick Map/)
+
+  const sqlSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-sql')
+  const sqlMirror = readSkillBody('.agents/skills', 'ae-sql')
+  assert.equal(sqlMirror, sqlSource, 'ae-sql mirror should match plugin source')
+  assert.match(sqlSource, /sql-safety-checklist\.md/)
+  const sqlChecklistSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-sql/references/sql-safety-checklist.md'), 'utf8')
+  const sqlChecklistMirror = readFileSync(resolve(repoRoot, '.agents/skills/ae-sql/references/sql-safety-checklist.md'), 'utf8')
+  assert.equal(sqlChecklistMirror, sqlChecklistSource, 'sql safety checklist mirror should match plugin source')
+  assert.match(sqlChecklistSource, /## Operation Risk Tiers/)
+  assert.match(sqlChecklistSource, /## Migration Safety/)
 })
 
 test('cross-artifact verification vocabulary is conditional and mirrored', () => {
