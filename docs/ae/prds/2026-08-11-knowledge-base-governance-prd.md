@@ -1,6 +1,6 @@
 ---
 type: prd
-status: drafted
+status: completed
 date: 2026-08-11
 topic: knowledge-base-governance
 format: human-readable-requirements

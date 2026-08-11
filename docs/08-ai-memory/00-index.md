@@ -29,8 +29,8 @@
 - Structural debt refactor (ae-tools split, layered check, domain tests, import-cycle guard) is recorded in `02-architecture-boundaries.md`, `03-key-workflows.md`, `04-known-pitfalls.md`, `05-decision-log.md`, `docs/ae/references/ae-tools-module-layout.md`, and `docs/ae/experience/2026-08-11-structural-debt-refactor.md`.
 - Frontend skill optimization (0.3.18–0.3.19, four frameworks + cross-skill lenses) is recorded in `03-key-workflows.md`, `05-decision-log.md`, and `docs/ae/experience/2026-08-11-frontend-skill-optimization.md` (commit `a51ef3c`).
 - Fullstack skill optimization (backend language guides, FE/BE contract checklist, debug/sql safety) is recorded in `02-architecture-boundaries.md`, `03-key-workflows.md`, `05-decision-log.md`, `docs/ae/experience/2026-08-11-fullstack-skill-optimization.md`, and plan `docs/ae/plans/2026-08-11-002-fullstack-skill-optimization-plan.md`.
+- Knowledge-base governance batch one (0.3.22: canonical `docs/ae/prds`, init stops creating `docs/ai-memory`, review-package fingerprint, evidence retention, external-samples registration) is recorded in `03-key-workflows.md`, `05-decision-log.md`, `docs/ae/experience/2026-08-11-knowledge-base-governance.md`, and plan `docs/ae/plans/2026-08-11-003-knowledge-base-governance-plan.md`.
 - Maintainer knowledge graph: declared relations in `00-registry.json`; human map in `docs/ae/graphs/maintainer-artifact-graph.md`; directory boundary in `docs/ae/graphs/README.md`. Shallow CLI graphs remain read-only (no `graph.json` persistence).
-- Next planned batch: knowledge-base governance PRD (`docs/ae/prds/2026-08-11-knowledge-base-governance-prd.md`, target 0.3.22).
 - `99-prompt-template.md`：初始化或维护记忆库的提示词模板。
 
 ## 维护规则

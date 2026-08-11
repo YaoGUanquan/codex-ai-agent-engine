@@ -388,7 +388,7 @@
     }
   ],
   "artifactPaths": {
-    "requirements": "docs/ae/brainstorms",
+    "requirements": "docs/ae/prds",
     "ideas": "docs/ae/brainstorms",
     "plans": "docs/ae/plans",
     "reviews": "docs/ae/reviews",

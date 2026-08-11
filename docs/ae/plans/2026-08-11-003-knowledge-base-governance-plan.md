@@ -1,10 +1,12 @@
 ---
 type: plan
-status: active
+status: completed
 date: 2026-08-11
 title: knowledge-base-governance
 format: human-readable-plan
 sharded: false
+archive: docs/00-process/archive/2026-08/knowledge-base-governance/summary.md
+experience: docs/ae/experience/2026-08-11-knowledge-base-governance.md
 ---
 
 # 知识库治理第一批实施计划（2026-08-11）

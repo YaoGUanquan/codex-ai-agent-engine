@@ -1,7 +1,7 @@
 <!-- ae-codex:reference -->
 # Maintainer Artifact Graph (2026-08-11)
 
-Curated map of the August 2026 optimization wave: initial repo scan (`781d4f6`), frontend skill guidance (`a51ef3c` / 0.3.18–0.3.19), structural refactor (`315db38` / 0.3.20), and fullstack skill optimization (0.3.21). For machine-readable edges see `docs/08-ai-memory/00-registry.json`.
+Curated map of the August 2026 optimization wave: initial repo scan (`781d4f6`), frontend skill guidance (`a51ef3c` / 0.3.18–0.3.19), structural refactor (`315db38` / 0.3.20), fullstack skill optimization (`e2621b7` / 0.3.21), and knowledge-base governance batch one (`53c94aa` / 0.3.22). For machine-readable edges see `docs/08-ai-memory/00-registry.json`.
 
 ## Delivery timeline
 
@@ -11,7 +11,7 @@ flowchart LR
   fe["Frontend skills a51ef3c<br/>0.3.18-0.3.19 four frameworks"]
   struct["Structural refactor 315db38<br/>0.3.20 ae-tools split"]
   full["Fullstack skills 0.3.21<br/>backend + FE/BE contract"]
-  kb["Knowledge-base governance PRD<br/>0.3.22 planned"]
+  kb["Knowledge-base governance<br/>0.3.22 53c94aa"]
   scan --> fe --> struct --> full --> kb
 ```
 
@@ -62,7 +62,10 @@ flowchart TB
 | `docs/08-ai-memory/03-key-workflows.md` | implements | check layers + skill sync | Release workflow |
 | `README.md` §后续持续优化方向 | references | completed + next items | Roadmap |
 | `docs/00-process/archive/2026-08/fullstack-skill-optimization/summary.md` | archives | fullstack plan | Process closure |
-| `docs/ae/prds/2026-08-11-knowledge-base-governance-prd.md` | supersedes | dual requirements channel | Next batch 0.3.22 |
+| `docs/ae/plans/2026-08-11-003-knowledge-base-governance-plan.md` | implements | init/recovery/review + skills | Canonical prds + evidence fingerprint |
+| `docs/ae/experience/2026-08-11-knowledge-base-governance.md` | records | above plan | Validation + deferred batch-two items |
+| `docs/00-process/archive/2026-08/knowledge-base-governance/summary.md` | archives | kb governance plan | Process closure |
+| `plugins/.../ae-help/references/capability-catalog.json` | documents | `artifactPaths.requirements` → prds | Help tier artifact routing |
 
 ## Skill mirror invariant
 

@@ -203,7 +203,7 @@
 - Date: 2026-08-11
 - Decision: Keep shallow `ae-graph-build` read-only (no `graph.json` persistence); maintain cross-artifact links in `docs/08-ai-memory/00-registry.json` and a human curator map at `docs/ae/graphs/maintainer-artifact-graph.md` with directory README explaining boundaries.
 - Context: Users need durable links between plans, experiences, memory, and post-split code layout without violating the graph-helper read-only contract.
-- Impact: `docs/ae/graphs/README.md` documents query commands and artifact types; registry relations extended for August 2026 deliveries. Next batch: knowledge-base governance PRD (`0.3.22`) for PRD single channel and review-package fingerprinting.
+- Impact: `docs/ae/graphs/README.md` documents query commands and artifact types; registry relations extended for August 2026 deliveries. Knowledge-base governance batch one landed in **0.3.22** (`53c94aa`, `f36e58e`).
 - Re-evaluate when: a deterministic tidy/archival command exists, or review evidence fingerprint format changes.
 
 ## 2026-08-11: Layer repository checks and split ae-tools without changing CLI contracts
@@ -219,5 +219,5 @@
 - Date: 2026-08-11
 - Decision: Make `docs/ae/prds` the canonical requirements location (`ae-brainstorm` reuses the `ae-prd` capture contract and its own template is removed; `recovery` scans prds), stop creating the legacy `docs/ai-memory` pointer for new inits while keeping existing projects untouched, fingerprint `review-package` artifacts instead of storing full diff bodies, adopt a three-month retention policy for gates and evidence artifacts, and register `docs/external-samples` with a README instead of archiving it.
 - Context: The 2026-08-11 knowledge-base review found the two requirements-capture templates had diverged by 184 lines, gates and evidence artifacts accumulated without an exit path (a 219KB full-diff artifact), and the reference consumer project showed the same decay at larger scale. The four dispositions were confirmed by the user.
-- Impact: Distributable version 0.3.22. PRD `docs/ae/prds/2026-08-11-knowledge-base-governance-prd.md`; plan `docs/ae/plans/2026-08-11-003-knowledge-base-governance-plan.md`.
+- Impact: Distributable version 0.3.22. PRD `docs/ae/prds/2026-08-11-knowledge-base-governance-prd.md`; plan `docs/ae/plans/2026-08-11-003-knowledge-base-governance-plan.md`; experience `docs/ae/experience/2026-08-11-knowledge-base-governance.md`; archive `docs/00-process/archive/2026-08/knowledge-base-governance/summary.md`.
 - Re-evaluate when: a tidy/archival command automates the retention policy, or legacy brainstorm requirements artifacts need migration tooling.

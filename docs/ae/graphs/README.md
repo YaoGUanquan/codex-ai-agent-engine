@@ -33,4 +33,4 @@ Human-readable maintainer map: [`maintainer-artifact-graph.md`](maintainer-artif
 | `maintainer-artifact-graph.md` | Curated 2026-08-11 delivery graph (plans → code → memory) |
 | `graph.json` | **Not used** — reserved path name only; shallow CLI keeps `store.written: false` |
 
-Do not commit large auto-generated diff snapshots here; review evidence uses fingerprinted artifacts under `docs/ae/evidence/artifacts/` (see drafted PRD `docs/ae/prds/2026-08-11-knowledge-base-governance-prd.md`).
+Do not commit large auto-generated diff snapshots here; review evidence uses fingerprinted artifacts under `docs/ae/evidence/artifacts/` (see `docs/ae/experience/2026-08-11-knowledge-base-governance.md` and PRD `docs/ae/prds/2026-08-11-knowledge-base-governance-prd.md`).
