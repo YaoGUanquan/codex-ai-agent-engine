@@ -28,6 +28,7 @@ init.mjs     ──► utils  (+ external init-templates/*.md)
 help.mjs     ──► utils
 recovery.mjs ──► utils
 gate.mjs     ──► utils
+tidy.mjs     ──► utils
 
 tasks.mjs  ──► graph, yaml, utils
 review.mjs ──► evidence, git, graph, utils
@@ -47,6 +48,11 @@ review.mjs ──► evidence, git, graph, utils
 | Acyclic module import graph | `tests/ae-tools.test.mjs` — `ae-tools command modules stay an acyclic layered import graph` |
 | Syntax of all `.mjs` under scripts/tests | `scripts/check-syntax.mjs` via `npm run check:syntax` |
 | Install smoke after plugin changes | `npm run check:smoke` |
+
+## Post-update maintenance (0.3.24+)
+
+- `plugins/ai-agent-engine-codex/scripts/update-project.mjs` invokes `tidy --apply` after a successful install unless `--no-tidy` is passed.
+- Summary lands in the update JSON under `maintenance` (`status`, `tidySummary`, `memoryBudget`).
 
 ## Rules for new commands
 

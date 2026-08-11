@@ -376,6 +376,78 @@
         "path": "docs/08-ai-memory/08-phase-two-tooling.md",
         "note": "Review-package fingerprinting reduces persisted artifact volume at the tooling boundary."
       }
+    },
+    {
+      "from": "decision-log",
+      "to": "docs/ae/prds/2026-08-11-governance-batch-two-prd.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/05-decision-log.md",
+        "note": "The tidy command and retention execution decision references the completed batch-two PRD."
+      }
+    },
+    {
+      "from": "decision-log",
+      "to": "docs/ae/prds/2026-08-11-governance-batch-three-prd.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/05-decision-log.md",
+        "note": "The post-update auto-maintenance decision references the completed batch-three PRD."
+      }
+    },
+    {
+      "from": "decision-log",
+      "to": "docs/ae/experience/2026-08-11-governance-batch-two.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/05-decision-log.md",
+        "note": "Batch-two delivery and calibration signals are grounded by the experience note."
+      }
+    },
+    {
+      "from": "decision-log",
+      "to": "docs/ae/experience/2026-08-11-governance-batch-three.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/05-decision-log.md",
+        "note": "Batch-three merge and auto-maintenance delivery links to the experience note."
+      }
+    },
+    {
+      "from": "key-workflows",
+      "to": "docs/ae/plans/2026-08-11-004-governance-batch-two-plan.md",
+      "type": "implements",
+      "evidence": {
+        "path": "docs/08-ai-memory/03-key-workflows.md",
+        "note": "The tidy and process-archive workflow implements the batch-two plan."
+      }
+    },
+    {
+      "from": "key-workflows",
+      "to": "docs/ae/plans/2026-08-11-005-governance-batch-three-plan.md",
+      "type": "implements",
+      "evidence": {
+        "path": "docs/08-ai-memory/03-key-workflows.md",
+        "note": "The post-update auto-maintenance workflow implements the batch-three plan."
+      }
+    },
+    {
+      "from": "architecture-boundaries",
+      "to": "docs/ae/references/ae-tools-module-layout.md",
+      "type": "documents",
+      "evidence": {
+        "path": "docs/08-ai-memory/02-architecture-boundaries.md",
+        "note": "The ae-tools module tree includes tidy.mjs for process-note classification and evidence retention (0.3.23+)."
+      }
+    },
+    {
+      "from": "maintenance-rules",
+      "to": "docs/ae/experience/2026-08-11-governance-batch-two.md",
+      "type": "governs",
+      "evidence": {
+        "path": "docs/08-ai-memory/06-agent-maintenance-rules.md",
+        "note": "Memory size-and-distillation budgets were introduced in batch two and reported by tidy memoryBudget."
+      }
     }
   ]
 }

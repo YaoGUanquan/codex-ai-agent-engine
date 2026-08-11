@@ -193,3 +193,26 @@
   5. 递增 SemVer + README 版本记录；运行 mirror/contract/release-notes/test/check:all。
 - 验证：`node scripts/check-skill-mirror.mjs`、`npm test`、`npm run check:all`。
 - 已知风险：证明边界仅为技能文档与分发合同一致，不代表 consumer 项目运行时验收。
+
+## 知识库 tidy 与过程归档
+
+- 工作流：用 `tidy` 执行保守的过程笔记分类、done 归档、空目录清理与 gate/evidence 超期迁移；默认 dry-run，显式 `--apply` 才写入。
+- 使用场景：治理批次收尾、`docs/00-process/active/` 堆积、gate/evidence 超三个月保留期、或更新插件后自动维护。
+- 步骤：
+  1. 预览：`node scripts/ae-tools.mjs tidy --root <project>`（五态分类 + memoryBudget 报告）。
+  2. 应用：`node scripts/ae-tools.mjs tidy --root <project> --apply`（可选 `--archive-stale --stale-days N`）。
+  3. 归档目标已存在时按文件合并（缺失移入、相同去重、冲突 `.from-active-<日期>` 后缀）。
+  4. 证据保留策略见 `docs/00-process/templates/archive-rules.md`；ledger 在 apply 时重写。
+- 验证：`npm test --test-name-pattern tidy`、`npm run check`。
+- 已知风险：memoryBudget 仅报告不移动；活跃会话中的记忆文件应通过 handoff 蒸馏而非跨仓强制改写。
+
+## 插件更新后自动维护
+
+- 工作流：消费项目执行 `update-ae-codex` 后，安装脚本自动跑保守 `tidy --apply` 并将结果写入 JSON 的 `maintenance` 字段。
+- 使用场景：用户升级 AE 插件后希望 done 笔记、空目录与过期证据自动收敛，无需单独记命令。
+- 步骤：
+  1. 运行 `node scripts/update-ae-codex.mjs`（或项目包装脚本）。
+  2. 检查输出 JSON 的 `maintenance`：`status`（applied/skipped/failed）、`tidySummary`、`memoryBudget`。
+  3. 跳过自动维护：传 `--no-tidy`；维护失败不阻断更新本身。
+- 验证：`tests/install-scripts.test.mjs` 中 auto-maintenance 用例；`INSTALL.md` / `ae-update` skill 说明。
+- 已知风险：自动 apply 不会开 `--archive-stale`；超期 active 笔记需人工审阅后单独 tidy。

@@ -203,8 +203,8 @@
 - Date: 2026-08-11
 - Decision: Keep shallow `ae-graph-build` read-only (no `graph.json` persistence); maintain cross-artifact links in `docs/08-ai-memory/00-registry.json` and a human curator map at `docs/ae/graphs/maintainer-artifact-graph.md` with directory README explaining boundaries.
 - Context: Users need durable links between plans, experiences, memory, and post-split code layout without violating the graph-helper read-only contract.
-- Impact: `docs/ae/graphs/README.md` documents query commands and artifact types; registry relations extended for August 2026 deliveries. Knowledge-base governance batch one landed in **0.3.22** (`53c94aa`, `f36e58e`).
-- Re-evaluate when: a deterministic tidy/archival command exists, or review evidence fingerprint format changes.
+- Impact: `docs/ae/graphs/README.md` documents query commands and artifact types; registry relations extended for August 2026 deliveries. Knowledge-base governance batches one–three landed in **0.3.22–0.3.24** (`53c94aa`, `6721ce3`).
+- Re-evaluate when: review evidence fingerprint format changes, or graph build gains persisted snapshots beyond the read-only helper.
 
 ## 2026-08-11: Layer repository checks and split ae-tools without changing CLI contracts
 
@@ -227,5 +227,13 @@
 - Date: 2026-08-11
 - Decision: Add a conservative `tidy` command (dry-run default; five-state process-note classification; retention-based evidence archiving with ledger rewrite; `--archive-stale`, `--stale-days`, `--retention-months` opt-ins; existing archive targets skipped safely), make `parseOptions` accumulate repeated flags so `gate --validation` records every command, land the `## Perspective Collision (Conditional)` section in the PRD capture contract with deterministic brainstorm triggers, add an `ae-review` Light Path, point evidence-tier wording in brainstorm/prd/review at the single `validation-evidence-profile.md` definition, unify handoff routing between `ae-handoff` and `ae-lfg`, and add memory size-and-distillation budgets to the maintenance rules.
 - Context: Batch one (0.3.22) wrote the retention policy but nothing executed it; this repository still had July notes in `docs/00-process/active/` and the work reference project had 23 empty task directories. Gate evidence previously kept only the last `--validation` flag.
-- Impact: Distributable version 0.3.23. Tidy applied here (structural-debt-refactor merged into its existing archive, four stale July tasks archived) and on the work project (23 empty dirs removed, 2 tasks archived, 4 active kept, 2 skipped on same-name archive conflicts). PRD `docs/ae/prds/2026-08-11-governance-batch-two-prd.md`; plan `docs/ae/plans/2026-08-11-004-governance-batch-two-plan.md`.
-- Re-evaluate when: tidy needs merge-on-conflict behavior for existing archive targets, or a scheduled automation should run the retention pass.
+- Impact: Distributable version 0.3.23. Tidy applied here (structural-debt-refactor merged into its existing archive, four stale July tasks archived) and on the work project (23 empty dirs removed, 2 tasks archived, 4 active kept, 2 skipped on same-name archive conflicts). PRD `docs/ae/prds/2026-08-11-governance-batch-two-prd.md`; plan `docs/ae/plans/2026-08-11-004-governance-batch-two-plan.md`; experience `docs/ae/experience/2026-08-11-governance-batch-two.md`; archive `docs/00-process/archive/2026-08/governance-batch-two/summary.md`.
+- Re-evaluate when: merge-on-conflict for archive targets ships, or scheduled automation should run the retention pass.
+
+## 2026-08-11: Post-update auto-maintenance and tidy archive merge
+
+- Date: 2026-08-11
+- Decision: Extend `tidy` with lossless file-by-file merge when an archive target already exists, add report-only `memoryBudget` (default 15KB per memory file), and run conservative `tidy --apply` automatically after `update-project` completes (summary in JSON `maintenance`; `--no-tidy` opt-out; failure does not block update). Work reference project archive conflicts merged; memory distillation deferred via handoff when files are actively edited.
+- Context: Batch two skipped two same-name archive targets; consumer projects had no hook to run retention after plugin upgrades; first budget scan showed this repo's decision log and workflows over the new size limits.
+- Impact: Distributable version 0.3.24; commit `6721ce3`. PRD `docs/ae/prds/2026-08-11-governance-batch-three-prd.md`; plan `docs/ae/plans/2026-08-11-005-governance-batch-three-plan.md`; experience `docs/ae/experience/2026-08-11-governance-batch-three.md`; archive `docs/00-process/archive/2026-08/governance-batch-three/summary.md`. Calibration signals for Light Path and collision triggers live in batch-two experience note.
+- Re-evaluate when: memory distillation tooling automates oversized files, or auto-maintenance needs `--archive-stale` as an opt-in profile.

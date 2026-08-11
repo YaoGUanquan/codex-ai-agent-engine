@@ -1,10 +1,11 @@
 ---
 type: plan
-status: active
+status: completed
 date: 2026-08-11
 title: governance-batch-two
 format: human-readable-plan
 sharded: false
+archive: docs/00-process/archive/2026-08/governance-batch-two/summary.md
 ---
 
 # 知识库治理第二批实施计划（2026-08-11）

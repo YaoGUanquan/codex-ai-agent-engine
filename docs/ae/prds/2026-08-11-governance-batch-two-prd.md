@@ -1,6 +1,6 @@
 ---
 type: prd
-status: drafted
+status: completed
 date: 2026-08-11
 topic: governance-batch-two
 format: human-readable-requirements

@@ -49,3 +49,8 @@
   - Work report: `docs/ae/work-reports/2026-07-28-frontend-motion-governance-work-report.md`
   - Experience: `docs/ae/experience/2026-07-28-frontend-motion-governance.md`
   - Process archive: `docs/00-process/archive/2026-07/frontend-motion-governance/summary.md`
+- Knowledge-base governance (三批，0.3.22–0.3.24):
+  - Batch 1 — PRD: `docs/ae/prds/2026-08-11-knowledge-base-governance-prd.md`; plan: `docs/ae/plans/2026-08-11-003-knowledge-base-governance-plan.md`; experience: `docs/ae/experience/2026-08-11-knowledge-base-governance.md`; archive: `docs/00-process/archive/2026-08/knowledge-base-governance/summary.md`
+  - Batch 2 — PRD: `docs/ae/prds/2026-08-11-governance-batch-two-prd.md`; plan: `docs/ae/plans/2026-08-11-004-governance-batch-two-plan.md`; experience: `docs/ae/experience/2026-08-11-governance-batch-two.md`; archive: `docs/00-process/archive/2026-08/governance-batch-two/summary.md`
+  - Batch 3 — PRD: `docs/ae/prds/2026-08-11-governance-batch-three-prd.md`; plan: `docs/ae/plans/2026-08-11-005-governance-batch-three-plan.md`; experience: `docs/ae/experience/2026-08-11-governance-batch-three.md`; archive: `docs/00-process/archive/2026-08/governance-batch-three/summary.md`
+  - Maintainer graph: `docs/ae/graphs/maintainer-artifact-graph.md`; registry: `docs/08-ai-memory/00-registry.json`

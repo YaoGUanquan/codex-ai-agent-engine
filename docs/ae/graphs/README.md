@@ -25,12 +25,25 @@ node scripts/ae-tools.mjs ae-knowledge-query --root . --path docs/08-ai-memory/0
 
 Human-readable maintainer map: [`maintainer-artifact-graph.md`](maintainer-artifact-graph.md).
 
+## Process maintenance (0.3.23+)
+
+Conservative archive and evidence retention for consumer projects:
+
+```powershell
+node scripts/ae-tools.mjs tidy --root .
+node scripts/ae-tools.mjs tidy --root . --apply
+```
+
+After `update-ae-codex`, `update-project` runs `tidy --apply` automatically unless `--no-tidy` is passed; see JSON field `maintenance` and `docs/ae/experience/2026-08-11-governance-batch-three.md`.
+
+`memoryBudget` in tidy output reports oversized `docs/08-ai-memory/*.md` files (default 15KB); it does not move them. Distillation rules live in `docs/08-ai-memory/06-agent-maintenance-rules.md`.
+
 ## What belongs in this directory
 
 | Artifact | Purpose |
 | --- | --- |
 | `README.md` | Boundary and query commands (this file) |
-| `maintainer-artifact-graph.md` | Curated 2026-08-11 delivery graph (plans → code → memory) |
+| `maintainer-artifact-graph.md` | Curated 2026-08-11 delivery graph (plans → code → memory → tidy loop) |
 | `graph.json` | **Not used** — reserved path name only; shallow CLI keeps `store.written: false` |
 
 Do not commit large auto-generated diff snapshots here; review evidence uses fingerprinted artifacts under `docs/ae/evidence/artifacts/` (see `docs/ae/experience/2026-08-11-knowledge-base-governance.md` and PRD `docs/ae/prds/2026-08-11-knowledge-base-governance-prd.md`).

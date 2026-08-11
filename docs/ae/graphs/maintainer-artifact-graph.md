@@ -1,7 +1,7 @@
 <!-- ae-codex:reference -->
 # Maintainer Artifact Graph (2026-08-11)
 
-Curated map of the August 2026 optimization wave: initial repo scan (`781d4f6`), frontend skill guidance (`a51ef3c` / 0.3.18–0.3.19), structural refactor (`315db38` / 0.3.20), fullstack skill optimization (`e2621b7` / 0.3.21), and knowledge-base governance batch one (`53c94aa` / 0.3.22). For machine-readable edges see `docs/08-ai-memory/00-registry.json`.
+Curated map of the August 2026 optimization wave: initial repo scan (`781d4f6`), frontend skill guidance (`a51ef3c` / 0.3.18–0.3.19), structural refactor (`315db38` / 0.3.20), fullstack skill optimization (`e2621b7` / 0.3.21), knowledge-base governance batches one–three (`53c94aa` / 0.3.22 → `6721ce3` / 0.3.23–0.3.24). For machine-readable edges see `docs/08-ai-memory/00-registry.json`.
 
 ## Delivery timeline
 
@@ -11,8 +11,10 @@ flowchart LR
   fe["Frontend skills a51ef3c<br/>0.3.18-0.3.19 four frameworks"]
   struct["Structural refactor 315db38<br/>0.3.20 ae-tools split"]
   full["Fullstack skills 0.3.21<br/>backend + FE/BE contract"]
-  kb["Knowledge-base governance<br/>0.3.22 53c94aa"]
-  scan --> fe --> struct --> full --> kb
+  kb1["KB governance batch 1<br/>0.3.22 53c94aa"]
+  kb2["KB governance batch 2<br/>0.3.23 tidy + skills"]
+  kb3["KB governance batch 3<br/>0.3.24 auto-maintain"]
+  scan --> fe --> struct --> full --> kb1 --> kb2 --> kb3
 ```
 
 ## Code module graph (ae-tools, post-0.3.20)
@@ -32,9 +34,11 @@ flowchart TB
   review["review.mjs"]
   tasks["tasks.mjs"]
   init["init.mjs"]
+  tidy["tidy.mjs"]
   entry --> review
   entry --> tasks
   entry --> init
+  entry --> tidy
   review --> evidence
   review --> git
   review --> graph
@@ -46,6 +50,18 @@ flowchart TB
   git --> utils
   graph --> utils
   init --> utils
+  tidy --> utils
+```
+
+## Update → tidy loop (0.3.24+)
+
+```mermaid
+flowchart LR
+  upd["update-ae-codex.mjs"]
+  upj["update-project.mjs"]
+  tidy["tidy --apply"]
+  maint["JSON maintenance field"]
+  upd --> upj --> tidy --> maint
 ```
 
 ## Artifact relations
@@ -65,6 +81,13 @@ flowchart TB
 | `docs/ae/plans/2026-08-11-003-knowledge-base-governance-plan.md` | implements | init/recovery/review + skills | Canonical prds + evidence fingerprint |
 | `docs/ae/experience/2026-08-11-knowledge-base-governance.md` | records | above plan | Validation + deferred batch-two items |
 | `docs/00-process/archive/2026-08/knowledge-base-governance/summary.md` | archives | kb governance plan | Process closure |
+| `docs/ae/plans/2026-08-11-004-governance-batch-two-plan.md` | implements | `tidy.mjs` + skill refinements | Executable retention + gate fix |
+| `docs/ae/experience/2026-08-11-governance-batch-two.md` | records | above plan | Tidy runs + calibration signals |
+| `docs/00-process/archive/2026-08/governance-batch-two/summary.md` | archives | batch-two plan | Process closure |
+| `docs/ae/plans/2026-08-11-005-governance-batch-three-plan.md` | implements | `tidy.mjs` merge + `update-project.mjs` | Auto-maintenance loop |
+| `docs/ae/experience/2026-08-11-governance-batch-three.md` | records | above plan | Merge + consumer hook |
+| `docs/00-process/archive/2026-08/governance-batch-three/summary.md` | archives | batch-three plan | Process closure |
+| `plugins/.../update-project.mjs` | invokes | `tidy --apply` | Post-install maintenance (unless `--no-tidy`) |
 | `plugins/.../ae-help/references/capability-catalog.json` | documents | `artifactPaths.requirements` → prds | Help tier artifact routing |
 
 ## Skill mirror invariant

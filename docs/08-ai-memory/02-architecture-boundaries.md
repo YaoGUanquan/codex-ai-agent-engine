@@ -29,6 +29,7 @@
 - Init 模板：`scripts/ae-tools/init-templates/{en,zh-CN}/*.md`，渲染时 CRLF 归一化。
 - 共享 artifact 校验：`plugins/ai-agent-engine-codex/scripts/artifact-check-utils.mjs`。
 - 维护者参考：`docs/ae/references/ae-tools-module-layout.md`；循环导入由 `tests/ae-tools.test.mjs` 守卫。
+- **tidy**（0.3.23+）：`ae-tools/tidy.mjs` 负责过程笔记五态分类、证据超期归档与 memoryBudget 报告；`update-project.mjs`（0.3.24+）安装后自动调用 `tidy --apply`。
 
 ## 图谱边界
 
