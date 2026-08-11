@@ -58,6 +58,12 @@ node scripts/ae-tools.mjs help
 
 ## 版本更新记录
 
+### 0.3.21（2026-08-11）
+- 全栈技能对称优化：`ae-backend` 新增 Java/Go/Python/C/C++/C# 六份语言指导，工作流增加按仓库技术栈选读步骤，其他后端语言仍回退仓库既有约定。
+- 契约与边界：`api-contract-checklist.md` 扩充 Frontend-Backend Alignment 章节；`ae-web-app` 与 `ae-web-forge` 路由至共享契约检查表；`ae-debug` 新增 Backend Failure Quick Map 与 Frontend-Backend Boundary Quick Map。
+- `ae-sql` 新增 `sql-safety-checklist.md`（操作风险分级与安全约束），SKILL 工作流挂载该清单。
+- 验证：`node scripts/check-skill-mirror.mjs`、`node scripts/check-skill-contract.mjs`、`node scripts/check-release-notes.mjs`、`node scripts/check-install-smoke.mjs`、`npm test`。这些检查只证明技能文档、镜像与分发合同一致，不代表任何目标项目的 API、数据库或部署验收。
+
 ### 0.3.20（2026-08-11）
 - 结构性重构：插件 `scripts/ae-tools.mjs`（约 2860 行单体）拆分为 `scripts/ae-tools/` 下 15 个命令模块（utils、yaml、git、evidence、graph、help、recovery、gate、tasks、review、swagger、claude、markitdown、static-server、init），入口只保留命令分发与全局参数解析；目标项目的根薄包装 `scripts/ae-tools.mjs` 导入路径不变。
 - init 三语模板外置为 `scripts/ae-tools/init-templates/{en,zh-CN}/*.md` UTF-8 模板文件加 `{{placeholder}}` 占位替换，bilingual 输出由中英模板拼接生成；渲染时归一化 CRLF，防止换行符污染生成文件。

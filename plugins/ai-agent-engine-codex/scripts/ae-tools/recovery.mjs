@@ -13,6 +13,7 @@ export function recovery(worktree) {
     recommendation: 'no_artifacts_found',
   }
   const specs = [
+    ['requirements', join(docsAe, 'prds'), /\.md$/],
     ['requirements', join(docsAe, 'brainstorms'), /requirements\.md$/],
     ['plan', join(docsAe, 'plans'), /plan\.md$/],
     ['review', join(docsAe, 'reviews'), /.*/],

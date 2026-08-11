@@ -757,7 +757,7 @@ test('task-brief accepts localized 单元 headings that task-analyze already sup
   }
 })
 
-test('review-package writes commit list stat summary and diff into an evidence artifact', () => {
+test('review-package writes a fingerprint artifact without the full diff body', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-review-package-'))
   try {
     runGit(['init'], tempRoot)
@@ -799,17 +799,22 @@ test('review-package writes commit list stat summary and diff into an evidence a
     assert.equal(result.impact.fileLimit, 1)
     assert.equal(result.impact.sourceFilesScanned, 1)
     assert.deepEqual(result.impact.seedFiles, ['sample.txt'])
-    assert.match(result.artifact.path, /^docs\/ae\/evidence\/artifacts\/review-package\//)
+    assert.match(result.artifact.path, /^docs\/ae\/evidence\/artifacts\/review-package\/.*\.md$/)
+    assert.equal(result.fingerprint.baseSha, base)
+    assert.equal(result.fingerprint.headSha, head)
     const artifactBody = readFileSync(join(tempRoot, result.artifact.path), 'utf8')
     assert.match(artifactBody, new RegExp(`# Review package: ${base}\\.\\.${head}`))
+    assert.match(artifactBody, /## Fingerprint/)
     assert.match(artifactBody, /## Commits/)
     assert.match(artifactBody, /update sample/)
     assert.match(artifactBody, /## Files changed/)
     assert.match(artifactBody, /sample\.txt/)
     assert.match(artifactBody, /## Review inventory/)
     assert.match(artifactBody, /## Impact context/)
-    assert.match(artifactBody, /## Diff/)
-    assert.match(artifactBody, /\+two/)
+    assert.match(artifactBody, /## Reproduce diff/)
+    assert.match(artifactBody, new RegExp(`git diff -U10 ${base}\\.\\.${head}`))
+    assert.doesNotMatch(artifactBody, /## Diff\n/, 'fingerprint artifact must not embed the raw diff section')
+    assert.doesNotMatch(artifactBody, /^\+two$/m, 'fingerprint artifact must not embed diff body lines')
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }
@@ -880,6 +885,37 @@ test('review-package marks binary files without invented line counts', () => {
     assert.equal(result.inventory.files[0].binary, true)
     assert.equal(result.inventory.files[0].additions, null)
     assert.equal(result.inventory.files[0].deletions, null)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('recovery lists canonical PRD artifacts alongside legacy brainstorm requirements', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-recovery-prds-'))
+  try {
+    mkdirSync(join(tempRoot, 'docs', 'ae', 'prds'), { recursive: true })
+    mkdirSync(join(tempRoot, 'docs', 'ae', 'brainstorms'), { recursive: true })
+    writeFileSync(join(tempRoot, 'docs', 'ae', 'prds', '2026-08-11-sample-prd.md'), '# sample prd\n', 'utf8')
+    writeFileSync(join(tempRoot, 'docs', 'ae', 'brainstorms', '2026-08-11-sample-requirements.md'), '# legacy requirements\n', 'utf8')
+
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'recovery'], tempRoot)
+    const typesByPath = new Map(result.candidates.map((candidate) => [candidate.path, candidate.type]))
+    assert.equal(typesByPath.get('docs/ae/prds/2026-08-11-sample-prd.md'), 'requirements', 'canonical PRD artifacts should be recovery candidates')
+    assert.equal(typesByPath.get('docs/ae/brainstorms/2026-08-11-sample-requirements.md'), 'requirements', 'legacy brainstorm requirements should stay recoverable')
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('init provisions the canonical prds directory and stops creating the legacy ai-memory pointer', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-init-scaffold-'))
+  try {
+    writeFileSync(join(tempRoot, 'package.json'), JSON.stringify({ name: 'init-fixture', type: 'module' }), 'utf8')
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'init', '--dry-run', '--project-root', tempRoot], tempRoot)
+    assert.equal(result.status, 'dry-run')
+    assert.ok(result.created_directories.includes('docs/ae/prds'), 'init should provision docs/ae/prds')
+    assert.ok(!result.created_directories.includes('docs/ai-memory'), 'init should not create the legacy docs/ai-memory pointer')
+    assert.ok(!result.created_files.includes('docs/ai-memory/README.md'), 'init should not write the legacy compatibility README')
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }

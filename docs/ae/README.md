@@ -5,7 +5,8 @@
 
 ## 目录说明
 
-- `brainstorms/`：需求澄清和验收标准。
+- `prds/`：需求正典目录（PRD 需求数据文档，`type: prd`）。
+- `brainstorms/`：探索性澄清记录（视角碰撞、选项对比等）；持久化需求写入 `prds/`。
 - `plans/`：实现计划。
 - `reviews/`：代码或文档审查报告。
 - `gates/`：验证和交付门禁证据。
@@ -13,6 +14,8 @@
 - `experience/`：可复用的实现经验。
 - `solutions/`：方案比较和选型记录。
 - `archive/`：已完成或已废弃的过程记录。
+
+其余子目录（`designs/`、`evidence/`、`integrity/`、`security-scans/`、`work-reports/`、`references/`、`graphs/`、`prompts/` 等）由对应命令或任务按需创建。`gates/` 与 `evidence/` 产物按 `docs/00-process/templates/archive-rules.md` 的证据保留策略定期归档。
 
 ## 与项目文档的关系
 

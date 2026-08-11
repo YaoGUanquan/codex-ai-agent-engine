@@ -72,7 +72,7 @@ After install, run this inside the target project:
 node scripts/ae-tools.mjs init
 ```
 
-This creates `AGENTS.md`, AE workflow artifact folders under `docs/ae`, process/archive folders under `docs/00-process`, and durable project memory files under `docs/08-ai-memory`. It also keeps `docs/ai-memory` as a compatibility pointer for earlier scaffolds.
+This creates `AGENTS.md`, AE workflow artifact folders under `docs/ae` (including the canonical requirements directory `docs/ae/prds`), process/archive folders under `docs/00-process`, and durable project memory files under `docs/08-ai-memory`. Since 0.3.22, init no longer creates the legacy `docs/ai-memory` compatibility pointer; existing projects keep theirs unchanged.
 
 Generated text files are written as UTF-8. On Windows, PowerShell can render valid UTF-8 Chinese text as garbled output, so verify with explicit UTF-8 reads or Git diff before rewriting files.
 

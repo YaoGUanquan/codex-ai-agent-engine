@@ -5,7 +5,8 @@ This directory stores process artifacts created while using AI Agent Engine for 
 
 ## Directory Map
 
-- `brainstorms/`: requirement clarification and acceptance notes.
+- `prds/`: canonical durable requirements (use `ae-prd` capture contract).
+- `brainstorms/`: exploratory notes, perspective collision, and option comparison (not the canonical requirements channel).
 - `plans/`: implementation plans.
 - `reviews/`: code or document review reports.
 - `gates/`: validation and delivery gate evidence.

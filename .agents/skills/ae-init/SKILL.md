@@ -1,6 +1,6 @@
 ---
 name: ae-init
-description: Use when the user asks for AE init, /ae-init, initialize a project for AI Agent Engine for Codex, create AGENTS.md, create docs/ae, docs/00-process, docs/08-ai-memory, docs/ai-memory, archive rules, or UTF-8 Chinese documentation rules.
+description: Use when the user asks for AE init, /ae-init, initialize a project for AI Agent Engine for Codex, create AGENTS.md, create docs/ae, docs/00-process, docs/08-ai-memory, archive rules, or UTF-8 Chinese documentation rules.
 ---
 
 # AE Init
@@ -42,7 +42,7 @@ Use the default only when no project signal or user preference points to Chinese
 node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" init
 ```
 
-7. Verify the result by checking the command JSON plus the expected core paths: `AGENTS.md`, `docs/ae`, `docs/00-process`, `docs/08-ai-memory`, and `docs/ai-memory`.
+7. Verify the result by checking the command JSON plus the expected core paths: `AGENTS.md`, `docs/ae` (including canonical `docs/ae/prds`), `docs/00-process`, and `docs/08-ai-memory`. Init no longer creates the legacy `docs/ai-memory` compatibility pointer on new projects.
 8. On Windows, verify Chinese Markdown with explicit UTF-8 reads or Git diff before treating mojibake as file corruption.
 
 ## Success Criteria

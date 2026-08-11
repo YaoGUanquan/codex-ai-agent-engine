@@ -478,6 +478,12 @@ Working rule: any change that touches distributable plugin content (`plugins/ai-
 
 ## Version Updates
 
+### 0.3.21 (2026-08-11)
+- Fullstack skill symmetry: `ae-backend` adds six language guidance files (Java, Go, Python, C, C++, C#), the workflow now selects guidance by repository stack, and other backend languages still fall back to existing repository conventions.
+- Contracts and boundaries: `api-contract-checklist.md` expands with a Frontend-Backend Alignment section; `ae-web-app` and `ae-web-forge` route to the shared contract checklist; `ae-debug` adds Backend Failure Quick Map and Frontend-Backend Boundary Quick Map.
+- `ae-sql` adds `sql-safety-checklist.md` (operation risk tiers and safety constraints), and the skill workflow mounts that checklist.
+- Validation: `node scripts/check-skill-mirror.mjs`, `node scripts/check-skill-contract.mjs`, `node scripts/check-release-notes.mjs`, `node scripts/check-install-smoke.mjs`, and `npm test`. These checks prove skill docs, mirror, and distribution contracts only, not API, database, or deployment acceptance in any target project.
+
 ### 0.3.20 (2026-08-11)
 - Structural refactor: the plugin's `scripts/ae-tools.mjs` (a ~2860-line monolith) is split into 15 command modules under `scripts/ae-tools/` (utils, yaml, git, evidence, graph, help, recovery, gate, tasks, review, swagger, claude, markitdown, static-server, init); the entry file keeps only command dispatch and global argument parsing, and the thin root wrapper `scripts/ae-tools.mjs` import path in target projects is unchanged.
 - The trilingual init templates are externalized to UTF-8 files under `scripts/ae-tools/init-templates/{en,zh-CN}/*.md` with `{{placeholder}}` substitution; bilingual output is composed from the two languages, and CRLF is normalized at render time so checkout line endings cannot leak into generated files.

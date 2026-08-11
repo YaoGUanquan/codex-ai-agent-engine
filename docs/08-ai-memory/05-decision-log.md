@@ -213,3 +213,11 @@
 - Context: A repository scan found duplicate `update-project.mjs`, missing gitignore for smoke temp dirs, and `check-claims` outside the default check chain (fixed in commit `781d4f6` before the larger refactor). `node --check` cannot detect ESM circular imports between new modules.
 - Impact: Maintainer layout in `docs/ae/references/ae-tools-module-layout.md`; import-cycle regression guard in tests; commit `315db38`; experience `docs/ae/experience/2026-08-11-structural-debt-refactor.md`; archive `docs/00-process/archive/2026-08/structural-debt-refactor/summary.md`.
 - Re-evaluate when: a new command family makes the module count unwieldy again, or Codex provides a first-class plugin CLI packaging model.
+
+## 2026-08-11: Knowledge-base governance: canonical PRD channel, retired init pointer, evidence retention
+
+- Date: 2026-08-11
+- Decision: Make `docs/ae/prds` the canonical requirements location (`ae-brainstorm` reuses the `ae-prd` capture contract and its own template is removed; `recovery` scans prds), stop creating the legacy `docs/ai-memory` pointer for new inits while keeping existing projects untouched, fingerprint `review-package` artifacts instead of storing full diff bodies, adopt a three-month retention policy for gates and evidence artifacts, and register `docs/external-samples` with a README instead of archiving it.
+- Context: The 2026-08-11 knowledge-base review found the two requirements-capture templates had diverged by 184 lines, gates and evidence artifacts accumulated without an exit path (a 219KB full-diff artifact), and the reference consumer project showed the same decay at larger scale. The four dispositions were confirmed by the user.
+- Impact: Distributable version 0.3.22. PRD `docs/ae/prds/2026-08-11-knowledge-base-governance-prd.md`; plan `docs/ae/plans/2026-08-11-003-knowledge-base-governance-plan.md`.
+- Re-evaluate when: a tidy/archival command automates the retention policy, or legacy brainstorm requirements artifacts need migration tooling.

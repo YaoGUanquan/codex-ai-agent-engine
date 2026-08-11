@@ -20,7 +20,7 @@
   2. 明确切换到目标项目目录后执行 `ae-init` 或 `node scripts/ae-tools.mjs init`。
   3. 安装后的 skill 列表元数据默认是双语；如需单一语言，安装或更新时显式传 `--lang en` 或 `--lang zh-CN`。
   4. 如需中文骨架，使用 `node scripts/ae-tools.mjs init --lang zh-CN`；如需先预览，使用 `--dry-run`。
-  5. 检查 `AGENTS.md`、`docs/ae`、`docs/00-process`、`docs/08-ai-memory` 和 `docs/ai-memory` 是否符合当前项目需求。
+  5. 检查 `AGENTS.md`、`docs/ae`（含需求正典目录 `docs/ae/prds`）、`docs/00-process` 和 `docs/08-ai-memory` 是否符合当前项目需求；0.3.22 起 init 不再创建 `docs/ai-memory` 兼容目录。
 - 验证：运行 `cmd /c npm run check`、`node scripts\ae-tools.mjs init --dry-run --lang zh-CN`、`node scripts\ae-tools.mjs recovery` 和 `git diff --check`。
 - 已知风险：安装文档中的 `node scripts/...` 必须在目标项目目录执行；如果仍在临时 clone 目录或其他 cwd，会初始化错误项目或找不到脚本。
 
