@@ -49,8 +49,11 @@
   - Work report: `docs/ae/work-reports/2026-07-28-frontend-motion-governance-work-report.md`
   - Experience: `docs/ae/experience/2026-07-28-frontend-motion-governance.md`
   - Process archive: `docs/00-process/archive/2026-07/frontend-motion-governance/summary.md`
-- Knowledge-base governance (三批，0.3.22–0.3.24):
+- Knowledge-base governance (四批，0.3.22–0.3.25):
   - Batch 1 — PRD: `docs/ae/prds/2026-08-11-knowledge-base-governance-prd.md`; plan: `docs/ae/plans/2026-08-11-003-knowledge-base-governance-plan.md`; experience: `docs/ae/experience/2026-08-11-knowledge-base-governance.md`; archive: `docs/00-process/archive/2026-08/knowledge-base-governance/summary.md`
   - Batch 2 — PRD: `docs/ae/prds/2026-08-11-governance-batch-two-prd.md`; plan: `docs/ae/plans/2026-08-11-004-governance-batch-two-plan.md`; experience: `docs/ae/experience/2026-08-11-governance-batch-two.md`; archive: `docs/00-process/archive/2026-08/governance-batch-two/summary.md`
   - Batch 3 — PRD: `docs/ae/prds/2026-08-11-governance-batch-three-prd.md`; plan: `docs/ae/plans/2026-08-11-005-governance-batch-three-plan.md`; experience: `docs/ae/experience/2026-08-11-governance-batch-three.md`; archive: `docs/00-process/archive/2026-08/governance-batch-three/summary.md`
+  - Batch 4 — PRD: `docs/ae/prds/2026-08-11-governance-batch-four-prd.md`; plan: `docs/ae/plans/2026-08-11-006-governance-batch-four-plan.md`; experience: `docs/ae/experience/2026-08-11-governance-batch-four.md`; archive: `docs/00-process/archive/2026-08/governance-batch-four/summary.md`
+  - 0.3.25 prds 路径统一 — plan: `docs/ae/plans/2026-08-11-007-prds-artifact-path-unification-plan.md`; archive: `docs/00-process/archive/2026-08/prds-artifact-path-unification/summary.md`
+  - 记忆蒸馏（2026-08-11）— experience: `docs/ae/experience/2026-08-11-memory-distillation.md`; 分片: `docs/99-archive/2026-08/memory-distillation/`
   - Maintainer graph: `docs/ae/graphs/maintainer-artifact-graph.md`; registry: `docs/08-ai-memory/00-registry.json`

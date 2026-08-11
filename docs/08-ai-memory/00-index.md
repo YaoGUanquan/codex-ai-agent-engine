@@ -32,7 +32,11 @@
 - Knowledge-base governance batch one (0.3.22: canonical `docs/ae/prds`, init stops creating `docs/ai-memory`, review-package fingerprint, evidence retention, external-samples registration) is recorded in `03-key-workflows.md`, `05-decision-log.md`, `docs/ae/experience/2026-08-11-knowledge-base-governance.md`, and plan `docs/ae/plans/2026-08-11-003-knowledge-base-governance-plan.md`.
 - Knowledge-base governance batch two (0.3.23: `tidy` command, gate flag accumulation, skill refinements, memory size budgets) is recorded in `03-key-workflows.md`, `05-decision-log.md`, `06-agent-maintenance-rules.md`, `docs/ae/experience/2026-08-11-governance-batch-two.md`, and plan `docs/ae/plans/2026-08-11-004-governance-batch-two-plan.md`.
 - Knowledge-base governance batch three (0.3.24: tidy archive merge, post-update auto-maintenance, memoryBudget report) is recorded in `03-key-workflows.md`, `05-decision-log.md`, `docs/ae/experience/2026-08-11-governance-batch-three.md`, and plan `docs/ae/plans/2026-08-11-005-governance-batch-three-plan.md`.
+- Knowledge-base governance batch four (repository-side: release-notes split to CHANGELOGs with a five-entry README window, process-archive closeout, deferred legacy-stack and frontend-contract dispositions) is recorded in `05-decision-log.md`, `docs/ae/experience/2026-08-11-governance-batch-four.md`, and plan `docs/ae/plans/2026-08-11-006-governance-batch-four-plan.md`.
+- Requirements-artifact path unification (0.3.25: capability-catalog artifactPath, ae-help artifact contract, and ae-review scope detection unified on `docs/ae/prds`) is recorded in plan `docs/ae/plans/2026-08-11-007-prds-artifact-path-unification-plan.md` and archive `docs/00-process/archive/2026-08/prds-artifact-path-unification/summary.md`.
+- Memory distillation (2026-08-11: `05`/`03` rotated within the 15KB budget) is recorded in `03-key-workflows.md`, `04-known-pitfalls.md`, `docs/ae/experience/2026-08-11-memory-distillation.md`, and shards under `docs/99-archive/2026-08/memory-distillation/`.
 - Maintainer knowledge graph: declared relations in `00-registry.json`; human map in `docs/ae/graphs/maintainer-artifact-graph.md`; directory boundary in `docs/ae/graphs/README.md`. Shallow CLI graphs remain read-only (no `graph.json` persistence).
+- 蒸馏归档分片（2026-08-11）：`docs/99-archive/2026-08/memory-distillation/`——`05-decision-log.md` 的 2026-05 至 07 决策全文与 `03-key-workflows.md` 的六个适配期工作流全文；源文件保留索引与指针。
 - `99-prompt-template.md`：初始化或维护记忆库的提示词模板。
 
 ## 维护规则
@@ -41,4 +45,4 @@
 
 ## 2026-06-19 Addendum
 
-- Claude Code best-practice adaptation is recorded in `03-key-workflows.md`, `05-decision-log.md`, and `docs/ae/experience/2026-06-19-claude-code-best-practice-adaptation.md` rather than a separate memory file.
+- Claude Code best-practice adaptation is recorded in `docs/ae/experience/2026-06-19-claude-code-best-practice-adaptation.md` and, since the 2026-08-11 distillation, in the archive shards under `docs/99-archive/2026-08/memory-distillation/`; the generic external-research workflow remains in `03-key-workflows.md`.

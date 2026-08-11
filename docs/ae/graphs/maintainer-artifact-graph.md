@@ -1,7 +1,7 @@
 <!-- ae-codex:reference -->
 # Maintainer Artifact Graph (2026-08-11)
 
-Curated map of the August 2026 optimization wave: initial repo scan (`781d4f6`), frontend skill guidance (`a51ef3c` / 0.3.18–0.3.19), structural refactor (`315db38` / 0.3.20), fullstack skill optimization (`e2621b7` / 0.3.21), knowledge-base governance batches one–three (`53c94aa` / 0.3.22 → `6721ce3` / 0.3.23–0.3.24). For machine-readable edges see `docs/08-ai-memory/00-registry.json`.
+Curated map of the August 2026 optimization wave: initial repo scan (`781d4f6`), frontend skill guidance (`a51ef3c` / 0.3.18–0.3.19), structural refactor (`315db38` / 0.3.20), fullstack skill optimization (`e2621b7` / 0.3.21), knowledge-base governance batches one–three (`53c94aa` / 0.3.22 → `6721ce3` / 0.3.23–0.3.24), governance batch four plus prds path unification (`d564fa6` / 0.3.25: release-notes split into changelogs, process-archive closeout, requirements-path declarations), and the 2026-08-11 memory distillation (05/03 rotated within the 15KB budget). For machine-readable edges see `docs/08-ai-memory/00-registry.json`.
 
 ## Delivery timeline
 
@@ -14,7 +14,10 @@ flowchart LR
   kb1["KB governance batch 1<br/>0.3.22 53c94aa"]
   kb2["KB governance batch 2<br/>0.3.23 tidy + skills"]
   kb3["KB governance batch 3<br/>0.3.24 auto-maintain"]
-  scan --> fe --> struct --> full --> kb1 --> kb2 --> kb3
+  kb4["KB governance batch 4<br/>release-notes split d564fa6"]
+  prds["prds path unification<br/>0.3.25 d564fa6"]
+  distill["Memory distillation<br/>05/03 within 15KB budget"]
+  scan --> fe --> struct --> full --> kb1 --> kb2 --> kb3 --> kb4 --> prds --> distill
 ```
 
 ## Code module graph (ae-tools, post-0.3.20)
@@ -89,6 +92,13 @@ flowchart LR
 | `docs/00-process/archive/2026-08/governance-batch-three/summary.md` | archives | batch-three plan | Process closure |
 | `plugins/.../update-project.mjs` | invokes | `tidy --apply` | Post-install maintenance (unless `--no-tidy`) |
 | `plugins/.../ae-help/references/capability-catalog.json` | documents | `artifactPaths.requirements` → prds | Help tier artifact routing |
+| `docs/ae/plans/2026-08-11-006-governance-batch-four-plan.md` | implements | `scripts/check-release-notes.mjs` + `CHANGELOG.md`/`CHANGELOG.en.md` | Release-notes split, five-entry README window |
+| `docs/ae/experience/2026-08-11-governance-batch-four.md` | records | above plan | Migration checks + deferred dispositions |
+| `docs/00-process/archive/2026-08/governance-batch-four/summary.md` | archives | batch-four plan | Process closure |
+| `docs/ae/plans/2026-08-11-007-prds-artifact-path-unification-plan.md` | implements | catalog `artifactPath` + `artifact-contract.md` + `scope-detection.md` (0.3.25) | Requirements-path declarations on prds |
+| `docs/00-process/archive/2026-08/prds-artifact-path-unification/summary.md` | archives | 007 plan | Process closure + finding adjudication |
+| `docs/99-archive/2026-08/memory-distillation/README.md` | archives | `05-decision-log.md` / `03-key-workflows.md` shards | Memory budget convergence |
+| `docs/ae/experience/2026-08-11-memory-distillation.md` | records | distillation shards + registry boundary | Rotation workflow lessons |
 
 ## Skill mirror invariant
 

@@ -466,6 +466,24 @@
         "path": "docs/08-ai-memory/05-decision-log.md",
         "note": "The batch-four decision links to the delivery experience note, including the deferred frontend-contract evaluation."
       }
+    },
+    {
+      "from": "key-workflows",
+      "to": "docs/ae/experience/2026-08-11-memory-distillation.md",
+      "type": "implements",
+      "evidence": {
+        "path": "docs/08-ai-memory/03-key-workflows.md",
+        "note": "The memory distillation rotation workflow implements the executed 2026-08-11 distillation."
+      }
+    },
+    {
+      "from": "known-pitfalls",
+      "to": "docs/ae/experience/2026-08-11-memory-distillation.md",
+      "type": "records",
+      "evidence": {
+        "path": "docs/08-ai-memory/04-known-pitfalls.md",
+        "note": "The registry relation-target boundary pitfall is grounded by the distillation experience note."
+      }
     }
   ]
 }

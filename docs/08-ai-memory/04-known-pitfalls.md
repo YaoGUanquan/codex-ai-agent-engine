@@ -58,6 +58,11 @@
 - 根 `scripts/update-project.mjs` 必须是薄包装；若在根目录复制完整实现，将与 `install-project.mjs` 写入目标项目的包装路径漂移。
 - install-smoke 临时目录 `.tmp-install-smoke-checks/` 已 gitignore；异常中断可能留下 UUID 子目录，可安全删除。
 
+## 记忆蒸馏与 registry 边界
+
+- `00-registry.json` 的关系目标只接受 `AGENTS.md` 或 `docs/ae/**` 下的 Markdown；指向 `docs/99-archive/**` 分片的关系会被 `check-memory-knowledge-contract` 直接拒绝。归档指针写在正典 Markdown（源文件索引节、`00-index.md`），不要写进 registry。
+- `05-decision-log.md` 蒸馏后约 14.5KB，贴近 15KB 预算；追加前先确认是长期决策，执行类知识写 `03-key-workflows.md` 或本文件。
+
 ## 全栈 skill 与并行会话
 
 - 多会话共享工作区时，对 `package.json`、`README` 仅做字段级或追加式编辑；skill 文件集合应零交集或明确归属。

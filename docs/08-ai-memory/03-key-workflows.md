@@ -37,85 +37,16 @@
 - Validation: Run `cmd /c npm run check`, `git diff --check`, and targeted help checks such as `node scripts/ae-tools.mjs help skill`.
 - Known risks: External skill prompts may include runtime assumptions, platform assumptions, or naming models that do not fit this project. Do not install or copy them directly.
 
-## Phase 2 shallow graph and browser routing
+## 已归档工作流（2026-08-11 蒸馏）
 
-- Workflow: Add high-value Phase 2 helpers only when they can stay read-only, bounded, and Codex-native.
-- Use case: A user asks to continue porting OpenCode-inspired graph, merge, or browser/DevTools capabilities.
-- Steps:
-  1. Prefer shallow helper scripts before persistent MCP tools when the schema and write lifecycle are not settled.
-  2. Use `node scripts/ae-tools.mjs ae-graph-build --root <path>` for a quick JSON dependency preview.
-  3. Use `node scripts/ae-tools.mjs ae-graph-query --root <path> --path <file>` or `--keyword <text>` for a focused graph query.
-  4. Keep `ae-merge-branch` deferred until Git evidence, rollback, and authorization rules are stronger.
-  5. Route browser debugging through `ae-test-browser` with Browser, Playwright, or an already available DevTools-capable tool.
-- Validation: Run `npm.cmd test`, `npm.cmd run check`, `git diff --check`, and `node scripts/check-skill-mirror.mjs`.
-- Known risks: The graph helper is static and shallow; dynamic imports, aliases, generated code, and framework-specific resolution may be incomplete.
+以下适配期工作流全文移至 `docs/99-archive/2026-08/memory-distillation/03-key-workflows-adaptation-era.md`；长期有效边界的正主文件：
 
-## Multi-agent auto config rollout
-
-- Workflow: Roll out `multi_agent.enabled: auto` to installed projects without silently enabling write-agent spawning.
-- Use case: A user asks how another project should update after the multi-agent config branch is merged.
-- Steps:
-  1. Merge the feature branch to `main`.
-  2. In each installed target project, run `node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-agent-engine.git --branch main`.
-  3. Create or update `.codex/ae-skill-profiles.yaml` from `docs/ae/templates/ae-skill-profiles.example.yaml`; the updater copies templates but does not overwrite the local runtime profile.
-  4. Keep `enabled: auto`, `mode: suggest`, and `allow_write_agents: false` as the safe baseline.
-  5. Only use `mode: auto` plus `allow_write_agents: true` when the user explicitly opts into write-agent auto parallelism.
-  6. Verify with `node scripts/ae-tools.mjs task-analyze --mode plan --plan docs/ae/plans/<your-plan>.md`.
-- Validation: Run `npm.cmd test`, `npm.cmd run check`, `node scripts/check-install-smoke.mjs`, and targeted task-analyze tests for the config matrix.
-- Known risks: `task-analyze` reports policy and waves; actual sub-agent spawning remains an orchestration decision and must respect blockers.
-
-## Minimality and complexity review adaptation
-
-- Workflow: Adapt external minimality patterns into AE skill guidance without importing runtime hooks or persona modes.
-- Use case: A user asks to optimize AE skills using a repository such as `DietrichGebert/ponytail`.
-- Steps:
-  1. Use `ae-skill-audit` to classify external patterns as portable workflow guidance or platform-specific runtime behavior.
-  2. Improve existing AE skills before creating new skills: `ae-work` for pre-edit minimality, `ae-review` for complexity findings, `ae-plan` for simplest-route alternatives, and `ae-task-loop` for smallest-fix iterations.
-  3. Keep plugin source and `.agents/skills` mirror paired in every edit.
-  4. Use TDD when locking guidance into tests; the regression test should verify both source and mirror.
-  5. Preserve boundaries: do not remove validation, security, accessibility, data-loss handling, or explicit user requirements in the name of smaller code.
-- Validation: Run `node --test --test-name-pattern "Ponytail-inspired minimality guidance" tests/skill-scripts.test.mjs`, `node --test tests/skill-scripts.test.mjs`, `npm.cmd run check`, and `node scripts/check-skill-mirror.mjs`.
-- Known risks: Minimality language can be misread as "delete safeguards"; always phrase it as smallest correct implementation, not shortest code.
-
-## OCR-style review guidance adaptation
-
-- Workflow: Adapt external AI review tools into AE review/audit guidance by separating deterministic review mechanics from runtime integration.
-- Use case: A user asks whether a code review agent such as `alibaba/open-code-review` can optimize AE review skills.
-- Steps:
-  1. Use `ae-skill-audit` to classify the external source, license, harnesses, runtime assumptions, and deterministic engineering patterns.
-  2. Improve existing skills before adding new entrypoints: `ae-review` for diff discipline and rule profiles; `ae-skill-audit` for audit classification.
-  3. Keep diff discipline conditional on diff-like scopes; preserve `full` and `full:<path>` review behavior.
-  4. Add manual position checks and contradiction checks as review discipline, not as an automated line validator unless a later schema exists.
-  5. Keep source and `.agents/skills` mirror synchronized and protect the behavior with focused tests.
-- Validation: Run `npm.cmd test -- --test-name-pattern "OCR-inspired review guidance"`, `node scripts/check-skill-mirror.mjs`, `node scripts/check-ae-artifacts.mjs`, and `npm.cmd run check`.
-- Known risks: OCR's CLI, provider configuration, telemetry/session viewer, CI examples, and prompt/rule files are runtime-specific or source-derived. Do not copy or require them unless the user explicitly requests a separate integration.
-
-## Claude Code best-practice adaptation
-
-- Workflow: Adapt Claude Code best-practice repositories by rewriting portable process contracts into existing AE skills.
-- Use case: A user asks whether a Claude Code workflow repository can optimize this Codex-native AE project.
-- Steps:
-  1. Use `ae-skill-audit` to record source freshness with `git ls-remote` when available, `observedCommit`, ref source, inspected files, license, runtime assumptions, and deterministic mechanisms.
-  2. Prefer existing skills before creating new entrypoints: audit, creator, agent template, delegation, plan, review, and memory skills usually cover the adaptation path.
-  3. Rewrite only portable gates, routing rules, diagnostics, and evidence contracts; reject hooks, settings, schedulers, slash commands, permission presets, sounds, and auto-registered agents unless Codex has an equivalent enforcement point.
-  4. Treat Claude output as untrusted advice until Codex verifies it against repository facts and validation output.
-  5. Keep plugin source and `.agents/skills` mirror synchronized and protect the guidance with focused tests.
-- Validation: Run targeted adaptation tests, `node scripts/check-skill-mirror.mjs`, `node scripts/check-ae-artifacts.mjs`, and `npm.cmd run check`.
-- Known risks: External Claude examples can imply runtime behavior Codex cannot enforce. Record rejected runtime assumptions instead of importing them.
-- Landed example: commit `3e7f01a` adapted `shanraisshan/claude-code-best-practice` by updating existing AE skills, adding no-output delegation diagnostics, preserving source/mirror sync, and archiving process evidence under `docs/00-process/archive/2026-06/claude-code-best-practice-audit/`.
-
-## Skill optimization framework audit
-
-- Workflow: Treat SkillOpt-like self-evolution frameworks as audit input first, not as a runtime to install.
-- Use case: A user asks whether a framework that trains, sleeps, replays, evolves, or self-improves skills should optimize this AE project.
-- Steps:
-  1. Use `ae-skill-audit` and record source freshness, inspected files, license, runtime assumptions, and evidence boundaries.
-  2. Evaluate trajectory source, bounded edit shape, held-out validation gate, rejected-update handling, staging/adoption policy, and AE validation mapping.
-  3. Reject ungated live mutation and auto-adoption without review unless AE has an equivalent validated runtime safety boundary.
-  4. Adapt useful ideas as AE-native process contracts, template fields, or future plans; do not copy external prompt/source text.
-  5. If implementation proceeds, update plugin source and `.agents/skills` mirror together, then archive process evidence.
-- Validation: Run `node --test --test-name-pattern "SkillOpt audit filter guidance" tests/skill-scripts.test.mjs`, `node scripts/check-skill-mirror.mjs`, `node scripts/check-skill-contract.mjs`, `node scripts/check-ae-artifacts.mjs`, and `git diff --check`.
-- Known risks: Optimizer demos can hide benchmark leakage, synthetic-only trajectories, broad prompt rewrites, or unsupported runtime harness behavior. Do not create `ae-skill-optimize` until AE has a local replay suite and a gate that rejects harmful skill edits before live files change.
+- Phase 2 shallow graph and browser routing → `08-phase-two-tooling.md`
+- Multi-agent auto config rollout → `09-multi-agent-auto-config.md` 与 README「多 agent auto 配置」
+- Minimality and complexity review adaptation → `10-minimality-review.md`
+- OCR-style review guidance adaptation → `11-ocr-review-guidance.md`
+- Claude Code best-practice adaptation → 本文件「AE workflow adaptation from external research」与 `docs/ae/experience/2026-06-19-claude-code-best-practice-adaptation.md`
+- Skill optimization framework audit → `ae-skill-audit` 的 Skill Optimization Pattern Filter
 
 ## Frontend motion governance
 
@@ -205,6 +136,20 @@
   4. 证据保留策略见 `docs/00-process/templates/archive-rules.md`；ledger 在 apply 时重写。
 - 验证：`npm test --test-name-pattern tidy`、`npm run check`。
 - 已知风险：memoryBudget 仅报告不移动；活跃会话中的记忆文件应通过 handoff 蒸馏而非跨仓强制改写。
+
+## 记忆蒸馏轮换
+
+- 工作流：`tidy` memoryBudget 报告超预算（约 15KB）后，对记忆文件做只移动不删除的轮换或拆分。
+- 使用场景：`05-decision-log.md` 条目积累、主题文件膨胀、tidy 报告 `oversized` 非空。
+- 步骤：
+  1. `node scripts/ae-tools.mjs tidy` 查看最新 memoryBudget 报告。
+  2. `05` 按时间窗轮换：保留窗口以预算为准（非固定月数），更早条目全文移入 `docs/99-archive/YYYY-MM/memory-distillation/`，原位留日期+标题索引。
+  3. `03/04` 按主题领域判断（不机械按体积切）：已由专题记忆文件或 skill 正文承载的适配期小节归档，原位留指针映射。
+  4. 用一次性脚本逐字节搬移，内置断言：标题集合守恒、无跨期泄漏、分片包含核对；用完删除脚本。
+  5. 同步 `00-index.md` 导航；registry 关系目标仅限 `AGENTS.md` 与 `docs/ae/**`，分片指针留在正典 Markdown，不进 registry。
+  6. 再跑 `tidy` 确认 `oversized` 清空。
+- 验证：`node scripts/ae-tools.mjs tidy`、`node scripts/check-memory-knowledge-contract.mjs --root .`、`npm run check`。
+- 已知风险：活跃会话正在写入的记忆文件走 handoff 蒸馏，不跨仓并发改写；蒸馏本身不要往 `05` 追加非决策条目。
 
 ## 插件更新后自动维护
 
