@@ -399,7 +399,6 @@
     "workflowArchive": "docs/00-process/archive",
     "topicArchive": "docs/99-archive",
     "aiMemory": "docs/08-ai-memory",
-    "aiMemoryCompat": "docs/ai-memory",
     "prds": "docs/ae/prds",
     "designs": "docs/ae/designs",
     "workReports": "docs/ae/work-reports",

@@ -30,7 +30,7 @@ Clarify what should be built. Produce a requirements artifact only when it will 
 8. For design-heavy work, compare 2-3 materially different approaches before converging.
 9. When a design needs validation, present the smallest useful design slices instead of a full speculative implementation.
 10. When the request benefits from multiple roles, run the Perspective Collision Pass before choosing or recording the scope.
-11. When durable decisions exist, write a requirements file using `references/requirements-capture.md`.
+11. When durable decisions exist, write a requirements file under `docs/ae/prds/` using `../ae-prd/references/requirements-capture.md`.
 12. If the behavior is already clear, summarize the confirmed scope and route to ae-plan or ae-work.
 13. If the user wants to continue, route to ae-plan with the requirements path.
 

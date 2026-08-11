@@ -10,7 +10,6 @@ const templatesRoot = resolve(fileURLToPath(new URL('./init-templates', import.m
 const templateKeys = [
   'agents',
   'aeReadme',
-  'memoryReadme',
   'processReadme',
   'archiveRules',
   'syncPlanTemplate',
@@ -37,6 +36,7 @@ export function initProject(worktree, args) {
   const templates = initTemplates(lang, projectContext)
   const directories = [
     'docs/ae',
+    'docs/ae/prds',
     'docs/ae/brainstorms',
     'docs/ae/plans',
     'docs/ae/reviews',
@@ -45,7 +45,6 @@ export function initProject(worktree, args) {
     'docs/ae/experience',
     'docs/ae/solutions',
     'docs/ae/archive',
-    'docs/ai-memory',
     'docs/00-process',
     'docs/00-process/active',
     'docs/00-process/archive',
@@ -79,7 +78,6 @@ export function initProject(worktree, args) {
     ['docs/08-ai-memory/05-decision-log.md', templates.memoryDecisionLog],
     ['docs/08-ai-memory/06-agent-maintenance-rules.md', templates.memoryMaintenanceRules],
     ['docs/08-ai-memory/99-prompt-template.md', templates.memoryPromptTemplate],
-    ['docs/ai-memory/README.md', templates.memoryReadme],
   ]
 
   const createdDirectories = []

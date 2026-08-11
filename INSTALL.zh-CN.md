@@ -72,7 +72,7 @@ node "$tmp/scripts/install-project.mjs" --target "$target" --lang en
 node scripts/ae-tools.mjs init
 ```
 
-这个命令会生成 `AGENTS.md`、`docs/ae`、`docs/00-process`、`docs/08-ai-memory`，并保留 `docs/ai-memory` 作为兼容说明入口。
+这个命令会生成 `AGENTS.md`、`docs/ae`（含需求正典目录 `docs/ae/prds`）、`docs/00-process` 和 `docs/08-ai-memory`。自 0.3.22 起不再创建 `docs/ai-memory` 兼容目录；存量项目中已有的该目录保持不动。
 
 如果需要先检查会创建什么内容，可以先运行：
 

@@ -24,7 +24,7 @@ Owned paths:
 
 - `AGENTS.md`
 - `docs/08-ai-memory/`
-- `docs/ai-memory/`
+- `docs/ai-memory/` (legacy pointer created by init before 0.3.22; kept only where it already exists)
 - durable project decisions linked from `docs/ae/constitution.md`
 
 Purpose: stable project rules, operating constraints, naming conventions, long-lived engineering decisions, and AI memory. Do not store transient command output or unfinished task notes here.

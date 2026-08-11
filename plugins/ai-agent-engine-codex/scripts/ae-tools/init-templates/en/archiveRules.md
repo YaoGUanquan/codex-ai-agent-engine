@@ -19,6 +19,12 @@
 - Related analysis, design, API, SQL, report, test data, and validation records.
 - A short summary of key commands, SQL, and user-provided outputs when relevant.
 
+## Evidence Retention
+
+- Keep artifacts under `docs/ae/gates/` and `docs/ae/evidence/artifacts/` for 3 months; after that, move them into `docs/ae/archive/<atomic-topic>/YYYY-MM/` during monthly tidy when ledger or review references are updated.
+- `review-package` artifacts are fingerprint-only (commits, diffstat, inventory, base/head SHAs, and a reproduce command); do not store full diff bodies. Rebuild the raw diff from Git when needed.
+- Legacy full `.diff` review artifacts may be deleted once nothing references them.
+
 ## After Archive
 
 - Update the active note with the archive path before moving it, or leave a small index if the project wants one.

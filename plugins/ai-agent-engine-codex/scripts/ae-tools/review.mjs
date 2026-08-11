@@ -26,9 +26,18 @@ export function reviewPackage(worktree, args) {
   const impact = truthy(opts['with-impact']) || truthy(opts.impact)
     ? buildReviewImpactContext(worktree, inventory, opts)
     : null
-  const diffBody = runGitRequired(worktree, ['diff', '-U10', `${base}..${head}`])
+  const baseSha = runGitRequired(worktree, ['rev-parse', base]).trim()
+  const headSha = runGitRequired(worktree, ['rev-parse', head]).trim()
+  const reproduceCommand = `git diff -U10 ${base}..${head}`
   const content = [
     `# Review package: ${base}..${head}`,
+    '',
+    '## Fingerprint',
+    `- baseRef: ${base}`,
+    `- headRef: ${head}`,
+    `- baseSha: ${baseSha}`,
+    `- headSha: ${headSha}`,
+    '- diffBody: omitted; this is a fingerprint-only artifact (see Reproduce diff).',
     '',
     '## Commits',
     commitLog || '(no commits)',
@@ -40,8 +49,10 @@ export function reviewPackage(worktree, args) {
     reviewInventoryMarkdown(inventory),
     '',
     ...(impact ? ['## Impact context', reviewImpactMarkdown(impact), ''] : []),
-    '## Diff',
-    diffBody || '(no diff)',
+    '## Reproduce diff',
+    '```',
+    reproduceCommand,
+    '```',
     '',
   ].join('\n')
   writeFileSync(outPath, content, 'utf8')
@@ -52,6 +63,11 @@ export function reviewPackage(worktree, args) {
     head,
     inventory,
     impact,
+    fingerprint: {
+      baseSha,
+      headSha,
+      reproduceCommand,
+    },
     artifact: {
       path: outRel,
       bytes: statSync(outPath).size,
@@ -197,7 +213,7 @@ function reviewImpactMarkdown(impact) {
 function defaultReviewPackageArtifactPath(worktree, base, head) {
   const baseShort = runGitRequired(worktree, ['rev-parse', '--short', base]).trim() || safeName(base).slice(0, 7)
   const headShort = runGitRequired(worktree, ['rev-parse', '--short', head]).trim() || safeName(head).slice(0, 7)
-  return `docs/ae/evidence/artifacts/review-package/review-${baseShort}..${headShort}-${timestamp()}.diff`
+  return `docs/ae/evidence/artifacts/review-package/review-${baseShort}..${headShort}-${timestamp()}.md`
 }
 
 export function reviewContract(worktree, args) {
