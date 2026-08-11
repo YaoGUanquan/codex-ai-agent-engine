@@ -58,6 +58,13 @@ node scripts/ae-tools.mjs help
 
 ## 版本更新记录
 
+### 0.3.20（2026-08-11）
+- 结构性重构：插件 `scripts/ae-tools.mjs`（约 2860 行单体）拆分为 `scripts/ae-tools/` 下 15 个命令模块（utils、yaml、git、evidence、graph、help、recovery、gate、tasks、review、swagger、claude、markitdown、static-server、init），入口只保留命令分发与全局参数解析；目标项目的根薄包装 `scripts/ae-tools.mjs` 导入路径不变。
+- init 三语模板外置为 `scripts/ae-tools/init-templates/{en,zh-CN}/*.md` UTF-8 模板文件加 `{{placeholder}}` 占位替换，bilingual 输出由中英模板拼接生成；渲染时归一化 CRLF，防止换行符污染生成文件。
+- 新增插件内共享模块 `scripts/artifact-check-utils.mjs`，`check-ae-artifacts.mjs` 与 `check-design-contract.mjs` 复用 readArg / isRepositoryRelativePath / toPosix / parseFrontmatter 等 helper，消除双份拷贝。
+- 新增模块依赖回归守卫：`tests/ae-tools.test.mjs` 静态扫描 `scripts/ae-tools/*.mjs` 本地导入构图并做 DFS 断环，断言 `utils.mjs` 保持零本地导入的基础层；引入循环导入时 `npm test` 直接失败并打印循环链。
+- 验证：`node scripts/check-syntax.mjs`、拆分前后关键命令金样输出对比（help/recovery/graph-build/graph-query/review-contract/evidence/gate/claude-delegate，仅时间戳与 git 指纹差异）、三语 init 输出与拆分前逐字节一致（48 个基线文件）、`npm test`（112 项）、`npm run check`、`node scripts/check-install-smoke.mjs`、`node scripts/check-global-install-smoke.mjs`。这些检查证明模块拆分后 CLI 行为与安装合同不变，不代表目标项目的运行时验收。
+
 ### 0.3.19（2026-08-11）
 - 补齐前端技术栈覆盖：`ae-web-app` 新增 `svelte-guidance.md`（Svelte 5 runes/SvelteKit：`$derived` 优先、`$effect` 清理、keyed each、load 函数与 `$lib/server` 边界）与 `angular-guidance.md`（standalone/signals：async pipe 或 `takeUntilDestroyed` 订阅治理、OnPush 可见性、`@for` track、typed forms、`switchMap` 竞态取消、SSR 守卫），SKILL 工作流按 React/Vue/Svelte/Angular 四栈选读，其他栈回退到沿用仓库既有约定。
 - 非前端 skill 的前端适配：`ae-review` 评审规则画像新增「Frontend Components / Styles」镜头（Vue/Svelte/Angular 响应性错误、列表 key/track、非交互元素点击无键盘等效、diff 削弱可访问性、样式全局泄漏、`innerHTML` 类注入点），并保留"以仓库实际框架为准"的抑制规则；`ae-tdd` 工作流新增前端测试挂载点指引（沿用既有 runner 与组件测试库、断言用户可见行为、jsdom 不证明真实浏览器行为并路由到 `ae-test-browser`）。
