@@ -455,6 +455,19 @@ Validate skills with your local Codex skill validator if available.
 
 See [docs/release-checklist.md](docs/release-checklist.md) before publishing a GitHub release.
 
+## Ongoing Optimization Roadmap
+
+A repository-wide scan on 2026-08-11 already removed the duplicated root/plugin `update-project.mjs` copy, added `.tmp-install-smoke-checks/` to `.gitignore`, wired `scripts/check-claims.mjs --dry-run` into `npm run check`, and archived the three stale OPTIMIZATION planning documents to `docs/99-archive/2026-08/skill-optimization-roadmap/`. The remaining structural debt, in priority order:
+
+1. **Split the `ae-tools.mjs` monolith** (~2700+ lines): extract `init-templates`, `graph`, `swagger`, and `evidence` modules along command boundaries, keeping only dispatch in the entry file; move the bilingual init templates into external UTF-8 files with placeholder substitution. Every split must keep the root thin-wrapper paths stable and be regressed with `npm test` plus the install smoke checks.
+2. **Reorganize the `package.json` `check` chain** (2000+ characters): split into layered `check:syntax` / `check:contracts` / `check:smoke` scripts or a runner script that globs script paths, so new scripts cannot be silently missed; relax the full-string regex assertions on the check chain in `tests/skill-scripts.test.mjs` into "this check step exists" assertions.
+3. **Split the giant test file by domain**: break `tests/skill-scripts.test.mjs` (~3400 lines) into global-install, ae-tools, contracts, and skills-docs test files to reduce maintenance and triage cost.
+4. **Extract shared path-guard helpers**: deduplicate `readArg` / `isRepositoryRelativePath` / `toPosix` between `check-ae-artifacts.mjs` and `check-design-contract.mjs` into a shared plugin module; also harden `ensureInsideRepo` in `check-install-smoke.mjs` against Windows cross-drive absolute paths.
+5. **Cover weakly tested scripts**: add direct tests for `set-repository.mjs`, `update-project.mjs` (clone can be simulated with a local file:// repository), and `install-project.mjs`.
+6. **Keep the default check fast**: the full install smoke is heavy; move it into a `check:smoke` layer so daily development runs the light layers and releases run everything.
+
+Working rule: any change that touches distributable plugin content (`plugins/ai-agent-engine-codex/`) must bump both SemVer versions and add README release notes; repository-side refactors (root `scripts/`, `tests/`, docs) do not bump the version but must ship with `npm run check` and `npm test` fully green.
+
 ## Version Updates
 
 ### 0.3.17 (2026-08-10)

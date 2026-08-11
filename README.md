@@ -534,6 +534,19 @@ node scripts/ae-tools.mjs ae-graph-build --root scripts
 
 发布前可参考 [docs/release-checklist.md](docs/release-checklist.md)。
 
+## 后续持续优化方向
+
+2026-08-11 的一轮全库扫描已经消除了根/插件 `update-project.mjs` 双份拷贝、把 `.tmp-install-smoke-checks/` 纳入 `.gitignore`、将 `scripts/check-claims.mjs --dry-run` 接入 `npm run check`，并把过期的三份 OPTIMIZATION 规划文档归档到 `docs/99-archive/2026-08/skill-optimization-roadmap/`。剩余的结构性债务按优先级持续推进：
+
+1. **拆分 `ae-tools.mjs` 单体**（约 2700+ 行）：按命令边界抽出 `init-templates`、`graph`、`swagger`、`evidence` 等模块，入口只保留分发逻辑；init 中英文模板改为外部 UTF-8 文件加占位替换。每次拆分必须保持根薄包装路径不变，并用 `npm test` 与安装烟测回归。
+2. **重组 `package.json` 的 `check` 命令串**（2000+ 字符）：拆为 `check:syntax` / `check:contracts` / `check:smoke` 分层脚本或用 runner 脚本 glob 扫描，避免新增脚本时漏改；同步放宽 `tests/skill-scripts.test.mjs` 对 check 字符串的整段正则断言，改为断言"某检查步骤存在"。
+3. **按域拆分巨型测试文件**：`tests/skill-scripts.test.mjs`（约 3400 行）拆为 global-install、ae-tools、contracts、skills-docs 等独立测试文件，降低维护和定位成本。
+4. **抽取共享 path 校验工具**：`check-ae-artifacts.mjs` 与 `check-design-contract.mjs` 中重复的 `readArg` / `isRepositoryRelativePath` / `toPosix` 等 helper 抽到插件内共享模块；同时加强 `check-install-smoke.mjs` 的 `ensureInsideRepo` 对 Windows 跨盘符绝对路径的拒绝。
+5. **补齐弱覆盖脚本的测试**：`set-repository.mjs`、`update-project.mjs`（可用本地 file:// 仓库模拟 clone）、`install-project.mjs` 的直接单测。
+6. **控制默认 check 的耗时**：完整 install-smoke 较重，可移入 `check:smoke` 层，日常开发跑轻量层，发布前跑全量。
+
+推进原则：涉及可分发插件内容（`plugins/ai-agent-engine-codex/`）的改动必须同步递增双份 SemVer 版本并补 README 版本记录；纯仓库侧（根 `scripts/`、`tests/`、文档）的重构不升版本，但必须以 `npm run check` 加 `npm test` 全绿为交付门槛。
+
 ## 发布到 GitHub
 
 先在 GitHub 创建一个空仓库，然后在当前目录执行：
