@@ -198,22 +198,6 @@
 - Impact: Distributable version 0.3.21; plan `docs/ae/plans/2026-08-11-002-fullstack-skill-optimization-plan.md`; experience `docs/ae/experience/2026-08-11-fullstack-skill-optimization.md`.
 - Re-evaluate when: OpenAPI-driven contract tests become a first-class AE skill or niche backend stacks need dedicated references beyond convention fallback.
 
-## 2026-08-11: Layer repository checks and split ae-tools without changing CLI contracts
-
-- Date: 2026-08-11
-- Decision: Split the ~2860-line `ae-tools.mjs` into layered modules under `scripts/ae-tools/`, externalize init templates, extract `artifact-check-utils.mjs`, layer `npm run check` into syntax/contracts/smoke/all, split tests by domain, and bump distributable version to **0.3.20**. Keep root thin wrappers unchanged.
-- Context: A repository scan found duplicate `update-project.mjs`, missing gitignore for smoke temp dirs, and `check-claims` outside the default check chain (fixed in commit `781d4f6` before the larger refactor).
-- Impact: Maintainer layout documented in `docs/ae/references/ae-tools-module-layout.md`; import-cycle regression guard in tests; install-smoke moved to `check:smoke`. Commit `315db38` on `main`.
-- Re-evaluate when: a new command family makes the module count unwieldy again, or Codex provides a first-class plugin CLI packaging model.
-
-## 2026-08-11: Fullstack skill parity via language guides and FE/BE contract checklist
-
-- Date: 2026-08-11
-- Decision: Extend `ae-backend` with six primary language guides (Java, Go, Python, C, C++, C#) and stack-detection workflow; expand `api-contract-checklist.md` for frontend-backend alignment; add backend and boundary quick maps to `ae-debug`; add `sql-safety-checklist.md` to `ae-sql`; wire `ae-web-app` and `ae-web-forge`. Bump to **0.3.21**.
-- Context: Frontend skills already had four framework guides while backend references were ~26 lines with no language-level guidance.
-- Impact: Mirror sync (127 files), skill contract checks pass; proof boundary is documentation and distribution contract only. Experience: `docs/ae/experience/2026-08-11-fullstack-skill-optimization.md`.
-- Re-evaluate when: real legacy-stack projects show insufficient fallback coverage, or contract checklist growth warrants a dedicated validator.
-
 ## 2026-08-11: Maintainer knowledge graph lives in registry plus curated markdown
 
 - Date: 2026-08-11
@@ -222,9 +206,10 @@
 - Impact: `docs/ae/graphs/README.md` documents query commands and artifact types; registry relations extended for August 2026 deliveries. Next batch: knowledge-base governance PRD (`0.3.22`) for PRD single channel and review-package fingerprinting.
 - Re-evaluate when: a deterministic tidy/archival command exists, or review evidence fingerprint format changes.
 
-## 2026-08-11: Split ae-tools by command modules and layer repository checks
+## 2026-08-11: Layer repository checks and split ae-tools without changing CLI contracts
 
-- Decision: Split the ~2860-line `ae-tools.mjs` into fifteen command modules under `plugins/ai-agent-engine-codex/scripts/ae-tools/`, externalize init templates to UTF-8 files with placeholder substitution, layer `npm run check` into syntax/contracts/smoke tiers, split the monolithic test file by domain, extract `artifact-check-utils.mjs`, and guard the module DAG with a regression test instead of adding barrels or dependency injection.
-- Context: Structural debt made check strings and tests hard to maintain; `node --check` cannot detect ESM circular imports between new modules.
-- Impact: Distributable version **0.3.20**; root thin wrapper unchanged; daily `npm run check` excludes heavy install-smoke; `docs/ae/references/ae-tools-module-layout.md` records the maintainer contract; experience at `docs/ae/experience/2026-08-11-structural-debt-refactor.md`.
-- Re-evaluate when: a second consumer needs shared graph primitives outside `review`/`tasks`, or module count makes the single `utils.mjs` foundation unwieldy.
+- Date: 2026-08-11
+- Decision: Split the ~2860-line `ae-tools.mjs` into fifteen command modules under `scripts/ae-tools/`, externalize init templates, extract `artifact-check-utils.mjs`, layer `npm run check` into syntax/contracts/smoke/all, split tests by domain, and bump distributable version to **0.3.20**. Keep root thin wrappers unchanged.
+- Context: A repository scan found duplicate `update-project.mjs`, missing gitignore for smoke temp dirs, and `check-claims` outside the default check chain (fixed in commit `781d4f6` before the larger refactor). `node --check` cannot detect ESM circular imports between new modules.
+- Impact: Maintainer layout in `docs/ae/references/ae-tools-module-layout.md`; import-cycle regression guard in tests; commit `315db38`; experience `docs/ae/experience/2026-08-11-structural-debt-refactor.md`; archive `docs/00-process/archive/2026-08/structural-debt-refactor/summary.md`.
+- Re-evaluate when: a new command family makes the module count unwieldy again, or Codex provides a first-class plugin CLI packaging model.

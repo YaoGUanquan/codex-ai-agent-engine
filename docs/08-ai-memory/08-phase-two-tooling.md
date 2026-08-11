@@ -12,6 +12,12 @@ This memory is repo-specific for `ai-agent-engine-codex`.
 - They intentionally do not write `.ae/graph.db`, maintain freshness, shard graph data, define a persistent graph schema, or render a preview page.
 - Promote them to a full MCP-backed graph tool only after schema, write approval, freshness, sharding, and preview requirements are explicit.
 
+## Maintainer Knowledge Graph (2026-08-11)
+
+- Declared cross-artifact links live in `docs/08-ai-memory/00-registry.json` and are queried with `ae-knowledge-map` / `ae-knowledge-query`.
+- Human curator map: `docs/ae/graphs/maintainer-artifact-graph.md`; directory README: `docs/ae/graphs/README.md`.
+- This is separate from shallow import scanning: use `ae-graph-build` only for source dependency previews, not for persisting `docs/ae/graphs/graph.json`.
+
 ## Maintainer module layout (not a persisted graph)
 
 - The command-module DAG for ae-tools is documented in `docs/ae/references/ae-tools-module-layout.md`.

@@ -39,6 +39,18 @@
 - 不要直接操作 `.codex/plugins/cache`，也不要手工删除项目级文件。安装器只删除经过归属与指纹验证的 AE 路径，并保留备份和 journal 直到用户显式 purge。
 - 在分发源仓库中同时看到本地 `.agents/skills` 与 personal plugin 属于预期开发例外；这不代表 consumer 项目仍有项目级残留。
 
+## 并行会话与版本协调
+
+- 多个 agent 会话可能同时修改同一仓库；`package.json`、README 双语版本记录和 check 脚本分层是常见冲突点。
+- 只暂存本会话拥有的文件集；对共享文件使用字段级或追加式编辑（版本号、README 条目），不要覆盖另一会话的 check 分层或脚本拆分。
+- 结构性重构与技能文档优化应使用零交集文件集；若另一会话已占用版本号，顺延 SemVer 并同步 README 条目。
+- 推送前在隔离 worktree 中检出待发布 commit 跑 `npm test`，避免工作区中未提交的另一会话改动污染验证结论。
+
+## 框架指导与旧栈命中率
+
+- 前端 `react/vue/svelte/angular-guidance` 与后端六语言指导以现代 idioms 为基线；Svelte 4 stores、NgModule、Options API 或 niche 后端栈依赖 SKILL 中的「匹配仓库既有约定」兜底，细则命中率会下降。
+- 不要在未遇到真实项目缺口前预先堆满每个旧栈变体；在 experience 或 roadmap 中记录按需补充策略。
+
 ## 结构性重构与 check 分层
 
 - 默认 `npm run check` 不含 install-smoke；发布前必须额外跑 `npm run check:smoke` 或 `npm run check:all`。

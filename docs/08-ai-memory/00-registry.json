@@ -268,6 +268,78 @@
         "path": "docs/08-ai-memory/08-phase-two-tooling.md",
         "note": "Graph helpers now live in ae-tools/graph.mjs; the module layout reference complements shallow graph queries."
       }
+    },
+    {
+      "from": "key-workflows",
+      "to": "docs/ae/plans/2026-08-11-002-fullstack-skill-optimization-plan.md",
+      "type": "implements",
+      "evidence": {
+        "path": "docs/08-ai-memory/03-key-workflows.md",
+        "note": "The fullstack skill mirror sync workflow implements the fullstack optimization plan."
+      }
+    },
+    {
+      "from": "decision-log",
+      "to": "docs/ae/plans/2026-08-11-002-fullstack-skill-optimization-plan.md",
+      "type": "documents",
+      "evidence": {
+        "path": "docs/08-ai-memory/05-decision-log.md",
+        "note": "The 2026-08-11 fullstack skill parity decision documents the optimization plan."
+      }
+    },
+    {
+      "from": "decision-log",
+      "to": "docs/ae/experience/2026-08-11-fullstack-skill-optimization.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/05-decision-log.md",
+        "note": "The fullstack skill decision references the completed experience note."
+      }
+    },
+    {
+      "from": "phase-two-tooling",
+      "to": "docs/ae/graphs/maintainer-artifact-graph.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/08-phase-two-tooling.md",
+        "note": "Phase-two tooling distinguishes shallow CLI graphs from the maintainer knowledge graph."
+      }
+    },
+    {
+      "from": "maintenance-rules",
+      "to": "docs/ae/graphs/README.md",
+      "type": "governs",
+      "evidence": {
+        "path": "docs/08-ai-memory/06-agent-maintenance-rules.md",
+        "note": "Memory maintenance rules apply when updating registry relations documented in the graphs README."
+      }
+    },
+    {
+      "from": "decision-log",
+      "to": "docs/ae/experience/2026-08-11-frontend-skill-optimization.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/05-decision-log.md",
+        "note": "The frontend stack guidance decision references the completed experience note (a51ef3c)."
+      }
+    },
+    {
+      "from": "key-workflows",
+      "to": "docs/ae/experience/2026-08-11-frontend-skill-optimization.md",
+      "type": "implements",
+      "evidence": {
+        "path": "docs/08-ai-memory/03-key-workflows.md",
+        "note": "The frontend stack skill workflow implements the four-framework reference pattern."
+      }
+    },
+    {
+      "from": "decision-log",
+      "to": "docs/ae/prds/2026-08-11-knowledge-base-governance-prd.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/05-decision-log.md",
+        "note": "The maintainer graph decision defers PRD single channel and review-package fingerprinting to the knowledge-base governance PRD."
+      }
     }
   ]
 }

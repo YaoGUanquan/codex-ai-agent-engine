@@ -556,19 +556,20 @@ node scripts/ae-tools.mjs ae-graph-build --root scripts
 
 2026-08-11 的一轮全库扫描已经消除了根/插件 `update-project.mjs` 双份拷贝、把 `.tmp-install-smoke-checks/` 纳入 `.gitignore`、将 `scripts/check-claims.mjs --dry-run` 接入 `npm run check`，并把过期的三份 OPTIMIZATION 规划文档归档到 `docs/99-archive/2026-08/skill-optimization-roadmap/`。剩余的结构性债务按优先级持续推进：
 
-1. **拆分 `ae-tools.mjs` 单体**（约 2700+ 行）：按命令边界抽出 `init-templates`、`graph`、`swagger`、`evidence` 等模块，入口只保留分发逻辑；init 中英文模板改为外部 UTF-8 文件加占位替换。每次拆分必须保持根薄包装路径不变，并用 `npm test` 与安装烟测回归。
-2. **重组 `package.json` 的 `check` 命令串**（2000+ 字符）：拆为 `check:syntax` / `check:contracts` / `check:smoke` 分层脚本或用 runner 脚本 glob 扫描，避免新增脚本时漏改；同步放宽 `tests/skill-scripts.test.mjs` 对 check 字符串的整段正则断言，改为断言"某检查步骤存在"。
-3. **按域拆分巨型测试文件**：`tests/skill-scripts.test.mjs`（约 3400 行）拆为 global-install、ae-tools、contracts、skills-docs 等独立测试文件，降低维护和定位成本。
-4. **抽取共享 path 校验工具**：`check-ae-artifacts.mjs` 与 `check-design-contract.mjs` 中重复的 `readArg` / `isRepositoryRelativePath` / `toPosix` 等 helper 抽到插件内共享模块；同时加强 `check-install-smoke.mjs` 的 `ensureInsideRepo` 对 Windows 跨盘符绝对路径的拒绝。
-5. **补齐弱覆盖脚本的测试**：`set-repository.mjs`、`update-project.mjs`（可用本地 file:// 仓库模拟 clone）、`install-project.mjs` 的直接单测。
-6. **控制默认 check 的耗时**：完整 install-smoke 较重，可移入 `check:smoke` 层，日常开发跑轻量层，发布前跑全量。
+1. ~~**拆分 `ae-tools.mjs` 单体**~~（**已完成 0.3.20**，`315db38`）：15 个命令模块 + 外置 init 模板；见 `docs/ae/experience/2026-08-11-structural-debt-refactor.md`。
+2. ~~**重组 `package.json` 的 `check` 命令串**~~（**已完成 0.3.20**）：`check:syntax` / `check:contracts` / `check:smoke` / `check:all`；测试断言改为分层存在性检查。
+3. ~~**按域拆分巨型测试文件**~~（**已完成 0.3.20**）：`tests/global-install.test.mjs`、`contracts.test.mjs`、`ae-tools.test.mjs`、`skills-docs.test.mjs`、`install-scripts.test.mjs`。
+4. ~~**抽取共享 path 校验工具**~~（**已完成 0.3.20**）：`artifact-check-utils.mjs`；install-smoke 跨盘符拒绝已加强。
+5. ~~**补齐弱覆盖脚本的测试**~~（**已完成 0.3.20**）：`tests/install-scripts.test.mjs`（6 例，覆盖 set-repository / install-project / update-project）。
+6. ~~**控制默认 check 的耗时**~~（**已完成 0.3.20**）：install-smoke 移入 `check:smoke`，日常 `npm run check` 为轻量层。
 
-以上 1-6 项为结构性债务，正在独立的 structural-debt-refactor 流程中推进，完成后随其自身的版本记录与验证证据落地。2026-08-11 前端技能优化（0.3.18 / 0.3.19）落地后，新增以下方向：
+2026-08-11 **前后端技能对称优化（0.3.21）** 已落地：后端六语言指导、FE/BE 契约检查表、debug 边界速查、`ae-sql` 安全清单；见 `docs/ae/experience/2026-08-11-fullstack-skill-optimization.md`。2026-08-11 **前端技能优化（0.3.18 / 0.3.19）** 见 `docs/ae/experience/2026-08-11-frontend-skill-optimization.md`。仍待推进的方向：
 
 7. **旧版本前端栈适配**：`svelte-guidance.md` 与 `angular-guidance.md` 以 Svelte 5 runes、Angular standalone/signals 为基线，Vue 指引以 Composition API 为主；命中 Svelte 4 stores、NgModule、Options API 等旧式栈时依赖"匹配仓库既有风格"的兜底规则，细则命中率下降。方向：在真实旧栈项目暴露不足时按需补充对照条目，不预先堆满。
 8. **版本记录拆分**：README 版本条目持续增长（0.3.x 已近 20 条）且中英双份维护，正文越来越长。方向：将历史条目迁移到 `CHANGELOG.md` 或 `docs/`，README 仅保留最近数个版本，同步调整 `scripts/check-release-notes.mjs` 的校验目标与对应测试断言。
 9. **过程文档归档纪律**：`docs/00-process/active/` 下存在已完成或阶段性停滞的任务目录（如 personal-marketplace-global-plugin）。方向：按 AGENTS.md 归档规则移入 `docs/00-process/archive/YYYY-MM/<task>` 或 `docs/99-archive/`，保持 active 目录只反映真正进行中的工作。
 10. **前端质量契约的交叉一致性**（评估项）：`web-ui-quality.md` 可访问性基线、`ae-review` 的 Frontend Components / Styles 镜头、`browser-acceptance.md` 键盘可操作性项之间的对应关系目前靠人工维护。方向：若前端条目继续增长，先评估一份轻量映射说明或 contract 检查的收益，再决定是否实现，避免为一次性映射引入长期校验负担。
+11. **知识库治理（下一批 0.3.22）**：需求单通道（`docs/ae/prds/` 正典）、init 停建 `docs/ai-memory` 兼容指针、review-package 指纹化、gate/evidence 归档规则、`external-samples` 登记。见 `docs/ae/prds/2026-08-11-knowledge-base-governance-prd.md`；维护者知识图谱见 `docs/ae/graphs/maintainer-artifact-graph.md`。
 
 推进原则：涉及可分发插件内容（`plugins/ai-agent-engine-codex/`）的改动必须同步递增双份 SemVer 版本并补 README 版本记录；纯仓库侧（根 `scripts/`、`tests/`、文档）的重构不升版本，但必须以 `npm run check` 加 `npm test` 全绿为交付门槛。
 
