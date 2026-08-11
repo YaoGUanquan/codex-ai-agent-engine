@@ -15,4 +15,4 @@ Always exclude secrets and generated output:
 - `.git`, `node_modules`, `dist`, `build`, `coverage`, caches.
 - `docs/ae/reviews` and `docs/ae/gates` unless explicitly requested.
 
-For document review, use the document path supplied by the user. If absent, search recent `docs/ae/brainstorms` and `docs/ae/plans` and ask before choosing in interactive mode.
+For document review, use the document path supplied by the user. If absent, search recent `docs/ae/prds`, `docs/ae/brainstorms`, and `docs/ae/plans` and ask before choosing in interactive mode.

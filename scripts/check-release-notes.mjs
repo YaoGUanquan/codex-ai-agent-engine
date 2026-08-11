@@ -8,7 +8,13 @@ const targetRoot = resolve(readArg('--target') || repoRoot)
 const errors = []
 const packagePath = resolve(targetRoot, 'package.json')
 const manifestPath = resolve(targetRoot, 'plugins', 'ai-agent-engine-codex', '.codex-plugin', 'plugin.json')
-const readmePaths = ['README.md', 'README.en.md']
+// Each README keeps only a recent window of release notes and links to its
+// changelog, which holds the complete history including the current version.
+const releaseNotePairs = [
+  { readme: 'README.md', changelog: 'CHANGELOG.md' },
+  { readme: 'README.en.md', changelog: 'CHANGELOG.en.md' },
+]
+const MAX_README_ENTRIES = 5
 
 const packageJson = readJson(packagePath, 'package.json')
 const manifest = readJson(manifestPath, 'plugin manifest')
@@ -23,8 +29,32 @@ if (version && manifest?.version && manifest.version !== version) {
 }
 
 if (version) {
-  for (const readmePath of readmePaths) {
-    validateReleaseNote(resolve(targetRoot, readmePath), readmePath, version)
+  for (const pair of releaseNotePairs) {
+    const readmeContent = readReleaseNotes(pair.readme)
+    const changelogContent = readReleaseNotes(pair.changelog)
+
+    if (changelogContent !== null) {
+      validateReleaseNote(changelogContent, pair.changelog, version)
+    }
+
+    if (readmeContent === null) continue
+    validateReleaseNote(readmeContent, pair.readme, version)
+
+    const readmeVersions = listVersionEntries(readmeContent)
+    if (readmeVersions.length > MAX_README_ENTRIES) {
+      errors.push(`${pair.readme} keeps at most ${MAX_README_ENTRIES} version entries; move older entries to ${pair.changelog}`)
+    }
+    if (!readmeContent.includes(pair.changelog)) {
+      errors.push(`${pair.readme} must link to ${pair.changelog} for the full release history`)
+    }
+    if (changelogContent !== null) {
+      const changelogVersions = new Set(listVersionEntries(changelogContent))
+      for (const entryVersion of readmeVersions) {
+        if (!changelogVersions.has(entryVersion)) {
+          errors.push(`${pair.readme} version ${entryVersion} is missing from ${pair.changelog}`)
+        }
+      }
+    }
   }
 }
 
@@ -32,7 +62,9 @@ const result = {
   status: errors.length === 0 ? 'ok' : 'failed',
   targetRoot,
   version: version || null,
-  readmes: readmePaths,
+  readmes: releaseNotePairs.map((pair) => pair.readme),
+  changelogs: releaseNotePairs.map((pair) => pair.changelog),
+  maxReadmeEntries: MAX_README_ENTRIES,
   errors,
 }
 
@@ -62,13 +94,21 @@ function readJson(path, label) {
   }
 }
 
-function validateReleaseNote(path, label, version) {
+function readReleaseNotes(label) {
+  const path = resolve(targetRoot, label)
   if (!existsSync(path)) {
     errors.push(`missing release notes file: ${label}`)
-    return
+    return null
   }
+  return readFileSync(path, 'utf8').replace(/\r\n/g, '\n')
+}
 
-  const content = readFileSync(path, 'utf8').replace(/\r\n/g, '\n')
+function listVersionEntries(content) {
+  const matches = content.matchAll(/^###\s+(\d+\.\d+\.\d+)\s*[（(]/gm)
+  return Array.from(matches, (match) => match[1])
+}
+
+function validateReleaseNote(content, label, version) {
   const heading = new RegExp(`^###\\s+${escapeRegex(version)}\\s*[（(](\\d{4}-\\d{2}-\\d{2})[）)]\\s*$`, 'm')
   const match = heading.exec(content)
   if (!match) {

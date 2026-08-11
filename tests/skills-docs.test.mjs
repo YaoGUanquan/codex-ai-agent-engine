@@ -604,6 +604,35 @@ test('brainstorm delegates durable requirements capture to the ae-prd contract',
   assert.equal(mirror, source, 'ae-brainstorm mirror should match plugin source')
   assert.match(source, /\.\.\/ae-prd\/references\/requirements-capture\.md/, 'brainstorm should reuse the ae-prd capture contract')
   assert.match(source, /docs\/ae\/prds/, 'brainstorm should name the canonical prds location')
+
+  for (const catalogPath of [
+    'plugins/ai-agent-engine-codex/skills/ae-help/references/capability-catalog.json',
+    '.agents/skills/ae-help/references/capability-catalog.json',
+  ]) {
+    const catalog = JSON.parse(readFileSync(resolve(repoRoot, catalogPath), 'utf8'))
+    const entry = catalog.skills.find((skill) => skill.name === 'ae-brainstorm')
+    assert.equal(entry?.artifactPath, 'docs/ae/prds', `${catalogPath} ae-brainstorm artifactPath should be the canonical prds channel`)
+    assert.equal(catalog.artifactPaths.requirements, 'docs/ae/prds', `${catalogPath} should keep requirements mapped to prds`)
+    assert.equal(catalog.artifactPaths.ideas, 'docs/ae/brainstorms', `${catalogPath} should keep ideas mapped to brainstorms`)
+  }
+
+  for (const contractPath of [
+    'plugins/ai-agent-engine-codex/skills/ae-help/references/artifact-contract.md',
+    '.agents/skills/ae-help/references/artifact-contract.md',
+  ]) {
+    const contract = readFileSync(resolve(repoRoot, contractPath), 'utf8')
+    assert.match(contract, /\| Requirements \| docs\/ae\/prds\//, `${contractPath} should declare prds as the requirements path`)
+    assert.match(contract, /type: prd/, `${contractPath} requirements frontmatter example should use the ae-prd capture shape`)
+    assert.doesNotMatch(contract, /origin: docs\/ae\/brainstorms/, `${contractPath} plan origin example should not point at brainstorms`)
+  }
+
+  for (const scopePath of [
+    'plugins/ai-agent-engine-codex/skills/ae-review/references/scope-detection.md',
+    '.agents/skills/ae-review/references/scope-detection.md',
+  ]) {
+    const scope = readFileSync(resolve(repoRoot, scopePath), 'utf8')
+    assert.match(scope, /docs\/ae\/prds/, `${scopePath} document review search should include the prds channel`)
+  }
 })
 
 test('governance batch two refinements are present and mirrored', () => {
