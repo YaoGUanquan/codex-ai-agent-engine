@@ -194,6 +194,8 @@ node scripts/install-project.mjs --target /path/to/your/codex-project --lang en
 - `scripts/update-ae-codex.mjs`
 - `scripts/set-ae-language.mjs`
 
+分发源仓库本身不支持作为安装目标；它使用用户级 personal 插件，并将维护镜像放在 `.ae-source/skills`，以避免重复发现。
+
 ## 从项目级安装迁移到用户级全局安装
 
 全局安装只集中 AE 运行时和 skills，不迁移项目数据。每个项目的 `AGENTS.md`、`docs/**`、AI 记忆、图谱和 archive 均保留在项目根目录。
@@ -239,7 +241,7 @@ node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" init --project-root (Get-L
 codex plugin list
 ```
 
-每个操作系统用户都有自己的 `$HOME`、dispatcher、备份和 personal marketplace；安装器不会扫描或修改其他用户的目录，也不会直接修改 `.codex/plugins/cache`。开发源仓库可同时看到本地 `.agents/skills` 与“个人”插件，这是有意保留的开发例外；consumer 项目迁移后只应使用用户级个人插件。
+每个操作系统用户都有自己的 `$HOME`、dispatcher、备份和 personal marketplace；安装器不会扫描或修改其他用户的目录，也不会直接修改 `.codex/plugins/cache`。分发源仓库将维护镜像保存在 `.ae-source/skills`，避免与“个人”插件重复发现；consumer 项目迁移后只应使用用户级个人插件。
 
 ## 初始化项目文档和记忆库
 
@@ -507,7 +509,7 @@ node scripts/ae-tools.mjs help
 node scripts/ae-tools.mjs ae-graph-build --root scripts
 ```
 
-如果本机有 Codex skill validator，也建议验证 `plugins/ai-agent-engine-codex/skills/*` 和 `.agents/skills/*`。
+如果本机有 Codex skill validator，也建议验证 `plugins/ai-agent-engine-codex/skills/*` 和 `.ae-source/skills/*`。
 
 发布前可参考 [docs/release-checklist.md](docs/release-checklist.md)。
 

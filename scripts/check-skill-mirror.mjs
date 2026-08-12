@@ -5,7 +5,8 @@ import { fileURLToPath } from 'node:url'
 
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
 const sourceRoot = resolve(repoRoot, 'plugins', 'ai-agent-engine-codex', 'skills')
-const mirrorRoot = resolve(repoRoot, '.agents', 'skills')
+// Keep the source-repository mirror outside Codex's project discovery path.
+const mirrorRoot = resolve(repoRoot, '.ae-source', 'skills')
 
 ensureInsideRepo(sourceRoot, 'sourceRoot')
 ensureInsideRepo(mirrorRoot, 'mirrorRoot')

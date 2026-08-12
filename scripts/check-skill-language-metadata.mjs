@@ -6,7 +6,7 @@ import { skillMetadata } from '../plugins/ai-agent-engine-codex/scripts/skill-la
 
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
 const sourceRoot = resolve(repoRoot, 'plugins', 'ai-agent-engine-codex', 'skills')
-const mirrorRoot = resolve(repoRoot, '.agents', 'skills')
+const mirrorRoot = resolve(repoRoot, '.ae-source', 'skills')
 
 const sourceSkills = listSkillDirs(sourceRoot)
 const metadataSkills = Object.keys(skillMetadata).sort()

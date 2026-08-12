@@ -27,5 +27,5 @@ The manifest's path and role are caller input, not authority. Apply only permits
 
 - `$HOME/.agents/skills` is the official user-level skill discovery location used by the dispatcher contract.
 - `$HOME/plugins/ai-agent-engine-codex` is the personal marketplace plugin source shown by the Codex plugin surface; it is not a second project-local installation.
-- The distribution source repository intentionally keeps its local `.agents/skills` and `plugins/` mirror for development. Seeing both that local source and the personal plugin while working in the source repository is expected. A consumer project has no local AE plugin, wrapper, AE skill mirror, or AE marketplace entry after migration.
+- The distribution source repository keeps its maintenance mirror at `.ae-source/skills`, outside Codex's project discovery path. The source repository therefore loads only the personal plugin; a consumer project has no local AE plugin, wrapper, AE skill mirror, or AE marketplace entry after migration.
 - A new Codex desktop task may need to be reopened after installation because skill discovery is evaluated at task startup; `codex plugin list` confirms registration, while a dispatcher smoke confirms project-root routing.
