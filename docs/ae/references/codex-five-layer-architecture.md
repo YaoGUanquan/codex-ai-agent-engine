@@ -39,11 +39,11 @@ Validation:
 Owned paths:
 
 - `plugins/ai-agent-engine-codex/skills/*`
-- `.agents/skills/*`
+- `.ae-source/skills/*`
 - skill-local `references/`
 - `docs/ae/references/`
 
-Purpose: workflow knowledge, routing rules, skill instructions, templates, schemas, and reusable context. Plugin source is canonical; `.agents/skills` is the installed mirror.
+Purpose: workflow knowledge, routing rules, skill instructions, templates, schemas, and reusable context. Plugin source is canonical; `.ae-source/skills` is the source-repository maintenance mirror. Consumer installation writes a separate `.agents/skills` copy.
 
 Validation:
 

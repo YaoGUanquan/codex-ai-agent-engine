@@ -61,7 +61,7 @@ All passed on 2026-07-07.
 When optimizing AE skill entrypoints:
 
 1. Treat `plugins/ai-agent-engine-codex/scripts/skill-language-metadata.mjs` as the metadata source.
-2. Keep plugin source and `.agents/skills` mirror synchronized.
+2. Keep plugin source and the `.ae-source/skills` maintenance mirror synchronized; consumer installation creates `.agents/skills` separately.
 3. Update README/help/catalog wording with claim boundaries.
 4. Add regression tests for metadata wording and unsupported runtime claims.
 5. Validate with `node scripts/check-skill-mirror.mjs`, `node scripts/check-skill-language-metadata.mjs`, `node scripts/check-skill-contract.mjs`, `node scripts/check-install-smoke.mjs`, and `node scripts/check-ae-artifacts.mjs`.

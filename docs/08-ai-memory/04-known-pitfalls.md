@@ -37,7 +37,7 @@
 - 全局安装只统一 dispatcher、skills 和 personal Codex plugin；`AGENTS.md`、`docs/**`、AI memory、图谱和 archive 仍按项目根保存，不能迁移到用户目录。
 - 默认 global preview 不发现 consumer，也不自动卸载项目级副本；项目退役必须使用显式 manifest，并在 preview/apply 中同时传 `--retire-modified` 才能处理修改或未知的历史 AE 副本。
 - 不要直接操作 `.codex/plugins/cache`，也不要手工删除项目级文件。安装器只删除经过归属与指纹验证的 AE 路径，并保留备份和 journal 直到用户显式 purge。
-- 在分发源仓库中同时看到本地 `.agents/skills` 与 personal plugin 属于预期开发例外；这不代表 consumer 项目仍有项目级残留。
+- 分发源仓库的维护镜像位于 `.ae-source/skills`，不得放回 `.agents/skills`；否则会与 personal plugin 重复发现。
 
 ## 并行会话与版本协调
 
@@ -66,5 +66,5 @@
 ## 全栈 skill 与并行会话
 
 - 多会话共享工作区时，对 `package.json`、`README` 仅做字段级或追加式编辑；skill 文件集合应零交集或明确归属。
-- `check-skill-mirror` 失败通常因只改了插件源或只改了 `.agents/skills` 之一。
+- `check-skill-mirror` 失败通常因只改了插件源或 `.ae-source/skills` 维护镜像之一。
 - 语言指导按仓库栈选读；对未覆盖语言强行套用 Java/Go 等指导会发明与仓库不一致的结构。

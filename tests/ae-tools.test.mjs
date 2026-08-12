@@ -156,7 +156,7 @@ test('help can find markitdown and static server capabilities', () => {
 
 test('tiered capability help groups every skill and preserves filtered output', () => {
   const sourcePath = resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-help/references/capability-catalog.json')
-  const mirrorPath = resolve(repoRoot, '.agents/skills/ae-help/references/capability-catalog.json')
+  const mirrorPath = resolve(repoRoot, '.ae-source/skills/ae-help/references/capability-catalog.json')
   const source = JSON.parse(readFileSync(sourcePath, 'utf8'))
   const mirror = JSON.parse(readFileSync(mirrorPath, 'utf8'))
   const expectedByTier = {

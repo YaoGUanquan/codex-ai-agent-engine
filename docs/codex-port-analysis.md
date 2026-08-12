@@ -73,7 +73,7 @@ node scripts/ae-tools.mjs ae-graph-query [--root <path>] (--path <file>|--keywor
 Implemented now:
 
 - Codex plugin scaffold.
-- Forty Codex skills with UI metadata in both plugin source and `.agents/skills` mirror.
+- Forty Codex skills with UI metadata in both plugin source and `.ae-source/skills` maintenance mirror.
 - Capability catalog and migration references.
 - Help, recovery, task analysis, gate, OpenAPI JSON/YAML smoke paths, and shallow dependency graph scan/query helpers.
 - Project-local installer and updater with bilingual skill-list metadata as the default.

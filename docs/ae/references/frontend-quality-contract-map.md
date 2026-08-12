@@ -11,7 +11,7 @@ This is a **descriptive maintainer map**, not a fourth contract surface and not 
 | B | `plugins/ai-agent-engine-codex/skills/ae-review/references/code-review-rule-profiles.md` § Frontend Components / Styles | Diff-review lens (6 checks) |
 | C | `plugins/ai-agent-engine-codex/skills/ae-test-browser/references/browser-acceptance.md` | Browser acceptance evidence (7 minimum items + Material Motion Evidence) |
 
-Each file also has a byte-identical mirror under `.agents/skills/`, locked by `check-skill-mirror` and `tests/skills-docs.test.mjs`.
+Each file also has a byte-identical maintenance mirror under `.ae-source/skills/`, locked by `check-skill-mirror` and `tests/skills-docs.test.mjs`.
 
 ## Correspondence Groups
 

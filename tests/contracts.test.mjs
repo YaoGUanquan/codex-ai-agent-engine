@@ -100,8 +100,8 @@ test('check-skill-contract reports ok without external dependencies', () => {
   assert.equal(result.errors.length, 0)
 })
 
-test('skill roots contain only ae-* skill directories', () => {
-  for (const root of ['plugins/ai-agent-engine-codex/skills', '.agents/skills']) {
+test('distribution skill roots contain only ae-* skill directories', () => {
+  for (const root of ['plugins/ai-agent-engine-codex/skills', '.ae-source/skills']) {
     const invalidEntries = readdirSync(resolve(repoRoot, root), { withFileTypes: true })
       .filter((entry) => !entry.isDirectory() || !entry.name.startsWith('ae-'))
       .map((entry) => entry.name)

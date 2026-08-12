@@ -35,6 +35,10 @@ const removedScriptNames = ['check-officecli-available.mjs', 'check-officecli-sm
 const lang = readArg('--lang') || readInstalledLang(targetRoot) || 'bilingual'
 const supportedLangs = new Set(['en', 'zh-CN', 'bilingual'])
 
+if (targetRoot === repoRoot) {
+  fail('refusing to install into the distribution source; use the personal plugin or choose a consumer project target')
+}
+
 if (!supportedLangs.has(lang)) {
   fail('Usage: node scripts/install-project.mjs --target <project> [--lang en|zh-CN|bilingual]')
 }

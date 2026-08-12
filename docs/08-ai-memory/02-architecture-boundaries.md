@@ -8,7 +8,7 @@
 | 边界 | 职责 | 路径 |
 | --- | --- | --- |
 | 可分发插件 | SemVer、skills、安装脚本、Codex manifest | `plugins/ai-agent-engine-codex/` |
-| 项目镜像 | 与本仓库自用安装一致的 skill 副本 | `.agents/skills/` |
+| 源维护镜像 | 与可分发 skill 一致、但不被 Codex 自动发现的副本 | `.ae-source/skills/` |
 | 根薄包装 | 目标项目与开发机统一入口，不含第二份实现 | `scripts/*.mjs` → `plugins/.../scripts/` |
 
 版本递增规则：仅当 `plugins/ai-agent-engine-codex/` 可分发内容变化时同步递增根 `package.json` 与 `plugin.json`，并在 README 与 CHANGELOG 各补版本条目（README 仅保留最近 5 条，超出窗口迁移到 CHANGELOG）；纯仓库侧 `tests/`、过程文档、记忆库更新不升版本。

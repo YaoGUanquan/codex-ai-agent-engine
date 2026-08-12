@@ -86,6 +86,19 @@ test('set-repository rejects non-GitHub repository URLs', () => {
   }
 })
 
+test('distribution source keeps its mirror outside Codex project discovery paths', () => {
+  assert.ok(existsSync(join(repoRoot, '.ae-source', 'skills', 'ae-help', 'SKILL.md')))
+  assert.ok(existsSync(join(repoRoot, '.ae-source', 'marketplace.json')))
+  assert.equal(existsSync(join(repoRoot, '.agents', 'skills')), false)
+  assert.equal(existsSync(join(repoRoot, '.agents', 'plugins', 'marketplace.json')), false)
+})
+
+test('install-project rejects the distribution source as a target', () => {
+  const result = runScript('scripts/install-project.mjs', ['--target', repoRoot], repoRoot)
+  assert.equal(result.status, 1)
+  assert.match(result.stderr, /refusing to install into the distribution source/)
+})
+
 test('install-project installs plugin, skills, marketplace entry, and wrappers into a target project', () => {
   const targetRoot = makeTempDir('ae-install-target-')
   try {

@@ -161,6 +161,8 @@ The installer writes these paths inside the target project:
 - `scripts/update-ae-codex.mjs`
 - `scripts/set-ae-language.mjs`
 
+The distribution source itself is not an installation target. It uses the user-level personal plugin and keeps its maintenance mirror in `.ae-source/skills` to avoid duplicate discovery.
+
 ## Migrate From Project-Level To Per-User Global Installation
 
 Global installation publishes the AE skills as one current-user personal Codex plugin while retaining a private dispatcher. Each project's `AGENTS.md`, `docs/**`, AI memory, graph, and archive remain in that project root.
@@ -204,7 +206,7 @@ node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" init --project-root (Get-L
 codex plugin list
 ```
 
-Each operating-system user has an independent `$HOME`, dispatcher, backup area, and personal marketplace. The distribution source may intentionally show both its local development skills and the personal plugin; migrated consumer projects should use only the personal plugin. The installer never edits `.codex/plugins/cache`.
+Each operating-system user has an independent `$HOME`, dispatcher, backup area, and personal marketplace. The distribution source keeps its maintenance mirror in `.ae-source/skills` so Codex does not discover a duplicate beside the personal plugin; migrated consumer projects should use only the personal plugin. The installer never edits `.codex/plugins/cache`.
 
 ## Initialize Project Docs And Memory
 

@@ -42,7 +42,7 @@
 ## 当前约定
 
 - 项目级安装默认使用双语 skill 列表元数据；`--lang en|zh-CN|bilingual` 仍可显式覆盖。
-- 插件源目录 `plugins/ai-agent-engine-codex/skills` 与本项目安装镜像 `.agents/skills` 必须保持一致。
+- 插件源目录 `plugins/ai-agent-engine-codex/skills` 与本分发源维护镜像 `.ae-source/skills` 必须保持一致；consumer 安装后才使用 `.agents/skills`。
 - 外部 agent/skill 仓库研究默认走 `ae-skill-audit`，先审计再决定是否改造为本地 AE skill。
 - `ae-tools` 命令实现位于 `plugins/ai-agent-engine-codex/scripts/ae-tools/`；根 `scripts/ae-tools.mjs` 仅为薄包装。
 - 可分发插件改动必须同步递增根 `package.json` 与 `plugin.json` 的 SemVer，并在 README 双语与 CHANGELOG 双语各追加版本条目（README 仅保留最近 5 条，完整历史在 `CHANGELOG.md`/`CHANGELOG.en.md`；当前分发版本以根 `package.json` 为准）。

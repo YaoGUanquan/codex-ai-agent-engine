@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url'
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
 const skillRoots = [
   resolve(repoRoot, 'plugins', 'ai-agent-engine-codex', 'skills'),
-  resolve(repoRoot, '.agents', 'skills'),
+  resolve(repoRoot, '.ae-source', 'skills'),
 ]
 const maxDescriptionLength = 1024
 const errors = []

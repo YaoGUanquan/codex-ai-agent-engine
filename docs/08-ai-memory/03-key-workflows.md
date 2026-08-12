@@ -108,17 +108,17 @@
   1. 保持 `ae-web-forge` 四问题路由；视觉-only 走 `ae-frontend-design`，含 API/状态走 `ae-web-app`。
   2. 在 `ae-web-app/references/` 按四段结构维护框架指导（structure / defect traps / SSR boundary / user-facing states）。
   3. 扩展 `web-ui-quality.md`（可访问性、响应式、布局稳定性）；必要时更新 `ae-review`、`ae-tdd`、`ae-debug` 镜头。
-  4. 插件源与 `.agents/skills` 逐字节镜像；可分发内容变更时递增 SemVer 与 README/CHANGELOG 版本条目。
+  4. 插件源与 `.ae-source/skills` 逐字节镜像；consumer 安装后由安装器写入 `.agents/skills`；可分发内容变更时递增 SemVer 与 README/CHANGELOG 版本条目。
 - 验证：`check-skill-mirror`、`check-skill-contract`、`npm test`、`check-install-smoke`。
 - 已知风险：现代 idioms 基线下旧栈命中率下降；jsdom 不能替代 `ae-test-browser`。
 
 ## 全栈 skill 优化与镜像同步
 
-- 工作流：扩展前后端并重 skill 时，插件源与 `.agents/skills` 镜像必须逐字节一致。
+- 工作流：扩展前后端并重 skill 时，插件源与 `.ae-source/skills` 维护镜像必须逐字节一致。
 - 使用场景：为 `ae-backend`、`ae-web-app`、`ae-debug`、`ae-sql` 等增加语言指导或契约检查表。
 - 步骤：
   1. 在 `plugins/ai-agent-engine-codex/skills/<skill>/` 编辑 SKILL 与 references。
-  2. 逐文件同步到 `.agents/skills/<skill>/`（插件源为分发正典）。
+  2. 逐文件同步到 `.ae-source/skills/<skill>/`（插件源为分发正典）；consumer 安装器负责写入目标项目的 `.agents/skills/<skill>/`。
   3. 未覆盖的后端/前端栈保持「沿用仓库既有约定」回退。
   4. 跨前后端契约对齐引用 `ae-backend/references/api-contract-checklist.md`。
   5. 递增 SemVer + README/CHANGELOG 版本条目（README 窗口 5 条）；运行 mirror/contract/release-notes/test/check:all。
