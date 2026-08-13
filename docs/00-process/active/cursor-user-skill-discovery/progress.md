@@ -11,12 +11,14 @@
 
 | Unit | Result | Evidence | Status |
 | --- | --- | --- | --- |
-| U1 | Cursor paths and link helpers in `global-install-contract.mjs` | isolated-home tests | implemented |
-| U2 | Apply publishes `~/.cursor/skills/ae-*` links; rollback unlinks only | `tests/global-install.test.mjs` | implemented |
-| U3 | Docs, smoke, 0.3.29 release notes | `npm test` 144/144; `npm run check`; `npm run check:smoke`; `node scripts/check-release-notes.mjs` | implemented |
+| U1 | Cursor paths and link/copy helpers in `global-install-contract.mjs` | isolated-home tests | implemented |
+| U2 | Apply publishes `~/.cursor/skills/ae-*`; rollback is installer-owned | `tests/global-install.test.mjs` | implemented |
+| U3 | Docs, smoke, 0.3.29 release notes | 0.3.29 shipped; superseded by U4 | implemented |
+| U4 | Replace unpublished Cursor links with real copies (0.3.30) | `npm test` 145/145; `npm run check`; `npm run check:smoke`; `node scripts/check-release-notes.mjs` | implemented |
 
 ## Notes
 
 - Codex remains `ai-agent-engine-codex@personal`.
-- Cursor links are junctions on Windows; recursive delete through a junction is forbidden.
+- Cursor does not track skill-directory symlinks or junctions. 0.3.30 copies real skill directories into `~/.cursor/skills`.
+- Leftover 0.3.29 links must be unlinked only; recursive delete through a junction is forbidden.
 - Slash-palette refresh requires a new Cursor chat and is outside automated proof.

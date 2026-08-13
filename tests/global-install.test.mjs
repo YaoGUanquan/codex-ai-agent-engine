@@ -1,13 +1,13 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 
 import { runGlobalInstall } from '../plugins/ai-agent-engine-codex/scripts/global-install.mjs'
-import { normalizeManifest, userPaths } from '../plugins/ai-agent-engine-codex/scripts/global-install-contract.mjs'
+import { fingerprintPath, normalizeManifest, userPaths } from '../plugins/ai-agent-engine-codex/scripts/global-install-contract.mjs'
 import { resolveProjectRoot } from '../plugins/ai-agent-engine-codex/scripts/project-root.mjs'
 import { runNodeScript } from './helpers/skill-test-utils.mjs'
 
@@ -209,7 +209,7 @@ test('global install does not purge a recovery-failed operation', () => {
   }
 })
 
-test('global install publishes Cursor skill links to the personal plugin', () => {
+test('global install publishes Cursor skill copies for slash discovery', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-cursor-skills-'))
   try {
     const home = join(tempRoot, 'home')
@@ -234,11 +234,12 @@ test('global install publishes Cursor skill links to the personal plugin', () =>
     const applied = applyPreview(home)
     assert.equal(applied.status, 'completed')
     for (const name of currentSkillNames) {
-      const linkPath = join(home, '.cursor', 'skills', name)
+      const copyPath = join(home, '.cursor', 'skills', name)
       const expected = join(home, 'plugins', 'ai-agent-engine-codex', 'skills', name)
-      assert.equal(existsSync(linkPath), true, name)
-      assert.equal(lstatSync(linkPath).isSymbolicLink() || lstatSync(linkPath).isDirectory(), true, name)
-      assert.equal(realpathSync(linkPath), realpathSync(expected), name)
+      assert.equal(existsSync(copyPath), true, name)
+      assert.equal(lstatSync(copyPath).isSymbolicLink(), false, name)
+      assert.equal(lstatSync(copyPath).isDirectory(), true, name)
+      assert.equal(fingerprintPath(copyPath).sha256, fingerprintPath(expected).sha256, name)
     }
     assert.equal(readFileSync(join(foreign, 'SKILL.md'), 'utf8'), foreignBefore)
     assert.equal(readFileSync(join(reserved, 'SKILL.md'), 'utf8'), reservedBefore)
@@ -265,7 +266,38 @@ test('global install blocks a modified Cursor ae skill without retire-modified',
   }
 })
 
-test('global install rolls back Cursor skill links with the installer-owned batch', () => {
+test('global install replaces legacy Cursor skill links with copies without retire-modified', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-cursor-legacy-link-'))
+  try {
+    const home = join(tempRoot, 'home')
+    mkdirSync(home, { recursive: true })
+    const applied = applyPreview(home)
+    assert.equal(applied.status, 'completed')
+    const linkType = process.platform === 'win32' ? 'junction' : 'dir'
+    for (const name of currentSkillNames) {
+      const dest = join(home, '.cursor', 'skills', name)
+      const expected = join(home, 'plugins', 'ai-agent-engine-codex', 'skills', name)
+      rmSync(dest, { recursive: true, force: false })
+      symlinkSync(expected, dest, linkType)
+      assert.equal(lstatSync(dest).isSymbolicLink(), true, name)
+    }
+    const preview = runGlobalInstall(['preview', '--home', home], { repoRoot })
+    assert.equal(preview.cursorSkills.every((item) => item.status === 'historical-release verified'), true)
+    const upgraded = applyPreview(home)
+    assert.equal(upgraded.status, 'completed')
+    for (const name of currentSkillNames) {
+      const dest = join(home, '.cursor', 'skills', name)
+      const expected = join(home, 'plugins', 'ai-agent-engine-codex', 'skills', name)
+      assert.equal(lstatSync(dest).isSymbolicLink(), false, name)
+      assert.equal(lstatSync(dest).isDirectory(), true, name)
+      assert.equal(fingerprintPath(dest).sha256, fingerprintPath(expected).sha256, name)
+    }
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('global install rolls back Cursor skill copies with the installer-owned batch', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-cursor-rollback-'))
   try {
     const home = join(tempRoot, 'home')

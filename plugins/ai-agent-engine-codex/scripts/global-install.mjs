@@ -18,7 +18,7 @@ import {
   inspectCursorSkillEntry,
   isInside,
   isLinkEntry,
-  isOwnedCursorSkillLink,
+  isOwnedCursorSkillCopy,
   normalizeManifest,
   operationId,
   pluginName,
@@ -64,7 +64,7 @@ function preview({ opts, repoRoot, paths }) {
       'Apply requires --apply --operation <preview-id> --confirm <confirmation>; operation IDs are recorded only when apply begins.',
       'Project docs, AGENTS.md, source code, distribution-source, and deferred roots are outside the cleanup set.',
       'Modified or unknown components require the additional --retire-modified authorization and are always backed up before retirement.',
-      'Cursor skill discovery uses ~/.cursor/skills/ae-* links; a new Cursor chat is required to observe /ae after apply.',
+      'Cursor skill discovery uses ~/.cursor/skills/ae-* copies; a new Cursor chat is required to observe /ae after apply.',
     ],
   }
 }
@@ -203,9 +203,11 @@ function ensureUserTargetsAreSafe(paths, repoRoot, opts) {
     }
   }
   for (const item of classifyCursorSkills(paths, repoRoot)) {
-    if (item.status === 'missing' || item.status === 'current-release verified') continue
+    if (item.status === 'missing' || item.status === 'current-release verified' || item.status === 'historical-release verified') continue
+    const dest = resolve(paths.cursorSkillsRoot, item.name)
+    if (item.kind === 'directory' && wasCreatedByCompletedOperation(paths, dest)) continue
     if (opts['retire-modified'] === true) continue
-    throw new Error(`existing user skill is unknown or modified: ${resolve(paths.cursorSkillsRoot, item.name)}`)
+    throw new Error(`existing user skill is unknown or modified: ${dest}`)
   }
 }
 
@@ -366,18 +368,18 @@ function publishCursorSkills(operation, repoRoot) {
   mkdirSync(operation.paths.cursorSkillsRoot, { recursive: true })
   for (const dest of aeSkillComponents(operation.paths.cursorSkillsRoot)) {
     const name = basename(dest)
-    const expected = expectedCursorSkillTarget(operation.paths.personalPluginRoot, name)
+    const source = expectedCursorSkillTarget(operation.paths.personalPluginRoot, name)
     const entry = inspectCursorSkillEntry(dest)
-    if (names.includes(name) && isOwnedCursorSkillLink(entry, expected)) continue
+    if (names.includes(name) && isOwnedCursorSkillCopy(entry, source)) continue
     backupCursorSkillEntry(operation, dest, entry)
   }
   for (const name of names) {
     const dest = resolve(operation.paths.cursorSkillsRoot, name)
-    const expected = expectedCursorSkillTarget(operation.paths.personalPluginRoot, name)
+    const source = expectedCursorSkillTarget(operation.paths.personalPluginRoot, name)
     const entry = inspectCursorSkillEntry(dest)
-    if (isOwnedCursorSkillLink(entry, expected)) continue
+    if (isOwnedCursorSkillCopy(entry, source)) continue
     if (entry.kind !== 'missing') backupCursorSkillEntry(operation, dest, entry)
-    createCursorSkillLink(operation, dest, expected)
+    createCursorSkillCopy(operation, dest, source)
   }
 }
 
@@ -403,13 +405,14 @@ function backupCursorSkillEntry(operation, dest, entry) {
   moveToBackup(operation, dest, `cursor-skills/${basename(dest)}`)
 }
 
-function createCursorSkillLink(operation, dest, target) {
-  assertCursorLinkTargetAllowed(operation.paths.personalPluginRoot, target)
-  if (!existsSync(target)) throw new Error(`cursor skill link target is missing: ${target}`)
+function createCursorSkillCopy(operation, dest, source) {
+  assertCursorLinkTargetAllowed(operation.paths.personalPluginRoot, source)
+  if (!existsSync(source)) throw new Error(`cursor skill copy source is missing: ${source}`)
   mkdirSync(dirname(dest), { recursive: true })
-  operation.changes.push({ source: null, target: dest, backup: null, kind: 'created-link' })
+  operation.changes.push({ source: null, target: dest, backup: null, kind: 'created' })
   writeJournal(operation.journal, operation)
-  symlinkSync(target, dest, cursorLinkType())
+  cpSync(source, dest, { recursive: true, errorOnExist: true })
+  if (fingerprintPath(dest).sha256 !== fingerprintPath(source).sha256) throw new Error(`cursor skill copy fingerprint mismatch: ${dest}`)
 }
 
 function unlinkCursorSkill(path) {

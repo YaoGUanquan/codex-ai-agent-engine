@@ -115,7 +115,7 @@ $preview.projects | Format-Table root, role, components
 node scripts\install-global.mjs apply --manifest $manifest --retire-modified --apply --operation $preview.operationId --confirm $preview.confirmation
 ```
 
-`--retire-modified` 必须同时出现在 preview 与 apply 中，表示先完整备份再退役已修改或未知的历史 AE 副本。安装器只处理清单中的 `consumer`，不会移动 `docs/**`、`AGENTS.md`、AI 记忆、图谱或 archive；分发源和 deferred 项目始终排除。它会备份经验证的项目级 AE 组件和旧的用户级 AE skill，发布个人插件，在 `~/.cursor/skills/ae-*` 创建指向该插件 skills 的联接，然后调用 `codex plugin add ai-agent-engine-codex@personal --json`。它不会直接修改 Codex cache，也不会写入 `~/.cursor/skills-cursor`；任一步失败会整批回滚。备份与 journal 默认保留，只能显式清理终态操作：
+`--retire-modified` 必须同时出现在 preview 与 apply 中，表示先完整备份再退役已修改或未知的历史 AE 副本。安装器只处理清单中的 `consumer`，不会移动 `docs/**`、`AGENTS.md`、AI 记忆、图谱或 archive；分发源和 deferred 项目始终排除。它会备份经验证的项目级 AE 组件和旧的用户级 AE skill，发布个人插件，把该插件的 `ae-*` 技能真实拷贝到 `~/.cursor/skills/<name>`（不是符号链接），然后调用 `codex plugin add ai-agent-engine-codex@personal --json`。它不会直接修改 Codex cache，也不会写入 `~/.cursor/skills-cursor`；任一步失败会整批回滚。备份与 journal 默认保留，只能显式清理终态操作：
 
 ```powershell
 node scripts\install-global.mjs purge --operation <operation-id>

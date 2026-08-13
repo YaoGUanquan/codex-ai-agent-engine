@@ -4,6 +4,10 @@ This file is the complete release history of AI Agent Engine for Codex (since 0.
 
 中文版本: [CHANGELOG.md](CHANGELOG.md)
 
+### 0.3.30 (2026-08-13)
+- Global apply now copies each personal-plugin `ae-*` skill into a real directory at the current user's `~/.cursor/skills/<name>` (not a symlink or junction). Cursor does not track skill-directory symlinks, so the 0.3.29 links never appeared in `/ae`. Legacy links that still resolve to the personal plugin are replaced with matching copies without `--retire-modified`; user-edited `ae-*` entries still require that authorization. It does not recreate `~/.agents/skills` and never writes `~/.cursor/skills-cursor`.
+- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`. These checks prove isolated-home copy creation, legacy-link upgrades, foreign Cursor skill retention, failed-batch rollback, and preview/doc contract consistency. They do not prove the current Cursor chat's `/ae` palette refreshed; open a new Cursor thread to observe slash discovery.
+
 ### 0.3.29 (2026-08-13)
 - After publishing the Codex personal plugin, global apply creates current-user `~/.cursor/skills/ae-*` directory junctions (or POSIX directory symlinks) pointing at `$HOME/plugins/ai-agent-engine-codex/skills/<name>`, so Cursor and Codex discover the same AE skills. It does not recreate `~/.agents/skills` and never writes `~/.cursor/skills-cursor`.
 - Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`. These checks prove isolated-home link creation, foreign Cursor skill retention, failed-batch rollback, and preview/doc contract consistency. They do not prove the current Cursor chat's `/ae` palette refreshed; open a new Cursor thread to observe slash discovery.
