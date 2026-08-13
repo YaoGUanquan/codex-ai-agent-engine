@@ -25,7 +25,8 @@ The manifest's path and role are caller input, not authority. Apply only permits
 
 ## Discovery Surfaces
 
-- `$HOME/.agents/skills` is the official user-level skill discovery location used by the dispatcher contract.
+- `$HOME/.agents/skills` is a legacy user-level skill path. Apply may back up and retire installer-owned `ae-*` copies there; it does not recreate them, because Codex now discovers AE skills through the personal plugin.
 - `$HOME/plugins/ai-agent-engine-codex` is the personal marketplace plugin source shown by the Codex plugin surface; it is not a second project-local installation.
+- `$HOME/.cursor/skills/ae-*` is the Cursor user-level discovery surface. Apply creates directory junctions on Windows (directory symlinks elsewhere) whose targets are `$HOME/plugins/ai-agent-engine-codex/skills/<name>`. The installer never writes `$HOME/.cursor/skills-cursor` and never replaces unrelated Cursor skills.
 - The distribution source repository keeps its maintenance mirror at `.ae-source/skills`, outside Codex's project discovery path. The source repository therefore loads only the personal plugin; a consumer project has no local AE plugin, wrapper, AE skill mirror, or AE marketplace entry after migration.
-- A new Codex desktop task may need to be reopened after installation because skill discovery is evaluated at task startup; `codex plugin list` confirms registration, while a dispatcher smoke confirms project-root routing.
+- Skill discovery is evaluated at client startup. A new Codex task and a new Cursor chat are required after installation. `codex plugin list` confirms Codex registration; isolated-home tests confirm Cursor link targets; a dispatcher smoke confirms project-root routing.

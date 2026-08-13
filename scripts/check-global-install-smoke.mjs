@@ -15,9 +15,11 @@ if (preview.status !== 'preview') fail('global preview did not return preview st
 if (resolve(preview.homeRoot) !== resolve(homedir())) fail('global preview escaped the current user home')
 if (resolve(preview.personalPluginRoot) !== resolve(homedir(), 'plugins', 'ai-agent-engine-codex')) fail('global preview did not expose the personal plugin source root')
 if (resolve(preview.personalMarketplace) !== resolve(homedir(), '.agents', 'plugins', 'marketplace.json')) fail('global preview did not expose the personal marketplace path')
+if (resolve(preview.cursorSkillsRoot) !== resolve(homedir(), '.cursor', 'skills')) fail('global preview did not expose the Cursor user skill root')
+if (!Array.isArray(preview.cursorSkills) || preview.cursorSkills.length === 0) fail('global preview did not classify Cursor skills')
 if (!Array.isArray(preview.projects) || preview.projects.some((project) => project.role === 'consumer')) fail('default global preview must not infer consumer projects')
 if (preview.projects.filter((project) => project.role === 'distribution-source').length !== 1) fail('global preview did not retain the source exclusion')
-console.log(JSON.stringify({ status: 'ok', checked: ['preview', 'current-user-home', 'personal-plugin-paths', 'explicit-manifest-required', 'source-exclusion'] }, null, 2))
+console.log(JSON.stringify({ status: 'ok', checked: ['preview', 'current-user-home', 'personal-plugin-paths', 'cursor-skill-paths', 'explicit-manifest-required', 'source-exclusion'] }, null, 2))
 
 function fail(message) {
   console.error(message)

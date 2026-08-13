@@ -38,6 +38,8 @@
 - 默认 global preview 不发现 consumer，也不自动卸载项目级副本；项目退役必须使用显式 manifest，并在 preview/apply 中同时传 `--retire-modified` 才能处理修改或未知的历史 AE 副本。
 - 不要直接操作 `.codex/plugins/cache`，也不要手工删除项目级文件。安装器只删除经过归属与指纹验证的 AE 路径，并保留备份和 journal 直到用户显式 purge。
 - 分发源仓库的维护镜像位于 `.ae-source/skills`，不得放回 `.agents/skills`；否则会与 personal plugin 重复发现。
+- Cursor 发现 AE 技能靠 `~/.cursor/skills/ae-*` 联接到 personal 插件，不靠 Codex plugin list。全局 apply 之后必须新开 Cursor 对话；不要把技能拷进 `~/.cursor/skills-cursor`。
+- 删除 Cursor 联接时只能 unlink 联接节点，禁止 recursive 删除，否则会顺着 junction 删掉 personal 插件文件。
 
 ## 并行会话与版本协调
 

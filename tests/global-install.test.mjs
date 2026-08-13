@@ -1,17 +1,30 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 
 import { runGlobalInstall } from '../plugins/ai-agent-engine-codex/scripts/global-install.mjs'
-import { normalizeManifest } from '../plugins/ai-agent-engine-codex/scripts/global-install-contract.mjs'
+import { normalizeManifest, userPaths } from '../plugins/ai-agent-engine-codex/scripts/global-install-contract.mjs'
 import { resolveProjectRoot } from '../plugins/ai-agent-engine-codex/scripts/project-root.mjs'
 import { runNodeScript } from './helpers/skill-test-utils.mjs'
 
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
+const currentSkillNames = readdirSync(join(repoRoot, 'plugins', 'ai-agent-engine-codex', 'skills'), { withFileTypes: true })
+  .filter((entry) => entry.isDirectory() && entry.name.startsWith('ae-'))
+  .map((entry) => entry.name)
+  .sort()
+
+function fakeCodexRunner() {
+  return { status: 0, stdout: '{"status":"installed"}', stderr: '' }
+}
+
+function applyPreview(home, extraArgs = [], commandRunner = fakeCodexRunner) {
+  const preview = runGlobalInstall(['preview', '--home', home, ...extraArgs], { repoRoot })
+  return runGlobalInstall(['apply', '--home', home, ...extraArgs, '--apply', '--operation', preview.operationId, '--confirm', preview.confirmation], { repoRoot, commandRunner })
+}
 
 test('global dispatcher resolves the nearest project marker and requires an explicit root for unmarked init', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-project-root-'))
@@ -191,6 +204,99 @@ test('global install does not purge a recovery-failed operation', () => {
     writeFileSync(journal, JSON.stringify({ id: operation, status: 'recovery-failed' }), 'utf8')
     assert.throws(() => runGlobalInstall(['purge', '--home', home, '--operation', operation], { repoRoot }), /before recovery completes/)
     assert.equal(existsSync(journal), true)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('global install publishes Cursor skill links to the personal plugin', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-cursor-skills-'))
+  try {
+    const home = join(tempRoot, 'home')
+    mkdirSync(home, { recursive: true })
+    const foreign = join(home, '.cursor', 'skills', 'other-skill')
+    mkdirSync(foreign, { recursive: true })
+    writeFileSync(join(foreign, 'SKILL.md'), 'keep this personal cursor skill\n', 'utf8')
+    const reserved = join(home, '.cursor', 'skills-cursor', 'builtin')
+    mkdirSync(reserved, { recursive: true })
+    writeFileSync(join(reserved, 'SKILL.md'), 'reserved cursor skills stay untouched\n', 'utf8')
+    const foreignBefore = readFileSync(join(foreign, 'SKILL.md'), 'utf8')
+    const reservedBefore = readFileSync(join(reserved, 'SKILL.md'), 'utf8')
+
+    const preview = runGlobalInstall(['preview', '--home', home], { repoRoot })
+    assert.equal(preview.status, 'preview')
+    assert.equal(preview.cursorSkillsRoot, userPaths(home).cursorSkillsRoot)
+    assert.ok(Array.isArray(preview.cursorSkills))
+    assert.equal(preview.cursorSkills.length, currentSkillNames.length)
+    assert.equal(preview.cursorSkills.every((item) => item.status === 'missing'), true)
+    assert.equal(existsSync(join(home, 'plugins', 'ai-agent-engine-codex')), false)
+
+    const applied = applyPreview(home)
+    assert.equal(applied.status, 'completed')
+    for (const name of currentSkillNames) {
+      const linkPath = join(home, '.cursor', 'skills', name)
+      const expected = join(home, 'plugins', 'ai-agent-engine-codex', 'skills', name)
+      assert.equal(existsSync(linkPath), true, name)
+      assert.equal(lstatSync(linkPath).isSymbolicLink() || lstatSync(linkPath).isDirectory(), true, name)
+      assert.equal(realpathSync(linkPath), realpathSync(expected), name)
+    }
+    assert.equal(readFileSync(join(foreign, 'SKILL.md'), 'utf8'), foreignBefore)
+    assert.equal(readFileSync(join(reserved, 'SKILL.md'), 'utf8'), reservedBefore)
+    assert.equal(existsSync(join(home, '.agents', 'skills', 'ae-help')), false)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('global install blocks a modified Cursor ae skill without retire-modified', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-cursor-modified-'))
+  try {
+    const home = join(tempRoot, 'home')
+    mkdirSync(join(home, '.cursor', 'skills', 'ae-help'), { recursive: true })
+    writeFileSync(join(home, '.cursor', 'skills', 'ae-help', 'SKILL.md'), 'user edited cursor skill\n', 'utf8')
+    const preview = runGlobalInstall(['preview', '--home', home], { repoRoot })
+    const modified = preview.cursorSkills.find((item) => item.name === 'ae-help')
+    assert.equal(modified?.status, 'modified')
+    assert.throws(() => applyPreview(home), /unknown or modified/)
+    assert.equal(readFileSync(join(home, '.cursor', 'skills', 'ae-help', 'SKILL.md'), 'utf8'), 'user edited cursor skill\n')
+    assert.equal(existsSync(join(home, 'plugins', 'ai-agent-engine-codex')), false)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('global install rolls back Cursor skill links with the installer-owned batch', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-cursor-rollback-'))
+  try {
+    const home = join(tempRoot, 'home')
+    mkdirSync(home, { recursive: true })
+    const preview = runGlobalInstall(['preview', '--home', home], { repoRoot })
+    let injectedFailure
+    try {
+      runGlobalInstall(['apply', '--home', home, '--apply', '--operation', preview.operationId, '--confirm', preview.confirmation, '--fail-at', 'publish-cursor-skills'], {
+        repoRoot,
+        commandRunner: fakeCodexRunner,
+      })
+    } catch (error) {
+      injectedFailure = error
+    }
+    assert.equal(injectedFailure?.operation?.status, 'rolled-back')
+    assert.equal(existsSync(join(home, '.cursor', 'skills', 'ae-help')), false)
+    assert.equal(existsSync(join(home, 'plugins', 'ai-agent-engine-codex')), false)
+
+    const authorizedPreview = runGlobalInstall(['preview', '--home', home], { repoRoot })
+    let cliFailure
+    try {
+      runGlobalInstall(['apply', '--home', home, '--apply', '--operation', authorizedPreview.operationId, '--confirm', authorizedPreview.confirmation], {
+        repoRoot,
+        commandRunner: () => ({ status: 1, stdout: '', stderr: 'simulated Codex failure' }),
+      })
+    } catch (error) {
+      cliFailure = error
+    }
+    assert.equal(cliFailure?.operation?.status, 'rolled-back')
+    assert.equal(existsSync(join(home, '.cursor', 'skills', 'ae-help')), false)
+    assert.equal(existsSync(join(home, 'plugins', 'ai-agent-engine-codex')), false)
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }

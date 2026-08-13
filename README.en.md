@@ -198,7 +198,7 @@ $preview.projects | Format-Table root, role, components
 node scripts\install-global.mjs apply --manifest $manifest --retire-modified --apply --operation $preview.operationId --confirm $preview.confirmation
 ```
 
-By default, an `owned: false`, `deferred`, or unknown component blocks apply. Do not manually delete project-level files. Pass `--retire-modified` to both preview and apply only when you explicitly accept complete backup before retiring modified or unknown historical AE components. Migration only touches declared `consumer` roots; project `docs/**`, `AGENTS.md`, AI memory, graph, and archive stay in place. Backups and journals remain until an explicit `purge --operation <id> --apply`. The distribution source and deferred roots are always excluded. After a successful migration, invoke the per-user dispatcher from any project root:
+By default, an `owned: false`, `deferred`, or unknown component blocks apply. Do not manually delete project-level files. Pass `--retire-modified` to both preview and apply only when you explicitly accept complete backup before retiring modified or unknown historical AE components. Migration only touches declared `consumer` roots; project `docs/**`, `AGENTS.md`, AI memory, graph, and archive stay in place. Backups and journals remain until an explicit `purge --operation <id> --apply`. The distribution source and deferred roots are always excluded. After a successful migration, invoke the per-user dispatcher from any project root, then reopen Codex and Cursor chats:
 
 ```powershell
 node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" help
@@ -206,7 +206,7 @@ node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" init --project-root (Get-L
 codex plugin list
 ```
 
-Each operating-system user has an independent `$HOME`, dispatcher, backup area, and personal marketplace. The distribution source keeps its maintenance mirror in `.ae-source/skills` so Codex does not discover a duplicate beside the personal plugin; migrated consumer projects should use only the personal plugin. The installer never edits `.codex/plugins/cache`.
+Each operating-system user has an independent `$HOME`, dispatcher, backup area, and personal marketplace. Codex discovers AE skills through the personal plugin; Cursor discovers the same skills through `~/.cursor/skills/ae-*` links to that plugin. The distribution source keeps its maintenance mirror in `.ae-source/skills` so Codex does not discover a duplicate beside the personal plugin; migrated consumer projects should use only the user-level distribution. The installer never edits `.codex/plugins/cache`. Already-open chats keep their startup skill catalog.
 
 ## Initialize Project Docs And Memory
 
@@ -494,6 +494,14 @@ Working rule: any change that touches distributable plugin content (`plugins/ai-
 
 Full history lives in [CHANGELOG.en.md](CHANGELOG.en.md); this section keeps only the latest five versions, and entries beyond that window move to the changelog on each release.
 
+### 0.3.29 (2026-08-13)
+- After publishing the Codex personal plugin, global apply creates current-user `~/.cursor/skills/ae-*` directory junctions (or POSIX directory symlinks) pointing at `$HOME/plugins/ai-agent-engine-codex/skills/<name>`, so Cursor and Codex discover the same AE skills. It does not recreate `~/.agents/skills` and never writes `~/.cursor/skills-cursor`.
+- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`. These checks prove isolated-home link creation, foreign Cursor skill retention, failed-batch rollback, and preview/doc contract consistency. They do not prove the current Cursor chat's `/ae` palette refreshed; open a new Cursor thread to observe slash discovery.
+
+### 0.3.28 (2026-08-13)
+- Global refresh: synchronize the root package and plugin manifest versions, then refresh the current user's AE plugin and dispatcher through the personal marketplace global-install flow; project-level docs, source, and user project data are unchanged.
+- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`. These checks prove version, skill mirror, install contracts, and global preview/install flow consistency; they do not represent runtime acceptance in target projects.
+
 ### 0.3.27 (2026-08-13)
 - `ae-test-api` and the shared local smoke gate now build a sanitized request-context manifest before resolving `project runner -> single-request curl fallback -> blocked`. The pure contract requires an input provider for every applicable header, matching path/query/body same-context aliases, non-static lifetimes for derived values, and a project runner for non-GET methods unless the contract proves they are read-only.
 - Add `plugins/ai-agent-engine-codex/scripts/request-context-contract.mjs` to validate context completeness, same-process credential visibility, runner method/path/assertion coverage, fallback eligibility, and `passed/request-context/client-config/transport/auth/business` outcomes (2xx is `passed`, 5xx is `transport`) without network access or secrets. The API verification record template now includes Request Context, Carrier, and Outcome fields.
@@ -508,19 +516,6 @@ Full history lives in [CHANGELOG.en.md](CHANGELOG.en.md); this section keeps onl
 - Unify the requirements-artifact directory declarations: the capability catalog's `ae-brainstorm` `artifactPath` moves from `docs/ae/brainstorms` to `docs/ae/prds`; the `ae-help` artifact contract's Requirements row and requirements frontmatter example now use `docs/ae/prds` with the `ae-prd` capture shape (`type: prd`), the plan `origin` example follows, and legacy requirements may remain under brainstorms; the `ae-review` document-review default search now includes `docs/ae/prds`. The top-level `artifactPaths` map and the init templates have been correct since 0.3.22 and are unchanged; `docs/ae/brainstorms` remains the exploratory-notes directory (`artifactPaths.ideas`).
 - Add regression assertions locking the directory declarations (catalog, artifact contract, and scope detection in source and mirror); the stale directory note in the work reference project's existing `docs/ae/README.md` was fixed alongside (an init-managed legacy file that plugin updates do not rewrite).
 - Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`. These checks prove skill docs, mirror, and distribution contracts only, not runtime acceptance in any target project.
-
-### 0.3.24 (2026-08-11)
-- Upgrade `tidy` archive conflicts from skip to lossless file-by-file merge: when the target exists, missing files move in, identical files deduplicate, and same-name different-content files arrive with a `.from-active-<date>` suffix; the emptied source directory is removed. Add a `memoryBudget` report (default 15KB, `--memory-budget-kb`; report-only, memory files are never moved).
-- Post-update auto maintenance: after installing files, `update-project` runs `tidy --apply` through the target's `scripts/ae-tools.mjs` (done notes, empty dirs, expired evidence; never stale archiving) and reports the summary under `maintenance` in the update output; `--no-tidy` skips it; a missing CLI or failed pass degrades to skipped without blocking the update. INSTALL (both languages), the README update section, and the `ae-update` skill document the behavior.
-- Governance execution: the two same-name archive conflicts in the work reference project were merged clean, a memory-distillation handoff now waits in that project for its own sessions, and Light Path / collision calibration signals were added to the 0.3.23 experience note.
-- Verification: `npm test` (five new cases covering merge, memory budget, and auto maintenance), `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`. These prove CLI behavior and distribution contracts; auto maintenance is evidenced by local git-repository simulation and does not represent end-to-end updates against real remotes.
-
-### 0.3.23 (2026-08-11)
-- Add the `tidy` maintenance command: classifies `docs/00-process/active/` notes (done/empty/stale/archived-pointer/active) and detects expired evidence under `docs/ae/gates/` and `docs/ae/evidence/artifacts/` against the retention window (default 3 months); dry-run by default, `--apply` archives done notes, removes empty dirs, and moves expired evidence while rewriting ledger references; `--archive-stale`, `--stale-days`, and `--retention-months` tune the policy; existing archive targets are skipped safely.
-- Fix `parseOptions`: repeated `--key value` flags accumulate into arrays, so `gate --validation` records every validation command separately.
-- Four skill refinements: the `ae-prd` capture template gains a `## Perspective Collision (Conditional)` landing section and `ae-brainstorm` gains deterministic collision triggers (skip S1-S2 single-direction tasks, four perspectives by default) with an explicit landing rule; `ae-review` gains a Light Path (at most 3 files, no public API/data/security/dependency boundary, not a delivery gate -> single lane without review-package/review-contract) plus persona quick selection; `ae-brainstorm`/`ae-prd`/`ae-review` point their evidence-tier wording at the single definition in `ae-plan/references/validation-evidence-profile.md`; `ae-handoff` and `ae-lfg` share one handoff routing rule (task-scoped handoffs in the process directory, standalone cross-session handoffs in `docs/ae/handoffs/`).
-- Memory maintenance rule templates (en/zh-CN) and this repository's rules gain a size-and-distillation budget (about 15KB per file, yearly decision-log rotation, quarterly reviewStatus pass, archive retired topics).
-- Verification: `npm test` (new gate accumulation and tidy cases, 121 total), `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`. These prove CLI behavior, skill docs, and distribution contracts stay consistent; the tidy runs on this repository and the work reference project are evidenced by command JSON output and do not represent runtime acceptance of other projects.
 
 ## Publishing To GitHub
 

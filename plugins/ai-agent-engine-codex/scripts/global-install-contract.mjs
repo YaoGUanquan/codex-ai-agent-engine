@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto'
-import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync, statSync } from 'node:fs'
+import { existsSync, lstatSync, readdirSync, readFileSync, readlinkSync, realpathSync, statSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { basename, isAbsolute, relative, resolve, sep } from 'node:path'
 
@@ -27,6 +27,8 @@ export function userPaths(home = homedir()) {
     personalPluginsRoot: resolve(homeRoot, 'plugins'),
     personalPluginRoot: resolve(homeRoot, 'plugins', pluginName),
     personalMarketplace: resolve(agentsRoot, 'plugins', 'marketplace.json'),
+    cursorSkillsRoot: resolve(homeRoot, '.cursor', 'skills'),
+    cursorReservedSkillsRoot: resolve(homeRoot, '.cursor', 'skills-cursor'),
   }
 }
 
@@ -51,7 +53,7 @@ export function normalizeManifest(manifest, { repoRoot, home = homedir(), allowC
     const root = canonicalExistingOrAbsolute(item.root)
     const role = deriveRole(root, { sourceRoot, requestedRole: item.role, allowCustomConsumers })
     if (projects.some((project) => project.root === root)) throw new Error(`manifest contains duplicate root: ${root}`)
-    if ([paths.homeRoot, paths.agentsRoot, paths.runtimeRoot, paths.personalPluginsRoot, paths.personalPluginRoot].includes(root)) throw new Error(`protected path cannot be a project root: ${root}`)
+    if ([paths.homeRoot, paths.agentsRoot, paths.runtimeRoot, paths.personalPluginsRoot, paths.personalPluginRoot, paths.cursorSkillsRoot, paths.cursorReservedSkillsRoot].includes(root)) throw new Error(`protected path cannot be a project root: ${root}`)
     if (isForeignHomePath(root, paths.homeRoot)) throw new Error(`project root belongs to another user home: ${root}`)
     projects.push({ root, role })
   }
@@ -83,8 +85,66 @@ export function guardedChild(root, relativePath) {
 export function aeSkillComponents(skillsRoot) {
   if (!existsSync(skillsRoot)) return []
   return readdirSync(skillsRoot, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory() && entry.name.startsWith('ae-'))
+    .filter((entry) => (entry.isDirectory() || entry.isSymbolicLink()) && entry.name.startsWith('ae-'))
     .map((entry) => guardedChild(skillsRoot, entry.name))
+}
+
+export function cursorLinkType() {
+  return process.platform === 'win32' ? 'junction' : 'dir'
+}
+
+export function expectedCursorSkillTarget(personalPluginRoot, skillName) {
+  return guardedChild(guardedChild(personalPluginRoot, 'skills'), skillName)
+}
+
+export function currentSkillNames(repoRoot) {
+  return aeSkillComponents(resolve(repoRoot, 'plugins', pluginName, 'skills')).map((path) => basename(path)).sort()
+}
+
+export function isLinkEntry(path) {
+  if (!existsSync(path)) return false
+  if (lstatSync(path).isSymbolicLink()) return true
+  try {
+    readlinkSync(path)
+    return true
+  } catch {
+    return false
+  }
+}
+
+export function inspectCursorSkillEntry(path) {
+  if (!existsSync(path)) return { kind: 'missing' }
+  if (isLinkEntry(path)) return { kind: 'link', target: realpathSync(path) }
+  return { kind: 'directory', fingerprint: fingerprintPath(path) }
+}
+
+export function isOwnedCursorSkillLink(entry, expectedTarget) {
+  return entry?.kind === 'link' && resolve(entry.target) === resolve(expectedTarget)
+}
+
+export function assertCursorLinkTargetAllowed(personalPluginRoot, target) {
+  const skillsRoot = guardedChild(personalPluginRoot, 'skills')
+  if (!isInside(skillsRoot, target) || resolve(target) === resolve(skillsRoot)) {
+    throw new Error(`cursor skill link target escapes personal plugin skills: ${target}`)
+  }
+}
+
+export function classifyCursorSkills(paths, repoRoot) {
+  const names = currentSkillNames(repoRoot)
+  const extras = aeSkillComponents(paths.cursorSkillsRoot)
+    .map((path) => basename(path))
+    .filter((name) => !names.includes(name))
+  return [...names, ...extras].map((name) => classifyCursorSkill(paths, name, names.includes(name)))
+}
+
+function classifyCursorSkill(paths, name, inRelease) {
+  const dest = resolve(paths.cursorSkillsRoot, name)
+  const entry = inspectCursorSkillEntry(dest)
+  if (!inRelease) return { name, status: 'modified', kind: entry.kind, target: entry.target || null }
+  if (entry.kind === 'missing') return { name, status: 'missing', kind: 'missing' }
+  const expected = resolve(paths.personalPluginRoot, 'skills', name)
+  if (isOwnedCursorSkillLink(entry, expected)) return { name, status: 'current-release verified', kind: 'link', target: entry.target }
+  return { name, status: 'modified', kind: entry.kind, target: entry.target || null }
 }
 
 export function fingerprintPath(path) {
