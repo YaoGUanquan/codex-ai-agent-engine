@@ -4,6 +4,11 @@ This file is the complete release history of AI Agent Engine for Codex (since 0.
 
 中文版本: [CHANGELOG.md](CHANGELOG.md)
 
+### 0.3.27 (2026-08-13)
+- `ae-test-api` and the shared local smoke gate now build a sanitized request-context manifest before resolving `project runner -> single-request curl fallback -> blocked`. The pure contract requires an input provider for every applicable header, matching path/query/body same-context aliases, non-static lifetimes for derived values, and a project runner for non-GET methods unless the contract proves they are read-only.
+- Add `plugins/ai-agent-engine-codex/scripts/request-context-contract.mjs` to validate context completeness, same-process credential visibility, runner method/path/assertion coverage, fallback eligibility, and `passed/request-context/client-config/transport/auth/business` outcomes (2xx is `passed`, 5xx is `transport`) without network access or secrets. The API verification record template now includes Request Context, Carrier, and Outcome fields.
+- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`. These checks prove pure contract behavior, skill docs, mirror, and distribution consistency; they do not prove authenticated target APIs, real header values, or state-changing smoke acceptance.
+
 ### 0.3.26 (2026-08-11)
 - Add minimal legacy counterpart sections to the frontend guidance: `svelte-guidance.md` gains Svelte 4 (stores and `$:` reactive statements) counterparts, `angular-guidance.md` gains NgModule-era counterparts, and `vue-guidance.md` gains Options API counterparts; each sits beside the modern baseline with the stack-conditional first line and the "match existing repository style" fallback unchanged. A new regression test locks the sections and mirror equality (red first, then green).
 - Add the maintainer map `docs/ae/references/frontend-quality-contract-map.md` recording the five correspondence groups, two coverage gaps, and existing test locks across `web-ui-quality.md`, the `ae-review` Frontend Components / Styles lens, and `browser-acceptance.md`; the map is descriptive, is not a fourth contract surface, and adds no checker. This batch closes roadmap items 7 and 10 early at the user's direction (the recorded triggers had not fired; see the 2026-08-11 decision-log entry).
