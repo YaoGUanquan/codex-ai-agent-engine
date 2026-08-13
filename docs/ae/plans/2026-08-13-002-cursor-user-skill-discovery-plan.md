@@ -73,11 +73,11 @@ Add a Cursor-only user skill discovery surface to the existing global installer.
 
 | Requirement | Tier | Signal | Owner | Status | Recovery signal |
 | --- | --- | --- | --- | --- | --- |
-| R2, R3 | focused integration | isolated-home apply: each `ae-*` is a non-link directory whose fingerprint matches the personal plugin skill | implementer | unverified | revert installer unit |
-| R5, R6 | focused integration | foreign skill hash unchanged; modified `ae-*` blocks without `--retire-modified` | implementer | unverified | no home mutation on block |
-| R7 | focused integration | `--fail-at publish-cursor-skills` and Codex CLI failure restore prior Cursor state | implementer | unverified | journal/backup retained |
-| R1, R4, NFR1-NFR4 | focused integration + docs | preview classifies Cursor surface; no `~/.agents/skills/ae-*`; no `skills-cursor` writes; smoke exposes `cursorSkillsRoot` | implementer | unverified | docs must not claim slash UI without a fresh thread |
-| live slash palette | current-user operations | new Cursor chat lists `/ae-*`; `codex plugin list` still shows personal plugin | current user | unverified | reopen client session |
+| R2, R3 | focused integration | isolated-home apply: each `ae-*` is a non-link directory whose fingerprint matches the personal plugin skill | implementer | verified | revert installer unit |
+| R5, R6 | focused integration | foreign skill hash unchanged; modified `ae-*` blocks without `--retire-modified` | implementer | verified | no home mutation on block |
+| R7 | focused integration | `--fail-at publish-cursor-skills` and Codex CLI failure restore prior Cursor state | implementer | verified | journal/backup retained |
+| R1, R4, NFR1-NFR4 | focused integration + docs | preview classifies Cursor surface; no `~/.agents/skills/ae-*`; no `skills-cursor` writes; smoke exposes `cursorSkillsRoot` | implementer | verified | docs must not claim slash UI without a fresh thread |
+| live slash palette | current-user operations | new Cursor chat lists `/ae-*`; `codex plugin list` still shows personal plugin | current user | verified | reopen client session |
 
 ## Implementation Units
 
@@ -217,3 +217,11 @@ Focused tests live in `tests/global-install.test.mjs` and reuse the isolated-hom
 - Requirements mapped: R1-R7 and NFR1-NFR4 are covered by U1-U4.
 - No Cursor marketplace plugin, no `.agents/skills` restoration, and no cache writes are in scope.
 - Leftover-link deletion safety remains an explicit unit constraint because junction follow-through is still the highest-severity failure mode.
+
+## Closeout
+
+- U1-U4 landed as 0.3.29 links then 0.3.30 copies after the live probe.
+- Commits: `8236fa6`, `cd20d47`. Current-user apply `4e3ef0f4-05fe-4d1c-9f5a-a504e176e084` completed at 0.3.30.
+- Live slash: the user confirmed a new Cursor chat lists `/ae-*`.
+- Experience: `docs/ae/experience/2026-08-13-cursor-user-skill-discovery.md`.
+- Process archive: `docs/00-process/archive/2026-08/cursor-user-skill-discovery/`.

@@ -81,6 +81,17 @@ For standalone helper scripts, use this distribution pattern:
 4. Add the command to `scripts/check-install-smoke.mjs` `expectedPaths`, execute it from the installed target root, and include it in `verifiedCommands`.
 5. Add plugin script syntax coverage to `npm run check`.
 
+## 2026-08-13 Cursor Dual-Client Surface
+
+Cursor does not load the Codex personal plugin. After 0.3.30, Cursor discovery is a real copy of each `ae-*` skill under `$HOME/.cursor/skills/<name>`. Junctions and directory symlinks are not a Cursor slash surface.
+
+Use this phrasing:
+
+- Supported: "Cursor discovers AE skills through current-user `~/.cursor/skills/ae-*` copies published by global apply."
+- Unsupported: "Cursor tracks skill-directory symlinks or junctions" or "Cursor loads `ai-agent-engine-codex@personal`."
+
+A new Cursor chat is required after apply. Isolated-home filesystem tests do not prove the current Cursor slash palette.
+
 ## Boundary
 
 Do not implement deprecated prompt shims as the primary path for AE workflow entrypoints. Do not add MCP auto-loading, hooks, global config propagation, or always-on agent registries to simulate command registration.
@@ -93,3 +104,5 @@ Do not implement deprecated prompt shims as the primary path for AE workflow ent
 - Installed command wrapper experience: `docs/ae/experience/2026-07-07-check-ae-artifacts-install-wrapper.md`
 - Process archive: `docs/00-process/archive/2026-07/codex-skill-slash-discoverability/progress.md`
 - Installed command wrapper archive: `docs/00-process/archive/2026-07/check-ae-artifacts-install-wrapper/progress.md`
+- Cursor copy surface: `docs/ae/experience/2026-08-13-cursor-user-skill-discovery.md`
+- Cursor process archive: `docs/00-process/archive/2026-08/cursor-user-skill-discovery/summary.md`

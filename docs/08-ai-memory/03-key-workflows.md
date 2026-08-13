@@ -82,10 +82,10 @@
   1. 在分发源仓库创建只包含当前用户项目根的 manifest；不要让安装器扫描 `D:\codes` 或猜测项目名。
   2. 用同一份 manifest 运行 `preview --retire-modified`，审阅每个 consumer 的组件、归属和 `owned` 状态。
   3. 用 preview 返回的 operation ID、confirmation 和同样的 `--retire-modified` 执行显式 apply；该选项表示先完整备份，再退役修改过或未知的历史副本。
-  4. 迁移成功后从目标项目根运行用户级 dispatcher，并在新的 Codex 任务中用 `codex plugin list` 检查 `ai-agent-engine-codex@personal`。
+  4. 迁移成功后从目标项目根运行用户级 dispatcher；新开 Codex 任务用 `codex plugin list` 检查 `ai-agent-engine-codex@personal`；新开 Cursor 对话检查 `~/.cursor/skills/ae-*` 真实拷贝是否出现在 `/ae`。
   5. 保留项目根中的 `AGENTS.md`、`docs/**`、AI memory、图谱和 archive；备份/journal 也默认保留，只有显式 purge 才删除。
-- 验证：逐项目检查项目级 plugin、wrapper、`ae-*` skill 和 AE marketplace 条目均不存在；比较迁移前后的 `AGENTS.md` 与 `docs/**` 指纹；运行 dispatcher smoke；确认 source/deferred 项目未被修改。
-- 已知风险：源仓库可同时显示本地开发 skill 与 personal 插件，这是开发例外；已打开的 Codex 桌面任务不会热刷新 skill 清单。每个操作系统用户有独立 `$HOME`，安装器不会修改其他用户目录。
+- 验证：逐项目检查项目级 plugin、wrapper、`ae-*` skill 和 AE marketplace 条目均不存在；比较迁移前后的 `AGENTS.md` 与 `docs/**` 指纹；运行 dispatcher smoke；确认 source/deferred 项目未被修改；确认 Cursor 技能是非链接目录而不是 junction。
+- 已知风险：源仓库可同时显示本地开发 skill 与 personal 插件，这是开发例外；已打开的 Codex 或 Cursor 对话不会热刷新 skill 清单。Cursor 不跟踪技能目录上的 symlink/junction，全局 apply 必须发布真实拷贝。每个操作系统用户有独立 `$HOME`，安装器不会修改其他用户目录。
 
 ## 分层 check 与 ae-tools 模块维护
 

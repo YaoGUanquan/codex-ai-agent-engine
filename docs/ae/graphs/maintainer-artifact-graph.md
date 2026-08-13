@@ -1,7 +1,7 @@
 <!-- ae-codex:reference -->
 # Maintainer Artifact Graph (2026-08-11)
 
-Curated map of the August 2026 optimization wave: initial repo scan (`781d4f6`), frontend skill guidance (`a51ef3c` / 0.3.18–0.3.19), structural refactor (`315db38` / 0.3.20), fullstack skill optimization (`e2621b7` / 0.3.21), knowledge-base governance batches one–three (`53c94aa` / 0.3.22 → `6721ce3` / 0.3.23–0.3.24), governance batch four plus prds path unification (`d564fa6` / 0.3.25: release-notes split into changelogs, process-archive closeout, requirements-path declarations), and the 2026-08-11 memory distillation (05/03 rotated within the 15KB budget). For machine-readable edges see `docs/08-ai-memory/00-registry.json`.
+Curated map of the August 2026 optimization wave through Cursor dual-client discovery (`cd20d47` / 0.3.30). For machine-readable edges see `docs/08-ai-memory/00-registry.json`.
 
 ## Delivery timeline
 
@@ -17,7 +17,8 @@ flowchart LR
   kb4["KB governance batch 4<br/>release-notes split d564fa6"]
   prds["prds path unification<br/>0.3.25 d564fa6"]
   distill["Memory distillation<br/>05/03 within 15KB budget"]
-  scan --> fe --> struct --> full --> kb1 --> kb2 --> kb3 --> kb4 --> prds --> distill
+  cursor["Cursor skill copies<br/>0.3.30 cd20d47"]
+  scan --> fe --> struct --> full --> kb1 --> kb2 --> kb3 --> kb4 --> prds --> distill --> cursor
 ```
 
 ## Code module graph (ae-tools, post-0.3.20)
@@ -99,13 +100,19 @@ flowchart LR
 | `docs/00-process/archive/2026-08/prds-artifact-path-unification/summary.md` | archives | 007 plan | Process closure + finding adjudication |
 | `docs/99-archive/2026-08/memory-distillation/README.md` | archives | `05-decision-log.md` / `03-key-workflows.md` shards | Memory budget convergence |
 | `docs/ae/experience/2026-08-11-memory-distillation.md` | records | distillation shards + registry boundary | Rotation workflow lessons |
+| `docs/ae/plans/2026-08-13-002-cursor-user-skill-discovery-plan.md` | implements | `global-install.mjs` publish-cursor-skills | Cursor copies after personal plugin |
+| `docs/ae/experience/2026-08-13-cursor-user-skill-discovery.md` | records | 0.3.29 links superseded by 0.3.30 copies | Live `/ae` probe |
+| `docs/ae/references/global-ae-install-contract.md` | documents | Codex personal plugin + Cursor copies | Dual discovery surfaces |
+| `docs/00-process/archive/2026-08/cursor-user-skill-discovery/summary.md` | archives | Cursor discovery plan | Process closure |
 
 ## Skill mirror invariant
 
 Every distributable skill change touches **both**:
 
 - `plugins/ai-agent-engine-codex/skills/**` (source)
-- `.agents/skills/**` (mirror)
+- `.ae-source/skills/**` (distribution-source maintenance mirror)
+
+Consumer installs still receive `.agents/skills`. Cursor user discovery after 0.3.30 is a separate copy under `~/.cursor/skills/ae-*`, not that mirror.
 
 Verified by `node scripts/check-skill-mirror.mjs` in `npm run check:contracts`.
 

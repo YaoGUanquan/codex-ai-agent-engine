@@ -48,3 +48,4 @@
 - 可分发插件改动必须同步递增根 `package.json` 与 `plugin.json` 的 SemVer，并在 README 双语与 CHANGELOG 双语各追加版本条目（README 仅保留最近 5 条，完整历史在 `CHANGELOG.md`/`CHANGELOG.en.md`；当前分发版本以根 `package.json` 为准）。
 - 根 `scripts/update-project.mjs` 等为薄包装；`update-project` 唯一实现位于 `plugins/ai-agent-engine-codex/scripts/`。
 - 声明式知识图谱：`docs/08-ai-memory/00-registry.json`；维护者策展图：`docs/ae/graphs/maintainer-artifact-graph.md`；浅层依赖图 CLI 不持久化 `docs/ae/graphs/graph.json`。
+- 用户级发现：Codex 走 `ai-agent-engine-codex@personal`；Cursor 走 `~/.cursor/skills/ae-*` 真实拷贝。分发源维护镜像保持 `.ae-source/skills`，不要放回 `.agents/skills`。

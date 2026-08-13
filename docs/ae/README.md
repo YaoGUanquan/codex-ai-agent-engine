@@ -56,4 +56,5 @@
   - Batch 4 — PRD: `docs/ae/prds/2026-08-11-governance-batch-four-prd.md`; plan: `docs/ae/plans/2026-08-11-006-governance-batch-four-plan.md`; experience: `docs/ae/experience/2026-08-11-governance-batch-four.md`; archive: `docs/00-process/archive/2026-08/governance-batch-four/summary.md`
   - 0.3.25 prds 路径统一 — plan: `docs/ae/plans/2026-08-11-007-prds-artifact-path-unification-plan.md`; archive: `docs/00-process/archive/2026-08/prds-artifact-path-unification/summary.md`
   - 记忆蒸馏（2026-08-11）— experience: `docs/ae/experience/2026-08-11-memory-distillation.md`; 分片: `docs/99-archive/2026-08/memory-distillation/`
+  - Cursor 用户级技能发现（0.3.29–0.3.30）— PRD: `docs/ae/prds/2026-08-13-cursor-user-skill-discovery-prd.md`; plan: `docs/ae/plans/2026-08-13-002-cursor-user-skill-discovery-plan.md`; experience: `docs/ae/experience/2026-08-13-cursor-user-skill-discovery.md`; archive: `docs/00-process/archive/2026-08/cursor-user-skill-discovery/summary.md`
   - Maintainer graph: `docs/ae/graphs/maintainer-artifact-graph.md`; registry: `docs/08-ai-memory/00-registry.json`

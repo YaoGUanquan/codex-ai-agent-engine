@@ -93,8 +93,8 @@
       "id": "skill-discoverability",
       "path": "docs/08-ai-memory/12-codex-skill-slash-discoverability.md",
       "kind": "memory",
-      "role": "Codex skill discoverability boundary",
-      "topics": ["skills", "discoverability", "codex"],
+      "role": "Codex and Cursor skill discoverability boundary",
+      "topics": ["skills", "discoverability", "codex", "cursor"],
       "reviewStatus": "current"
     },
     {
@@ -221,7 +221,7 @@
       "type": "references",
       "evidence": {
         "path": "docs/08-ai-memory/01-project-context.md",
-        "note": "The project distribution boundary is defined by the global AE install contract."
+        "note": "The project distribution boundary is defined by the global AE install contract, including Cursor skill copies."
       }
     },
     {
@@ -501,6 +501,69 @@
       "evidence": {
         "path": "docs/08-ai-memory/05-decision-log.md",
         "note": "The early-completion decision records the descriptive frontend quality contract map as the item-10 deliverable."
+      }
+    },
+    {
+      "from": "decision-log",
+      "to": "docs/ae/prds/2026-08-13-cursor-user-skill-discovery-prd.md",
+      "type": "documents",
+      "evidence": {
+        "path": "docs/08-ai-memory/05-decision-log.md",
+        "note": "The 2026-08-13 Cursor copy decision documents the dual-client discovery PRD."
+      }
+    },
+    {
+      "from": "decision-log",
+      "to": "docs/ae/designs/cursor-user-skill-discovery-2026-08-13/design.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/05-decision-log.md",
+        "note": "The Cursor copy decision references ADR-005 superseding the 0.3.29 link ADR."
+      }
+    },
+    {
+      "from": "decision-log",
+      "to": "docs/ae/experience/2026-08-13-cursor-user-skill-discovery.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/05-decision-log.md",
+        "note": "The Cursor copy decision links to the live-probe experience note."
+      }
+    },
+    {
+      "from": "key-workflows",
+      "to": "docs/ae/plans/2026-08-13-002-cursor-user-skill-discovery-plan.md",
+      "type": "implements",
+      "evidence": {
+        "path": "docs/08-ai-memory/03-key-workflows.md",
+        "note": "The global install workflow publishes Cursor skill copies as specified by the plan."
+      }
+    },
+    {
+      "from": "key-workflows",
+      "to": "docs/ae/experience/2026-08-13-cursor-user-skill-discovery.md",
+      "type": "implements",
+      "evidence": {
+        "path": "docs/08-ai-memory/03-key-workflows.md",
+        "note": "The global install workflow now verifies Cursor copies in a new chat after apply."
+      }
+    },
+    {
+      "from": "known-pitfalls",
+      "to": "docs/ae/experience/2026-08-13-cursor-user-skill-discovery.md",
+      "type": "records",
+      "evidence": {
+        "path": "docs/08-ai-memory/04-known-pitfalls.md",
+        "note": "Cursor does not track skill-directory symlinks; leftover junctions must be unlinked only."
+      }
+    },
+    {
+      "from": "skill-discoverability",
+      "to": "docs/ae/experience/2026-08-13-cursor-user-skill-discovery.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/12-codex-skill-slash-discoverability.md",
+        "note": "Cursor slash discovery uses real user skill copies, not Codex plugin registration."
       }
     }
   ]

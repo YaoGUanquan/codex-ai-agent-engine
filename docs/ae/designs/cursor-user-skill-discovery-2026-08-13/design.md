@@ -1,6 +1,6 @@
 ---
 type: design
-status: review-passed
+status: completed
 date: 2026-08-13
 title: cursor-user-skill-discovery
 origin: docs/ae/prds/2026-08-13-cursor-user-skill-discovery-prd.md
@@ -212,3 +212,5 @@ No new dependencies. Cursor skills are copied with `fs.cpSync`. Leftover 0.3.29 
 - mappingTablesComplete: true
 - sourceScopePreserved: true
 - reviewStatus: passed
+- deliveryStatus: completed
+- processArchive: docs/00-process/archive/2026-08/cursor-user-skill-discovery/

@@ -34,3 +34,7 @@ The AE runtime is distributed per operating-system user through a private dispat
 ## Verification boundary
 
 The repository smoke and Codex CLI list prove the local distribution and registration contract. At this documentation checkpoint Codex reports the installed personal plugin as `0.3.16` while the repository source is `0.3.17`; run a new global apply after publishing this version to close that upgrade gap. A newly opened Codex task is required to observe the refreshed skill catalog; an already-open desktop task may retain its startup catalog. Consumer dispatcher smoke proves project-root routing, not authenticated target-project API, browser, or deployment acceptance.
+
+## Later change (0.3.30)
+
+`$HOME/.agents/skills` is no longer the Cursor discovery path. Global apply copies personal-plugin `ae-*` skills into `$HOME/.cursor/skills/<name>` as real directories. See `docs/ae/experience/2026-08-13-cursor-user-skill-discovery.md`.

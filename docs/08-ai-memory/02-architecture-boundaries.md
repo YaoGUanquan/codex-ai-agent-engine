@@ -49,5 +49,5 @@
 
 ## 全局安装 vs 项目数据
 
-- 全局：当前 OS 用户的 dispatcher、skills、personal plugin、journal、backups（`~/.agents/ai-agent-engine-codex`）。
+- 全局：当前 OS 用户的 dispatcher、personal plugin、journal、backups（`~/.agents/ai-agent-engine-codex`）；Codex 发现面是 `$HOME/plugins/ai-agent-engine-codex`；Cursor 发现面是 `$HOME/.cursor/skills/ae-*` 真实拷贝。
 - 项目本地：`AGENTS.md`、`docs/**`、AI memory、过程记录、Git 历史；不因全局安装而迁移。

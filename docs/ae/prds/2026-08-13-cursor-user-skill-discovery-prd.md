@@ -1,6 +1,6 @@
 ---
 type: prd
-status: review-passed
+status: completed
 date: 2026-08-13
 topic: cursor-user-skill-discovery
 format: human-readable-requirements
