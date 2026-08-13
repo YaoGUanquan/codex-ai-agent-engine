@@ -4,6 +4,14 @@ This file is the complete release history of AI Agent Engine for Codex (since 0.
 
 中文版本: [CHANGELOG.md](CHANGELOG.md)
 
+### 0.3.29 (2026-08-13)
+- After publishing the Codex personal plugin, global apply creates current-user `~/.cursor/skills/ae-*` directory junctions (or POSIX directory symlinks) pointing at `$HOME/plugins/ai-agent-engine-codex/skills/<name>`, so Cursor and Codex discover the same AE skills. It does not recreate `~/.agents/skills` and never writes `~/.cursor/skills-cursor`.
+- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`. These checks prove isolated-home link creation, foreign Cursor skill retention, failed-batch rollback, and preview/doc contract consistency. They do not prove the current Cursor chat's `/ae` palette refreshed; open a new Cursor thread to observe slash discovery.
+
+### 0.3.28 (2026-08-13)
+- Global refresh: synchronize the root package and plugin manifest versions, then refresh the current user's AE plugin and dispatcher through the personal marketplace global-install flow; project-level docs, source, and user project data are unchanged.
+- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`. These checks prove version, skill mirror, install contracts, and global preview/install flow consistency; they do not represent runtime acceptance in target projects.
+
 ### 0.3.27 (2026-08-13)
 - `ae-test-api` and the shared local smoke gate now build a sanitized request-context manifest before resolving `project runner -> single-request curl fallback -> blocked`. The pure contract requires an input provider for every applicable header, matching path/query/body same-context aliases, non-static lifetimes for derived values, and a project runner for non-GET methods unless the contract proves they are read-only.
 - Add `plugins/ai-agent-engine-codex/scripts/request-context-contract.mjs` to validate context completeness, same-process credential visibility, runner method/path/assertion coverage, fallback eligibility, and `passed/request-context/client-config/transport/auth/business` outcomes (2xx is `passed`, 5xx is `transport`) without network access or secrets. The API verification record template now includes Request Context, Carrier, and Outcome fields.

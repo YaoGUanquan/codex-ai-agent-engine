@@ -60,6 +60,14 @@ node scripts/ae-tools.mjs help
 
 完整历史见 [CHANGELOG.md](CHANGELOG.md)；本节仅保留最近 5 个版本，发布时超出窗口的条目迁移到 CHANGELOG。
 
+### 0.3.29（2026-08-13）
+- 全局安装在发布 Codex personal 插件之后，于当前用户 `~/.cursor/skills/ae-*` 创建指向 `$HOME/plugins/ai-agent-engine-codex/skills/<name>` 的目录联接，使 Cursor 与 Codex 都能发现同一套 AE 技能；不恢复 `~/.agents/skills`，也不写入 `~/.cursor/skills-cursor`。
+- 验证：`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`。这些检查证明安装器在隔离 home 中创建联接、保留无关 Cursor 技能、回滚失败批次，以及预览/文档契约一致；不代表当前 Cursor 会话的 `/ae` 列表已刷新，新开 Cursor 对话后才能观察 slash 发现。
+
+### 0.3.28（2026-08-13）
+- 全局更新：同步根包与插件 manifest 版本，并通过个人 marketplace 的全局安装流程刷新当前用户的 AE 插件与 dispatcher；不改变项目级文档、源码或用户项目数据。
+- 验证：`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`。这些检查证明版本、技能镜像、安装契约和全局预览/安装流程一致，不代表目标项目运行时验收。
+
 ### 0.3.27（2026-08-13）
 - `ae-test-api` 与共享本地冒烟门禁改为先构建脱敏 request-context manifest，再按 `项目 runner -> 单请求 curl fallback -> blocked` 选择执行载体；纯函数强制适用 header 必须有 provider、path/query/body same-context 别名一致、动态值不得使用 static lifetime，且非 GET 默认不能走通用 curl。
 - 新增纯函数 `plugins/ai-agent-engine-codex/scripts/request-context-contract.mjs`：无网络、无密钥地校验上下文完整性、同进程凭据可见性、runner 的 method/path/assertion 覆盖证据、fallback 资格，以及 `passed/request-context/client-config/transport/auth/business` 分类（2xx 为 passed，5xx 为 transport）；验证记录模板补齐 Request Context、Carrier、Outcome 字段。
@@ -74,19 +82,6 @@ node scripts/ae-tools.mjs help
 - 统一需求产物目录声明：能力目录中 `ae-brainstorm` 的 `artifactPath` 由 `docs/ae/brainstorms` 改为 `docs/ae/prds`；`ae-help` 工件契约的 Requirements 行与需求 frontmatter 示例改用 `docs/ae/prds` 与 `ae-prd` 捕获形状（`type: prd`），计划 `origin` 示例同步，并注明 legacy 需求可保留在 brainstorms；`ae-review` 文档评审默认搜索范围加入 `docs/ae/prds`。顶层 `artifactPaths` 与 init 模板自 0.3.22 已正确，保持不变；`docs/ae/brainstorms` 仍为探索性记录目录（`artifactPaths.ideas`）。
 - 新增回归断言锁定目录声明一致性（catalog、工件契约、scope-detection 的源与镜像）；work 参照项目存量 `docs/ae/README.md` 的旧目录说明已同步修正（init 存量文件，插件更新不会自动重写）。
 - 验证：`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`。这些检查证明技能文档、镜像与分发合同一致，不代表任何目标项目的运行时验收。
-
-### 0.3.24（2026-08-11）
-- `tidy` 归档冲突从"跳过"升级为无损按文件合并：目标已存在时缺失文件移入、内容相同去重、同名不同内容带 `.from-active-<日期>` 后缀并入，源目录清空后删除；新增 `memoryBudget` 报告（默认 15KB，`--memory-budget-kb` 可调，仅报告、永不移动记忆文件）。
-- 更新后自动维护：`update-project` 安装完成后通过目标项目的 `scripts/ae-tools.mjs` 自动执行 `tidy --apply`（done 记录、空目录、超期证据；永不 stale 归档），摘要并入更新输出 `maintenance` 字段；`--no-tidy` 跳过；CLI 缺失或执行失败降级为 skipped 且不阻断更新。INSTALL 双语、README 更新章节与 `ae-update` skill 同步说明。
-- 治理执行：work 参照项目 2 个同名归档冲突目录经合并清零，记忆蒸馏交接（memory-distillation）已放入该项目待其会话收尾后执行；Light Path 与碰撞触发的校准信号补入 0.3.23 经验笔记。
-- 验证：`npm test`（新增冲突合并、记忆预算、自动维护共 5 个用例）、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`。这些检查证明 CLI 行为与分发合同一致；更新自动维护以本地 git 仓库模拟为证据边界，不代表真实远端仓库的端到端更新验收。
-
-### 0.3.23（2026-08-11）
-- 新增 `tidy` 维护命令：对 `docs/00-process/active/` 过程记录做五态分类（done/empty/stale/archived-pointer/active），对 `docs/ae/gates/` 与 `docs/ae/evidence/artifacts/` 按保留期（默认 3 个月）检测超期证据；默认 dry-run，`--apply` 归档 done 记录、删除空目录、迁移超期证据并同步重写 ledger 引用；`--archive-stale`、`--stale-days`、`--retention-months` 控制口径；归档目标已存在时安全跳过。
-- 修整 `parseOptions`：重复 `--key value` 累积为数组，`gate --validation` 多次传参逐条记录验证命令。
-- skill 精修四项：`ae-prd` capture 模板新增 `## Perspective Collision (Conditional)` 落点小节，`ae-brainstorm` 碰撞段增加确定性触发条件（S1-S2 单一方向跳过、默认至多四视角）并指明落点；`ae-review` 新增 Light Path 轻量档（≤3 文件、不跨公共 API/数据/安全/依赖边界、非交付门禁时免 review-package/review-contract 单 lane 直审）与 persona 速选提示；`ae-brainstorm`/`ae-prd`/`ae-review` 的证据分层词汇统一指向 `ae-plan/references/validation-evidence-profile.md` 唯一定义；`ae-handoff` 与 `ae-lfg` 统一交接路由（任务内交接进过程目录，跨会话独立交接进 `docs/ae/handoffs/`）。
-- 记忆维护规则模板（en/zh-CN）与本仓规则新增体积与蒸馏预算（单文件约 15KB、决策日志按年轮换、季度 reviewStatus 盘点、退役主题归档）。
-- 验证：`npm test`（新增 gate 累积与 tidy 用例，共 121 项）、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`。这些检查证明 CLI 行为、技能文档与分发合同一致；tidy 对本仓与 work 参照项目的实际治理以命令 JSON 输出为证据，不代表其他项目的运行时验收。
 
 ## 能力清单
 
@@ -232,7 +227,7 @@ node scripts\install-global.mjs apply --manifest $manifest --retire-modified --a
 
 默认情况下，任何 `owned: false`、`deferred` 或未知组件都会阻止 apply；不要手工删除项目级文件。`--retire-modified` 必须同时出现在 preview 和 apply 中，它表示“先完整备份，再退役已修改或无法指纹确认的历史 AE 副本”。迁移只处理 manifest 中的 consumer；分发源仓库和 deferred 项目必须排除。`docs/**`、`AGENTS.md`、AI memory、图谱和 archive 始终留在各自项目根目录。备份与 journal 默认保留，只有显式 `purge --operation <id> --apply` 才删除。
 
-成功后，从任意项目根运行用户级 dispatcher，并在新的 Codex 会话中检查个人插件：
+成功后，从任意项目根运行用户级 dispatcher，并在新的 Codex 会话和新的 Cursor 对话中检查技能：
 
 ```powershell
 node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" help
@@ -240,7 +235,7 @@ node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" init --project-root (Get-L
 codex plugin list
 ```
 
-每个操作系统用户都有自己的 `$HOME`、dispatcher、备份和 personal marketplace；安装器不会扫描或修改其他用户的目录，也不会直接修改 `.codex/plugins/cache`。分发源仓库将维护镜像保存在 `.ae-source/skills`，避免与“个人”插件重复发现；consumer 项目迁移后只应使用用户级个人插件。
+每个操作系统用户都有自己的 `$HOME`、dispatcher、备份和 personal marketplace；安装器不会扫描或修改其他用户的目录，也不会直接修改 `.codex/plugins/cache`。Codex 通过 personal 插件发现 AE 技能；Cursor 通过 `~/.cursor/skills/ae-*` 联接到同一插件 skill 目录。分发源仓库将维护镜像保存在 `.ae-source/skills`，避免与个人插件重复发现；consumer 项目迁移后只应使用用户级分发。已打开的对话不会自动刷新技能目录。
 
 ## 初始化项目文档和记忆库
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { closeSync, cpSync, existsSync, fsyncSync, mkdirSync, openSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from 'node:fs'
+import { closeSync, cpSync, existsSync, fsyncSync, mkdirSync, openSync, readFileSync, readdirSync, renameSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { basename, dirname, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -8,9 +8,17 @@ import { homedir } from 'node:os'
 import {
   aeSkillComponents,
   allowedConsumerComponents,
+  assertCursorLinkTargetAllowed,
   buildFirstBatchManifest,
+  classifyCursorSkills,
+  currentSkillNames,
+  cursorLinkType,
+  expectedCursorSkillTarget,
   fingerprintPath,
+  inspectCursorSkillEntry,
   isInside,
+  isLinkEntry,
+  isOwnedCursorSkillLink,
   normalizeManifest,
   operationId,
   pluginName,
@@ -39,11 +47,13 @@ function preview({ opts, repoRoot, paths }) {
   return {
     status: 'preview',
     operationId: operation,
-    confirmation: confirmationFor(normalized, opts),
+    confirmation: confirmationFor(normalized, opts, paths, repoRoot),
     homeRoot: paths.homeRoot,
     runtimeRoot: paths.runtimeRoot,
     personalPluginRoot: paths.personalPluginRoot,
     personalMarketplace: paths.personalMarketplace,
+    cursorSkillsRoot: paths.cursorSkillsRoot,
+    cursorSkills: classifyCursorSkills(paths, repoRoot),
     projects: normalized.projects.map((project) => ({
       root: project.root,
       role: project.role,
@@ -54,6 +64,7 @@ function preview({ opts, repoRoot, paths }) {
       'Apply requires --apply --operation <preview-id> --confirm <confirmation>; operation IDs are recorded only when apply begins.',
       'Project docs, AGENTS.md, source code, distribution-source, and deferred roots are outside the cleanup set.',
       'Modified or unknown components require the additional --retire-modified authorization and are always backed up before retirement.',
+      'Cursor skill discovery uses ~/.cursor/skills/ae-* links; a new Cursor chat is required to observe /ae after apply.',
     ],
   }
 }
@@ -65,7 +76,7 @@ function apply({ opts, repoRoot, paths, commandRunner }) {
   recoverInterrupted(paths)
   const manifest = loadManifest(opts.manifest, repoRoot)
   const normalized = normalizeManifest(manifest, { repoRoot, home: paths.homeRoot, allowCustomConsumers: Boolean(opts.manifest) })
-  if (opts.confirm !== confirmationFor(normalized, opts)) throw new Error('preview confirmation does not match the current manifest, source root, or retirement authorization')
+  if (opts.confirm !== confirmationFor(normalized, opts, paths, repoRoot)) throw new Error('preview confirmation does not match the current manifest, source root, or retirement authorization')
   const operation = { id: opts.operation, status: 'in-progress', phase: 'preflight', createdAt: new Date().toISOString(), paths, sourceRoot: normalized.sourceRoot, manifest: normalized, changes: [], failAt: opts['fail-at'] || null }
   const journal = journalPath(paths, operation.id)
   if (existsSync(journal)) throw new Error(`operation journal already exists: ${operation.id}`)
@@ -95,6 +106,10 @@ function apply({ opts, repoRoot, paths, commandRunner }) {
     operation.phase = 'activate-global-runtime'
     activateGlobalRuntime(operation, repoRoot)
     verifyProtectedProjectState(operation.protectedProjectState)
+    operation.phase = 'publish-cursor-skills'
+    publishCursorSkills(operation, repoRoot)
+    writeJournal(journal, operation)
+    injectFailure(operation, 'publish-cursor-skills')
     operation.phase = 'register-codex-plugin'
     registerCodexPlugin(operation, commandRunner)
     removeStage(operation)
@@ -164,7 +179,7 @@ function recoverInterrupted(paths) {
 }
 
 function ensureUserTargetsAreSafe(paths, repoRoot, opts) {
-  if (!isInside(paths.homeRoot, paths.agentsRoot) || !isInside(paths.homeRoot, paths.runtimeRoot) || !isInside(paths.homeRoot, paths.personalPluginsRoot) || !isInside(paths.homeRoot, paths.personalPluginRoot) || !isInside(paths.homeRoot, paths.personalMarketplace)) throw new Error('global paths escape the current user home')
+  if (!isInside(paths.homeRoot, paths.agentsRoot) || !isInside(paths.homeRoot, paths.runtimeRoot) || !isInside(paths.homeRoot, paths.personalPluginsRoot) || !isInside(paths.homeRoot, paths.personalPluginRoot) || !isInside(paths.homeRoot, paths.personalMarketplace) || !isInside(paths.homeRoot, paths.cursorSkillsRoot) || !isInside(paths.homeRoot, paths.cursorReservedSkillsRoot)) throw new Error('global paths escape the current user home')
   if (resolve(repoRoot) === paths.runtimeRoot || isInside(paths.runtimeRoot, resolve(repoRoot)) || resolve(repoRoot) === paths.personalPluginRoot || isInside(paths.personalPluginRoot, resolve(repoRoot))) throw new Error('distribution source must not overlap a user runtime or plugin root')
   const expectedRuntimeEntries = new Set(['operations', 'backups', 'staging', 'runtime', 'bin'])
   const unexpectedRuntimeEntries = existsSync(paths.runtimeRoot)
@@ -186,6 +201,11 @@ function ensureUserTargetsAreSafe(paths, repoRoot, opts) {
       if (opts['retire-modified'] === true) continue
       throw new Error(`existing user skill is unknown or modified: ${target}`)
     }
+  }
+  for (const item of classifyCursorSkills(paths, repoRoot)) {
+    if (item.status === 'missing' || item.status === 'current-release verified') continue
+    if (opts['retire-modified'] === true) continue
+    throw new Error(`existing user skill is unknown or modified: ${resolve(paths.cursorSkillsRoot, item.name)}`)
   }
 }
 
@@ -341,6 +361,68 @@ function writePersonalMarketplace(operation) {
   replaceFileWithBackup(operation, target, `${JSON.stringify(next, null, 2)}\n`, 'personal-marketplace.json')
 }
 
+function publishCursorSkills(operation, repoRoot) {
+  const names = currentSkillNames(repoRoot)
+  mkdirSync(operation.paths.cursorSkillsRoot, { recursive: true })
+  for (const dest of aeSkillComponents(operation.paths.cursorSkillsRoot)) {
+    const name = basename(dest)
+    const expected = expectedCursorSkillTarget(operation.paths.personalPluginRoot, name)
+    const entry = inspectCursorSkillEntry(dest)
+    if (names.includes(name) && isOwnedCursorSkillLink(entry, expected)) continue
+    backupCursorSkillEntry(operation, dest, entry)
+  }
+  for (const name of names) {
+    const dest = resolve(operation.paths.cursorSkillsRoot, name)
+    const expected = expectedCursorSkillTarget(operation.paths.personalPluginRoot, name)
+    const entry = inspectCursorSkillEntry(dest)
+    if (isOwnedCursorSkillLink(entry, expected)) continue
+    if (entry.kind !== 'missing') backupCursorSkillEntry(operation, dest, entry)
+    createCursorSkillLink(operation, dest, expected)
+  }
+}
+
+function backupCursorSkillEntry(operation, dest, entry) {
+  if (entry.kind === 'link' || isLinkEntry(dest)) {
+    const backup = resolve(backupPath(operation.paths, operation.id), `cursor-skills/${basename(dest)}.link.json`)
+    mkdirSync(dirname(backup), { recursive: true })
+    const record = { kind: 'link', target: entry.target, linkType: cursorLinkType() }
+    writeFileSync(backup, `${JSON.stringify(record)}\n`, 'utf8')
+    operation.changes.push({
+      source: dest,
+      target: dest,
+      backup,
+      fingerprint: { sha256: createHash('sha256').update(String(entry.target || '')).digest('hex'), kind: 'link' },
+      kind: 'link-replaced',
+      linkTarget: entry.target,
+      linkType: cursorLinkType(),
+    })
+    writeJournal(operation.journal, operation)
+    unlinkCursorSkill(dest)
+    return
+  }
+  moveToBackup(operation, dest, `cursor-skills/${basename(dest)}`)
+}
+
+function createCursorSkillLink(operation, dest, target) {
+  assertCursorLinkTargetAllowed(operation.paths.personalPluginRoot, target)
+  if (!existsSync(target)) throw new Error(`cursor skill link target is missing: ${target}`)
+  mkdirSync(dirname(dest), { recursive: true })
+  operation.changes.push({ source: null, target: dest, backup: null, kind: 'created-link' })
+  writeJournal(operation.journal, operation)
+  symlinkSync(target, dest, cursorLinkType())
+}
+
+function unlinkCursorSkill(path) {
+  if (!existsSync(path)) return
+  if (isLinkEntry(path)) {
+    unlinkSync(path)
+    if (existsSync(path)) throw new Error(`failed to remove cursor skill link: ${path}`)
+    return
+  }
+  rmSync(path, { recursive: true, force: false })
+  if (existsSync(path)) throw new Error(`failed to remove cursor skill path: ${path}`)
+}
+
 function personalMarketplaceEntry() {
   return {
     name: pluginName,
@@ -412,6 +494,7 @@ function quoteWindowsArg(value) {
 
 function moveToBackup(operation, source, backupRelative) {
   if (!existsSync(source)) return
+  if (isLinkEntry(source)) throw new Error(`refusing to recursively back up a link: ${source}`)
   const before = fingerprintPath(source)
   const backup = resolve(backupPath(operation.paths, operation.id), backupRelative)
   mkdirSync(dirname(backup), { recursive: true })
@@ -425,13 +508,27 @@ function moveToBackup(operation, source, backupRelative) {
 
 function rollback(operation) {
   for (const change of [...(operation.changes || [])].reverse()) {
+    if (change.kind === 'created-link') {
+      if (existsSync(change.target)) unlinkCursorSkill(change.target)
+      continue
+    }
     if (change.kind === 'created') {
-      if (existsSync(change.target)) rmSync(change.target, { recursive: fingerprintPath(change.target)?.kind === 'directory', force: false })
+      if (existsSync(change.target)) {
+        if (isLinkEntry(change.target)) unlinkCursorSkill(change.target)
+        else rmSync(change.target, { recursive: fingerprintPath(change.target)?.kind === 'directory', force: false })
+      }
+      continue
+    }
+    if (change.kind === 'link-replaced') {
+      if (existsSync(change.target)) unlinkCursorSkill(change.target)
+      mkdirSync(dirname(change.target), { recursive: true })
+      symlinkSync(change.linkTarget, change.target, change.linkType || cursorLinkType())
       continue
     }
     if (!change.backup || !existsSync(change.backup)) throw new Error(`backup is missing: ${change.backup}`)
     if (change.kind === 'replaced' && existsSync(change.target)) rmSync(change.target, { force: false })
     else if (existsSync(change.target)) {
+      if (isLinkEntry(change.target)) throw new Error(`refusing to overwrite unexpected restore target: ${change.target}`)
       if (fingerprintPath(change.target)?.kind === 'directory' && readDirectory(change.target).length === 0) rmSync(change.target, { recursive: true, force: false })
       else throw new Error(`refusing to overwrite unexpected restore target: ${change.target}`)
     }
@@ -465,8 +562,12 @@ function loadManifest(path, repoRoot) {
   return path ? readJson(resolve(path)) : buildFirstBatchManifest(repoRoot)
 }
 
-function confirmationFor(manifest, opts = {}) {
-  return createHash('sha256').update(JSON.stringify({ manifest, retireModified: opts['retire-modified'] === true })).digest('hex')
+function confirmationFor(manifest, opts = {}, paths = null, repoRoot = null) {
+  return createHash('sha256').update(JSON.stringify({
+    manifest,
+    retireModified: opts['retire-modified'] === true,
+    cursorSkills: paths && repoRoot ? classifyCursorSkills(paths, repoRoot) : [],
+  })).digest('hex')
 }
 
 function injectFailure(operation, phase) {
