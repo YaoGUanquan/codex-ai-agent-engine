@@ -6,6 +6,7 @@ Use this reference to select endpoint-scoped API evidence and write one sanitize
 
 - Scope Selection
 - Contract Source Precedence
+- Request Context Manifest
 - Evidence Tiers
 - Live Call Boundary
 - Retention Rules
@@ -29,7 +30,7 @@ Run the approved workflow path before boundary cases when both apply. Do not req
 ## Contract Source Precedence
 
 1. Use an authoritative OpenAPI or Swagger definition when one exists.
-2. Otherwise use the repository controller, DTO, handler, or equivalent public contract.
+2. Otherwise use the repository controller, DTO, handler, and applicable authentication, gateway, filter, or interceptor contract.
 3. Use tests, fixtures, and observed responses only to support assertions. They cannot silently redefine a field, requiredness, status, or error shape.
 
 When sources contradict each other, report a validation gap instead of merging them. Retain repository-relative source paths and stable symbols or operation references only.
@@ -49,11 +50,28 @@ When sources contradict each other, report a validation gap instead of merging t
 
 A passing lower tier cannot satisfy a higher-tier claim.
 
+## Request Context Manifest
+
+Before selecting a client, record a sanitized manifest for every request input. The manifest is not a second API schema; it records how the smoke obtains and validates values from the authoritative target contract.
+
+| Field | Required content |
+| --- | --- |
+| location | `header`, `cookie`, `path`, `query`, `body`, or `prior-response` |
+| requiredness | required, optional, or conditional rule |
+| source | repository-relative OpenAPI/controller/auth/gateway/filter/interceptor/runner source |
+| classification | static non-secret fixture, user-controlled opaque secret, environment non-secret context, runtime-derived, or prior-response-derived |
+| provider | runner, opaque file reference, same-process environment, fixture, or prior response |
+| validation | presence, type/format, allowed values, cross-field consistency, or freshness rule |
+| lifetime | static, request, step, or one-time |
+| redaction | what may be retained in sanitized evidence; never retain live values |
+
+Check applicable authentication, tenant/organization/school/workspace scope, content negotiation/media type, locale, version/concurrency, idempotency, signature/timestamp/nonce, CSRF/session, and gateway context headers. Explicitly record why an inapplicable category is omitted. Missing providers, source contradictions, stale reusable values, and locally decidable path/query/body conflicts block live execution before the client is invoked.
+
 ## Live Call Boundary
 
 Before a live local API call, read `../../ae-work/references/local-runtime-smoke-gate.md` and, when a credential handoff is needed, `../../ae-work/references/request-config-template.md`. Do not duplicate or weaken their restart, authorization, secret-reference, request-template, request classification, or failure handling rules. The handoff file must be a non-empty UTF-8 fillable template with `REPLACE_WITH_LOCAL_TOKEN`; never leave the user an empty script.
 
-For an explicitly authorized mutation, use an isolated synthetic fixture class and clean up only through the target's supported pattern when appropriate. If the API exposes a read surface, record a sanitized read-back assertion. If it does not, state the hidden-effect limitation; do not substitute direct database state for a public API claim.
+For an explicitly authorized mutation, use an isolated synthetic fixture class and clean up only through the target's supported pattern when appropriate. If the API exposes a read surface, record a sanitized read-back assertion. If it does not, state the hidden-effect limitation; do not substitute direct database state for a public API claim. Dynamic revisions, ETags, timestamps, nonces, signatures, CSRF values, and response-derived identifiers must be acquired or generated at point of use by the selected runner.
 
 ## Retention Rules
 
@@ -61,11 +79,13 @@ Allowed record content:
 
 - path templates, HTTP methods, operation/symbol references, contract source paths, field names, types, requiredness, and semantic constraints;
 - non-secret fixture class, operation classification, expected/actual summary, evidence tier, status, and sanitized command form or observation;
+- request-context classifications, carrier class, preparation status, failure category, and bounded retry/recovery action;
 - repository-relative test/source paths, known unrelated failure reason, blocked or unverified proof, and correction/supersession references.
 
 Forbidden record content:
 
 - concrete URLs, hosts, resource IDs, query or body values, raw requests or responses, headers, cookies, tokens, credentials, secret-reference paths, personal data, stack traces, and opaque identifiers;
+- dynamic revisions, ETags, timestamps, nonces, signatures, CSRF values, and response-derived identifiers;
 - original command lines that contain any forbidden content.
 
 A sanitized command form may retain the executable name, non-secret flags, path template, and placeholders. It must omit secret/config paths, headers, cookies, concrete values, private hosts, and opaque IDs. If safe summarization is impossible, mark evidence blocked and do not write a success claim.
@@ -95,6 +115,24 @@ topic: <sanitized-topic>
 | Method | Path template | Operation reference | Classification | Coverage status |
 | --- | --- | --- | --- | --- |
 | `<METHOD>` | `<path template>` | `<operation or symbol>` | read-only | covered |
+
+## Request Context
+
+| Location | Name | Requiredness | Classification | Provider | Lifetime | Header category or omission |
+| --- | --- | --- | --- | --- | --- | --- |
+| header | `<sanitized name>` | required | user-controlled opaque secret | opaque file reference | request | authentication |
+
+## Carrier
+
+- Kind: project-runner | single-request-curl | blocked
+- Source: `<repository-relative runner or template path>`
+- Coverage: `<METHOD> <path template> — <repository-relative assertion source>`
+- Preparation status: ready | blocked
+
+## Outcome
+
+- Failure category: passed | request-context | client-config | transport | auth | business
+- Retry hypothesis: `<sanitized>` or none
 
 ## Field Summary
 

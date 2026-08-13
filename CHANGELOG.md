@@ -4,6 +4,11 @@
 
 English: [CHANGELOG.en.md](CHANGELOG.en.md)
 
+### 0.3.27（2026-08-13）
+- `ae-test-api` 与共享本地冒烟门禁改为先构建脱敏 request-context manifest，再按 `项目 runner -> 单请求 curl fallback -> blocked` 选择执行载体；纯函数强制适用 header 必须有 provider、path/query/body same-context 别名一致、动态值不得使用 static lifetime，且非 GET 默认不能走通用 curl。
+- 新增纯函数 `plugins/ai-agent-engine-codex/scripts/request-context-contract.mjs`：无网络、无密钥地校验上下文完整性、同进程凭据可见性、runner 的 method/path/assertion 覆盖证据、fallback 资格，以及 `passed/request-context/client-config/transport/auth/business` 分类（2xx 为 passed，5xx 为 transport）；验证记录模板补齐 Request Context、Carrier、Outcome 字段。
+- 验证：`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`。这些检查证明纯契约逻辑、技能文档、镜像与分发一致，不代表任何目标项目的认证接口、实际 header 值或有状态冒烟已经通过。
+
 ### 0.3.26（2026-08-11）
 - 前端指导补旧栈最小对照节：`svelte-guidance.md` 增 Svelte 4（stores 与 `$:` 反应语句）对照、`angular-guidance.md` 增 NgModule 时代对照、`vue-guidance.md` 增 Options API 对照，均与现代基线同文件并存，文件首行 stack-conditional 语句与"匹配仓库既有风格"兜底不变；新增回归用例锁定对照节与镜像一致（先红后绿）。
 - 新建维护者映射说明 `docs/ae/references/frontend-quality-contract-map.md`：登记 `web-ui-quality.md`、`ae-review` Frontend Components / Styles 镜头、`browser-acceptance.md` 之间 5 组对应关系、两处空档与既有测试锁；映射为描述性文档，不构成第 4 份契约面，不建校验脚本。本批为路线图第 7、10 条的提前收尾（用户决定，原触发条件未命中；见决策日志 2026-08-11 条目）。

@@ -17,7 +17,9 @@ Never create an empty file, a comments-only stub without request fields, or a te
 
 ## Curl Config Shape
 
-Prefer a curl `-K` / `--config` file when the session can invoke curl by absolute config path without echoing contents:
+Use this curl `-K` / `--config` shape only after the smoke gate proves the request is one bounded operation with static or safely referenced context. It is not valid for GET -> PUT -> GET, revision acquisition, read-back, restoration, dynamic signatures/nonces, or cross-field validation. Prefer a project-owned runner for those workflows.
+
+When a single-request fallback is eligible and the session can invoke curl by absolute config path without echoing contents, use:
 
 ```text
 # AE local smoke request config
@@ -39,6 +41,8 @@ request = "GET"
 ```
 
 Replace `<port>` and `<path-template>` with the bounded local values for the approved smoke. Keep query or body values out unless they are non-secret fixtures required by the contract. For a POST that is still read-only by contract, keep `request = "POST"` and include only the approved non-secret fixture body through curl-supported config fields.
+
+The generic template may include only request-context fields whose provider and validation were already resolved. Do not hardcode revisions, ETags, timestamps, nonces, signatures, CSRF values, or response-derived identifiers. Header categories such as tenant/school scope, locale, API version, idempotency, or gateway context must be added only when the authoritative contract marks them applicable; otherwise record the omission reason in the verification record.
 
 ## Handoff Rules
 

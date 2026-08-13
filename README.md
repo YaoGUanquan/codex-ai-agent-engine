@@ -60,6 +60,11 @@ node scripts/ae-tools.mjs help
 
 完整历史见 [CHANGELOG.md](CHANGELOG.md)；本节仅保留最近 5 个版本，发布时超出窗口的条目迁移到 CHANGELOG。
 
+### 0.3.27（2026-08-13）
+- `ae-test-api` 与共享本地冒烟门禁改为先构建脱敏 request-context manifest，再按 `项目 runner -> 单请求 curl fallback -> blocked` 选择执行载体；纯函数强制适用 header 必须有 provider、path/query/body same-context 别名一致、动态值不得使用 static lifetime，且非 GET 默认不能走通用 curl。
+- 新增纯函数 `plugins/ai-agent-engine-codex/scripts/request-context-contract.mjs`：无网络、无密钥地校验上下文完整性、同进程凭据可见性、runner 的 method/path/assertion 覆盖证据、fallback 资格，以及 `passed/request-context/client-config/transport/auth/business` 分类（2xx 为 passed，5xx 为 transport）；验证记录模板补齐 Request Context、Carrier、Outcome 字段。
+- 验证：`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`。这些检查证明纯契约逻辑、技能文档、镜像与分发一致，不代表任何目标项目的认证接口、实际 header 值或有状态冒烟已经通过。
+
 ### 0.3.26（2026-08-11）
 - 前端指导补旧栈最小对照节：`svelte-guidance.md` 增 Svelte 4（stores 与 `$:` 反应语句）对照、`angular-guidance.md` 增 NgModule 时代对照、`vue-guidance.md` 增 Options API 对照，均与现代基线同文件并存，文件首行 stack-conditional 语句与"匹配仓库既有风格"兜底不变；新增回归用例锁定对照节与镜像一致（先红后绿）。
 - 新建维护者映射说明 `docs/ae/references/frontend-quality-contract-map.md`：登记 `web-ui-quality.md`、`ae-review` Frontend Components / Styles 镜头、`browser-acceptance.md` 之间 5 组对应关系、两处空档与既有测试锁；映射为描述性文档，不构成第 4 份契约面，不建校验脚本。本批为路线图第 7、10 条的提前收尾（用户决定，原触发条件未命中；见决策日志 2026-08-11 条目）。
@@ -82,12 +87,6 @@ node scripts/ae-tools.mjs help
 - skill 精修四项：`ae-prd` capture 模板新增 `## Perspective Collision (Conditional)` 落点小节，`ae-brainstorm` 碰撞段增加确定性触发条件（S1-S2 单一方向跳过、默认至多四视角）并指明落点；`ae-review` 新增 Light Path 轻量档（≤3 文件、不跨公共 API/数据/安全/依赖边界、非交付门禁时免 review-package/review-contract 单 lane 直审）与 persona 速选提示；`ae-brainstorm`/`ae-prd`/`ae-review` 的证据分层词汇统一指向 `ae-plan/references/validation-evidence-profile.md` 唯一定义；`ae-handoff` 与 `ae-lfg` 统一交接路由（任务内交接进过程目录，跨会话独立交接进 `docs/ae/handoffs/`）。
 - 记忆维护规则模板（en/zh-CN）与本仓规则新增体积与蒸馏预算（单文件约 15KB、决策日志按年轮换、季度 reviewStatus 盘点、退役主题归档）。
 - 验证：`npm test`（新增 gate 累积与 tidy 用例，共 121 项）、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`。这些检查证明 CLI 行为、技能文档与分发合同一致；tidy 对本仓与 work 参照项目的实际治理以命令 JSON 输出为证据，不代表其他项目的运行时验收。
-
-### 0.3.22（2026-08-11）
-- 知识库治理第一批：`docs/ae/prds/` 为需求正典目录；`ae-brainstorm` 持久化需求时复用 `ae-prd` 捕获契约并写入 `docs/ae/prds/`，删除重复的 `requirements-capture.md`；`recovery` 扫描 PRD 产物；init 创建 `docs/ae/prds` 且不再创建 `docs/ai-memory` 兼容指针（存量项目不动）。
-- `review-package` 改为指纹产物（提交列表、diffstat、清单、base/head SHA 与 `git diff -U10` 重建命令），不再嵌入全量 diff 正文；init/archive 模板与 `docs/00-process/templates/archive-rules.md` 新增 gate/evidence 3 个月保留策略。
-- 新增 `docs/external-samples/README.md` 登记样本语料用途与保留条件。
-- 验证：`node scripts/check-skill-mirror.mjs`、`node scripts/check-release-notes.mjs`、`npm test`、`npm run check`、`npm run check:smoke`。这些检查只证明 CLI、技能文档与分发合同一致，不代表目标项目 init 或审查工作流的运行时验收。
 
 ## 能力清单
 

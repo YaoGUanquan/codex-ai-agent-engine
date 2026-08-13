@@ -62,6 +62,7 @@ try {
     'plugins/ai-agent-engine-codex/scripts/check-ae-artifacts.mjs',
     'plugins/ai-agent-engine-codex/scripts/check-memory-knowledge-contract.mjs',
     'plugins/ai-agent-engine-codex/scripts/memory-knowledge-contract.mjs',
+    'plugins/ai-agent-engine-codex/scripts/request-context-contract.mjs',
     'plugins/ai-agent-engine-codex/.codex-plugin/plugin.json',
     '.agents/skills/ae-prd/agents/openai.yaml',
     '.agents/skills/ae-work-report/agents/openai.yaml',
