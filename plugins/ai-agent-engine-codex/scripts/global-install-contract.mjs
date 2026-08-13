@@ -118,14 +118,19 @@ export function inspectCursorSkillEntry(path) {
   return { kind: 'directory', fingerprint: fingerprintPath(path) }
 }
 
-export function isOwnedCursorSkillLink(entry, expectedTarget) {
+export function isOwnedCursorSkillCopy(entry, sourceSkillPath) {
+  if (entry?.kind !== 'directory' || !entry.fingerprint || !existsSync(sourceSkillPath)) return false
+  return entry.fingerprint.sha256 === fingerprintPath(sourceSkillPath).sha256
+}
+
+export function isLegacyCursorSkillLink(entry, expectedTarget) {
   return entry?.kind === 'link' && resolve(entry.target) === resolve(expectedTarget)
 }
 
 export function assertCursorLinkTargetAllowed(personalPluginRoot, target) {
   const skillsRoot = guardedChild(personalPluginRoot, 'skills')
   if (!isInside(skillsRoot, target) || resolve(target) === resolve(skillsRoot)) {
-    throw new Error(`cursor skill link target escapes personal plugin skills: ${target}`)
+    throw new Error(`cursor skill copy source escapes personal plugin skills: ${target}`)
   }
 }
 
@@ -134,17 +139,25 @@ export function classifyCursorSkills(paths, repoRoot) {
   const extras = aeSkillComponents(paths.cursorSkillsRoot)
     .map((path) => basename(path))
     .filter((name) => !names.includes(name))
-  return [...names, ...extras].map((name) => classifyCursorSkill(paths, name, names.includes(name)))
+  return [...names, ...extras].map((name) => classifyCursorSkill(paths, repoRoot, name, names.includes(name)))
 }
 
-function classifyCursorSkill(paths, name, inRelease) {
+function classifyCursorSkill(paths, repoRoot, name, inRelease) {
   const dest = resolve(paths.cursorSkillsRoot, name)
   const entry = inspectCursorSkillEntry(dest)
   if (!inRelease) return { name, status: 'modified', kind: entry.kind, target: entry.target || null }
   if (entry.kind === 'missing') return { name, status: 'missing', kind: 'missing' }
+  const source = cursorSkillSource(paths, repoRoot, name)
   const expected = resolve(paths.personalPluginRoot, 'skills', name)
-  if (isOwnedCursorSkillLink(entry, expected)) return { name, status: 'current-release verified', kind: 'link', target: entry.target }
+  if (isOwnedCursorSkillCopy(entry, source)) return { name, status: 'current-release verified', kind: 'directory' }
+  if (isLegacyCursorSkillLink(entry, expected)) return { name, status: 'historical-release verified', kind: 'link', target: entry.target }
   return { name, status: 'modified', kind: entry.kind, target: entry.target || null }
+}
+
+function cursorSkillSource(paths, repoRoot, name) {
+  const published = resolve(paths.personalPluginRoot, 'skills', name)
+  if (existsSync(published)) return published
+  return resolve(repoRoot, 'plugins', pluginName, 'skills', name)
 }
 
 export function fingerprintPath(path) {

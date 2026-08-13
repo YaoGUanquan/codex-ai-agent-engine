@@ -206,7 +206,7 @@ node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" init --project-root (Get-L
 codex plugin list
 ```
 
-Each operating-system user has an independent `$HOME`, dispatcher, backup area, and personal marketplace. Codex discovers AE skills through the personal plugin; Cursor discovers the same skills through `~/.cursor/skills/ae-*` links to that plugin. The distribution source keeps its maintenance mirror in `.ae-source/skills` so Codex does not discover a duplicate beside the personal plugin; migrated consumer projects should use only the user-level distribution. The installer never edits `.codex/plugins/cache`. Already-open chats keep their startup skill catalog.
+Each operating-system user has an independent `$HOME`, dispatcher, backup area, and personal marketplace. Codex discovers AE skills through the personal plugin; Cursor discovers the same skills through real `~/.cursor/skills/ae-*` copies (Cursor does not track skill-directory symlinks). The distribution source keeps its maintenance mirror in `.ae-source/skills` so Codex does not discover a duplicate beside the personal plugin; migrated consumer projects should use only the user-level distribution. The installer never edits `.codex/plugins/cache`. Already-open chats keep their startup skill catalog.
 
 ## Initialize Project Docs And Memory
 
@@ -494,6 +494,10 @@ Working rule: any change that touches distributable plugin content (`plugins/ai-
 
 Full history lives in [CHANGELOG.en.md](CHANGELOG.en.md); this section keeps only the latest five versions, and entries beyond that window move to the changelog on each release.
 
+### 0.3.30 (2026-08-13)
+- Global apply now copies each personal-plugin `ae-*` skill into a real directory at the current user's `~/.cursor/skills/<name>` (not a symlink or junction). Cursor does not track skill-directory symlinks, so the 0.3.29 links never appeared in `/ae`. Legacy links that still resolve to the personal plugin are replaced with matching copies without `--retire-modified`; user-edited `ae-*` entries still require that authorization. It does not recreate `~/.agents/skills` and never writes `~/.cursor/skills-cursor`.
+- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`. These checks prove isolated-home copy creation, legacy-link upgrades, foreign Cursor skill retention, failed-batch rollback, and preview/doc contract consistency. They do not prove the current Cursor chat's `/ae` palette refreshed; open a new Cursor thread to observe slash discovery.
+
 ### 0.3.29 (2026-08-13)
 - After publishing the Codex personal plugin, global apply creates current-user `~/.cursor/skills/ae-*` directory junctions (or POSIX directory symlinks) pointing at `$HOME/plugins/ai-agent-engine-codex/skills/<name>`, so Cursor and Codex discover the same AE skills. It does not recreate `~/.agents/skills` and never writes `~/.cursor/skills-cursor`.
 - Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`. These checks prove isolated-home link creation, foreign Cursor skill retention, failed-batch rollback, and preview/doc contract consistency. They do not prove the current Cursor chat's `/ae` palette refreshed; open a new Cursor thread to observe slash discovery.
@@ -511,11 +515,6 @@ Full history lives in [CHANGELOG.en.md](CHANGELOG.en.md); this section keeps onl
 - Add minimal legacy counterpart sections to the frontend guidance: `svelte-guidance.md` gains Svelte 4 (stores and `$:` reactive statements) counterparts, `angular-guidance.md` gains NgModule-era counterparts, and `vue-guidance.md` gains Options API counterparts; each sits beside the modern baseline with the stack-conditional first line and the "match existing repository style" fallback unchanged. A new regression test locks the sections and mirror equality (red first, then green).
 - Add the maintainer map `docs/ae/references/frontend-quality-contract-map.md` recording the five correspondence groups, two coverage gaps, and existing test locks across `web-ui-quality.md`, the `ae-review` Frontend Components / Styles lens, and `browser-acceptance.md`; the map is descriptive, is not a fourth contract surface, and adds no checker. This batch closes roadmap items 7 and 10 early at the user's direction (the recorded triggers had not fired; see the 2026-08-11 decision-log entry).
 - Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`. These checks prove skill docs, mirror, and distribution contracts only, not runtime acceptance of legacy stacks (Svelte 4 / NgModule / Options API) in any target project.
-
-### 0.3.25 (2026-08-11)
-- Unify the requirements-artifact directory declarations: the capability catalog's `ae-brainstorm` `artifactPath` moves from `docs/ae/brainstorms` to `docs/ae/prds`; the `ae-help` artifact contract's Requirements row and requirements frontmatter example now use `docs/ae/prds` with the `ae-prd` capture shape (`type: prd`), the plan `origin` example follows, and legacy requirements may remain under brainstorms; the `ae-review` document-review default search now includes `docs/ae/prds`. The top-level `artifactPaths` map and the init templates have been correct since 0.3.22 and are unchanged; `docs/ae/brainstorms` remains the exploratory-notes directory (`artifactPaths.ideas`).
-- Add regression assertions locking the directory declarations (catalog, artifact contract, and scope detection in source and mirror); the stale directory note in the work reference project's existing `docs/ae/README.md` was fixed alongside (an init-managed legacy file that plugin updates do not rewrite).
-- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`. These checks prove skill docs, mirror, and distribution contracts only, not runtime acceptance in any target project.
 
 ## Publishing To GitHub
 
