@@ -99,7 +99,7 @@ test('install-project rejects the distribution source as a target', () => {
   assert.match(result.stderr, /refusing to install into the distribution source/)
 })
 
-test('install-project installs plugin, skills, marketplace entry, and wrappers into a target project', () => {
+test('install-project installs plugin, skills, marketplace entry, and wrappers into a target project without deleting unowned retired skills', () => {
   const targetRoot = makeTempDir('ae-install-target-')
   try {
     // Pre-create a retired skill so the installer's cleanup path is exercised.
@@ -115,7 +115,7 @@ test('install-project installs plugin, skills, marketplace entry, and wrappers i
 
     assert.ok(existsSync(join(targetRoot, 'plugins', 'ai-agent-engine-codex', '.codex-plugin', 'plugin.json')))
     assert.ok(existsSync(join(targetRoot, '.agents', 'skills', 'ae-help', 'SKILL.md')))
-    assert.ok(!existsSync(join(targetRoot, '.agents', 'skills', 'ae-officecli')), 'retired skill must be removed')
+    assert.ok(existsSync(join(targetRoot, '.agents', 'skills', 'ae-officecli')), 'unowned retired skill must be preserved')
 
     const marketplace = JSON.parse(readFileSync(join(targetRoot, '.agents', 'plugins', 'marketplace.json'), 'utf8'))
     const entry = marketplace.plugins.find((plugin) => plugin.name === 'ai-agent-engine-codex')
@@ -127,6 +127,34 @@ test('install-project installs plugin, skills, marketplace entry, and wrappers i
     for (const script of ['update-ae-codex.mjs', 'set-ae-language.mjs', 'check-ae-artifacts.mjs', 'check-design-contract.mjs', 'check-memory-knowledge-contract.mjs']) {
       assert.ok(existsSync(join(targetRoot, 'scripts', script)), `wrapper ${script} must exist`)
     }
+    assert.ok(existsSync(join(targetRoot, '.agents', 'ai-agent-engine-codex', 'project-install.json')), 'installer ownership state must exist')
+  } finally {
+    rmSync(targetRoot, { recursive: true, force: true })
+  }
+})
+
+test('install-project requires an explicit target and protects modified managed components by default', () => {
+  const targetRoot = makeTempDir('ae-install-ownership-')
+  try {
+    const missingTarget = runScript('scripts/install-project.mjs', [], repoRoot)
+    assert.equal(missingTarget.status, 1)
+    assert.match(missingTarget.stderr, /--target <project>/)
+
+    const first = runScript('scripts/install-project.mjs', ['--target', targetRoot, '--lang', 'en'], repoRoot)
+    assert.equal(first.status, 0, first.stderr)
+    const second = runScript('scripts/install-project.mjs', ['--target', targetRoot, '--lang', 'en'], repoRoot)
+    assert.equal(second.status, 0, second.stderr, 'unchanged installer-owned files should update normally')
+
+    const wrapperPath = join(targetRoot, 'scripts', 'ae-tools.mjs')
+    writeFileSync(wrapperPath, '// consumer change\n', 'utf8')
+    const protectedResult = runScript('scripts/install-project.mjs', ['--target', targetRoot, '--lang', 'en'], repoRoot)
+    assert.equal(protectedResult.status, 1)
+    assert.match(protectedResult.stderr, /unowned or modified managed component: scripts\/ae-tools\.mjs/)
+    assert.equal(readFileSync(wrapperPath, 'utf8'), '// consumer change\n')
+
+    const replacement = runScript('scripts/install-project.mjs', ['--target', targetRoot, '--lang', 'en', '--replace-modified'], repoRoot)
+    assert.equal(replacement.status, 0, replacement.stderr)
+    assert.match(readFileSync(wrapperPath, 'utf8'), /plugins\/ai-agent-engine-codex\/scripts\/ae-tools\.mjs/)
   } finally {
     rmSync(targetRoot, { recursive: true, force: true })
   }

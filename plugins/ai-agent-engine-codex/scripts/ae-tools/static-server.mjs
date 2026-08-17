@@ -1,5 +1,5 @@
 // Local static preview server.
-import { existsSync, readFileSync, statSync } from 'node:fs'
+import { existsSync, readFileSync, realpathSync, statSync } from 'node:fs'
 import { basename, dirname, extname, isAbsolute, relative, resolve } from 'node:path'
 import { createServer } from 'node:http'
 import { clampInteger, normalizeRelPath, parseOptions, printJson, safeResolve, truthy } from './utils.mjs'
@@ -7,12 +7,15 @@ import { clampInteger, normalizeRelPath, parseOptions, printJson, safeResolve, t
 export function staticServer(worktree, args) {
   const opts = parseOptions(args)
   const targetArg = opts._[0] || opts.path || '.'
-  const targetPath = safeResolve(worktree, targetArg)
+  const requestedPath = safeResolve(worktree, targetArg)
+  const canonicalWorktree = realpathSync(worktree)
+  const targetPath = canonicalContainedPath(canonicalWorktree, requestedPath, targetArg)
   if (!existsSync(targetPath)) throw new Error(`static-server target not found: ${targetArg}`)
   const stat = statSync(targetPath)
   const port = clampInteger(Number(opts.port || 4173), 4173, 1, 65535)
   const host = String(opts.host || '127.0.0.1')
-  const rel = normalizeRelPath(relative(worktree, targetPath)) || '.'
+  if (!isLoopbackHost(host)) throw new Error(`static-server only supports loopback hosts: ${host}`)
+  const rel = normalizeRelPath(relative(canonicalWorktree, targetPath)) || '.'
   const urlPath = stat.isDirectory() ? '/' : `/${encodeURI(basename(targetPath))}`
   const base = {
     status: 'ok',
@@ -40,8 +43,9 @@ export function staticServer(worktree, args) {
         response.end('Not found')
         return
       }
-      response.writeHead(200, { 'content-type': contentType(localPath) })
-      response.end(readFileSync(localPath))
+      const canonicalPath = canonicalContainedPath(canonicalWorktree, localPath, requestPath)
+      response.writeHead(200, { 'content-type': contentType(canonicalPath) })
+      response.end(readFileSync(canonicalPath))
     } catch (error) {
       response.writeHead(500, { 'content-type': 'text/plain; charset=utf-8' })
       response.end(error instanceof Error ? error.message : String(error))
@@ -50,6 +54,18 @@ export function staticServer(worktree, args) {
   server.listen(port, host, () => {
     printJson({ ...base, dryRun: false, pid: process.pid })
   })
+}
+
+function canonicalContainedPath(canonicalWorktree, candidate, label) {
+  if (!existsSync(candidate)) throw new Error(`static-server target not found: ${label}`)
+  const canonical = realpathSync(candidate)
+  const rel = relative(canonicalWorktree, canonical)
+  if (rel.startsWith('..') || isAbsolute(rel)) throw new Error(`static-server path escapes workspace after resolution: ${label}`)
+  return canonical
+}
+
+function isLoopbackHost(host) {
+  return host === '127.0.0.1' || host === '::1' || host.toLowerCase() === 'localhost'
 }
 
 function contentType(path) {

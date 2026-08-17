@@ -104,13 +104,13 @@ try {
   }
   for (const skillName of staleSkillDirs) {
     const staleSkillDir = resolve(targetRoot, '.agents', 'skills', skillName)
-    if (existsSync(staleSkillDir)) {
-      throw new Error(`Install left removed skill in target mirror: ${skillName}`)
+    if (!existsSync(staleSkillDir)) {
+      throw new Error(`Install removed unowned retired skill: ${skillName}`)
     }
   }
   for (const staleScriptPath of staleScriptPaths) {
-    if (existsSync(staleScriptPath)) {
-      throw new Error(`Install left removed OfficeCLI script in target project: ${relative(targetRoot, staleScriptPath)}`)
+    if (!existsSync(staleScriptPath)) {
+      throw new Error(`Install removed unowned OfficeCLI script: ${relative(targetRoot, staleScriptPath)}`)
     }
   }
 

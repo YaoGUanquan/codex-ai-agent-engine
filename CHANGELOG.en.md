@@ -4,6 +4,10 @@ This file is the complete release history of AI Agent Engine for Codex (since 0.
 
 中文版本: [CHANGELOG.md](CHANGELOG.md)
 
+### 0.3.31 (2026-08-17)
+- Project installation now requires an explicit target and uses recorded component ownership, staging backups, recovery, and explicit `--replace-modified` authorization before replacing changed or unknown managed content. Local static previews are loopback-only and reject canonical link escapes; evidence writes are serialized; quoted CSV/TSV input and review-contract selector validation are hardened.
+- Verification: `npm.cmd test`, `npm.cmd run check`, `npm.cmd run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`. These checks prove local installer, helper, mirror, and distribution contracts only; they do not prove target-project deployment, external network serving, or browser acceptance.
+
 ### 0.3.30 (2026-08-13)
 - Global apply now copies each personal-plugin `ae-*` skill into a real directory at the current user's `~/.cursor/skills/<name>` (not a symlink or junction). Cursor does not track skill-directory symlinks, so the 0.3.29 links never appeared in `/ae`. Legacy links that still resolve to the personal plugin are replaced with matching copies without `--retire-modified`; user-edited `ae-*` entries still require that authorization. It does not recreate `~/.agents/skills` and never writes `~/.cursor/skills-cursor`.
 - Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`. These checks prove isolated-home copy creation, legacy-link upgrades, foreign Cursor skill retention, failed-batch rollback, and preview/doc contract consistency. They do not prove the current Cursor chat's `/ae` palette refreshed; open a new Cursor thread to observe slash discovery.

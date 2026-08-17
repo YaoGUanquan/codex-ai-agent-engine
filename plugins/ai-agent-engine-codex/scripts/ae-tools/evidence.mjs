@@ -1,5 +1,6 @@
 // Evidence ledger commands and record helpers.
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
+import { closeSync, existsSync, fsyncSync, mkdirSync, openSync, renameSync, rmSync, writeFileSync } from 'node:fs'
+import { randomUUID } from 'node:crypto'
 import { dirname } from 'node:path'
 import { gitFingerprint } from './git.mjs'
 import { parseOptions, readText, redactOptions, safeName, safeResolve, stableHash } from './utils.mjs'
@@ -18,43 +19,34 @@ export function evidenceCommand(worktree, args) {
 
 export function writeEvidenceRecord(worktree, kind, payload) {
   const safeKind = safeName(kind)
-  const id = `${new Date().toISOString().replace(/[-:.]/g, '').replace('Z', 'Z')}-${stableHash(payload).slice(0, 12)}`
+  const id = `${new Date().toISOString().replace(/[-:.]/g, '').replace('Z', 'Z')}-${stableHash(payload).slice(0, 12)}-${randomUUID()}`
   const relPath = `docs/ae/evidence/artifacts/${safeKind}/${id}.json`
   const target = safeResolve(worktree, relPath)
-  mkdirSync(dirname(target), { recursive: true })
-  const previous = readLastEvidenceEvent(worktree)
-  const record = {
-    schemaVersion: 1,
-    id,
-    evidenceKind: safeKind,
-    payload,
-    timestamps: {
-      writtenAt: new Date().toISOString(),
-    },
-    git: gitFingerprint(worktree),
-    hashes: {
-      previousRecordHash: previous?.recordHash || null,
-      payloadHash: stableHash(payload),
-      recordHash: null,
-    },
-  }
-  record.hashes.recordHash = stableHash({ ...record, hashes: { ...record.hashes, recordHash: null } })
-  writeFileSync(target, `${JSON.stringify(record, null, 2)}\n`, 'utf8')
-  appendEvidenceEvent(worktree, {
-    id,
-    evidenceKind: safeKind,
-    artifactPath: relPath,
-    artifactHash: stableHash(readText(target)),
-    recordHash: record.hashes.recordHash,
-    previousRecordHash: record.hashes.previousRecordHash,
-    writtenAt: record.timestamps.writtenAt,
+  return withEvidenceLock(worktree, () => {
+    mkdirSync(dirname(target), { recursive: true })
+    const previous = readLastEvidenceEvent(worktree)
+    const record = {
+      schemaVersion: 1,
+      id,
+      evidenceKind: safeKind,
+      payload,
+      timestamps: { writtenAt: new Date().toISOString() },
+      git: gitFingerprint(worktree),
+      hashes: { previousRecordHash: previous?.recordHash || null, payloadHash: stableHash(payload), recordHash: null },
+    }
+    record.hashes.recordHash = stableHash({ ...record, hashes: { ...record.hashes, recordHash: null } })
+    writeFileSync(target, `${JSON.stringify(record, null, 2)}\n`, 'utf8')
+    appendEvidenceEvent(worktree, {
+      id,
+      evidenceKind: safeKind,
+      artifactPath: relPath,
+      artifactHash: stableHash(readText(target)),
+      recordHash: record.hashes.recordHash,
+      previousRecordHash: record.hashes.previousRecordHash,
+      writtenAt: record.timestamps.writtenAt,
+    })
+    return { kind: safeKind, id, path: relPath, recordHash: record.hashes.recordHash }
   })
-  return {
-    kind: safeKind,
-    id,
-    path: relPath,
-    recordHash: record.hashes.recordHash,
-  }
 }
 
 export function readEvidenceLedger(worktree) {
@@ -99,7 +91,28 @@ function appendEvidenceEvent(worktree, event) {
   const ledgerPath = safeResolve(worktree, 'docs/ae/evidence/ledger.jsonl')
   mkdirSync(dirname(ledgerPath), { recursive: true })
   const existing = existsSync(ledgerPath) ? readText(ledgerPath) : ''
-  writeFileSync(ledgerPath, `${existing}${JSON.stringify(event)}\n`, 'utf8')
+  const temp = `${ledgerPath}.${process.pid}.${randomUUID()}.tmp`
+  writeFileSync(temp, `${existing}${JSON.stringify(event)}\n`, 'utf8')
+  const descriptor = openSync(temp, 'r+')
+  try { fsyncSync(descriptor) } finally { closeSync(descriptor) }
+  renameSync(temp, ledgerPath)
+}
+
+function withEvidenceLock(worktree, action) {
+  const lockPath = safeResolve(worktree, 'docs/ae/evidence/ledger.lock')
+  mkdirSync(dirname(lockPath), { recursive: true })
+  const deadline = Date.now() + 5_000
+  while (true) {
+    try {
+      const descriptor = openSync(lockPath, 'wx')
+      closeSync(descriptor)
+      break
+    } catch (error) {
+      if (error?.code !== 'EEXIST' || Date.now() >= deadline) throw new Error('evidence ledger is busy; retry after the active writer finishes')
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 10)
+    }
+  }
+  try { return action() } finally { rmSync(lockPath, { force: true }) }
 }
 
 function readLastEvidenceEvent(worktree) {

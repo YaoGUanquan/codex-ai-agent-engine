@@ -64,7 +64,71 @@ function delimitedToMarkdown(text, delimiter) {
 }
 
 function parseDelimited(text, delimiter) {
-  return text.replace(/\r\n/g, '\n').split('\n').filter((line) => line.length > 0).slice(0, 5001).map((line) => line.split(delimiter).map((cell) => cell.trim()))
+  const rows = []
+  let row = []
+  let cell = ''
+  let quoted = false
+  let closedQuote = false
+  let line = 1
+  let column = 1
+  const finishRow = () => {
+    if (row.length === 0 && cell === '') return
+    row.push(cell.trim())
+    if (rows.length < 5001) rows.push(row)
+    row = []
+    cell = ''
+    closedQuote = false
+  }
+  for (let index = 0; index < text.length; index++) {
+    const char = text[index]
+    const next = text[index + 1]
+    if (quoted) {
+      if (char === '"') {
+        if (next === '"') { cell += '"'; index++; column += 2; continue }
+        quoted = false
+        closedQuote = true
+      } else if (char === '\r' && next === '\n') {
+        cell += '\n'
+        index++
+        line++
+        column = 0
+      } else {
+        cell += char
+        if (char === '\n') { line++; column = 0 }
+      }
+      column++
+      continue
+    }
+    if (closedQuote && char !== delimiter && char !== '\n' && char !== '\r') throw malformedDelimited(line, column, 'unexpected character after closing quote')
+    if (char === '"') {
+      if (cell.length !== 0) throw malformedDelimited(line, column, 'unexpected quote in unquoted field')
+      quoted = true
+      closedQuote = false
+    } else if (char === delimiter) {
+      row.push(cell.trim())
+      cell = ''
+      closedQuote = false
+    } else if (char === '\n') {
+      finishRow()
+      line++
+      column = 0
+    } else if (char === '\r') {
+      if (next === '\n') index++
+      finishRow()
+      line++
+      column = 0
+    } else {
+      cell += char
+    }
+    column++
+  }
+  if (quoted) throw malformedDelimited(line, column, 'unterminated quoted field')
+  finishRow()
+  return rows
+}
+
+function malformedDelimited(line, column, detail) {
+  return new Error(`invalid delimited data at line ${line}, column ${column}: ${detail}`)
 }
 
 function objectsToMarkdownTable(rows) {

@@ -26,8 +26,8 @@ node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" static-server <file-or-dir
 
 ## Boundaries
 
-- Local workspace paths only.
+- Local workspace paths only; canonical symbolic-link and junction resolution must remain inside the workspace.
+- The server binds only to `127.0.0.1`, `::1`, or `localhost`; LAN and public-network hosting are intentionally unsupported.
 - Static file serving only; no API proxy, live reload, TLS, auth, or production hosting.
 - Prefer existing project dev servers for framework apps. Use this skill for simple HTML/static artifacts.
 - Do not leave background server processes running after validation unless the user explicitly wants the preview to remain available.
-
