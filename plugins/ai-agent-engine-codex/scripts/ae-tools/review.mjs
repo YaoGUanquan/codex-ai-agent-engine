@@ -221,6 +221,7 @@ export function reviewContract(worktree, args) {
   const kind = String(opts.kind || opts._[0] || 'code')
   const mode = String(opts.mode || 'report-only')
   const targets = splitCsv(opts.targets || opts.targetTypes)
+  validateReviewContractInputs(kind, mode, targets)
   const reviewers = selectReviewersForContract(kind, opts, targets)
   const targetCoverage = computeReviewTargetCoverage(targets, reviewers)
   const result = {
@@ -248,6 +249,17 @@ export function reviewContract(worktree, args) {
     })
   }
   return result
+}
+
+function validateReviewContractInputs(kind, mode, targets) {
+  const kinds = new Set(['code', 'document', 'general', 'mixed', 'hybrid'])
+  const modes = new Set(['report-only', 'autofix', 'headless'])
+  const supportedTargets = new Set(['code', 'requirements', 'design', 'prototype', 'test-case', 'plan', 'config', 'asset', 'document'])
+  if (!kinds.has(kind)) throw new Error(`unsupported review-contract kind: ${kind}`)
+  if (!modes.has(mode)) throw new Error(`unsupported review-contract mode: ${mode}`)
+  for (const target of targets) {
+    if (!supportedTargets.has(target)) throw new Error(`unsupported review-contract target: ${target}`)
+  }
 }
 
 function selectReviewersForContract(kind, opts, targets = []) {

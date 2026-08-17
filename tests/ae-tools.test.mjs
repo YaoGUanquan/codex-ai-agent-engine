@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { spawnSync } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, utimesSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
@@ -634,6 +634,45 @@ test('review-contract selects reviewers and writes evidence ledger records', () 
   }
 })
 
+test('review-contract rejects unsupported selectors before writing evidence', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-review-contract-invalid-'))
+  try {
+    mkdirSync(join(tempRoot, 'docs', 'ae'), { recursive: true })
+    for (const args of [
+      ['review-contract', '--kind', 'unknown'],
+      ['review-contract', '--mode', 'unknown'],
+      ['review-contract', '--targets', 'code,unknown'],
+    ]) {
+      const result = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'ae-tools.mjs'), ...args, '--write-evidence'], { cwd: tempRoot, encoding: 'utf8', stdio: 'pipe' })
+      assert.equal(result.status, 1)
+      assert.match(result.stderr, /unsupported review-contract (kind|mode|target)/)
+    }
+    assert.equal(existsSync(join(tempRoot, 'docs', 'ae', 'evidence', 'ledger.jsonl')), false)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('evidence ledger preserves all concurrent writer events', async () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-evidence-concurrent-'))
+  try {
+    mkdirSync(join(tempRoot, 'docs', 'ae'), { recursive: true })
+    const writer = (index) => new Promise((resolvePromise, rejectPromise) => {
+      const child = spawn(process.execPath, [resolve(repoRoot, 'scripts', 'ae-tools.mjs'), 'evidence', 'write', '--kind', 'concurrent', '--payload', JSON.stringify({ index })], { cwd: tempRoot, stdio: 'pipe' })
+      let stderr = ''
+      child.stderr.on('data', (chunk) => { stderr += chunk })
+      child.on('error', rejectPromise)
+      child.on('close', (code) => code === 0 ? resolvePromise() : rejectPromise(new Error(stderr)))
+    })
+    await Promise.all(Array.from({ length: 8 }, (_, index) => writer(index)))
+    const ledger = runNodeScriptJson(['scripts/ae-tools.mjs', 'evidence', 'read'], tempRoot)
+    assert.equal(ledger.state, 'passed')
+    assert.equal(ledger.records.length, 8)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
 test('task-brief extracts a single AE implementation unit into an evidence artifact', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-brief-'))
   try {
@@ -1111,6 +1150,25 @@ test('markitdown converts JSON arrays and CSV files to Markdown tables', () => {
   }
 })
 
+test('markitdown parses quoted CSV and TSV fields and rejects malformed quotes', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-markitdown-quoted-'))
+  try {
+    writeFileSync(join(tempRoot, 'items.csv'), 'name,note\r\nAda,"one, two"\r\nLin,"said ""hi""\nand more"\r\n', 'utf8')
+    writeFileSync(join(tempRoot, 'items.tsv'), 'name\tnote\nAda\t"one\ttwo"\n', 'utf8')
+    writeFileSync(join(tempRoot, 'broken.csv'), 'name,note\nAda,"unterminated', 'utf8')
+    const csv = runNodeScriptJson(['scripts/ae-tools.mjs', 'markitdown', 'items.csv'], tempRoot)
+    assert.match(csv.markdown, /\| Ada \| one, two \|/)
+    assert.match(csv.markdown, /\| Lin \| said "hi" and more \|/)
+    const tsv = runNodeScriptJson(['scripts/ae-tools.mjs', 'markitdown', 'items.tsv'], tempRoot)
+    assert.match(tsv.markdown, /\| Ada \| one\ttwo \|/)
+    const broken = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'ae-tools.mjs'), 'markitdown', 'broken.csv'], { cwd: tempRoot, encoding: 'utf8', stdio: 'pipe' })
+    assert.equal(broken.status, 1)
+    assert.match(broken.stderr, /invalid delimited data at line 2, column 18/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
 test('static-server dry run returns a local preview URL without starting a process', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-static-server-'))
   try {
@@ -1122,6 +1180,29 @@ test('static-server dry run returns a local preview URL without starting a proce
     assert.equal(result.dryRun, true)
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('static-server rejects non-loopback hosts and canonical path escapes', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-static-server-guard-'))
+  const outsideRoot = mkdtempSync(join(tmpdir(), 'ae-static-server-outside-'))
+  try {
+    writeFileSync(join(tempRoot, 'index.html'), '<!doctype html><title>AE</title>', 'utf8')
+    writeFileSync(join(outsideRoot, 'secret.html'), 'not in workspace', 'utf8')
+    const external = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'ae-tools.mjs'), 'static-server', 'index.html', '--host', '0.0.0.0', '--dry-run'], { cwd: tempRoot, encoding: 'utf8', stdio: 'pipe' })
+    assert.equal(external.status, 1)
+    assert.match(external.stderr, /only supports loopback hosts/)
+    const loopback = runNodeScriptJson(['scripts/ae-tools.mjs', 'static-server', 'index.html', '--host', 'localhost', '--dry-run'], tempRoot)
+    assert.equal(loopback.host, 'localhost')
+
+    const linkPath = join(tempRoot, 'outside.html')
+    symlinkSync(join(outsideRoot, 'secret.html'), linkPath, 'file')
+    const escaped = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'ae-tools.mjs'), 'static-server', 'outside.html', '--dry-run'], { cwd: tempRoot, encoding: 'utf8', stdio: 'pipe' })
+    assert.equal(escaped.status, 1)
+    assert.match(escaped.stderr, /escapes workspace after resolution/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+    rmSync(outsideRoot, { recursive: true, force: true })
   }
 })
 

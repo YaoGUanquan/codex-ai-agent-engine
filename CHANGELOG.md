@@ -4,6 +4,10 @@
 
 English: [CHANGELOG.en.md](CHANGELOG.en.md)
 
+### 0.3.31（2026-08-17）
+- Project installation now requires an explicit target and uses recorded component ownership, staging backups, recovery, and explicit `--replace-modified` authorization before replacing changed or unknown managed content. Local static previews are loopback-only and reject canonical link escapes; evidence writes are serialized; quoted CSV/TSV input and review-contract selector validation are hardened.
+- Verification: `npm.cmd test`, `npm.cmd run check`, `npm.cmd run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`. These checks prove local installer, helper, mirror, and distribution contracts only; they do not prove target-project deployment, external network serving, or browser acceptance.
+
 ### 0.3.30（2026-08-13）
 - 全局安装改为把 personal 插件的 `ae-*` 技能真实拷贝到当前用户 `~/.cursor/skills/<name>`（普通目录，不是符号链接或 junction）。Cursor 不跟踪技能目录上的 symlink，0.3.29 联接因此不会出现在 `/ae`。无 `--retire-modified` 时会把仍指向 personal 插件的遗留联接替换为匹配拷贝；用户私改的 `ae-*` 仍需授权。不恢复 `~/.agents/skills`，也不写入 `~/.cursor/skills-cursor`。
 - 验证：`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`。这些检查证明安装器在隔离 home 中创建真实拷贝、升级遗留联接、保留无关 Cursor 技能、回滚失败批次，以及预览/文档契约一致；不代表当前 Cursor 会话的 `/ae` 列表已刷新，新开 Cursor 对话后才能观察 slash 发现。
