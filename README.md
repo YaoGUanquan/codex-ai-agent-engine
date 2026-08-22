@@ -60,6 +60,19 @@ node scripts/ae-tools.mjs help
 
 完整历史见 [CHANGELOG.md](CHANGELOG.md)；本节仅保留最近 5 个版本，发布时超出窗口的条目迁移到 CHANGELOG。
 
+### 0.3.34（2026-08-22）
+- 将 `mattpocock/skills` 纳入可复检跟踪：`skill-audit --watch` 比较钉提交与远程观察，只报告 `current` / `stale` / `unavailable` 和受影响 AE skill，不自动改写 skill 或记忆。
+- 验证：`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`、`git diff --check`。这些检查证明跟踪清单、复检命令和已改 skill 的源/镜像锁定；不证明上游后续提交的内容，也不证明真实项目中的 skill 效果。
+
+### 0.3.33（2026-08-22）
+- 报告生成现在支持 Git 友好的 Markdown 输出，同时保留现有离线自包含 HTML 视图；技能审计计数改为统计每条 finding，包括 defer 记录中的 finding。
+- 验证：`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`、`git diff --check`。
+
+### 0.3.32（2026-08-22）
+- 新增 Codex 原生的并行 worker 请求契约、自包含离线 HTML 报告、本地 Markdown Issue Tracker 和 40 项技能组合静态审计；外部 Claude/OpenCode runtime、后台代理、自动提交和外部 tracker 仍不属于 AE 运行时能力。
+- 强化 `ae-debug`、`ae-tdd`、`ae-tasks`、`ae-review` 与 `ae-refactor` 的可证伪诊断、独立 oracle、tracer-bullet、Standards/Spec 双轴审查和 deep-module 判断；Issue 拒绝非法状态转换、环依赖及解析后越界路径，报告默认无 CDN 并转义输入。
+- 验证：`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs` 与 `git diff --check`。这些检查证明本地脚本、技能镜像和安装分发契约；不证明 Codex 父代理一定采用 worker 建议、外部 tracker 同步、浏览器视觉验收或真实项目中的技能效果。
+
 ### 0.3.31（2026-08-17）
 - Project installation now requires an explicit target and uses recorded component ownership, staging backups, recovery, and explicit `--replace-modified` authorization before replacing changed or unknown managed content. Local static previews are loopback-only and reject canonical link escapes; evidence writes are serialized; quoted CSV/TSV input and review-contract selector validation are hardened.
 - Verification: `npm.cmd test`, `npm.cmd run check`, `npm.cmd run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`. These checks prove local installer, helper, mirror, and distribution contracts only; they do not prove target-project deployment, external network serving, or browser acceptance.
@@ -68,18 +81,9 @@ node scripts/ae-tools.mjs help
 - 全局安装改为把 personal 插件的 `ae-*` 技能真实拷贝到当前用户 `~/.cursor/skills/<name>`（普通目录，不是符号链接或 junction）。Cursor 不跟踪技能目录上的 symlink，0.3.29 联接因此不会出现在 `/ae`。无 `--retire-modified` 时会把仍指向 personal 插件的遗留联接替换为匹配拷贝；用户私改的 `ae-*` 仍需授权。不恢复 `~/.agents/skills`，也不写入 `~/.cursor/skills-cursor`。
 - 验证：`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`。这些检查证明安装器在隔离 home 中创建真实拷贝、升级遗留联接、保留无关 Cursor 技能、回滚失败批次，以及预览/文档契约一致；不代表当前 Cursor 会话的 `/ae` 列表已刷新，新开 Cursor 对话后才能观察 slash 发现。
 
-### 0.3.29（2026-08-13）
-- 全局安装在发布 Codex personal 插件之后，于当前用户 `~/.cursor/skills/ae-*` 创建指向 `$HOME/plugins/ai-agent-engine-codex/skills/<name>` 的目录联接，使 Cursor 与 Codex 都能发现同一套 AE 技能；不恢复 `~/.agents/skills`，也不写入 `~/.cursor/skills-cursor`。
-- 验证：`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`。这些检查证明安装器在隔离 home 中创建联接、保留无关 Cursor 技能、回滚失败批次，以及预览/文档契约一致；不代表当前 Cursor 会话的 `/ae` 列表已刷新，新开 Cursor 对话后才能观察 slash 发现。
-
-### 0.3.28（2026-08-13）
+#### 0.3.28（2026-08-13）
 - 全局更新：同步根包与插件 manifest 版本，并通过个人 marketplace 的全局安装流程刷新当前用户的 AE 插件与 dispatcher；不改变项目级文档、源码或用户项目数据。
 - 验证：`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`。这些检查证明版本、技能镜像、安装契约和全局预览/安装流程一致，不代表目标项目运行时验收。
-
-### 0.3.27（2026-08-13）
-- `ae-test-api` 与共享本地冒烟门禁改为先构建脱敏 request-context manifest，再按 `项目 runner -> 单请求 curl fallback -> blocked` 选择执行载体；纯函数强制适用 header 必须有 provider、path/query/body same-context 别名一致、动态值不得使用 static lifetime，且非 GET 默认不能走通用 curl。
-- 新增纯函数 `plugins/ai-agent-engine-codex/scripts/request-context-contract.mjs`：无网络、无密钥地校验上下文完整性、同进程凭据可见性、runner 的 method/path/assertion 覆盖证据、fallback 资格，以及 `passed/request-context/client-config/transport/auth/business` 分类（2xx 为 passed，5xx 为 transport）；验证记录模板补齐 Request Context、Carrier、Outcome 字段。
-- 验证：`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`。这些检查证明纯契约逻辑、技能文档、镜像与分发一致，不代表任何目标项目的认证接口、实际 header 值或有状态冒烟已经通过。
 
 #### 0.3.26（2026-08-11）
 - 前端指导补旧栈最小对照节：`svelte-guidance.md` 增 Svelte 4（stores 与 `$:` 反应语句）对照、`angular-guidance.md` 增 NgModule 时代对照、`vue-guidance.md` 增 Options API 对照，均与现代基线同文件并存，文件首行 stack-conditional 语句与"匹配仓库既有风格"兜底不变；新增回归用例锁定对照节与镜像一致（先红后绿）。
@@ -156,6 +160,18 @@ node scripts/ae-tools.mjs ae-graph-query --root scripts --path ae-tools.mjs
 ```
 
 `ae-graph-build` 和 `ae-graph-query` 是只读浅层依赖图脚本，用于快速预览源码文件、静态导入边和外部依赖。输出的 `limits` 会标明文件和边的请求值、有效值、返回数量和截断状态；默认保持 500 文件、无边数上限，只有 `--edge-limit` 才截断边。它们不会写入 `docs/ae/graphs/graph.json` 或 `.ae/graph.db`，也不提供完整图谱 schema、分片、freshness 或预览页。
+
+Codex 原生编排、报告和 Issue 辅助命令：
+
+```bash
+node scripts/ae-tools.mjs task-analyze --mode plan --plan docs/ae/plans/example.md
+node scripts/ae-tools.mjs report --input docs/ae/reports/audit.json --out docs/ae/reports/audit.html
+node scripts/ae-tools.mjs issue create --title "跟踪项"
+node scripts/ae-tools.mjs issue list
+node scripts/ae-tools.mjs skill-audit --out docs/ae/reports/skill-audit.json
+```
+
+`task-analyze` 只生成供 Codex 父代理判断的 worker request 和并行波次，不会自行启动后台代理；写入 worker 仍要求显式授权、干净 Git、完整依赖和不重叠的文件所有权。`report` 默认生成无外部依赖的转义 HTML，只有同时提供 `--cdn --cdn-url https://...` 才启用 CDN。Issue 只跟踪状态、优先级、依赖和工件引用，不替代 PRD、plan、task、review、gate 或 evidence。
 
 ## 项目级安装
 

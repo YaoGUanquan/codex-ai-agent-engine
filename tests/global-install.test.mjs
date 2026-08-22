@@ -343,6 +343,9 @@ test('check-install-smoke reports ok and verifies new skills', () => {
   assert.ok(result.verifiedCommands.includes('check-design-contract'))
   assert.ok(result.verifiedCommands.includes('check-memory-knowledge-contract'))
   assert.ok(result.verifiedCommands.includes('ae-memory-query'))
+  assert.ok(result.verifiedCommands.includes('report'))
+  assert.ok(result.verifiedCommands.includes('issue'))
+  assert.ok(result.verifiedCommands.includes('skill-audit'))
   assert.deepEqual(result.verifiedSkills, [
     'ae-prd',
     'ae-work-report',

@@ -1,21 +1,28 @@
 # Debugging Workflow
 
+## Feedback Loop Gate
+
+Do not move from exploration to a root-cause story until one red-capable loop has been run. Record one command or harness that reaches the user's exact symptom, is deterministic, and completes quickly enough to repeat. If no such loop can be built, stop and report the missing environment or artifact instead of guessing.
+
 Debug in this order:
 
 1. Reproduce or capture evidence.
 2. Narrow the failing path.
-3. Form explicit hypotheses.
-4. Test those hypotheses with commands, code inspection, or browser tools.
-5. Change the smallest thing that explains the failure.
-6. Re-run the failing case and one nearby healthy case.
+3. Minimise the reproduction one input, caller, config, or step at a time; keep only load-bearing elements.
+4. Form 3-5 ranked, falsifiable hypotheses and state the prediction for each before probing.
+5. Test one prediction at a time with commands, code inspection, or browser tools.
+6. Change the smallest thing that explains the failure.
+7. Re-run the failing case and one nearby healthy case.
 
-Useful evidence to capture:
+Useful evidence to capture (redact secrets before recording):
 
 - exact command and output,
 - exact URL and user action,
 - stack trace or console error,
 - relevant request or response data,
 - recent code path touched by the failure.
+
+Tag temporary diagnostics with a unique marker such as `[DEBUG-<id>]`. Before completion, rerun the original loop, remove tagged diagnostics and throwaway harnesses, and verify the marker no longer exists. Never persist credentials, authorization headers, cookies, or raw private payloads in an evidence artifact.
 
 ## Frontend Failure Quick Map
 

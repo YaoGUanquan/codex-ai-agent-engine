@@ -4,6 +4,19 @@ This file is the complete release history of AI Agent Engine for Codex (since 0.
 
 中文版本: [CHANGELOG.md](CHANGELOG.md)
 
+### 0.3.34 (2026-08-22)
+- Track `mattpocock/skills` as a recheckable source: `skill-audit --watch` compares the pinned commit with a remote observation and reports only `current` / `stale` / `unavailable` plus affected AE skills. It does not rewrite skills or memory.
+- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`. These checks prove the watchlist, recheck command, and source/mirror locks for the adapted skills; they do not prove later upstream commits or skill outcomes in real projects.
+
+### 0.3.33 (2026-08-22)
+- Report generation now supports Git-friendly Markdown output alongside the existing offline self-contained HTML view; the audit counter now counts individual findings, including deferred findings.
+- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`.
+
+### 0.3.32 (2026-08-22)
+- Add Codex-native parallel worker request contracts, self-contained offline HTML reports, a local Markdown issue tracker, and a static audit across all 40 skills. Claude/OpenCode runtime behavior, background agents, automatic commits, and external tracker runtimes remain outside AE.
+- Strengthen `ae-debug`, `ae-tdd`, `ae-tasks`, `ae-review`, and `ae-refactor` with falsifiable diagnostics, independent oracles, tracer bullets, Standards/Spec review axes, and deep-module judgment. Issues reject invalid transitions, dependency cycles, and resolved path escapes; reports escape input and use no CDN by default.
+- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`. These checks prove local helpers, skill mirrors, and install/distribution contracts; they do not prove that a Codex parent uses worker suggestions, external tracker synchronization, browser visual acceptance, or skill outcomes in real projects.
+
 ### 0.3.31 (2026-08-17)
 - Project installation now requires an explicit target and uses recorded component ownership, staging backups, recovery, and explicit `--replace-modified` authorization before replacing changed or unknown managed content. Local static previews are loopback-only and reject canonical link escapes; evidence writes are serialized; quoted CSV/TSV input and review-contract selector validation are hardened.
 - Verification: `npm.cmd test`, `npm.cmd run check`, `npm.cmd run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`. These checks prove local installer, helper, mirror, and distribution contracts only; they do not prove target-project deployment, external network serving, or browser acceptance.

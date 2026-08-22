@@ -93,9 +93,9 @@
 ## 2026-08-11: Tidy command turns the retention policy into an executable maintenance pass
 
 - Date: 2026-08-11
-- Decision: Add a conservative `tidy` command (dry-run default; five-state process-note classification; retention-based evidence archiving with ledger rewrite; `--archive-stale`, `--stale-days`, `--retention-months` opt-ins; existing archive targets skipped safely), make `parseOptions` accumulate repeated flags so `gate --validation` records every command, land the `## Perspective Collision (Conditional)` section in the PRD capture contract with deterministic brainstorm triggers, add an `ae-review` Light Path, point evidence-tier wording in brainstorm/prd/review at the single `validation-evidence-profile.md` definition, unify handoff routing between `ae-handoff` and `ae-lfg`, and add memory size-and-distillation budgets to the maintenance rules.
+- Decision: Add conservative `tidy` (dry-run default, five-state notes, retention archiving), accumulate repeated `--validation` flags, land PRD Perspective Collision, add `ae-review` Light Path, unify evidence-tier wording and handoff routing, and add memory size budgets.
 - Context: Batch one (0.3.22) wrote the retention policy but nothing executed it; this repository still had July notes in `docs/00-process/active/` and the work reference project had 23 empty task directories. Gate evidence previously kept only the last `--validation` flag.
-- Impact: Distributable version 0.3.23. Tidy applied here (structural-debt-refactor merged into its existing archive, four stale July tasks archived) and on the work project (23 empty dirs removed, 2 tasks archived, 4 active kept, 2 skipped on same-name archive conflicts). PRD `docs/ae/prds/2026-08-11-governance-batch-two-prd.md`; plan `docs/ae/plans/2026-08-11-004-governance-batch-two-plan.md`; experience `docs/ae/experience/2026-08-11-governance-batch-two.md`; archive `docs/00-process/archive/2026-08/governance-batch-two/summary.md`.
+- Impact: 0.3.23. Plan `docs/ae/plans/2026-08-11-004-governance-batch-two-plan.md`; experience `docs/ae/experience/2026-08-11-governance-batch-two.md`; archive `docs/00-process/archive/2026-08/governance-batch-two/summary.md`.
 - Re-evaluate when: merge-on-conflict for archive targets ships, or scheduled automation should run the retention pass.
 
 ## 2026-08-11: Post-update auto-maintenance and tidy archive merge
@@ -121,6 +121,14 @@
 - Context: Batch four had deferred both items; the 2026-08-11 re-check found no trigger, then the user chose early completion.
 - Impact: 0.3.26. Experience `docs/ae/experience/2026-08-11-frontend-legacy-and-contract-map.md`; archive `docs/00-process/archive/2026-08/frontend-legacy-and-contract-map/summary.md`.
 - Re-evaluate when: a real legacy-stack miss or contract-surface growth justifies extending the counterparts or upgrading the map.
+
+## 2026-08-22: Track mattpocock/skills without auto-updating AE skills
+
+- Date: 2026-08-22
+- Decision: Pin `https://github.com/mattpocock/skills` as research input. Recheck with `skill-audit --watch`; never auto-edit skills.
+- Context: Diagnosing, TDD, review, deep-module, and tracer-ticket methods were already adapted.
+- Impact: 0.3.32–0.3.34. Issues stay referential. See `16-mattpocock-skills-watch.md` and `docs/ae/experience/2026-08-22-codex-orchestration-and-mattpocock-watch.md`.
+- Re-evaluate when: a stale recheck produces an adopted-skill gap with evidence, or another external source needs the same watchlist.
 
 ## 2026-08-13: Cursor user skills are real copies, not links
 

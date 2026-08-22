@@ -43,7 +43,7 @@ After `update-ae-codex`, `update-project` runs `tidy --apply` automatically unle
 | Artifact | Purpose |
 | --- | --- |
 | `README.md` | Boundary and query commands (this file) |
-| `maintainer-artifact-graph.md` | Curated 2026-08-11 delivery graph (plans → code → memory → tidy loop) |
+| `maintainer-artifact-graph.md` | Curated 2026-08 delivery graph (plans → code → memory → tidy loop → 0.3.34 watch) |
 | `graph.json` | **Not used** — reserved path name only; shallow CLI keeps `store.written: false` |
 
 Do not commit large auto-generated diff snapshots here; review evidence uses fingerprinted artifacts under `docs/ae/evidence/artifacts/` (see `docs/ae/experience/2026-08-11-knowledge-base-governance.md` and PRD `docs/ae/prds/2026-08-11-knowledge-base-governance-prd.md`).

@@ -101,6 +101,18 @@ The helper CLI is available through:
 node scripts/ae-tools.mjs help
 ```
 
+Codex-native orchestration, reporting, and issue helpers:
+
+```bash
+node scripts/ae-tools.mjs task-analyze --mode plan --plan docs/ae/plans/example.md
+node scripts/ae-tools.mjs report --input docs/ae/reports/audit.json --out docs/ae/reports/audit.html
+node scripts/ae-tools.mjs issue create --title "Tracking item"
+node scripts/ae-tools.mjs issue list
+node scripts/ae-tools.mjs skill-audit --out docs/ae/reports/skill-audit.json
+```
+
+`task-analyze` emits worker requests and dependency waves for the Codex parent agent to evaluate; it does not start background agents. Write workers still require explicit authorization, clean Git state, complete dependencies, and disjoint file ownership. `report` emits escaped, dependency-free HTML by default; CDN use requires both `--cdn` and `--cdn-url https://...`. Issues track state, priority, dependencies, and artifact references without replacing PRDs, plans, tasks, reviews, gates, or evidence.
+
 Validate design contracts:
 
 ```bash
@@ -494,6 +506,19 @@ Working rule: any change that touches distributable plugin content (`plugins/ai-
 
 Full history lives in [CHANGELOG.en.md](CHANGELOG.en.md); this section keeps only the latest five versions, and entries beyond that window move to the changelog on each release.
 
+### 0.3.34 (2026-08-22)
+- Track `mattpocock/skills` as a recheckable source: `skill-audit --watch` compares the pinned commit with a remote observation and reports only `current` / `stale` / `unavailable` plus affected AE skills. It does not rewrite skills or memory.
+- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`. These checks prove the watchlist, recheck command, and source/mirror locks for the adapted skills; they do not prove later upstream commits or skill outcomes in real projects.
+
+### 0.3.33 (2026-08-22)
+- Report generation now supports Git-friendly Markdown output alongside the existing offline self-contained HTML view; the audit counter now counts individual findings, including deferred findings.
+- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`.
+
+### 0.3.32 (2026-08-22)
+- Add Codex-native parallel worker request contracts, self-contained offline HTML reports, a local Markdown issue tracker, and a static audit across all 40 skills. Claude/OpenCode runtime behavior, background agents, automatic commits, and external tracker runtimes remain outside AE.
+- Strengthen `ae-debug`, `ae-tdd`, `ae-tasks`, `ae-review`, and `ae-refactor` with falsifiable diagnostics, independent oracles, tracer bullets, Standards/Spec review axes, and deep-module judgment. Issues reject invalid transitions, dependency cycles, and resolved path escapes; reports escape input and use no CDN by default.
+- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`. These checks prove local helpers, skill mirrors, and install/distribution contracts; they do not prove that a Codex parent uses worker suggestions, external tracker synchronization, browser visual acceptance, or skill outcomes in real projects.
+
 ### 0.3.31 (2026-08-17)
 - Project installation now requires an explicit target and uses recorded component ownership, staging backups, recovery, and explicit `--replace-modified` authorization before replacing changed or unknown managed content. Local static previews are loopback-only and reject canonical link escapes; evidence writes are serialized; quoted CSV/TSV input and review-contract selector validation are hardened.
 - Verification: `npm.cmd test`, `npm.cmd run check`, `npm.cmd run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`. These checks prove local installer, helper, mirror, and distribution contracts only; they do not prove target-project deployment, external network serving, or browser acceptance.
@@ -502,18 +527,9 @@ Full history lives in [CHANGELOG.en.md](CHANGELOG.en.md); this section keeps onl
 - Global apply now copies each personal-plugin `ae-*` skill into a real directory at the current user's `~/.cursor/skills/<name>` (not a symlink or junction). Cursor does not track skill-directory symlinks, so the 0.3.29 links never appeared in `/ae`. Legacy links that still resolve to the personal plugin are replaced with matching copies without `--retire-modified`; user-edited `ae-*` entries still require that authorization. It does not recreate `~/.agents/skills` and never writes `~/.cursor/skills-cursor`.
 - Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`. These checks prove isolated-home copy creation, legacy-link upgrades, foreign Cursor skill retention, failed-batch rollback, and preview/doc contract consistency. They do not prove the current Cursor chat's `/ae` palette refreshed; open a new Cursor thread to observe slash discovery.
 
-### 0.3.29 (2026-08-13)
-- After publishing the Codex personal plugin, global apply creates current-user `~/.cursor/skills/ae-*` directory junctions (or POSIX directory symlinks) pointing at `$HOME/plugins/ai-agent-engine-codex/skills/<name>`, so Cursor and Codex discover the same AE skills. It does not recreate `~/.agents/skills` and never writes `~/.cursor/skills-cursor`.
-- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`. These checks prove isolated-home link creation, foreign Cursor skill retention, failed-batch rollback, and preview/doc contract consistency. They do not prove the current Cursor chat's `/ae` palette refreshed; open a new Cursor thread to observe slash discovery.
-
-### 0.3.28 (2026-08-13)
+#### 0.3.28 (2026-08-13)
 - Global refresh: synchronize the root package and plugin manifest versions, then refresh the current user's AE plugin and dispatcher through the personal marketplace global-install flow; project-level docs, source, and user project data are unchanged.
 - Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`. These checks prove version, skill mirror, install contracts, and global preview/install flow consistency; they do not represent runtime acceptance in target projects.
-
-### 0.3.27 (2026-08-13)
-- `ae-test-api` and the shared local smoke gate now build a sanitized request-context manifest before resolving `project runner -> single-request curl fallback -> blocked`. The pure contract requires an input provider for every applicable header, matching path/query/body same-context aliases, non-static lifetimes for derived values, and a project runner for non-GET methods unless the contract proves they are read-only.
-- Add `plugins/ai-agent-engine-codex/scripts/request-context-contract.mjs` to validate context completeness, same-process credential visibility, runner method/path/assertion coverage, fallback eligibility, and `passed/request-context/client-config/transport/auth/business` outcomes (2xx is `passed`, 5xx is `transport`) without network access or secrets. The API verification record template now includes Request Context, Carrier, and Outcome fields.
-- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`. These checks prove pure contract behavior, skill docs, mirror, and distribution consistency; they do not prove authenticated target APIs, real header values, or state-changing smoke acceptance.
 
 #### 0.3.26 (2026-08-11)
 - Add minimal legacy counterpart sections to the frontend guidance: `svelte-guidance.md` gains Svelte 4 (stores and `$:` reactive statements) counterparts, `angular-guidance.md` gains NgModule-era counterparts, and `vue-guidance.md` gains Options API counterparts; each sits beside the modern baseline with the stack-conditional first line and the "match existing repository style" fallback unchanged. A new regression test locks the sections and mirror equality (red first, then green).

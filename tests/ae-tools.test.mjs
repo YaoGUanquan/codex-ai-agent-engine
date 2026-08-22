@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { spawn, spawnSync } from 'node:child_process'
 import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, utimesSync, writeFileSync } from 'node:fs'
-import { join, resolve } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 
@@ -1183,6 +1183,100 @@ test('static-server dry run returns a local preview URL without starting a proce
   }
 })
 
+test('report generates an offline self-contained HTML artifact and escapes evidence', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-report-'))
+  try {
+    mkdirSync(join(tempRoot, 'docs', 'ae', 'evidence'), { recursive: true })
+    const input = join(tempRoot, 'docs', 'ae', 'evidence', 'report.json')
+    writeFileSync(input, JSON.stringify({
+      title: 'Safety <Report>', status: 'partial', summary: '<script>alert(1)</script>',
+      findings: [{ severity: 'P1', title: 'Escape', path: 'src/a.js', evidence: '<b>x</b>', fix: 'sanitize' }],
+      validation: ['npm test'], limitations: ['offline'], unverified: ['browser'],
+    }), 'utf8')
+    const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'report', '--input', 'docs/ae/evidence/report.json', '--out', 'docs/ae/reports/report.html'], tempRoot)
+    assert.equal(result.status, 'ok')
+    const html = readFileSync(join(tempRoot, 'docs', 'ae', 'reports', 'report.html'), 'utf8')
+    assert.match(html, /Offline self-contained assets/)
+    assert.match(html, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/)
+    assert.doesNotMatch(html, /<script>alert\(1\)/)
+    assert.doesNotMatch(html, /https:\/\/cdn\./)
+    const markdown = runNodeScriptJson(['scripts/ae-tools.mjs', 'report', '--input', 'docs/ae/evidence/report.json', '--out', 'docs/ae/reports/report.md'], tempRoot)
+    assert.equal(markdown.status, 'ok')
+    const md = readFileSync(join(tempRoot, 'docs', 'ae', 'reports', 'report.md'), 'utf8')
+    assert.match(md, /^# Safety &lt;Report&gt;/m)
+    assert.match(md, /\*\*partial\*\*/)
+    assert.match(md, /\[P1\] Escape/)
+    assert.doesNotMatch(md, /<script>alert\(1\)<\/script>/)
+    const enhanced = runNodeScriptJson(['scripts/ae-tools.mjs', 'report', '--input', 'docs/ae/evidence/report.json', '--out', 'docs/ae/reports/enhanced.html', '--cdn', '--cdn-url', 'https://cdn.example.com/report.css'], tempRoot)
+    assert.deepEqual(enhanced.externalDependencies, ['https://cdn.example.com/report.css'])
+    assert.match(readFileSync(join(tempRoot, 'docs', 'ae', 'reports', 'enhanced.html'), 'utf8'), /https:\/\/cdn\.example\.com\/report\.css/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('issue tracker creates, links, transitions, and lists local issues', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-issue-'))
+  try {
+    writeFileSync(join(tempRoot, 'AGENTS.md'), '# fixture\n', 'utf8')
+    mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
+    mkdirSync(join(tempRoot, 'docs', 'ae', 'issues'), { recursive: true })
+    writeFileSync(join(tempRoot, 'docs', 'ae', 'issues', 'README.md'), '# Issue docs\n', 'utf8')
+    writeFileSync(join(tempRoot, 'docs', 'ae', 'plans', 'plan.md'), '# plan\n', 'utf8')
+    const created = runNodeScriptJson(['scripts/ae-tools.mjs', 'issue', 'create', '--title', 'Tracker issue', '--description', 'local', '--project-root', tempRoot], tempRoot)
+    assert.equal(created.issue.status, 'backlog')
+    assert.match(created.issue.id, /^AEI-\d{8}-001$/)
+    const linked = runNodeScriptJson(['scripts/ae-tools.mjs', 'issue', 'link', '--id', created.issue.id, '--path', 'docs/ae/plans/plan.md', '--project-root', tempRoot], tempRoot)
+    assert.deepEqual(linked.issue.links, ['docs/ae/plans/plan.md'])
+    const updated = runNodeScriptJson(['scripts/ae-tools.mjs', 'issue', 'update', '--id', created.issue.id, '--priority', 'P1', '--description', 'updated'], tempRoot)
+    assert.equal(updated.issue.priority, 'P1')
+    assert.equal(updated.issue.description, 'updated')
+    const transitioned = runNodeScriptJson(['scripts/ae-tools.mjs', 'issue', 'transition', '--id', created.issue.id, '--status', 'closed', '--reason', 'verified', '--project-root', tempRoot], tempRoot)
+    assert.equal(transitioned.issue.status, 'closed')
+    const listed = runNodeScriptJson(['scripts/ae-tools.mjs', 'issue', 'list', '--status', 'closed', '--project-root', tempRoot], tempRoot)
+    assert.equal(listed.issues.length, 1)
+    assert.deepEqual(listed.issues[0].history.map((event) => event.action), ['create', 'link', 'update', 'transition'])
+    const first = runNodeScriptJson(['scripts/ae-tools.mjs', 'issue', 'create', '--title', 'First dependency'], tempRoot)
+    const second = runNodeScriptJson(['scripts/ae-tools.mjs', 'issue', 'create', '--title', 'Second dependency'], tempRoot)
+    runNodeScriptJson(['scripts/ae-tools.mjs', 'issue', 'depend', '--id', first.issue.id, '--on', second.issue.id], tempRoot)
+    const dependencies = runNodeScriptJson(['scripts/ae-tools.mjs', 'issue', 'depends', '--id', first.issue.id], tempRoot)
+    assert.deepEqual(dependencies.dependencies.map((issue) => issue.id), [second.issue.id])
+
+    const cycle = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'ae-tools.mjs'), 'issue', 'depend', '--id', second.issue.id, '--on', first.issue.id], { cwd: tempRoot, encoding: 'utf8', stdio: 'pipe' })
+    assert.equal(cycle.status, 1)
+    assert.match(cycle.stderr, /create a cycle/)
+
+    const invalidTransition = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'ae-tools.mjs'), 'issue', 'transition', '--id', created.issue.id, '--status', 'in-progress'], { cwd: tempRoot, encoding: 'utf8', stdio: 'pipe' })
+    assert.equal(invalidTransition.status, 1)
+    assert.match(invalidTransition.stderr, /transition is not allowed/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('report and issue tracker reject canonical link escapes', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-local-tools-guard-'))
+  const outsideRoot = mkdtempSync(join(tmpdir(), 'ae-local-tools-outside-'))
+  try {
+    mkdirSync(join(tempRoot, 'docs', 'ae', 'evidence'), { recursive: true })
+    writeFileSync(join(outsideRoot, 'report.json'), JSON.stringify({ title: 'outside' }), 'utf8')
+    symlinkSync(join(outsideRoot, 'report.json'), join(tempRoot, 'docs', 'ae', 'evidence', 'report.json'), 'file')
+    const report = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'ae-tools.mjs'), 'report', '--input', 'docs/ae/evidence/report.json'], { cwd: tempRoot, encoding: 'utf8', stdio: 'pipe' })
+    assert.equal(report.status, 1)
+    assert.match(report.stderr, /escapes worktree after resolution/)
+
+    const linkType = process.platform === 'win32' ? 'junction' : 'dir'
+    symlinkSync(outsideRoot, join(tempRoot, 'docs', 'ae', 'issues'), linkType)
+    const issue = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'ae-tools.mjs'), 'issue', 'create', '--title', 'escape'], { cwd: tempRoot, encoding: 'utf8', stdio: 'pipe' })
+    assert.equal(issue.status, 1)
+    assert.match(issue.stderr, /escapes worktree after resolution|symbolic link or junction/)
+    assert.equal(readdirSync(outsideRoot).some((name) => /^AEI-/.test(name)), false)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+    rmSync(outsideRoot, { recursive: true, force: true })
+  }
+})
+
 test('static-server rejects non-loopback hosts and canonical path escapes', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-static-server-guard-'))
   const outsideRoot = mkdtempSync(join(tmpdir(), 'ae-static-server-outside-'))
@@ -1722,4 +1816,84 @@ test('ae-tools command modules stay an acyclic layered import graph', () => {
     done.add(name)
   }
   for (const name of graph.keys()) visit(name, [])
+})
+
+test('skill-audit --watch compares pinned commits without writing skills', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-skill-watch-'))
+  const pinned = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+  const watchlist = {
+    schemaVersion: 1,
+    sources: [{
+      id: 'mattpocock-skills',
+      sourceUrl: 'https://github.com/mattpocock/skills',
+      license: 'MIT',
+      pinnedCommit: pinned,
+      refSource: 'refs/heads/main',
+      freshnessMethod: 'explicit-remote-commit',
+      checkedAt: '2026-08-22',
+      adopted: [{
+        upstream: 'diagnosing-bugs',
+        aeSkill: 'ae-debug',
+        evidence: 'red-capable feedback loop',
+      }],
+      rejected: [{
+        pattern: 'Claude plugin auto-update',
+        reason: 'runtime-specific installer',
+      }],
+    }],
+  }
+  try {
+    mkdirSync(join(tempRoot, 'docs', 'ae', 'references'), { recursive: true })
+    writeFileSync(join(tempRoot, 'docs', 'ae', 'references', 'external-skill-watchlist.json'), `${JSON.stringify(watchlist, null, 2)}\n`, 'utf8')
+    const marker = join(tempRoot, 'plugins', 'ai-agent-engine-codex', 'skills', 'ae-debug', 'SKILL.md')
+    mkdirSync(dirname(marker), { recursive: true })
+
+    const current = runNodeScriptJson([
+      'scripts/ae-tools.mjs', 'skill-audit', '--watch',
+      '--remote-commit', pinned,
+    ], tempRoot)
+    assert.equal(current.tool, 'skill-audit-watch')
+    assert.equal(current.status, 'ok')
+    assert.equal(current.sources[0].freshness, 'current')
+    assert.equal(current.sources[0].pinnedCommit, pinned)
+    assert.equal(current.sources[0].observedCommit, pinned)
+    assert.deepEqual(current.sources[0].affectedSkills, [])
+    assert.equal(existsSync(marker), false)
+
+    const stale = runNodeScriptJson([
+      'scripts/ae-tools.mjs', 'skill-audit', '--watch',
+      '--remote-commit', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    ], tempRoot)
+    assert.equal(stale.sources[0].freshness, 'stale')
+    assert.deepEqual(stale.sources[0].affectedSkills, ['ae-debug'])
+    assert.equal(stale.sources[0].recommendation, 'recheck-adopted-skills')
+    assert.equal(existsSync(marker), false)
+
+    const unavailable = runNodeScriptJson([
+      'scripts/ae-tools.mjs', 'skill-audit', '--watch', '--no-fetch',
+    ], tempRoot)
+    assert.equal(unavailable.sources[0].freshness, 'unavailable')
+    assert.match(String(unavailable.sources[0].freshnessMethod), /unavailable|no-fetch|explicit/)
+    assert.notEqual(unavailable.sources[0].freshness, 'current')
+    assert.equal(existsSync(marker), false)
+    assert.equal(readFileSync(join(tempRoot, 'docs', 'ae', 'references', 'external-skill-watchlist.json'), 'utf8'), `${JSON.stringify(watchlist, null, 2)}\n`)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('skill-audit --watch reads the repository mattpocock watchlist', () => {
+  const watchlist = JSON.parse(readFileSync(resolve(repoRoot, 'docs/ae/references/external-skill-watchlist.json'), 'utf8'))
+  const source = watchlist.sources.find((item) => item.id === 'mattpocock-skills')
+  assert.equal(source.sourceUrl, 'https://github.com/mattpocock/skills')
+  assert.equal(source.license, 'MIT')
+  assert.match(source.pinnedCommit, /^[0-9a-f]{40}$/)
+  assert.deepEqual(source.adopted.map((item) => item.aeSkill).sort(), ['ae-debug', 'ae-refactor', 'ae-review', 'ae-tasks', 'ae-tdd'])
+  const result = runNodeScriptJson([
+    'scripts/ae-tools.mjs', 'skill-audit', '--watch',
+    '--remote-commit', source.pinnedCommit,
+  ])
+  assert.equal(result.tool, 'skill-audit-watch')
+  assert.equal(result.sources[0].freshness, 'current')
+  assert.deepEqual(result.sources[0].affectedSkills, [])
 })

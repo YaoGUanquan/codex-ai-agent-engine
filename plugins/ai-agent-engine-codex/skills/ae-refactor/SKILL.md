@@ -7,6 +7,8 @@ description: Use when the user asks for AE refactor, /ae-refactor, refactoring p
 
 Plan behavior-preserving refactors before implementation.
 
+Use the deep-module vocabulary when it improves a decision: module, interface, seam, adapter, depth, locality, and leverage. Apply the deletion test before proposing a wrapper or split: if deleting the module only moves complexity, it is shallow and the refactor needs a stronger seam. Record the behavior baseline, design alternatives, and the evidence that makes the proposed seam real rather than hypothetical.
+
 ## Workflow
 
 1. Inspect the current behavior, call sites, tests, and module boundaries.

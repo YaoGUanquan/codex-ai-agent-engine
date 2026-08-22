@@ -62,8 +62,10 @@
 
 ## 记忆蒸馏与 registry 边界
 
-- `00-registry.json` 的关系目标只接受 `AGENTS.md` 或 `docs/ae/**` 下的 Markdown；指向 `docs/99-archive/**` 分片的关系会被 `check-memory-knowledge-contract` 直接拒绝。归档指针写在正典 Markdown（源文件索引节、`00-index.md`），不要写进 registry。
-- `05-decision-log.md` 蒸馏后约 14.5KB，贴近 15KB 预算；追加前先确认是长期决策，执行类知识写 `03-key-workflows.md` 或本文件。
+- `00-registry.json` 的关系目标只接受 `AGENTS.md` 或 `docs/ae/**` 下的 Markdown；指向 `docs/99-archive/**` 分片或 JSON watchlist 的关系会被 `check-memory-knowledge-contract` 直接拒绝。归档指针写在正典 Markdown（源文件索引节、`00-index.md`），不要写进 registry。
+- `05-decision-log.md` 蒸馏后约 14.5KB，贴近 15KB 预算；追加前先确认是长期决策，执行类知识写 `03-key-workflows.md`、本文件或 `docs/ae/experience/`。
+- `skill-audit --watch` 的 `unavailable` 是新鲜度失败，不是“源未变”。`stale` 只列出 `affectedSkills`，不能直接改写 skill。
+- 本机 Windows 上 `report`/`issue` 与 `static-server` 的 symlink-escape 测试可能因 `EPERM` 失败；这是隔离临时目录权限问题，不否定 `--watch` 或 skill 文本锁。
 
 ## 全栈 skill 与并行会话
 

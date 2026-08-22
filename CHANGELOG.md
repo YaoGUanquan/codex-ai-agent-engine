@@ -4,6 +4,19 @@
 
 English: [CHANGELOG.en.md](CHANGELOG.en.md)
 
+### 0.3.34（2026-08-22）
+- 将 `mattpocock/skills` 纳入可复检跟踪：`skill-audit --watch` 比较钉提交与远程观察，只报告 `current` / `stale` / `unavailable` 和受影响 AE skill，不自动改写 skill 或记忆。
+- 验证：`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`、`git diff --check`。这些检查证明跟踪清单、复检命令和已改 skill 的源/镜像锁定；不证明上游后续提交的内容，也不证明真实项目中的 skill 效果。
+
+### 0.3.33（2026-08-22）
+- 报告生成现在支持 Git 友好的 Markdown 输出，同时保留现有离线自包含 HTML 视图；技能审计计数改为统计每条 finding，包括 defer 记录中的 finding。
+- 验证：`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`、`git diff --check`。
+
+### 0.3.32（2026-08-22）
+- 新增 Codex 原生的并行 worker 请求契约、自包含离线 HTML 报告、本地 Markdown Issue Tracker 和 40 项技能组合静态审计；外部 Claude/OpenCode runtime、后台代理、自动提交和外部 tracker 仍不属于 AE 运行时能力。
+- 强化 `ae-debug`、`ae-tdd`、`ae-tasks`、`ae-review` 与 `ae-refactor` 的可证伪诊断、独立 oracle、tracer-bullet、Standards/Spec 双轴审查和 deep-module 判断；Issue 拒绝非法状态转换、环依赖及解析后越界路径，报告默认无 CDN 并转义输入。
+- 验证：`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs` 与 `git diff --check`。这些检查证明本地脚本、技能镜像和安装分发契约；不证明 Codex 父代理一定采用 worker 建议、外部 tracker 同步、浏览器视觉验收或真实项目中的技能效果。
+
 ### 0.3.31（2026-08-17）
 - Project installation now requires an explicit target and uses recorded component ownership, staging backups, recovery, and explicit `--replace-modified` authorization before replacing changed or unknown managed content. Local static previews are loopback-only and reject canonical link escapes; evidence writes are serialized; quoted CSV/TSV input and review-contract selector validation are hardened.
 - Verification: `npm.cmd test`, `npm.cmd run check`, `npm.cmd run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`. These checks prove local installer, helper, mirror, and distribution contracts only; they do not prove target-project deployment, external network serving, or browser acceptance.

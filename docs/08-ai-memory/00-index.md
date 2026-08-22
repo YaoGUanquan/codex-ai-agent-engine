@@ -23,6 +23,10 @@
 - `11-ocr-review-guidance.md`：OCR-inspired diff review discipline, rule profiles, deterministic engineering audit, and prompt pattern boundaries.
 - `12-codex-skill-slash-discoverability.md`：Codex skill-backed discoverability decision, wording boundaries, Cursor copy surface, and validation workflow.
 - `13-review-inventory-and-advisory-impact.md`：审查文件清单、顾问式影响分析和证据边界。
+- `14-document-encoding-evidence.md`：2026-08-17 文档严格 UTF-8 解码证据、PowerShell 显示边界和新增文本规则。
+- `15-interface-safety-and-reliability.md`：项目安装、本地预览、证据账本与结构化转换的稳定安全和可靠性边界。
+- `16-mattpocock-skills-watch.md`：`mattpocock/skills` 的钉提交、已采用映射、拒绝运行时和 `--watch` 复检边界。
+- 0.3.32–0.3.34 编排/报告/issue/审计/跟踪批次记录在 `docs/ae/experience/2026-08-22-codex-orchestration-and-mattpocock-watch.md` 与图谱 `docs/ae/graphs/maintainer-artifact-graph.md`。
 - Frontend motion governance is recorded in `03-key-workflows.md`, `05-decision-log.md`, and `docs/ae/experience/2026-07-28-frontend-motion-governance.md`.
 - Authenticated API smoke fillable request-config handoff is recorded in `03-key-workflows.md`, `04-known-pitfalls.md`, `05-decision-log.md`, and `docs/ae/experience/2026-08-10-api-smoke-fillable-request-config.md`.
 - Per-user global AE migration, project-data locality, and personal-plugin discovery are recorded in `03-key-workflows.md`, `04-known-pitfalls.md`, `05-decision-log.md`, and `docs/ae/experience/2026-08-10-global-project-install-migration.md`.
@@ -37,6 +41,8 @@
 - Requirements-artifact path unification (0.3.25: capability-catalog artifactPath, ae-help artifact contract, and ae-review scope detection unified on `docs/ae/prds`) is recorded in plan `docs/ae/plans/2026-08-11-007-prds-artifact-path-unification-plan.md` and archive `docs/00-process/archive/2026-08/prds-artifact-path-unification/summary.md`.
 - Memory distillation (2026-08-11: `05`/`03` rotated within the 15KB budget) is recorded in `03-key-workflows.md`, `04-known-pitfalls.md`, `docs/ae/experience/2026-08-11-memory-distillation.md`, and shards under `docs/99-archive/2026-08/memory-distillation/`.
 - Maintainer knowledge graph: declared relations in `00-registry.json`; human map in `docs/ae/graphs/maintainer-artifact-graph.md`; directory boundary in `docs/ae/graphs/README.md`. Shallow CLI graphs remain read-only (no `graph.json` persistence).
+- Document encoding evidence (2026-08-17: 516 `docs/` text files strict-decoded with zero failures and zero `U+FFFD` files) is recorded in `14-document-encoding-evidence.md`, with PRD/design/plan and graph links declared in `00-registry.json`.
+- Interface optimization review (2026-08-17: project installer ownership/recovery, static-preview containment, ledger serialization, and CSV parsing) is recorded in `15-interface-safety-and-reliability.md` and `docs/ae/solutions/2026-08-17-interface-optimization-roadmap.md`.
 - 蒸馏归档分片（2026-08-11）：`docs/99-archive/2026-08/memory-distillation/`——`05-decision-log.md` 的 2026-05 至 07 决策全文与 `03-key-workflows.md` 的六个适配期工作流全文；源文件保留索引与指针。
 - `99-prompt-template.md`：初始化或维护记忆库的提示词模板。
 

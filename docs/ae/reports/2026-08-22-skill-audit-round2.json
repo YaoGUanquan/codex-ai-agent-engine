@@ -1,0 +1,1930 @@
+{
+  "status": "ok",
+  "tool": "skill-audit",
+  "generatedAt": "2026-08-22T11:15:44.047Z",
+  "sourceCount": 40,
+  "mirrorCount": 40,
+  "findingCount": 3,
+  "auditedDimensions": [
+    "trigger",
+    "scope",
+    "routing",
+    "runtimeBoundary",
+    "artifactContract",
+    "validation",
+    "metadataMirror",
+    "licenseProvenance"
+  ],
+  "records": [
+    {
+      "name": "ae-agent-creator",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-agent-creator/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-agent-creator/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-backend",
+      "status": "defer",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-backend/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-backend/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "defer",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-brainstorm",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-brainstorm/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-brainstorm/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-claude-code",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-claude-code/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-claude-code/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-constitution",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-constitution/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-constitution/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-debug",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-debug/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-debug/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-design",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-design/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-design/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-doc-humanize",
+      "status": "defer",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-doc-humanize/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-doc-humanize/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": false,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "defer",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "defer",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": [
+        {
+          "severity": "P2",
+          "code": "verification-guidance-gap",
+          "evidence": "D:\\codes\\ph-AI-Agent-Engine\\plugins\\ai-agent-engine-codex\\skills\\ae-doc-humanize\\SKILL.md",
+          "impact": "Static guidance does not state an observable verification signal.",
+          "disposition": "defer until a real usage gap or targeted requirement exists."
+        }
+      ]
+    },
+    {
+      "name": "ae-doc-structure",
+      "status": "defer",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-doc-structure/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-doc-structure/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "defer",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-frontend-design",
+      "status": "defer",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-frontend-design/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-frontend-design/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "defer",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-handoff",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-handoff/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-handoff/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-help",
+      "status": "defer",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-help/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-help/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": false,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "defer",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": [
+        {
+          "severity": "P2",
+          "code": "verification-guidance-gap",
+          "evidence": "D:\\codes\\ph-AI-Agent-Engine\\plugins\\ai-agent-engine-codex\\skills\\ae-help\\SKILL.md",
+          "impact": "Static guidance does not state an observable verification signal.",
+          "disposition": "defer until a real usage gap or targeted requirement exists."
+        }
+      ]
+    },
+    {
+      "name": "ae-ideate",
+      "status": "defer",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-ideate/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-ideate/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "defer",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-imagegen-prompt",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-imagegen-prompt/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-imagegen-prompt/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-init",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-init/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-init/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-language",
+      "status": "defer",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-language/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-language/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": false,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "defer",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "defer",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "defer",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": [
+        {
+          "severity": "P2",
+          "code": "verification-guidance-gap",
+          "evidence": "D:\\codes\\ph-AI-Agent-Engine\\plugins\\ai-agent-engine-codex\\skills\\ae-language\\SKILL.md",
+          "impact": "Static guidance does not state an observable verification signal.",
+          "disposition": "defer until a real usage gap or targeted requirement exists."
+        }
+      ]
+    },
+    {
+      "name": "ae-lfg",
+      "status": "defer",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-lfg/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-lfg/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "defer",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-markitdown",
+      "status": "defer",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-markitdown/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-markitdown/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "defer",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-plan",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-plan/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-plan/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-prd",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-prd/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-prd/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-prompt-optimize",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-prompt-optimize/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-prompt-optimize/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-refactor",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-refactor/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-refactor/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-reverse-engineering",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-reverse-engineering/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-reverse-engineering/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-review",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-review/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-review/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-save-experience",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-save-experience/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-save-experience/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-skill-audit",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-skill-audit/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-skill-audit/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-skill-creator",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-skill-creator/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-skill-creator/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-sql",
+      "status": "defer",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-sql/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-sql/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "defer",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-static-server",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-static-server/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-static-server/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-swagger-parser",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-swagger-parser/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-swagger-parser/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-task-loop",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-task-loop/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-task-loop/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-tasks",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-tasks/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-tasks/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-tdd",
+      "status": "defer",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-tdd/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-tdd/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "defer",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-test-api",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-test-api/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-test-api/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-test-browser",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-test-browser/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-test-browser/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-update",
+      "status": "defer",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-update/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-update/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "defer",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-web-app",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-web-app/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-web-app/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-web-forge",
+      "status": "defer",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-web-forge/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-web-forge/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "defer",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-work",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-work/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-work/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "ae-work-report",
+      "status": "pass",
+      "sourcePath": "plugins/ai-agent-engine-codex/skills/ae-work-report/SKILL.md",
+      "mirrorPath": ".ae-source/skills/ae-work-report/SKILL.md",
+      "sourceExists": true,
+      "mirrorExists": true,
+      "mirrorEqual": true,
+      "hasName": true,
+      "hasDescription": true,
+      "hasVerification": true,
+      "dimensions": {
+        "trigger": {
+          "status": "inspectable",
+          "evidence": "frontmatter description declares the invocation boundary"
+        },
+        "scope": {
+          "status": "inspectable",
+          "evidence": "workflow, rule, scope, or boundary section"
+        },
+        "routing": {
+          "status": "inspectable",
+          "evidence": "routing or handoff guidance"
+        },
+        "runtimeBoundary": {
+          "status": "inspectable",
+          "evidence": "runtime, authorization, or negative boundary guidance"
+        },
+        "artifactContract": {
+          "status": "inspectable",
+          "evidence": "artifact, output, record, template, or docs path guidance"
+        },
+        "validation": {
+          "status": "inspectable",
+          "evidence": "validation, verification, evidence, or test guidance"
+        },
+        "metadataMirror": {
+          "status": "inspectable",
+          "evidence": "frontmatter and source/mirror equality"
+        },
+        "licenseProvenance": {
+          "status": "inspectable",
+          "evidence": "repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence"
+        }
+      },
+      "findings": []
+    }
+  ],
+  "limitations": [
+    "static document inspection only; dimension signals indicate inspectable guidance, not semantic correctness",
+    "does not prove runtime skill behavior or user outcomes",
+    "license/provenance is evaluated at repository distribution level; source-specific reuse still needs claim provenance",
+    "defer/reject records require human adoption decisions"
+  ]
+}

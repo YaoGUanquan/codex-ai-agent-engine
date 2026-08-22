@@ -16,7 +16,7 @@ This constitution defines durable governance for `ai-agent-engine-codex`. It exi
 Applies to:
 
 - Codex skill source under `plugins/ai-agent-engine-codex/skills`.
-- Project-local skill mirror under `.agents/skills`.
+- Distribution maintenance mirror under `.ae-source/skills`; consumer-installed mirrors under `.agents/skills` are managed outputs, not this repository's canonical source.
 - Helper scripts under `scripts` and `plugins/ai-agent-engine-codex/scripts`.
 - AE workflow artifacts under `docs/ae`, process notes under `docs/00-process`, and long-term memory under `docs/08-ai-memory`.
 - User-facing install, README, release, and plugin metadata documents.
@@ -38,7 +38,7 @@ Does not apply to:
 
 ### Principle 2 - Source And Mirror Consistency
 
-- Rule: Every active skill in `plugins/ai-agent-engine-codex/skills` must have a matching `.agents/skills` mirror, `agents/openai.yaml`, language metadata, help catalog entry when user-facing, and install smoke coverage when it is a core entrypoint.
+- Rule: Every active skill in `plugins/ai-agent-engine-codex/skills` must have a matching `.ae-source/skills` maintenance mirror, `agents/openai.yaml`, language metadata, help catalog entry when user-facing, and install smoke coverage when it is a core entrypoint. Consumer `.agents/skills` copies are verified by installation smoke tests.
 - Rationale: Codex discovers and displays project-local skills through both source and installed mirror paths.
 - Review check: `node scripts/check-skill-mirror.mjs`, `node scripts/check-skill-language-metadata.mjs`, and `node scripts/check-install-smoke.mjs` must pass after catalog changes. Design contract changes must also run `node scripts/check-design-contract.mjs`.
 - Violation examples: Adding a skill only under plugin source; forgetting `skill-language-metadata.mjs`; help output listing a deleted skill.
@@ -97,6 +97,13 @@ Does not apply to:
 6. Run document review when the amendment changes planning, review, implementation, or validation gates.
 
 ## Amendment Notes
+
+### 2026-08-22 - Local issues, reports, and external skill watch
+
+- Reason: 0.3.32–0.3.34 added local reports, issues, skill-audit, and a pinned watch for `mattpocock/skills`.
+- Changed principles: No new runtime principle. Clarified that issues are referential trackers, not a second source of intent or proof; external skill watches produce recheck suggestions and never auto-edit skills or memory.
+- Impacted artifacts: `report`, `issue`, `skill-audit --watch`, `docs/ae/issues`, `docs/ae/references/external-skill-watchlist.json`, `docs/08-ai-memory/16-mattpocock-skills-watch.md`.
+- Migration action: Future S4 work may link issues to PRD/plan/evidence. Treat `--watch` `stale` as a candidate list that still needs an authorized plan or user adoption before skill edits.
 
 ### 2026-06-12 - Initial Constitution
 

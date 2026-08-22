@@ -104,6 +104,30 @@
       "role": "review inventory and advisory impact guidance",
       "topics": ["review", "inventory", "impact"],
       "reviewStatus": "current"
+    },
+    {
+      "id": "document-encoding-evidence",
+      "path": "docs/08-ai-memory/14-document-encoding-evidence.md",
+      "kind": "memory",
+      "role": "strict UTF-8 document evidence and console-rendering boundary",
+      "topics": ["utf-8", "encoding", "evidence", "powershell"],
+      "reviewStatus": "current"
+    },
+    {
+      "id": "interface-safety-reliability",
+      "path": "docs/08-ai-memory/15-interface-safety-and-reliability.md",
+      "kind": "memory",
+      "role": "durable safety and reliability boundaries for public local interfaces",
+      "topics": ["installer", "static-server", "evidence", "csv", "cli"],
+      "reviewStatus": "current"
+    },
+    {
+      "id": "mattpocock-skills-watch",
+      "path": "docs/08-ai-memory/16-mattpocock-skills-watch.md",
+      "kind": "memory",
+      "role": "long-term watch for mattpocock/skills adaptations",
+      "topics": ["mattpocock", "skills", "watch", "provenance"],
+      "reviewStatus": "current"
     }
   ],
   "relations": [
@@ -564,6 +588,132 @@
       "evidence": {
         "path": "docs/08-ai-memory/12-codex-skill-slash-discoverability.md",
         "note": "Cursor slash discovery uses real user skill copies, not Codex plugin registration."
+      }
+    },
+    {
+      "from": "document-encoding-evidence",
+      "to": "docs/ae/prds/2026-08-17-document-encoding-evidence-governance-prd.md",
+      "type": "documents",
+      "evidence": {
+        "path": "docs/08-ai-memory/14-document-encoding-evidence.md",
+        "note": "The canonical memory record states the dated strict-decoding evidence captured by the PRD."
+      }
+    },
+    {
+      "from": "document-encoding-evidence",
+      "to": "docs/ae/designs/document-encoding-evidence-governance-2026-08-17/design.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/14-document-encoding-evidence.md",
+        "note": "The design preserves the byte-evidence boundary and selects declared relations over a second graph store."
+      }
+    },
+    {
+      "from": "document-encoding-evidence",
+      "to": "docs/ae/plans/2026-08-17-001-document-encoding-evidence-governance-plan.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/14-document-encoding-evidence.md",
+        "note": "The plan defers continuous enforcement until a real regression proves a maintained checker is needed."
+      }
+    },
+    {
+      "from": "document-encoding-evidence",
+      "to": "docs/ae/graphs/maintainer-artifact-graph.md",
+      "type": "documents",
+      "evidence": {
+        "path": "docs/08-ai-memory/14-document-encoding-evidence.md",
+        "note": "The curated maintainer graph gives the human-readable path from strict decoding evidence to durable memory."
+      }
+    },
+    {
+      "from": "interface-safety-reliability",
+      "to": "docs/ae/solutions/2026-08-17-interface-optimization-roadmap.md",
+      "type": "documents",
+      "evidence": {
+        "path": "docs/08-ai-memory/15-interface-safety-and-reliability.md",
+        "note": "The memory records stable guardrails distilled from the source-level interface optimization roadmap."
+      }
+    },
+    {
+      "from": "mattpocock-skills-watch",
+      "to": "docs/ae/prds/2026-08-22-mattpocock-skills-watch-prd.md",
+      "type": "documents",
+      "evidence": {
+        "path": "docs/08-ai-memory/16-mattpocock-skills-watch.md",
+        "note": "The memory records the watch requirement for pinned freshness and no auto-write."
+      }
+    },
+    {
+      "from": "mattpocock-skills-watch",
+      "to": "docs/ae/plans/2026-08-22-002-mattpocock-skills-watch-plan.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/16-mattpocock-skills-watch.md",
+        "note": "The recheck workflow is the durable remainder of the watch implementation plan."
+      }
+    },
+    {
+      "from": "mattpocock-skills-watch",
+      "to": "docs/ae/experience/2026-08-22-codex-orchestration-and-mattpocock-watch.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/16-mattpocock-skills-watch.md",
+        "note": "The experience note records authority, proof boundary, and 0.3.32-0.3.34 remainder."
+      }
+    },
+    {
+      "from": "mattpocock-skills-watch",
+      "to": "docs/ae/graphs/maintainer-artifact-graph.md",
+      "type": "documents",
+      "evidence": {
+        "path": "docs/08-ai-memory/16-mattpocock-skills-watch.md",
+        "note": "The curated maintainer graph maps the watch PRD/plan to --watch and memory 16."
+      }
+    },
+    {
+      "from": "mattpocock-skills-watch",
+      "to": "docs/ae/issues/AEI-20260822-003.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/16-mattpocock-skills-watch.md",
+        "note": "Later stale --watch results are tracked as follow-up only, not as skill-edit authority."
+      }
+    },
+    {
+      "from": "key-workflows",
+      "to": "docs/ae/plans/2026-08-22-002-mattpocock-skills-watch-plan.md",
+      "type": "implements",
+      "evidence": {
+        "path": "docs/08-ai-memory/03-key-workflows.md",
+        "note": "The external-research workflow now rechecks pinned sources with skill-audit --watch."
+      }
+    },
+    {
+      "from": "key-workflows",
+      "to": "docs/ae/experience/2026-08-22-codex-orchestration-and-mattpocock-watch.md",
+      "type": "implements",
+      "evidence": {
+        "path": "docs/08-ai-memory/03-key-workflows.md",
+        "note": "The experience note is the durable remainder of the 0.3.32-0.3.34 orchestration and watch batch."
+      }
+    },
+    {
+      "from": "decision-log",
+      "to": "docs/ae/prds/2026-08-22-codex-orchestration-reporting-issue-tracker-skill-governance-prd.md",
+      "type": "documents",
+      "evidence": {
+        "path": "docs/08-ai-memory/05-decision-log.md",
+        "note": "The 2026-08-22 decision records that local report/issue/skill-audit are not a second source of truth."
+      }
+    },
+    {
+      "from": "decision-log",
+      "to": "docs/ae/experience/2026-08-22-codex-orchestration-and-mattpocock-watch.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/05-decision-log.md",
+        "note": "The delivery record for 0.3.32-0.3.34 lives in the dated experience note to keep the decision log inside budget."
       }
     }
   ]

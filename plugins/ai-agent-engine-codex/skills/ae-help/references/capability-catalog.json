@@ -385,6 +385,21 @@
       "name": "static-server",
       "purpose": "Serve a local static file or directory for browser preview.",
       "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' static-server <path> --port 4173 [--dry-run]"
+    },
+    {
+      "name": "report",
+      "purpose": "Generate a bounded self-contained HTML report or Git-friendly Markdown report from local JSON or Markdown evidence.",
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' report --input <path> [--out <path.html|path.md>] [--dry-run]"
+    },
+    {
+      "name": "issue",
+      "purpose": "Manage worktree-local AE issues and links to canonical plans, tasks, reviews, gates, and evidence.",
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' issue <create|list|show|update|transition|link|depend|close|depends>"
+    },
+    {
+      "name": "skill-audit",
+      "purpose": "Audit every distributed AE skill and its maintenance mirror, or recheck a pinned external skill watchlist without rewriting AE skills.",
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' skill-audit [--watch] [--remote-commit <sha>] [--out <path>]"
     }
   ],
   "artifactPaths": {
@@ -402,6 +417,8 @@
     "prds": "docs/ae/prds",
     "designs": "docs/ae/designs",
     "workReports": "docs/ae/work-reports",
+    "reports": "docs/ae/reports",
+    "issues": "docs/ae/issues",
     "constitution": "docs/ae/constitution.md",
     "tasks": "docs/ae/tasks",
     "evidence": "docs/ae/evidence",

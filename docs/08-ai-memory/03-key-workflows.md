@@ -30,11 +30,12 @@
 - Use case: A user asks to compare a third-party Codex skill or workflow repository and improve local AE skills.
 - Steps:
   1. Use `ae-skill-audit` for read-only external agent/skill repository analysis.
-  2. Identify transferable gates, artifacts, and review rules instead of copying runtime-specific behavior.
-  3. Keep local AE entrypoints stable unless the user explicitly asks for new commands.
-  4. Record adopted and rejected ideas in `docs/ae/solutions/`.
-  5. Archive the completed process under `docs/00-process/archive/YYYY-MM/<task>/`.
-- Validation: Run `cmd /c npm run check`, `git diff --check`, and targeted help checks such as `node scripts/ae-tools.mjs help skill`.
+  2. For a tracked source, run `node scripts/ae-tools.mjs skill-audit --watch` before rereading files; `stale` only names affected AE skills.
+  3. Identify transferable gates, artifacts, and review rules instead of copying runtime-specific behavior.
+  4. Keep local AE entrypoints stable unless the user explicitly asks for new commands.
+  5. Record adopted and rejected ideas in `docs/ae/solutions/` or the watchlist; do not vendor the source.
+  6. Archive the completed process under `docs/00-process/archive/YYYY-MM/<task>/`.
+- Validation: Run `cmd /c npm run check`, `git diff --check`, `node scripts/ae-tools.mjs skill-audit --watch`, and targeted help checks such as `node scripts/ae-tools.mjs help skill`.
 - Known risks: External skill prompts may include runtime assumptions, platform assumptions, or naming models that do not fit this project. Do not install or copy them directly.
 
 ## 已归档工作流（2026-08-11 蒸馏）
@@ -47,6 +48,7 @@
 - OCR-style review guidance adaptation → `11-ocr-review-guidance.md`
 - Claude Code best-practice adaptation → 本文件「AE workflow adaptation from external research」与 `docs/ae/experience/2026-06-19-claude-code-best-practice-adaptation.md`
 - Skill optimization framework audit → `ae-skill-audit` 的 Skill Optimization Pattern Filter
+- mattpocock/skills long-term watch → `16-mattpocock-skills-watch.md` 与 `skill-audit --watch`
 
 ## Frontend motion governance
 

@@ -30,6 +30,7 @@ if (existsSync(artifactRoot)) {
     const frontmatter = parseFrontmatter(content)
     if (!frontmatter) continue
     const relPath = toPosix(relative(targetRoot, file))
+    if (relPath.startsWith('docs/ae/issues/')) continue
     checked++
     validateFrontmatter(relPath, frontmatter)
   }
@@ -137,4 +138,3 @@ function isNewContractManaged(data) {
 function isOnOrAfterContractStart(value) {
   return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && value >= contractStartDate
 }
-

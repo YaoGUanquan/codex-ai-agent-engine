@@ -1,0 +1,10 @@
+{"at":"2026-08-22T11:10:17Z","step":"watch-live","command":"node scripts/ae-tools.mjs skill-audit --watch","result":"ok","evidence":"freshness=current observedCommit=5b15a47f2d7150f545fbcacbfe381787fc0230dc"}
+{"at":"2026-08-22T11:10:17Z","step":"skill-audit-round-1","command":"node scripts/ae-tools.mjs skill-audit --out docs/ae/reports/2026-08-22-skill-audit.json","result":"ok","evidence":"sourceCount=40 mirrorCount=40 findingCount=3"}
+{"at":"2026-08-22T11:12:47Z","step":"npm-test-round-1","command":"npm test","result":"154 pass / 2 fail","evidence":"EPERM symlink on report/issue escape and static-server escape tests"}
+{"at":"2026-08-22T11:13:13Z","step":"npm-check","command":"npm run check","result":"ok","evidence":"syntax 59 files, skill mirror 126 files, artifacts 139, version 0.3.34"}
+{"at":"2026-08-22T11:15:40Z","step":"npm-test-round-2","command":"npm test","result":"154 pass / 2 fail","evidence":"same two EPERM symlink failures; mattpocock-adapted and --watch tests passed"}
+{"at":"2026-08-22T11:16:00Z","step":"skill-audit-round-2","command":"node scripts/ae-tools.mjs skill-audit --out docs/ae/reports/2026-08-22-skill-audit-round2.json","result":"ok","evidence":"same 40/40 coverage"}
+{"at":"2026-08-22T11:16:00Z","step":"skill-audit-round-3","command":"node scripts/ae-tools.mjs skill-audit --out docs/ae/reports/2026-08-22-skill-audit-round3.json","result":"ok","evidence":"same 40/40 coverage"}
+{"at":"2026-08-22T11:18:20Z","step":"npm-test-round-3","command":"npm test","result":"154 pass / 2 fail","evidence":"same two EPERM symlink failures; no new failures"}
+{"at":"2026-08-22T11:28:25Z","step":"npm-check","command":"npm run check","result":"ok","evidence":"syntax 59, artifacts 140, memory 16 docs / 65 relations, version 0.3.34"}
+{"at":"2026-08-22T11:27:50Z","step":"global-apply","command":"node scripts/install-global.mjs apply --apply --operation c84da2a4-5cff-492d-88ff-8df922371c31","result":"ok","evidence":"ai-agent-engine-codex@personal 0.3.34; 40 Cursor ae-* copies, 0 links"}

@@ -180,6 +180,58 @@ test('renderYaml supports Spec Kit inspired workflow metadata', () => {
   assert.match(tasksYaml, /dependency-ordered/)
 })
 
+test('mattpocock-adapted guidance is present in source and mirror skills', () => {
+  const expectedBySkill = {
+    'ae-debug': [
+      /red-capable feedback loop/,
+      /3-5 ranked concrete hypotheses/,
+      /If no red-capable loop can be built/,
+    ],
+    'ae-tdd': [
+      /independent oracle/,
+      /public seam/,
+      /vertical tracer-bullet slices/,
+    ],
+    'ae-review': [
+      /\*\*Standards\*\*/,
+      /\*\*Spec\*\*/,
+      /Pin the base and head/,
+    ],
+    'ae-refactor': [
+      /deep-module vocabulary/,
+      /deletion test/,
+    ],
+    'ae-tasks': [
+      /tracer-bullet slice/,
+      /blocking edges explicit/,
+    ],
+  }
+
+  for (const [skillName, expectations] of Object.entries(expectedBySkill)) {
+    const sourceBody = readSkillBody('plugins/ai-agent-engine-codex/skills', skillName)
+    const mirrorBody = readSkillBody('.ae-source/skills', skillName)
+    assert.equal(mirrorBody, sourceBody, `${skillName} mirror should match plugin source`)
+    for (const expectation of expectations) {
+      assert.match(sourceBody, expectation, `${skillName} should include ${expectation}`)
+    }
+    if (skillName === 'ae-debug') {
+      const sourceWorkflow = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-debug/references/debugging-workflow.md'), 'utf8')
+      const mirrorWorkflow = readFileSync(resolve(repoRoot, '.ae-source/skills/ae-debug/references/debugging-workflow.md'), 'utf8')
+      assert.equal(mirrorWorkflow, sourceWorkflow, 'ae-debug workflow mirror should match plugin source')
+      assert.match(sourceWorkflow, /red-capable loop/)
+      assert.match(sourceWorkflow, /3-5 ranked, falsifiable hypotheses/)
+      assert.match(sourceWorkflow, /\[DEBUG-<id>\]/)
+    }
+    if (skillName === 'ae-tdd') {
+      const sourceWorkflow = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-tdd/references/tdd-workflow.md'), 'utf8')
+      const mirrorWorkflow = readFileSync(resolve(repoRoot, '.ae-source/skills/ae-tdd/references/tdd-workflow.md'), 'utf8')
+      assert.equal(mirrorWorkflow, sourceWorkflow, 'ae-tdd workflow mirror should match plugin source')
+      assert.match(sourceWorkflow, /independent oracle/)
+      assert.match(sourceWorkflow, /Work vertically/)
+    }
+  }
+})
+
 test('Ponytail-inspired minimality guidance is present in source and mirror skills', () => {
   const expectedBySkill = {
     'ae-work': [
