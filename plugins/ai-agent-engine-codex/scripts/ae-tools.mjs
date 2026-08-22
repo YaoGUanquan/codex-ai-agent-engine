@@ -8,9 +8,12 @@ import { gate } from './ae-tools/gate.mjs'
 import { graphBuild, graphQuery } from './ae-tools/graph.mjs'
 import { printHelp } from './ae-tools/help.mjs'
 import { initProject } from './ae-tools/init.mjs'
+import { issueCommand } from './ae-tools/issues.mjs'
+import { skillAuditCommand } from './ae-tools/skill-audit.mjs'
 import { markitdown } from './ae-tools/markitdown.mjs'
 import { recovery } from './ae-tools/recovery.mjs'
 import { reviewContract, reviewPackage } from './ae-tools/review.mjs'
+import { reportCommand } from './ae-tools/report.mjs'
 import { staticServer } from './ae-tools/static-server.mjs'
 import { printSwagger } from './ae-tools/swagger.mjs'
 import { taskAnalyze, taskBrief } from './ae-tools/tasks.mjs'
@@ -48,6 +51,15 @@ function main() {
         break
       case 'task-brief':
         printJson(taskBrief(worktree, args))
+        break
+      case 'report':
+        printJson(reportCommand(worktree, args))
+        break
+      case 'issue':
+        printJson(issueCommand(worktree, args))
+        break
+      case 'skill-audit':
+        printJson(skillAuditCommand(worktree, args))
         break
       case 'review-package':
         printJson(reviewPackage(worktree, args))
@@ -94,7 +106,7 @@ function main() {
         printJson(graphQuery(worktree, args))
         break
       default:
-        throw new Error(`Unknown command: ${command}\nAvailable: help, init, recovery, tidy, task-analyze, task-brief, review-package, gate, swagger, claude-delegate, review-contract, evidence, markitdown, static-server, ae-memory-query, ae-knowledge-map, ae-knowledge-query, ae-graph-build, ae-graph-query`)
+        throw new Error(`Unknown command: ${command}\nAvailable: help, init, recovery, tidy, task-analyze, task-brief, report, issue (create|list|show|update|transition|link|depend|close|depends), skill-audit, review-package, gate, swagger, claude-delegate, review-contract, evidence, markitdown, static-server, ae-memory-query, ae-knowledge-map, ae-knowledge-query, ae-graph-build, ae-graph-query`)
     }
   } catch (error) {
     console.error(formatError(error))

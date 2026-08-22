@@ -42,6 +42,8 @@ For workspace or session review, establish the same inventory from `git status -
 
 ## Diff Review Discipline
 
+For fixed-point branch or commit-range reviews, keep two distinguishable lenses: **Standards** (repository rules and maintainability baseline) and **Spec** (originating PRD, plan, task, or issue alignment). Pin the base and head before reading the diff, capture the commit list and complete changed-file inventory, then resolve the nearest originating specification from linked issues or `docs/ae` artifacts. A missing spec is a verification gap, not permission to invent requirements.
+
 Apply this section only when `domain:code` uses a diff-like scope: `from:<ref>`, `recent:<N>`, `session`, or the default Git status/diff review. `full` and `full:<path>` remain repository or path scans and must not be narrowed to changed lines only.
 
 For diff-like scopes:

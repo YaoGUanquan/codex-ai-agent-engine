@@ -20,9 +20,9 @@ This document defines reusable quality criteria for all AI agent skills, derived
 
 ---
 
-## SKILL.md Contract (Deterministic Validation)
+## SKILL.md Quality Reference (Aspirational Unless A Checker Says Otherwise)
 
-Every SKILL.md file MUST include:
+The following anatomy is a portable quality reference, not a claim that every existing skill currently implements every section. The active deterministic contract is defined by `scripts/check-skill-contract.mjs`; migrations to stricter anatomy require a separate approved plan.
 
 ### Frontmatter (required)
 ```yaml

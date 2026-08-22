@@ -128,6 +128,8 @@ try {
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'tdd'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'markitdown'], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'static'], { cwd: targetRoot })
+  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'issue'], { cwd: targetRoot })
+  run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'skill-audit'], { cwd: targetRoot })
   const recoveryResult = JSON.parse(run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'recovery'], { cwd: targetRoot }).stdout)
   if (recoveryResult.exists !== true || recoveryResult.worktree !== targetRoot) {
     throw new Error('Installed recovery command did not inspect the target project root')
@@ -272,7 +274,7 @@ try {
     verifiedMultiAgentPolicy: 'multi_agent_auto_analysis_by_default',
     verifiedSkillGovernancePolicy: 'source_mirror_metadata_and_path_safety',
     verifiedPluginVersion: installedPluginManifest.version,
-    verifiedCommands: ['recovery', 'claude-delegate', 'markitdown', 'static-server', 'check-ae-artifacts', 'check-design-contract', 'check-memory-knowledge-contract', 'ae-memory-query'],
+    verifiedCommands: ['recovery', 'claude-delegate', 'markitdown', 'static-server', 'report', 'issue', 'skill-audit', 'check-ae-artifacts', 'check-design-contract', 'check-memory-knowledge-contract', 'ae-memory-query'],
   }, null, 2))
 } finally {
   cleanupTarget()

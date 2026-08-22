@@ -18,10 +18,12 @@ Audit external agent and skill repositories, then translate useful patterns into
 
 1. Identify the external source, license, supported harnesses, and primary capability model.
 2. Verify source freshness before analysis when network is available:
-   - run `git ls-remote <repo-url> HEAD` or `git ls-remote <repo-url> <branch-or-tag>`;
+   - for a tracked source in `docs/ae/references/external-skill-watchlist.json`, run `node scripts/ae-tools.mjs skill-audit --watch` and treat `current`, `stale`, or `unavailable` as evidence, not as permission to rewrite skills;
+   - otherwise run `git ls-remote <repo-url> HEAD` or `git ls-remote <repo-url> <branch-or-tag>`;
    - record `sourceUrl`, `observedCommit`, `refSource`, and `inspectedFiles`;
    - if the user supplied a short hash such as `6d4d686`, resolve it to a full commit in a local clone or mark it `unreachable-short-hash`;
    - if local checkout HEAD differs from the remote ref, record `commitMismatch` before using local files as evidence.
+   - `--watch` never writes skills, memory, or the watchlist; a `stale` result only names affected AE skills for a later authorized edit.
 3. Inspect the repository structure: skills, agents, hooks, commands, MCP, docs, installer scripts, manifests, deterministic engineering mechanisms, and license metadata.
 4. Compare the external model with current AE boundaries: `ae-ideate`, `ae-brainstorm`, `ae-plan`, `ae-work`, `ae-review`, `ae-skill-creator`, `ae-agent-creator`, `ae-save-experience`, and `ae-help`.
 5. Classify findings using `references/audit-template.md`, including deterministic engineering patterns and license compatibility before recommending reuse.

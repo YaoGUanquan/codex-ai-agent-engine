@@ -1,5 +1,7 @@
 # TDD Workflow
 
+Before the first test in each slice, record the public seam under test and the independent oracle: a literal expected value, approved requirement, fixture, or known-good behavior. Tests should observe behavior through that seam, not private methods, internal mocks, or an assertion that recomputes the implementation.
+
 Use this loop:
 
 1. Write the failing test.
@@ -8,6 +10,8 @@ Use this loop:
 4. Re-run the target test.
 5. Run nearby tests when the change touches shared behavior.
 6. Refactor only with passing tests.
+
+Work vertically: one behavior test, the smallest implementation, then the next behavior. Do not write a horizontal batch of imagined tests before the implementation teaches you the actual interface.
 
 When not to force TDD:
 

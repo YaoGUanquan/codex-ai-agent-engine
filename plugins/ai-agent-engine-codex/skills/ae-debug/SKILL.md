@@ -10,7 +10,8 @@ Investigate a failure systematically before changing code.
 ## Operating Principles
 
 - Reproduce or capture the failure before explaining it.
-- Prefer one precise hypothesis with a disconfirming check over several plausible stories.
+- Build and run one tight, deterministic, red-capable feedback loop before moving to hypotheses; rank 3-5 falsifiable hypotheses to avoid anchoring.
+- Minimise the reproduction, redact secrets from evidence, tag temporary diagnostics, and remove them before completion.
 - Fix the nearest proven cause, then widen only if evidence requires it.
 - Preserve the failure evidence and validation command in the final report.
 
@@ -19,7 +20,7 @@ Investigate a failure systematically before changing code.
 1. Read `references/debugging-workflow.md`.
 2. Reproduce the failure or capture the best available evidence: exact error text, command, route, request, screenshot, or log excerpt.
 3. Identify the nearest failing path in the repository instead of starting with a broad redesign.
-4. Form one or more concrete hypotheses and test them with disconfirming checks.
+4. Form 3-5 ranked concrete hypotheses and test one falsifiable prediction at a time.
 5. Apply the smallest fix that matches the observed evidence.
 6. Add a regression test or equivalent validation when practical.
 7. Report the observed failure, root-cause evidence, fix, validation, and any remaining unknowns.
@@ -34,3 +35,4 @@ When the user explicitly requests a local runtime smoke for a changed API or UI 
 - Prefer `ae-sql` when the failure is tied to schema, data shape, or query behavior.
 - Avoid speculative rewrites when the failing path is narrow.
 - If the symptom disappears during investigation, report the last known evidence and what remains unproven.
+- If no red-capable loop can be built, stop and report the missing environment or artifact instead of guessing.

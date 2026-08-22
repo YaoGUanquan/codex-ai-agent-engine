@@ -234,6 +234,7 @@ function buildTaskOutput(units, warnings = [], options = {}) {
   })
   const preSpawnRequirements = config.require_clean_git ? ['ae-work pre-edit gate must confirm a clean Git state before write delegation'] : []
   const configAllowsWriteAgents = canWriteParallelize && config.enabled !== false && config.mode === 'auto' && config.allow_write_agents
+  const workerRequests = buildWorkerRequests(units, waves, { config, canReadParallelize, canWriteParallelize, dependencyReport, hasConflict })
   return {
     units,
     conflict_matrix,
@@ -267,9 +268,34 @@ function buildTaskOutput(units, warnings = [], options = {}) {
       notes: multiAgentNotes(config),
     },
     parallel_waves: waves,
+    execution_contract: {
+      orchestrator: 'parent-codex-agent',
+      decision: 'task-analyze reports readiness; the parent agent decides whether to spawn workers',
+      read_only_default: true,
+      write_requires_explicit_opt_in: true,
+      required_worker_fields: ['unit_id', 'owned_files', 'forbidden_files', 'depends_on', 'validation', 'prohibited_operations', 'return_format'],
+      abort_signals: ['shared files detected', 'unknown dependency', 'dirty Git state before write delegation', 'worker edits outside owned files', 'validation failure'],
+    },
+    worker_requests: workerRequests,
     execution_order: units.map((u) => u.id),
     warnings,
   }
+}
+
+function buildWorkerRequests(units, waves, context) {
+  const waveByUnit = new Map(waves.flatMap((wave) => wave.unit_ids.map((id) => [id, wave.id])))
+  return units.map((unit) => ({
+    unit_id: unit.id,
+    wave_id: waveByUnit.get(unit.id) || null,
+    owned_files: unit.files.map((file) => file.path),
+    forbidden_files: unit.forbidden_files || [],
+    depends_on: unit.depends_on || [],
+    lane: context.canReadParallelize ? 'read-or-write-after-parent-gate' : 'serial',
+    authorization: context.canWriteParallelize && context.config.mode === 'auto' && context.config.allow_write_agents ? 'explicit-parent-approval-required' : 'read-only-review-or-parent-execution',
+    validation: unit.suggested_validation || ['run project-specific validation'],
+    prohibited_operations: ['git add', 'git commit', 'git push', 'git reset', 'git checkout', 'destructive cleanup', 'service startup unless assigned'],
+    return_format: ['changed_files', 'tests_run', 'risks', 'conflicts'],
+  }))
 }
 
 function extractPlanUnit(text, unitId) {

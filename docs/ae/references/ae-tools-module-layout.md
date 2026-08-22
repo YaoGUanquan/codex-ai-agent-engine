@@ -32,6 +32,10 @@ tidy.mjs     ──► utils
 
 tasks.mjs  ──► graph, yaml, utils
 review.mjs ──► evidence, git, graph, utils
+
+report.mjs      ──► utils
+issues.mjs      ──► utils
+skill-audit.mjs ──► utils
 ```
 
 ## Init templates
@@ -48,6 +52,16 @@ review.mjs ──► evidence, git, graph, utils
 | Acyclic module import graph | `tests/ae-tools.test.mjs` — `ae-tools command modules stay an acyclic layered import graph` |
 | Syntax of all `.mjs` under scripts/tests | `scripts/check-syntax.mjs` via `npm run check:syntax` |
 | Install smoke after plugin changes | `npm run check:smoke` |
+
+## Additive commands (0.3.32–0.3.34)
+
+| Module | Role |
+| --- | --- |
+| `report.mjs` | Offline self-contained HTML or Git-friendly Markdown reports from local JSON/Markdown |
+| `issues.mjs` | Worktree-local issue records under `docs/ae/issues`; referential links only |
+| `skill-audit.mjs` | Static 40/40 skill+mirror audit; `--watch` rechecks a pinned external source without writing skills |
+
+These modules stay on `utils` only. They must not import `review.mjs` or `tasks.mjs`. `--watch` compares `docs/ae/references/external-skill-watchlist.json` and never rewrites skills or memory.
 
 ## Post-update maintenance (0.3.24+)
 

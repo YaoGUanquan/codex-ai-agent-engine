@@ -1,6 +1,6 @@
 ﻿// Shared low-level helpers for ae-tools command modules.
-import { existsSync, readFileSync, readdirSync } from 'node:fs'
-import { isAbsolute, join, relative, resolve, sep } from 'node:path'
+import { existsSync, readFileSync, readdirSync, realpathSync } from 'node:fs'
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { createHash } from 'node:crypto'
 
 const textDecoder = new TextDecoder('utf-8')
@@ -82,6 +82,22 @@ export function safeResolve(root, input) {
   const rel = relative(root, abs)
   if (rel.startsWith('..') || rel.includes(`..${sep}`) || isAbsolute(rel)) throw new Error(`path escapes worktree: ${input}`)
   return abs
+}
+
+export function assertCanonicalContained(root, candidate, label = 'path') {
+  const canonicalRoot = realpathSync(root)
+  let existing = candidate
+  while (!existsSync(existing)) {
+    const parent = dirname(existing)
+    if (parent === existing) throw new Error(`${label} has no resolvable parent: ${candidate}`)
+    existing = parent
+  }
+  const canonicalExisting = realpathSync(existing)
+  const rel = relative(canonicalRoot, canonicalExisting)
+  if (rel.startsWith('..') || isAbsolute(rel)) {
+    throw new Error(`${label} escapes worktree after resolution: ${candidate}`)
+  }
+  return candidate
 }
 
 export function normalizeRelPath(input) {

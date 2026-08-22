@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "sources": [
+    {
+      "id": "mattpocock-skills",
+      "sourceUrl": "https://github.com/mattpocock/skills",
+      "license": "MIT",
+      "licenseEvidence": "https://raw.githubusercontent.com/mattpocock/skills/main/LICENSE",
+      "pinnedCommit": "5b15a47f2d7150f545fbcacbfe381787fc0230dc",
+      "refSource": "HEAD",
+      "freshnessMethod": "git-ls-remote",
+      "checkedAt": "2026-08-22T11:10:00Z",
+      "adaptationBoundary": "Rewrite portable methods into existing AE skills. Do not vendor the repository, run npx skills, install the Claude plugin, or copy SKILL.md verbatim.",
+      "adopted": [
+        {
+          "upstream": "skills/engineering/diagnosing-bugs/SKILL.md",
+          "aeSkill": "ae-debug",
+          "evidence": "red-capable feedback loop"
+        },
+        {
+          "upstream": "skills/engineering/tdd/SKILL.md",
+          "aeSkill": "ae-tdd",
+          "evidence": "independent oracle"
+        },
+        {
+          "upstream": "skills/engineering/code-review/SKILL.md",
+          "aeSkill": "ae-review",
+          "evidence": "Standards"
+        },
+        {
+          "upstream": "skills/engineering/codebase-design/SKILL.md",
+          "aeSkill": "ae-refactor",
+          "evidence": "deletion test"
+        },
+        {
+          "upstream": "skills/engineering/to-tickets/SKILL.md",
+          "aeSkill": "ae-tasks",
+          "evidence": "tracer-bullet"
+        }
+      ],
+      "rejected": [
+        {
+          "pattern": "Claude Code plugin auto-update and npx skills installer",
+          "reason": "runtime-specific distribution; AE uses its own plugin mirror and install contract"
+        },
+        {
+          "pattern": "GitHub/Linear tracker adapters and setup-matt-pocock-skills",
+          "reason": "external tracker runtime is out of scope; local issues remain referential"
+        },
+        {
+          "pattern": "background research agents, newsletter, and popularity metrics",
+          "reason": "not engineering evidence and not a Codex-enforced runtime"
+        },
+        {
+          "pattern": "verbatim SKILL.md import",
+          "reason": "GPL-2.0-only distribution copies methods, not source-derived prose"
+        }
+      ],
+      "watch": [
+        {
+          "upstream": "wayfinder",
+          "note": "multi-session decision maps; revisit only if AE handoff/issue linkage is insufficient"
+        },
+        {
+          "upstream": "improve-codebase-architecture",
+          "note": "HTML architecture survey; current report command is evidence-in, not a codebase crawler"
+        },
+        {
+          "upstream": "grill-with-docs",
+          "note": "CONTEXT.md/ADR inline updates overlap existing memory and constitution paths"
+        }
+      ]
+    }
+  ]
+}
