@@ -1,5 +1,5 @@
 <!-- ae-codex:reference -->
-# Maintainer Artifact Graph (2026-08-11, extended 2026-08-22)
+# Maintainer Artifact Graph (2026-08-11, extended 2026-08-30)
 
 Curated map of the August 2026 optimization wave through Cursor dual-client discovery (`cd20d47` / 0.3.30) and the 0.3.31–0.3.34 interface, orchestration, and external-skill watch batch. For machine-readable edges see `docs/08-ai-memory/00-registry.json`.
 
@@ -21,7 +21,8 @@ flowchart LR
   iface["Interface safety<br/>0.3.31"]
   orch["Report / issue / skill-audit<br/>0.3.32-0.3.33"]
   watch["mattpocock watch<br/>0.3.34"]
-  scan --> fe --> struct --> full --> kb1 --> kb2 --> kb3 --> kb4 --> prds --> distill --> cursor --> iface --> orch --> watch
+  update["global update hardening<br/>0.3.37"]
+  scan --> fe --> struct --> full --> kb1 --> kb2 --> kb3 --> kb4 --> prds --> distill --> cursor --> iface --> orch --> watch --> update
 ```
 
 ## Code module graph (ae-tools, post-0.3.20)

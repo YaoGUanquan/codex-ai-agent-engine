@@ -4,6 +4,20 @@ This file is the complete release history of AI Agent Engine for Codex (since 0.
 
 中文版本: [CHANGELOG.md](CHANGELOG.md)
 
+### 0.3.37 (2026-08-30)
+- Fixed global updater exit-code propagation and temporary clone cleanup on failure, added local Git fixture regression coverage, and aligned ae-update wording with global installation behavior.
+- Validation: `npm run check`, `npm run check:smoke`, and `node --test tests/ae-tools.test.mjs --test-name-pattern="global updater"`; two full-suite Windows symlink fixture tests remain environment-limited by `EPERM`.
+
+### 0.3.36 (2026-08-30)
+- Repaired the global command contract: help routes update, language, and checker commands through the user dispatcher; `ae-update` runs global-installer preview/apply from a cloned release.
+- Clarified `--project-root` versus repository-relative `--root`, preserved generic read-only graph scans, and added explicit `--compat` design reporting without weakening strict default gates.
+- Verification: focused tests, `npm run check`, `npm run check:smoke`, release-note checks, and installed Codex/Cursor fingerprint checks.
+
+### 0.3.35 (2026-08-30)
+- Upgrade external skill watches to path-evidence semantics: Gitee AE is the `primary-upstream`, while Taste, Impeccable, and mattpocock are supplementary research sources. `affectedSkills` is populated only when repeated `--changed-path` values match adopted `upstreamPaths`; a changed HEAD alone produces `stale-impact-unverified` candidates. An explicit remote commit must be one 40-character hexadecimal value, and drive-relative or URI-like paths are rejected.
+- Add a shared UI Direction Contract, `audit` / `refine` / `adjust` / `harden` routing, design-template integration, evidence-backed visual review, and screenshot validity/contradiction rerun gates. Four replay scenarios preserve operational UI, existing baselines, and mobile constraints without copying external prompts, detectors, or runtimes.
+- Verification: both focused test groups, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check` passed. `npm test` ran 160 tests: 158 passed and 2 returned `EPERM` before product assertions because this Windows host cannot create the test symlinks. Passing checks prove path-impact output, conditional UI Direction Contract enforcement, skill/source mirrors, contracts, and install distribution consistency; they do not prove the symlink-escape cases, user-perceived visual improvement, pixel-perfect fidelity, or browser acceptance that was not run.
+
 ### 0.3.34 (2026-08-22)
 - Track `mattpocock/skills` as a recheckable source: `skill-audit --watch` compares the pinned commit with a remote observation and reports only `current` / `stale` / `unavailable` plus affected AE skills. It does not rewrite skills or memory.
 - Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`. These checks prove the watchlist, recheck command, and source/mirror locks for the adapted skills; they do not prove later upstream commits or skill outcomes in real projects.

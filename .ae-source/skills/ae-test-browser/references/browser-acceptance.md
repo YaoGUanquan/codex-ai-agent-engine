@@ -10,6 +10,20 @@ Minimum browser evidence for a claimed pass:
 6. Desktop and mobile checks when responsive behavior is relevant.
 7. Keyboard operability of the primary control when form usability or accessibility behavior is part of the claim.
 
+## Visual Evidence Validity Gate
+
+Before using a screenshot or visual snapshot as pass evidence, confirm:
+
+- the page contains nonblank visible content and is not only a loading shell;
+- relevant assets loaded, or each asset failure is recorded and the visual claim remains bounded;
+- the target route, component, state, and critical content are fully framed at the claimed viewport;
+- no critical control or content is obscured, clipped, overlapped, or overflowed;
+- the capture corresponds to the exercised state and not a stale or intermediate frame.
+
+Classify visual evidence as `not-collected -> collected -> valid | invalid -> rerun -> valid | unverified`. Blank, cropped, blocked, missing, or resource-failed captures cannot support a visual pass. Retake the capture or rerun the relevant scope; if that is impossible, name the missing evidence and report `unverified`.
+
+When the user supplies a screenshot or visible discrepancy that contradicts a prior pass, move the relevant evidence from `valid` to `rerun`. Recheck the same route, viewport, state, and design baseline before restoring a pass. A valid screenshot proves only the framed visible state; it is not pixel-perfect proof of the whole application.
+
 ## Reconnaissance And Stability
 
 Before triggering a workflow, load the route and capture the initial UI, prerequisites, interaction targets, and known failure state. This is reconnaissance, not acceptance evidence by itself.

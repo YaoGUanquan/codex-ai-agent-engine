@@ -61,6 +61,12 @@ Check for:
 
 Anchor findings in the framework the repository actually uses; do not flag idiomatic patterns merely for differing from another framework's conventions.
 
+### Visual Direction Sub-Lens
+
+Use this sub-lens only when the diff changes visual direction or the task explicitly requests a visual audit/refinement. A visual finding must cite at least one inspectable anchor: the UI Direction Contract, supplied design input, existing design tokens or measured baseline, an accessibility/responsive requirement, or valid browser evidence. Distinguish a contextual contract violation from personal taste; suppress unsupported requests to make a surface merely more modern, polished, bold, minimal, or attractive.
+
+Check whether the changed hierarchy, typography, palette, density, expressiveness, motion, responsive behavior, and preserve/replace boundary contradict their recorded direction. A screenshot can support the finding only after the browser evidence-validity gate passes. A blank, cropped, blocked, asset-failed, or user-contradicted capture requires rerun or an `unverified` result, not a visual pass.
+
 ## package.json
 
 Check for:

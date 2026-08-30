@@ -128,6 +128,14 @@
       "role": "long-term watch for mattpocock/skills adaptations",
       "topics": ["mattpocock", "skills", "watch", "provenance"],
       "reviewStatus": "current"
+    },
+    {
+      "id": "global-update-hardening",
+      "path": "docs/08-ai-memory/17-global-update-hardening.md",
+      "kind": "memory",
+      "role": "global updater transaction and release validation boundaries",
+      "topics": ["installer", "global-update", "cursor", "release", "validation"],
+      "reviewStatus": "current"
     }
   ],
   "relations": [
@@ -714,6 +722,15 @@
       "evidence": {
         "path": "docs/08-ai-memory/05-decision-log.md",
         "note": "The delivery record for 0.3.32-0.3.34 lives in the dated experience note to keep the decision log inside budget."
+      }
+    },
+    {
+      "from": "global-update-hardening",
+      "to": "docs/ae/graphs/maintainer-artifact-graph.md",
+      "type": "documents",
+      "evidence": {
+        "path": "docs/08-ai-memory/17-global-update-hardening.md",
+        "note": "The maintainer graph records the 0.3.37 global update hardening node and its validation boundary."
       }
     }
   ]

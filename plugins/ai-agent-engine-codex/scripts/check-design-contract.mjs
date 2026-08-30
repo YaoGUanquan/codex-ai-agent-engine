@@ -7,6 +7,7 @@ import { hasField, isRepositoryRelativePath, looksLikePath, parseFrontmatter, re
 const repoRoot = resolve(fileURLToPath(new URL('../../..', import.meta.url)))
 const args = process.argv.slice(2)
 const targetRoot = resolve(readArg(args, '--target') || repoRoot)
+const compatibilityMode = args.includes('--compat')
 const designRoot = resolve(targetRoot, 'docs', 'ae', 'designs')
 const requiredFrontmatter = {
   type: 'design',
@@ -62,11 +63,18 @@ if (existsSync(designRoot)) {
 }
 
 if (errors.length > 0) {
-  console.error(JSON.stringify({ status: 'failed', targetRoot, checked, errors }, null, 2))
-  process.exit(1)
+  const result = compatibilityMode
+    ? { status: 'compatible-with-warnings', targetRoot, checked, warnings: errors, warningCount: errors.length }
+    : { status: 'failed', targetRoot, checked, errors }
+  const output = JSON.stringify(result, null, 2)
+  if (compatibilityMode) console.log(output)
+  else {
+    console.error(output)
+    process.exit(1)
+  }
 }
 
-console.log(JSON.stringify({ status: 'ok', targetRoot, checked }, null, 2))
+if (errors.length === 0) console.log(JSON.stringify({ status: 'ok', targetRoot, checked }, null, 2))
 
 function validateDesign(file) {
   const relPath = toPosix(relative(targetRoot, file))
@@ -108,6 +116,7 @@ function validateDesign(file) {
   }
 
   validateExplicitOmittedDimensions(relPath, sections.get('Overview') || '')
+  validateUiDirectionContract(relPath, content, sections.get('Overview') || '')
   validateConsistencyFields(relPath, sections.get('Consistency Check') || '')
   validateStableIds(relPath, content)
   const manifestFiles = validateSplitManifest(relPath, file, sections.get('Split Manifest') || '')
@@ -239,6 +248,35 @@ function validateExplicitOmittedDimensions(path, overview) {
   }
 }
 
+function validateUiDirectionContract(path, content, overview) {
+  const dimensionsLine = overview.split('\n').find((value) => /Required dimensions:/i.test(value))
+  if (!dimensionsLine) return
+  const dimensions = dimensionsLine
+    .slice(dimensionsLine.indexOf(':') + 1)
+    .split(',')
+    .map((value) => value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''))
+  const uiDimensions = new Set(['ui', 'ux', 'ui-ux', 'ux-ui', 'frontend', 'user-interface', 'user-experience'])
+  if (!dimensions.some((dimension) => uiDimensions.has(dimension))) return
+
+  let inUiSection = false
+  let hasDirectionContract = false
+  for (const line of content.replace(/\r\n/g, '\n').split('\n')) {
+    const h2 = /^##\s+(.+?)\s*$/.exec(line)
+    if (h2) {
+      inUiSection = h2[1].trim() === 'UI/UX'
+      continue
+    }
+    const h3 = /^###\s+(.+?)\s*$/.exec(line)
+    if (inUiSection && h3 && /\bUI Direction Contract\b/i.test(h3[1])) {
+      hasDirectionContract = true
+      break
+    }
+  }
+  if (!hasDirectionContract) {
+    errors.push({ path, field: 'uiDirectionContract', message: 'UI/UX required dimension requires a UI Direction Contract subsection under UI/UX' })
+  }
+}
+
 function validateConsistencyFields(path, sectionBody) {
   for (const field of requiredConsistencyFields) {
     const pattern = new RegExp(`\\b${field}\\s*:`)
@@ -300,4 +338,3 @@ function validateOriginPair(path, data) {
     errors.push({ path, field: hasOrigin ? 'originFingerprint' : 'origin', message: 'origin and originFingerprint must be provided together' })
   }
 }
-

@@ -136,6 +136,19 @@ Use equivalence classes and boundary values for constrained inputs; decision tab
 
 ## UI/UX
 
+### UI Direction Contract (Required When UI/UX Is Triggered)
+
+- Surface, audience, and primary job:
+- Existing baseline, supplied design/assets, and preserve/replace boundary:
+- Hierarchy and typography:
+- Palette and contrast constraints:
+- Spacing/density and expressiveness:
+- Motion purpose or `none`:
+- Responsive intent and content priorities:
+- Avoid list:
+- Confidence/evidence: <verified | inferred | assumed for each material choice>
+- Runnable-spec evidence: <absent | provided-unverified | browser-valid | drifted | superseded; this is evidence, not authority over requirements/security/NFR/source>
+
 ### ST-XXX - <UI state machine or state>
 
 ## Test Cases

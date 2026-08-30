@@ -1,11 +1,12 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { existsSync, readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { renderYaml, skillMetadata } from '../plugins/ai-agent-engine-codex/scripts/skill-language-metadata.mjs'
-import { readSkillBody } from './helpers/skill-test-utils.mjs'
+import { readSkillBody, runDesignContractCheck, validDesignContractLines, writeAeArtifact } from './helpers/skill-test-utils.mjs'
 
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
 
@@ -1134,6 +1135,74 @@ test('risk-scaled test design guidance is present in source and mirror skills', 
     /N\/A when the related dimension is explicitly omitted/,
   ]) {
     assert.match(templateSource, expectation, `design template should include ${expectation}`)
+  }
+})
+
+test('frontend UI direction, refinement, and visual evidence contracts stay aligned', () => {
+  const directionSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-frontend-design/references/ui-direction-contract.md'), 'utf8')
+  const directionMirror = readFileSync(resolve(repoRoot, '.ae-source/skills/ae-frontend-design/references/ui-direction-contract.md'), 'utf8')
+  const frontendSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-frontend-design')
+  const forgeSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-web-forge')
+  const designSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-design')
+  const designTemplate = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-design/references/design-contract-template.md'), 'utf8')
+  const reviewProfile = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-review/references/code-review-rule-profiles.md'), 'utf8')
+  const browserAcceptance = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-test-browser/references/browser-acceptance.md'), 'utf8')
+  const replay = readFileSync(resolve(repoRoot, 'docs/ae/templates/frontend-design-quality-replay.md'), 'utf8')
+
+  assert.equal(directionMirror, directionSource)
+  for (const [sourcePath, mirrorPath] of [
+    ['plugins/ai-agent-engine-codex/skills/ae-frontend-design/SKILL.md', '.ae-source/skills/ae-frontend-design/SKILL.md'],
+    ['plugins/ai-agent-engine-codex/skills/ae-web-forge/SKILL.md', '.ae-source/skills/ae-web-forge/SKILL.md'],
+    ['plugins/ai-agent-engine-codex/skills/ae-design/SKILL.md', '.ae-source/skills/ae-design/SKILL.md'],
+    ['plugins/ai-agent-engine-codex/skills/ae-design/references/design-contract-template.md', '.ae-source/skills/ae-design/references/design-contract-template.md'],
+    ['plugins/ai-agent-engine-codex/skills/ae-review/references/code-review-rule-profiles.md', '.ae-source/skills/ae-review/references/code-review-rule-profiles.md'],
+    ['plugins/ai-agent-engine-codex/skills/ae-test-browser/references/browser-acceptance.md', '.ae-source/skills/ae-test-browser/references/browser-acceptance.md'],
+  ]) {
+    assert.equal(readFileSync(resolve(repoRoot, mirrorPath), 'utf8'), readFileSync(resolve(repoRoot, sourcePath), 'utf8'))
+  }
+
+  for (const expectation of [/## Precedence/, /existing project design system/i, /## Fields/, /Spacing and density/, /Expressiveness/, /Motion purpose/, /## Refinement Modes/, /`audit`/, /`refine`/, /`adjust`/, /`harden`/, /does not replace canonical requirements/i]) {
+    assert.match(directionSource, expectation)
+  }
+  assert.match(frontendSource, /ui-direction-contract\.md/)
+  assert.match(forgeSource, /audit.*refine.*adjust.*harden/i)
+  assert.match(designSource, /UI Direction Contract/)
+  assert.match(designTemplate, /UI Direction Contract \(Required When UI\/UX Is Triggered\)/)
+  assert.match(reviewProfile, /Visual Direction Sub-Lens/)
+  assert.match(reviewProfile, /personal taste/i)
+  assert.match(browserAcceptance, /Visual Evidence Validity Gate/)
+  assert.match(browserAcceptance, /not-collected -> collected -> valid \| invalid -> rerun/)
+  assert.match(browserAcceptance, /contradicts a prior pass/i)
+  for (const scenario of [/Marketing Launch Page/, /Dense Operational Console/, /Preserve-Style Redesign/, /Mobile Responsive Adaptation/]) {
+    assert.match(replay, scenario)
+  }
+  assert.match(replay, /measured design-quality improvement/i)
+})
+
+test('design contract requires UI Direction Contract only when a UI dimension is triggered', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-design-ui-direction-'))
+  const designPath = 'docs/ae/designs/sample-2026-07-07/design.md'
+  try {
+    const nonUi = validDesignContractLines()
+    writeAeArtifact(tempRoot, designPath, nonUi)
+    assert.equal(runDesignContractCheck(tempRoot).status, 0, 'non-UI design should remain valid without a UI direction subsection')
+
+    const uiWithoutDirection = nonUi.map((line) => line.replace(
+      'Required dimensions: overview, architecture, test-cases',
+      'Required dimensions: overview, architecture, ui/ux, test-cases',
+    ))
+    writeAeArtifact(tempRoot, designPath, uiWithoutDirection)
+    const missingDirection = runDesignContractCheck(tempRoot)
+    assert.notEqual(missingDirection.status, 0)
+    assert.match(`${missingDirection.stderr}${missingDirection.stdout}`, /uiDirectionContract[\s\S]*requires a UI Direction Contract subsection/i)
+
+    const uiHeadingIndex = uiWithoutDirection.indexOf('### ST-001 - No UI state')
+    const uiWithDirection = [...uiWithoutDirection]
+    uiWithDirection.splice(uiHeadingIndex, 0, '### UI Direction Contract (Required When UI/UX Is Triggered)', '', '- Surface, audience, and primary job: sample UI.', '')
+    writeAeArtifact(tempRoot, designPath, uiWithDirection)
+    assert.equal(runDesignContractCheck(tempRoot).status, 0, 'UI design should pass when its UI/UX section contains the direction contract')
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
   }
 })
 

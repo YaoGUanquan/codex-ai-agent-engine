@@ -9,15 +9,16 @@ Design and implement frontend UI surfaces using the repository's existing stack,
 
 ## Workflow
 
-1. Read `references/web-ui-quality.md`.
+1. Read `references/web-ui-quality.md` and `references/ui-direction-contract.md`.
 2. Inspect the existing frontend stack, routing, design system, component library, assets, and local conventions.
-3. Identify the route, user workflow, design input, visual baseline, data dependencies, and adjacent screens the UI must support.
+3. Identify the route, user workflow, design input, visual baseline, data dependencies, and adjacent screens the UI must support. Record the compact UI Direction Contract; label inferred or assumed choices instead of silently defaulting them.
 4. If there is a screenshot, Figma link, existing page, or written design spec, treat it as a constraint and preserve its measurable visual baseline unless the user asks for redesign.
 5. Implement the UI using existing components, icons, tokens, and patterns when available.
 6. Cover expected states: empty, loading, success, error, disabled, validation errors, and destructive confirmation when relevant.
 7. When the project uses React, Next.js, or Vite, follow local framework and build patterns instead of inventing a new structure.
 8. When the project uses shadcn or an equivalent local component system, extend it consistently instead of bypassing it.
 9. Run the project validation and browser checks when the app needs a dev server.
+10. For audit, refine, adjust, or harden requests, use the owning-skill mapping in `references/ui-direction-contract.md`; modes may compose but keep one primary owner.
 
 ## Motion Decision Gate
 

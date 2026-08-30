@@ -58,7 +58,19 @@ node scripts/ae-tools.mjs help
 
 ## 版本更新记录
 
+### 0.3.37（2026-08-30）
+- 修复全局更新器失败时的退出码传播与临时 clone 清理，新增本地 Git fixture 回归测试，并统一 ae-update 的全局安装说明。
+
+### 0.3.36（2026-08-30）
+- 全局 help 的 update、language 和 checker 命令统一经过用户级 dispatcher；`ae-update` 从 cloned release 运行全局 installer 的 preview/apply。
+- `--project-root` 明确选择项目；memory/knowledge 的 `--root` 为仓库内相对目录，graph 保留无项目只读扫描；设计检查新增 `--compat` 报告模式。
+
 完整历史见 [CHANGELOG.md](CHANGELOG.md)；本节仅保留最近 5 个版本，发布时超出窗口的条目迁移到 CHANGELOG。
+
+### 0.3.35（2026-08-30）
+- 外部 skill watch 升级为路径证据语义：Gitee AE 登记为 `primary-upstream`，Taste、Impeccable 与 mattpocock 登记为补充研究源；仅在重复 `--changed-path` 与 `upstreamPaths` 匹配时填充 `affectedSkills`，HEAD 变化本身只产生 `stale-impact-unverified` 候选；显式 remote commit 必须是唯一的 40 位十六进制值，drive-relative/URI-like 路径会被拒绝。
+- 前端链新增共享 UI Direction Contract、`audit` / `refine` / `adjust` / `harden` 精修路由、设计模板集成、证据化视觉 review 与截图有效性/反例重开门禁；四类场景回放明确保留 operational UI、既有基线与移动端约束，不复制外部 prompt、detector 或 runtime。
+- 验证：两组聚焦测试、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs` 与 `git diff --check` 通过；`npm test` 共 160 项，158 项通过，2 项因当前 Windows 主机禁止创建测试 symlink 而在产品断言前返回 `EPERM`。已通过的检查证明路径匹配输出、条件式 UI Direction Contract、skill/source mirror、契约与安装分发一致性；不证明 symlink 逃逸用例、真实项目中的用户审美提升、像素级一致性或未执行的浏览器验收。
 
 ### 0.3.34（2026-08-22）
 - 将 `mattpocock/skills` 纳入可复检跟踪：`skill-audit --watch` 比较钉提交与远程观察，只报告 `current` / `stale` / `unavailable` 和受影响 AE skill，不自动改写 skill 或记忆。
@@ -67,19 +79,6 @@ node scripts/ae-tools.mjs help
 ### 0.3.33（2026-08-22）
 - 报告生成现在支持 Git 友好的 Markdown 输出，同时保留现有离线自包含 HTML 视图；技能审计计数改为统计每条 finding，包括 defer 记录中的 finding。
 - 验证：`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`、`git diff --check`。
-
-### 0.3.32（2026-08-22）
-- 新增 Codex 原生的并行 worker 请求契约、自包含离线 HTML 报告、本地 Markdown Issue Tracker 和 40 项技能组合静态审计；外部 Claude/OpenCode runtime、后台代理、自动提交和外部 tracker 仍不属于 AE 运行时能力。
-- 强化 `ae-debug`、`ae-tdd`、`ae-tasks`、`ae-review` 与 `ae-refactor` 的可证伪诊断、独立 oracle、tracer-bullet、Standards/Spec 双轴审查和 deep-module 判断；Issue 拒绝非法状态转换、环依赖及解析后越界路径，报告默认无 CDN 并转义输入。
-- 验证：`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs` 与 `git diff --check`。这些检查证明本地脚本、技能镜像和安装分发契约；不证明 Codex 父代理一定采用 worker 建议、外部 tracker 同步、浏览器视觉验收或真实项目中的技能效果。
-
-### 0.3.31（2026-08-17）
-- Project installation now requires an explicit target and uses recorded component ownership, staging backups, recovery, and explicit `--replace-modified` authorization before replacing changed or unknown managed content. Local static previews are loopback-only and reject canonical link escapes; evidence writes are serialized; quoted CSV/TSV input and review-contract selector validation are hardened.
-- Verification: `npm.cmd test`, `npm.cmd run check`, `npm.cmd run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`. These checks prove local installer, helper, mirror, and distribution contracts only; they do not prove target-project deployment, external network serving, or browser acceptance.
-
-### 0.3.30（2026-08-13）
-- 全局安装改为把 personal 插件的 `ae-*` 技能真实拷贝到当前用户 `~/.cursor/skills/<name>`（普通目录，不是符号链接或 junction）。Cursor 不跟踪技能目录上的 symlink，0.3.29 联接因此不会出现在 `/ae`。无 `--retire-modified` 时会把仍指向 personal 插件的遗留联接替换为匹配拷贝；用户私改的 `ae-*` 仍需授权。不恢复 `~/.agents/skills`，也不写入 `~/.cursor/skills-cursor`。
-- 验证：`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`。这些检查证明安装器在隔离 home 中创建真实拷贝、升级遗留联接、保留无关 Cursor 技能、回滚失败批次，以及预览/文档契约一致；不代表当前 Cursor 会话的 `/ae` 列表已刷新，新开 Cursor 对话后才能观察 slash 发现。
 
 #### 0.3.28（2026-08-13）
 - 全局更新：同步根包与插件 manifest 版本，并通过个人 marketplace 的全局安装流程刷新当前用户的 AE 插件与 dispatcher；不改变项目级文档、源码或用户项目数据。
@@ -124,7 +123,7 @@ node scripts/ae-tools.mjs help
 - `ae-skill-creator`：创建或更新 Codex skill。
 - `ae-skill-audit`：审计外部 agent/skill 仓库并提炼可适配的 AE 改进。
 - `ae-agent-creator`：创建 Codex 可用的代理提示和委派模板。
-- `ae-update`：更新项目本地 AE for Codex 安装。
+- `ae-update`：更新当前用户的全局 AE for Codex runtime、personal plugin 与 Cursor skill 副本。
 - `ae-language`：高级入口，切换项目本地 AE skill 显示语言。
 
 本地辅助命令入口：

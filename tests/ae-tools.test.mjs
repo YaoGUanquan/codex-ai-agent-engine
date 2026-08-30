@@ -10,12 +10,98 @@ import { writeMemoryFixture, runNodeScriptJson, runGit, runNodeScriptRaw } from 
 
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
 
+test('global dispatcher exposes maintenance checkers without project wrappers', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-dispatcher-maintenance-'))
+  try {
+    mkdirSync(join(tempRoot, 'docs', 'ae'), { recursive: true })
+    const script = resolve(repoRoot, 'plugins', 'ai-agent-engine-codex', 'scripts', 'ae-tools.mjs')
+    const result = spawnSync(process.execPath, [script, 'check-design-contract', '--project-root', tempRoot], { cwd: repoRoot, encoding: 'utf8' })
+    assert.equal(result.status, 0, result.stderr)
+    assert.equal(JSON.parse(result.stdout).targetRoot, resolve(tempRoot))
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('global updater clones a release and completes preview/apply with the cloned installer', () => {
+  const fixtureRoot = mkdtempSync(join(tmpdir(), 'ae-global-update-success-'))
+  try {
+    const sourceRoot = join(fixtureRoot, 'source')
+    const updaterTemp = join(fixtureRoot, 'tmp')
+    mkdirSync(join(sourceRoot, 'scripts'), { recursive: true })
+    mkdirSync(updaterTemp, { recursive: true })
+    writeFileSync(join(sourceRoot, 'scripts', 'install-global.mjs'), [
+      "const [command, ...args] = process.argv.slice(2)",
+      "if (command === 'preview') console.log(JSON.stringify({ status: 'preview', operationId: '11111111-1111-4111-8111-111111111111', confirmation: 'fixture-confirmation' }))",
+      "else if (command === 'apply' && args.includes('--apply') && args.includes('fixture-confirmation')) console.log(JSON.stringify({ status: 'completed', operationId: '11111111-1111-4111-8111-111111111111', changes: 3 }))",
+      "else process.exitCode = 2",
+      '',
+    ].join('\n'), 'utf8')
+    initializeGitFixture(sourceRoot)
+    const branch = runGit(['branch', '--show-current'], sourceRoot).stdout.trim()
+    const script = resolve(repoRoot, 'plugins', 'ai-agent-engine-codex', 'scripts', 'update-global.mjs')
+    const result = spawnSync(process.execPath, [script, '--repo', sourceRoot, '--branch', branch], {
+      cwd: repoRoot,
+      env: updaterTempEnvironment(updaterTemp),
+      encoding: 'utf8',
+      stdio: 'pipe',
+    })
+
+    assert.equal(result.status, 0, result.stderr)
+    const output = JSON.parse(result.stdout)
+    assert.equal(output.status, 'updated')
+    assert.equal(output.preview.status, 'preview')
+    assert.equal(output.result.status, 'completed')
+    assert.deepEqual(readdirSync(updaterTemp), [], 'successful update should remove its temporary clone')
+  } finally {
+    rmSync(fixtureRoot, { recursive: true, force: true })
+  }
+})
+
+test('global updater preserves the child exit code and cleans its clone after installer failure', () => {
+  const fixtureRoot = mkdtempSync(join(tmpdir(), 'ae-global-update-failure-'))
+  try {
+    const sourceRoot = join(fixtureRoot, 'source')
+    const updaterTemp = join(fixtureRoot, 'tmp')
+    mkdirSync(join(sourceRoot, 'scripts'), { recursive: true })
+    mkdirSync(updaterTemp, { recursive: true })
+    writeFileSync(join(sourceRoot, 'scripts', 'install-global.mjs'), "console.error('fixture installer failure')\nprocess.exitCode = 7\n", 'utf8')
+    initializeGitFixture(sourceRoot)
+    const branch = runGit(['branch', '--show-current'], sourceRoot).stdout.trim()
+    const script = resolve(repoRoot, 'plugins', 'ai-agent-engine-codex', 'scripts', 'update-global.mjs')
+    const result = spawnSync(process.execPath, [script, '--repo', sourceRoot, '--branch', branch], {
+      cwd: repoRoot,
+      env: updaterTempEnvironment(updaterTemp),
+      encoding: 'utf8',
+      stdio: 'pipe',
+    })
+
+    assert.equal(result.status, 7)
+    assert.match(result.stderr, /fixture installer failure/)
+    assert.deepEqual(readdirSync(updaterTemp), [], 'failed update should remove its temporary clone before exit')
+  } finally {
+    rmSync(fixtureRoot, { recursive: true, force: true })
+  }
+})
+
 test('claude-delegate availability check returns ok or skip', () => {
   const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'claude-delegate', '--check'])
   assert.match(result.status, /^(ok|skip)$/)
   assert.equal(typeof result.available, 'boolean')
   assert.equal(result.write_policy, 'codex-reviewed')
 })
+
+function initializeGitFixture(root) {
+  runGit(['init'], root)
+  runGit(['config', 'user.name', 'Codex Test'], root)
+  runGit(['config', 'user.email', 'codex@example.com'], root)
+  runGit(['add', '.'], root)
+  runGit(['commit', '-m', 'fixture release'], root)
+}
+
+function updaterTempEnvironment(root) {
+  return { ...process.env, TMP: root, TEMP: root, TMPDIR: root }
+}
 
 test('claude-delegate prompt mode skips safely when Claude is unavailable', () => {
   const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'claude-delegate', '--prompt', 'Summarize the repo.'])
@@ -1833,6 +1919,7 @@ test('skill-audit --watch compares pinned commits without writing skills', () =>
       checkedAt: '2026-08-22',
       adopted: [{
         upstream: 'diagnosing-bugs',
+        upstreamPaths: ['skills/engineering/diagnosing-bugs/SKILL.md'],
         aeSkill: 'ae-debug',
         evidence: 'red-capable feedback loop',
       }],
@@ -1857,6 +1944,7 @@ test('skill-audit --watch compares pinned commits without writing skills', () =>
     assert.equal(current.sources[0].freshness, 'current')
     assert.equal(current.sources[0].pinnedCommit, pinned)
     assert.equal(current.sources[0].observedCommit, pinned)
+    assert.equal(current.sources[0].impactStatus, 'current')
     assert.deepEqual(current.sources[0].affectedSkills, [])
     assert.equal(existsSync(marker), false)
 
@@ -1865,9 +1953,67 @@ test('skill-audit --watch compares pinned commits without writing skills', () =>
       '--remote-commit', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
     ], tempRoot)
     assert.equal(stale.sources[0].freshness, 'stale')
-    assert.deepEqual(stale.sources[0].affectedSkills, ['ae-debug'])
-    assert.equal(stale.sources[0].recommendation, 'recheck-adopted-skills')
+    assert.equal(stale.sources[0].impactStatus, 'stale-impact-unverified')
+    assert.deepEqual(stale.sources[0].candidateSkills, ['ae-debug'])
+    assert.deepEqual(stale.sources[0].affectedSkills, [])
+    assert.equal(stale.sources[0].recommendation, 'collect-changed-path-evidence')
     assert.equal(existsSync(marker), false)
+
+    const affected = runNodeScriptJson([
+      'scripts/ae-tools.mjs', 'skill-audit', '--watch',
+      '--remote-commit', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+      '--changed-path', 'skills/engineering/diagnosing-bugs/SKILL.md',
+    ], tempRoot)
+    assert.equal(affected.sources[0].impactStatus, 'stale-affected')
+    assert.deepEqual(affected.sources[0].candidateSkills, [])
+    assert.deepEqual(affected.sources[0].affectedSkills, ['ae-debug'])
+    assert.equal(affected.sources[0].recommendation, 'recheck-affected-skills')
+
+    const unrelated = runNodeScriptJson([
+      'scripts/ae-tools.mjs', 'skill-audit', '--watch',
+      '--remote-commit', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+      '--changed-path', 'skills/in-progress/retro/SKILL.md',
+    ], tempRoot)
+    assert.equal(unrelated.sources[0].impactStatus, 'stale-unrelated')
+    assert.deepEqual(unrelated.sources[0].candidateSkills, [])
+    assert.deepEqual(unrelated.sources[0].affectedSkills, [])
+
+    const normalized = runNodeScriptJson([
+      'scripts/ae-tools.mjs', 'skill-audit', '--watch',
+      '--remote-commit', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+      '--changed-path', './skills//engineering/diagnosing-bugs/./SKILL.md',
+    ], tempRoot)
+    assert.deepEqual(normalized.sources[0].changedPathEvidence, ['skills/engineering/diagnosing-bugs/SKILL.md'])
+    assert.deepEqual(normalized.sources[0].affectedSkills, ['ae-debug'])
+
+    for (const invalidPath of ['../skills/private', '/etc/passwd', 'C:\\private\\file', 'C:relative/path', 'file:relative/path', 'https:relative/path']) {
+      const invalid = spawnSync(process.execPath, [
+        resolve(repoRoot, 'scripts/ae-tools.mjs'), 'skill-audit', '--root', tempRoot, '--watch',
+        '--remote-commit', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+        '--changed-path', invalidPath,
+      ], { cwd: tempRoot, encoding: 'utf8' })
+      assert.notEqual(invalid.status, 0)
+      assert.match(`${invalid.stderr}${invalid.stdout}`, /Invalid --changed-path/)
+    }
+
+    for (const invalidCommitArgs of [
+      ['--remote-commit', 'not-a-sha'],
+      ['--remote-commit'],
+      ['--remote-commit', pinned, '--remote-commit', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'],
+    ]) {
+      const invalid = spawnSync(process.execPath, [
+        resolve(repoRoot, 'scripts/ae-tools.mjs'), 'skill-audit', '--root', tempRoot, '--watch',
+        ...invalidCommitArgs,
+      ], { cwd: tempRoot, encoding: 'utf8' })
+      assert.notEqual(invalid.status, 0)
+      assert.match(`${invalid.stderr}${invalid.stdout}`, /remote-commit.*(?:exactly once|40 hexadecimal)/i)
+    }
+
+    const uppercase = runNodeScriptJson([
+      'scripts/ae-tools.mjs', 'skill-audit', '--watch', '--remote-commit', pinned.toUpperCase(),
+    ], tempRoot)
+    assert.equal(uppercase.sources[0].freshness, 'current')
+    assert.equal(uppercase.sources[0].observedCommit, pinned)
 
     const unavailable = runNodeScriptJson([
       'scripts/ae-tools.mjs', 'skill-audit', '--watch', '--no-fetch',
@@ -1877,6 +2023,15 @@ test('skill-audit --watch compares pinned commits without writing skills', () =>
     assert.notEqual(unavailable.sources[0].freshness, 'current')
     assert.equal(existsSync(marker), false)
     assert.equal(readFileSync(join(tempRoot, 'docs', 'ae', 'references', 'external-skill-watchlist.json'), 'utf8'), `${JSON.stringify(watchlist, null, 2)}\n`)
+
+    watchlist.sources[0].pinnedCommit = 'invalid-pinned-commit'
+    writeFileSync(join(tempRoot, 'docs', 'ae', 'references', 'external-skill-watchlist.json'), `${JSON.stringify(watchlist, null, 2)}\n`, 'utf8')
+    const invalidPinned = spawnSync(process.execPath, [
+      resolve(repoRoot, 'scripts/ae-tools.mjs'), 'skill-audit', '--root', tempRoot, '--watch',
+      '--remote-commit', pinned,
+    ], { cwd: tempRoot, encoding: 'utf8' })
+    assert.notEqual(invalidPinned.status, 0)
+    assert.match(`${invalidPinned.stderr}${invalidPinned.stdout}`, /Invalid watchlist pinnedCommit.*40 hexadecimal/i)
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }
@@ -1887,13 +2042,43 @@ test('skill-audit --watch reads the repository mattpocock watchlist', () => {
   const source = watchlist.sources.find((item) => item.id === 'mattpocock-skills')
   assert.equal(source.sourceUrl, 'https://github.com/mattpocock/skills')
   assert.equal(source.license, 'MIT')
+  assert.equal(source.sourceRole, 'supplementary-research')
   assert.match(source.pinnedCommit, /^[0-9a-f]{40}$/)
   assert.deepEqual(source.adopted.map((item) => item.aeSkill).sort(), ['ae-debug', 'ae-refactor', 'ae-review', 'ae-tasks', 'ae-tdd'])
   const result = runNodeScriptJson([
     'scripts/ae-tools.mjs', 'skill-audit', '--watch',
+    '--source', 'mattpocock-skills',
     '--remote-commit', source.pinnedCommit,
   ])
   assert.equal(result.tool, 'skill-audit-watch')
   assert.equal(result.sources[0].freshness, 'current')
   assert.deepEqual(result.sources[0].affectedSkills, [])
+})
+
+test('external skill watchlist distinguishes the primary upstream and adaptation boundaries', () => {
+  const watchlist = JSON.parse(readFileSync(resolve(repoRoot, 'docs/ae/references/external-skill-watchlist.json'), 'utf8'))
+  assert.equal(watchlist.schemaVersion, 2)
+  const primary = watchlist.sources.find((item) => item.id === 'jiangqiang-ai-agent-engine')
+  assert.equal(primary.sourceRole, 'primary-upstream')
+  assert.equal(primary.license, 'GPL-3.0-or-later')
+  assert.match(primary.pinnedCommit, /^[0-9a-f]{40}$/)
+  assert.ok(primary.capabilityDomains.includes('runnable-specification'))
+  for (const id of ['taste-skill', 'impeccable', 'mattpocock-skills']) {
+    assert.equal(watchlist.sources.find((item) => item.id === id).sourceRole, 'supplementary-research')
+  }
+  for (const source of watchlist.sources) {
+    for (const adopted of source.adopted) {
+      assert.ok(Array.isArray(adopted.upstreamPaths) && adopted.upstreamPaths.length > 0)
+    }
+  }
+})
+
+test('skill-audit --watch requires a source for explicit evidence across multiple repositories', () => {
+  const result = spawnSync(process.execPath, [
+    resolve(repoRoot, 'scripts/ae-tools.mjs'), 'skill-audit', '--watch',
+    '--remote-commit', '0000000000000000000000000000000000000000',
+    '--changed-path', 'skills/example/SKILL.md',
+  ], { cwd: repoRoot, encoding: 'utf8' })
+  assert.notEqual(result.status, 0)
+  assert.match(`${result.stderr}${result.stdout}`, /--source is required/)
 })

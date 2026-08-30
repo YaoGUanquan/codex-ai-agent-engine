@@ -1,0 +1,47 @@
+# UI Direction Contract
+
+Use this compact contract before significant UI implementation or refinement. For a small task, keep it inline in the work summary; for a design artifact, place it in the UI/UX dimension. Mark unknown values `inferred` or `assumed` instead of silently choosing a generic style.
+
+## Precedence
+
+Resolve direction in this order:
+
+1. existing project design system, tokens, components, and measured visual baseline;
+2. user-supplied design, brand assets, screenshots, or explicit constraints;
+3. target audience, primary job, surface type, and content needs;
+4. contextual inference;
+5. generic defaults only for unresolved implementation details.
+
+Operational, public-service, regulated, and accessibility-priority surfaces normally favor clarity, stability, scanability, and established patterns. Marketing or editorial surfaces may use stronger expression when it supports the content. Never apply a landing-page aesthetic to every surface.
+
+## Fields
+
+| Field | Record |
+| --- | --- |
+| Surface and job | surface type, audience, primary task, frequency of use |
+| Baseline and assets | existing system, supplied design, brand/content assets, preserve/replace boundary |
+| Hierarchy and typography | reading order, emphasis, type roles, content length constraints |
+| Palette | existing tokens, semantic colors, contrast constraints, permitted additions |
+| Spacing and density | project tokens or contextual `low` / `medium` / `high`; do not use a universal density default |
+| Expressiveness | contextual `low` / `medium` / `high`, with a reason tied to audience and job |
+| Motion purpose | state, relationship, feedback, or outcome communicated; otherwise `none` |
+| Responsive intent | priority content, reflow/collapse behavior, target viewports and input modes |
+| Avoid list | explicit visual, content, accessibility, performance, or brand violations |
+| Confidence and evidence | each material choice marked `verified`, `inferred`, or `assumed`, with its source |
+
+A self-contained static interaction specification may provide route, layout, field, state, responsive, and interaction evidence. It does not replace canonical requirements, security, concurrency, non-functional, production behavior, or source-code verification. When spec and source differ, list the differences and request an authority decision; do not choose a synchronization direction silently.
+
+## Refinement Modes
+
+| Mode | Typical intent | Primary owner | Verification |
+| --- | --- | --- | --- |
+| `audit` | diagnose hierarchy, consistency, accessibility, responsiveness, or direction drift | `ae-review` for report-only work; `ae-frontend-design` when fixes are requested | evidence-backed findings, then `ae-test-browser` when runnable |
+| `refine` | improve hierarchy, typesetting, layout, palette, motion, and finish without changing product behavior | `ae-frontend-design` | relevant build/tests plus browser evidence |
+| `adjust` | make the surface bolder, quieter, distilled, or clearer while preserving its job | `ae-frontend-design` | compare against this contract and the preserved baseline |
+| `harden` | complete responsive states, content/i18n fit, performance, accessibility, and production readiness | `ae-web-app` when state/API/runtime behavior is involved; otherwise `ae-frontend-design` | project checks plus `ae-test-browser` |
+
+Modes may compose, but select one primary owner. Do not create a new skill or change product behavior merely because a refinement word was used.
+
+## Evidence Boundary
+
+Review findings must cite this contract, supplied design input, existing tokens/baseline, an accessibility or responsive requirement, or valid browser evidence. Personal preference without one of those anchors is not a defect. Visual acceptance remains `unverified` when captures are blank, cropped, blocked, missing relevant assets, or contradicted by the user.

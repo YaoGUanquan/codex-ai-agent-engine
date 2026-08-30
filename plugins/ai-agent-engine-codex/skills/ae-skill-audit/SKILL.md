@@ -23,7 +23,8 @@ Audit external agent and skill repositories, then translate useful patterns into
    - record `sourceUrl`, `observedCommit`, `refSource`, and `inspectedFiles`;
    - if the user supplied a short hash such as `6d4d686`, resolve it to a full commit in a local clone or mark it `unreachable-short-hash`;
    - if local checkout HEAD differs from the remote ref, record `commitMismatch` before using local files as evidence.
-   - `--watch` never writes skills, memory, or the watchlist; a `stale` result only names affected AE skills for a later authorized edit.
+   - `--watch` never writes skills, memory, or the watchlist. A stale HEAD without path evidence reports `stale-impact-unverified` plus `candidateSkills`; only repeated `--changed-path <repo-relative-path>` values matching an adopted row's `upstreamPaths` may populate `affectedSkills` and report `stale-affected`. When multiple sources are registered, explicit `--remote-commit` or `--changed-path` evidence requires `--source <id>` so evidence from one repository cannot be applied to another.
+   - Treat `sourceRole: primary-upstream` as the first audit priority and `supplementary-research` as bounded method research; neither role authorizes automatic synchronization.
 3. Inspect the repository structure: skills, agents, hooks, commands, MCP, docs, installer scripts, manifests, deterministic engineering mechanisms, and license metadata.
 4. Compare the external model with current AE boundaries: `ae-ideate`, `ae-brainstorm`, `ae-plan`, `ae-work`, `ae-review`, `ae-skill-creator`, `ae-agent-creator`, `ae-save-experience`, and `ae-help`.
 5. Classify findings using `references/audit-template.md`, including deterministic engineering patterns and license compatibility before recommending reuse.
@@ -47,6 +48,8 @@ Classify each finding into portable method, local deterministic mechanism, or ru
 Reject direct ports of runtime-specific behavior unless the current Codex environment has an equivalent enforcement point. If a useful idea comes from such behavior, rewrite only the process contract and note the rejected runtime assumption and license impact.
 
 Freshness failures are audit findings, not blockers by themselves. If `git ls-remote` is unavailable, record `freshnessMethod: unavailable` and the reason. If a requested short hash is not reachable from the inspected ref, record the mismatch and avoid claiming the inspected files are the latest source.
+
+Changed-path input is untrusted evidence. Accept only normalized repository-relative paths, reject absolute paths and `..` traversal, and do not infer affected skills from a changed HEAD alone. `stale-unrelated` means supplied paths did not match adopted mappings; it does not prove the rest of the upstream change is harmless.
 
 ## Evidence And Claim Provenance
 

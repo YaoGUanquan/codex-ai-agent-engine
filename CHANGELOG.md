@@ -4,6 +4,20 @@
 
 English: [CHANGELOG.en.md](CHANGELOG.en.md)
 
+### 0.3.37（2026-08-30）
+- 修复全局更新器失败时的退出码传播与临时 clone 清理，新增本地 Git fixture 回归测试，并统一 ae-update 的全局安装说明。
+- 验证：`npm run check`、`npm run check:smoke`、`node --test tests/ae-tools.test.mjs --test-name-pattern="global updater"`；全量测试的两个 Windows 符号链接 fixture 仍受 `EPERM` 环境限制。
+
+### 0.3.36（2026-08-30）
+- 修复全局命令契约：help 中的更新、语言和检查命令改为用户级 dispatcher；`ae-update` 从 cloned release 执行全局安装器 preview/apply 事务。
+- 明确 `--project-root` 与仓库内相对 `--root` 的边界，graph 保留无项目只读扫描；设计检查新增不削弱默认严格门禁的 `--compat` 报告模式。
+- 验证：聚焦测试、`npm run check`、`npm run check:smoke`、发布说明和安装后 Codex/Cursor 指纹检查。
+
+### 0.3.35（2026-08-30）
+- 外部 skill watch 升级为路径证据语义：Gitee AE 登记为 `primary-upstream`，Taste、Impeccable 与 mattpocock 登记为补充研究源；仅在重复 `--changed-path` 与 `upstreamPaths` 匹配时填充 `affectedSkills`，HEAD 变化本身只产生 `stale-impact-unverified` 候选；显式 remote commit 必须是唯一的 40 位十六进制值，drive-relative/URI-like 路径会被拒绝。
+- 前端链新增共享 UI Direction Contract、`audit` / `refine` / `adjust` / `harden` 精修路由、设计模板集成、证据化视觉 review 与截图有效性/反例重开门禁；四类场景回放明确保留 operational UI、既有基线与移动端约束，不复制外部 prompt、detector 或 runtime。
+- 验证：两组聚焦测试、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs` 与 `git diff --check` 通过；`npm test` 共 160 项，158 项通过，2 项因当前 Windows 主机禁止创建测试 symlink 而在产品断言前返回 `EPERM`。已通过的检查证明路径匹配输出、条件式 UI Direction Contract、skill/source mirror、契约与安装分发一致性；不证明 symlink 逃逸用例、真实项目中的用户审美提升、像素级一致性或未执行的浏览器验收。
+
 ### 0.3.34（2026-08-22）
 - 将 `mattpocock/skills` 纳入可复检跟踪：`skill-audit --watch` 比较钉提交与远程观察，只报告 `current` / `stale` / `unavailable` 和受影响 AE skill，不自动改写 skill 或记忆。
 - 验证：`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`、`git diff --check`。这些检查证明跟踪清单、复检命令和已改 skill 的源/镜像锁定；不证明上游后续提交的内容，也不证明真实项目中的 skill 效果。
