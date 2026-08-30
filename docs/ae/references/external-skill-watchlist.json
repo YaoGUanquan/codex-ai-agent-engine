@@ -1,74 +1,119 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "sources": [
     {
-      "id": "mattpocock-skills",
-      "sourceUrl": "https://github.com/mattpocock/skills",
-      "license": "MIT",
-      "licenseEvidence": "https://raw.githubusercontent.com/mattpocock/skills/main/LICENSE",
-      "pinnedCommit": "5b15a47f2d7150f545fbcacbfe381787fc0230dc",
+      "id": "jiangqiang-ai-agent-engine",
+      "sourceRole": "primary-upstream",
+      "sourceUrl": "https://gitee.com/jiangqiang1996/ai-agent-engine",
+      "license": "GPL-3.0-or-later",
+      "licenseEvidence": "https://gitee.com/jiangqiang1996/ai-agent-engine/blob/master/LICENSE",
+      "pinnedCommit": "8ef17fbc9d8cd7b956f8d01c0448500651650189",
       "refSource": "HEAD",
       "freshnessMethod": "git-ls-remote",
-      "checkedAt": "2026-08-22T11:10:00Z",
-      "adaptationBoundary": "Rewrite portable methods into existing AE skills. Do not vendor the repository, run npx skills, install the Claude plugin, or copy SKILL.md verbatim.",
+      "checkedAt": "2026-08-30T00:00:00+08:00",
+      "capabilityDomains": ["workflow-model", "runnable-specification", "review-delegation", "installation-layout"],
+      "adaptationBoundary": "Independently express portable workflow methods only. Do not copy GPL-3.0-or-later code, prompts, OpenCode agents, installers, or runtime behavior into the GPL-2.0-only distribution.",
       "adopted": [
         {
-          "upstream": "skills/engineering/diagnosing-bugs/SKILL.md",
-          "aeSkill": "ae-debug",
-          "evidence": "red-capable feedback loop"
+          "upstream": "ae:spec-html evidence model",
+          "upstreamPaths": ["src/assets/skills/ae-spec-html/SKILL.md", "src/assets/agents/designers/spec-author.md", "src/assets/agents/developers/spec-translator.md"],
+          "aeSkill": "ae-design",
+          "evidence": "A runnable static specification may be bounded design evidence, never the canonical security or non-functional contract."
         },
         {
-          "upstream": "skills/engineering/tdd/SKILL.md",
-          "aeSkill": "ae-tdd",
-          "evidence": "independent oracle"
+          "upstream": "ae:spec-html frontend input",
+          "upstreamPaths": ["src/assets/skills/ae-spec-html/SKILL.md", "src/assets/agents/designers/spec-author.md"],
+          "aeSkill": "ae-frontend-design",
+          "evidence": "Static interaction specifications can inform UI direction and browser evidence."
         },
         {
-          "upstream": "skills/engineering/code-review/SKILL.md",
+          "upstream": "ae:ocr responsibility split",
+          "upstreamPaths": ["src/assets/skills/ae-ocr/SKILL.md", "src/tools/ae-ocr.tool.ts"],
           "aeSkill": "ae-review",
-          "evidence": "Standards"
-        },
-        {
-          "upstream": "skills/engineering/codebase-design/SKILL.md",
-          "aeSkill": "ae-refactor",
-          "evidence": "deletion test"
-        },
-        {
-          "upstream": "skills/engineering/to-tickets/SKILL.md",
-          "aeSkill": "ae-tasks",
-          "evidence": "tracer-bullet"
+          "evidence": "Deterministic preparation may select review material while the current model remains responsible for findings."
         }
       ],
       "rejected": [
-        {
-          "pattern": "Claude Code plugin auto-update and npx skills installer",
-          "reason": "runtime-specific distribution; AE uses its own plugin mirror and install contract"
-        },
-        {
-          "pattern": "GitHub/Linear tracker adapters and setup-matt-pocock-skills",
-          "reason": "external tracker runtime is out of scope; local issues remain referential"
-        },
-        {
-          "pattern": "background research agents, newsletter, and popularity metrics",
-          "reason": "not engineering evidence and not a Codex-enforced runtime"
-        },
-        {
-          "pattern": "verbatim SKILL.md import",
-          "reason": "GPL-2.0-only distribution copies methods, not source-derived prose"
-        }
+        {"pattern": "OpenCode agent orchestration and bidirectional spec/code runtime", "reason": "runtime-specific and narrower than AE security, concurrency, non-functional, and validation contracts"},
+        {"pattern": "GPL-3.0-or-later code or prompt copying", "reason": "incompatible with this GPL-2.0-only distribution boundary"}
       ],
       "watch": [
-        {
-          "upstream": "wayfinder",
-          "note": "multi-session decision maps; revisit only if AE handoff/issue linkage is insufficient"
-        },
-        {
-          "upstream": "improve-codebase-architecture",
-          "note": "HTML architecture survey; current report command is evidence-in, not a codebase crawler"
-        },
-        {
-          "upstream": "grill-with-docs",
-          "note": "CONTEXT.md/ADR inline updates overlap existing memory and constitution paths"
-        }
+        {"upstream": "installation path and module-layout inference", "upstreamPaths": ["src/services", "src/utils"], "note": "Audit separately under ae-update only after a local installation defect reproduces."}
+      ]
+    },
+    {
+      "id": "taste-skill",
+      "sourceRole": "supplementary-research",
+      "sourceUrl": "https://github.com/Leonxlnx/taste-skill",
+      "license": "MIT",
+      "licenseEvidence": "https://github.com/Leonxlnx/taste-skill/blob/main/LICENSE",
+      "pinnedCommit": "ccbc15639c97057cbfcf32ecebc38ef716e4bb37",
+      "refSource": "HEAD",
+      "freshnessMethod": "github-page-observation",
+      "checkedAt": "2026-08-30T00:00:00+08:00",
+      "capabilityDomains": ["design-direction", "visual-calibration", "frontend-refinement"],
+      "adaptationBoundary": "Independently rewrite contextual design methods. Do not copy the long SKILL prompt or install an external runtime.",
+      "adopted": [
+        {"upstream": "contextual design direction", "upstreamPaths": ["skills/taste-skill/SKILL.md"], "aeSkill": "ae-frontend-design", "evidence": "Audience, surface, baseline, expressiveness, motion, and density should be decided from context."},
+        {"upstream": "design intent before implementation", "upstreamPaths": ["skills/taste-skill/SKILL.md"], "aeSkill": "ae-design", "evidence": "Significant UI work records a compact direction contract before planning."}
+      ],
+      "rejected": [
+        {"pattern": "fixed aesthetic defaults and verbatim long-prompt import", "reason": "would replace contextual judgment with another generic style and expand the frequently loaded prompt"}
+      ],
+      "watch": []
+    },
+    {
+      "id": "impeccable",
+      "sourceRole": "supplementary-research",
+      "sourceUrl": "https://github.com/pbakaus/impeccable",
+      "license": "Apache-2.0",
+      "licenseEvidence": "https://github.com/pbakaus/impeccable/blob/main/LICENSE",
+      "pinnedCommit": "b0594c72d18006b5865c70eb3a97e8b04064e600",
+      "refSource": "HEAD",
+      "freshnessMethod": "github-page-observation",
+      "checkedAt": "2026-08-30T00:00:00+08:00",
+      "capabilityDomains": ["frontend-refinement", "visual-review", "deterministic-detection"],
+      "adaptationBoundary": "Adapt public behavior and general methods independently. Do not copy Apache-2.0 detector code, scripts, provider payloads, or long prompt text into this GPL-2.0-only distribution.",
+      "adopted": [
+        {"upstream": "grouped refinement intents", "upstreamPaths": [".claude/skills/impeccable/SKILL.md"], "aeSkill": "ae-frontend-design", "evidence": "Many command words can map to a small set of audit, refine, adjust, and harden modes."},
+        {"upstream": "evidence-backed visual review", "upstreamPaths": [".claude/skills/impeccable/SKILL.md"], "aeSkill": "ae-review", "evidence": "Visual findings need direction, baseline, accessibility, responsive, or browser evidence."},
+        {"upstream": "screenshot recheck loop", "upstreamPaths": [".claude/skills/impeccable/SKILL.md"], "aeSkill": "ae-test-browser", "evidence": "Blank, cropped, blocked, or contradicted captures must not pass visual acceptance."}
+      ],
+      "rejected": [
+        {"pattern": "detector, hooks, provider installers, and live mode", "reason": "license, false-positive, path-safety, platform, and runtime ownership remain unproven locally"}
+      ],
+      "watch": [
+        {"upstream": "deterministic visual detector", "upstreamPaths": ["scripts"], "note": "Revisit only after real replay data defines a held-out corpus and false-positive budget."}
+      ]
+    },
+    {
+      "id": "mattpocock-skills",
+      "sourceRole": "supplementary-research",
+      "sourceUrl": "https://github.com/mattpocock/skills",
+      "license": "MIT",
+      "licenseEvidence": "https://raw.githubusercontent.com/mattpocock/skills/main/LICENSE",
+      "pinnedCommit": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "refSource": "HEAD",
+      "freshnessMethod": "github-page-observation",
+      "checkedAt": "2026-08-30T00:00:00+08:00",
+      "capabilityDomains": ["debugging", "testing", "review", "refactoring", "task-breakdown"],
+      "adaptationBoundary": "Rewrite portable methods into existing AE skills. Do not vendor the repository, run npx skills, install the Claude plugin, or copy SKILL.md verbatim.",
+      "adopted": [
+        {"upstream": "skills/engineering/diagnosing-bugs/SKILL.md", "upstreamPaths": ["skills/engineering/diagnosing-bugs/SKILL.md"], "aeSkill": "ae-debug", "evidence": "red-capable feedback loop"},
+        {"upstream": "skills/engineering/tdd/SKILL.md", "upstreamPaths": ["skills/engineering/tdd/SKILL.md"], "aeSkill": "ae-tdd", "evidence": "independent oracle"},
+        {"upstream": "skills/engineering/code-review/SKILL.md", "upstreamPaths": ["skills/engineering/code-review/SKILL.md"], "aeSkill": "ae-review", "evidence": "Standards"},
+        {"upstream": "skills/engineering/codebase-design/SKILL.md", "upstreamPaths": ["skills/engineering/codebase-design/SKILL.md"], "aeSkill": "ae-refactor", "evidence": "deletion test"},
+        {"upstream": "skills/engineering/to-tickets/SKILL.md", "upstreamPaths": ["skills/engineering/to-tickets/SKILL.md"], "aeSkill": "ae-tasks", "evidence": "tracer-bullet"}
+      ],
+      "rejected": [
+        {"pattern": "Claude Code plugin auto-update and npx skills installer", "reason": "runtime-specific distribution; AE uses its own plugin mirror and install contract"},
+        {"pattern": "GitHub/Linear tracker adapters and setup-matt-pocock-skills", "reason": "external tracker runtime is out of scope; local issues remain referential"},
+        {"pattern": "background research agents, newsletter, and popularity metrics", "reason": "not engineering evidence and not a Codex-enforced runtime"},
+        {"pattern": "verbatim SKILL.md import", "reason": "GPL-2.0-only distribution copies methods, not source-derived prose"}
+      ],
+      "watch": [
+        {"upstream": "skills/in-progress/retro", "upstreamPaths": ["skills/in-progress/retro"], "note": "Experimental design notes only; revisit after functional release and repeated local need."},
+        {"upstream": "wayfinder", "note": "multi-session decision maps; revisit only if AE handoff/issue linkage is insufficient"}
       ]
     }
   ]

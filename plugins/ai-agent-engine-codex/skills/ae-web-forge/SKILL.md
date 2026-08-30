@@ -34,6 +34,8 @@ Typical outcomes:
 - Visual implementation from screenshot/Figma: `ae-frontend-design` with the provided design input -> `ae-test-browser`.
 - Verification only: `ae-test-browser`.
 
+For visual audit, polish/refine, bolder/quieter/distill/clarify, adapt, or optimize requests, read `../ae-frontend-design/references/ui-direction-contract.md` and map the intent to its `audit`, `refine`, `adjust`, or `harden` mode. Preserve Q1-Q4; this vocabulary selects an existing owner and does not create another public skill. Record the resulting direction contract before implementation when the request changes visual direction.
+
 ## Rework Loop
 
 Browser acceptance is required for web UI changes when a runnable app or static preview is available. Use `ae-test-browser` for final acceptance, then route failures back to the smallest owning skill:
@@ -55,6 +57,7 @@ Include this summary when the skill drives work:
 - Q2 design input:
 - Q3 backend/API:
 - Q4 visual baseline:
+- UI direction/refinement mode:
 - Motion decision:
 - Reduced-motion evidence:
 - Selected skills:

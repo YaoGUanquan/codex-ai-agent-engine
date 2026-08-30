@@ -1,24 +1,23 @@
 ---
 name: ae-update
-description: Use when the user asks for AE update, /ae-update, update AI Agent Engine for Codex, refresh the project-local AE plugin, pull from a configured repository, or reinstall local AE skills.
+description: Use when the user asks for AE update, /ae-update, update the current user's global AI Agent Engine for Codex installation, pull from a configured repository, or refresh Codex and Cursor AE skills.
 ---
 
 # AE Update
 
-Update the project-local AE for Codex installation.
+Update the current user's global AE for Codex installation.
 
 ## Workflow
 
-1. Inspect the current installation and repository setting.
-2. Explain that update uses Git/network operations and may replace project-local `plugins/ai-agent-engine-codex`, `.agents/skills/ae-*`, and AE wrapper scripts.
+1. Inspect the current user's global installation and repository setting.
+2. Explain that update uses Git/network operations and may replace the current user's private runtime, personal plugin, marketplace entry, and `~/.cursor/skills/ae-*` copies; it does not alter consumer project documents or source.
 3. Request approval before network fetch, clone, pull, or destructive replacement when required by Codex rules.
-4. Run `node scripts/update-ae-codex.mjs --repo <url> --branch <branch> --lang <lang>` after approval.
-5. After installing files, the updater automatically runs a conservative maintenance pass through the target's `scripts/ae-tools.mjs` (`tidy --apply`: archive done process notes, remove empty task dirs, move expired gate/evidence files, report oversized memory files; never stale archiving). Pass `--no-tidy` to skip it; the update summary reports the result under `maintenance`.
-6. Validate with `npm run check` or the narrowest equivalent available.
+4. Run `node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" ae-update --repo <url> --branch <branch>` after approval.
+5. The updater previews and then applies the cloned release through the transactional global installer; it preserves backups and reports the operation ID.
+6. Start a new Codex or Cursor chat after apply so skill discovery reloads.
+7. Validate with installed help plus the narrowest equivalent checks available.
 
 ## Rules
 
 - Do not run update against placeholder repository URLs.
-- Preserve the user's selected display language when possible.
-- Report changed paths, the `maintenance` summary, and validation results.
-- A skipped or failed maintenance pass never blocks the update; surface its reason instead.
+- Preserve the current-user rollback journal and report operation status, changed paths, and validation results.

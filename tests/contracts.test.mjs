@@ -466,6 +466,43 @@ test('check-design-contract rejects malformed design contracts with structured e
   }
 })
 
+test('check-design-contract compat mode reports warnings without weakening strict mode', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-design-compat-'))
+  try {
+    writeAeArtifact(tempRoot, 'docs/ae/designs/partial-2026-07-07/design.md', [
+      '---',
+      'type: design',
+      'status: drafted',
+      'date: 2026-07-07',
+      'title: partial design',
+      'format: human-readable-design',
+      'sharded: false',
+      '---',
+      '# Design: partial design',
+      '',
+      '## Overview',
+      '',
+      '## Decisions',
+      '',
+      '### ADR-001 - Decision',
+      '',
+      '## Consistency Check',
+      '',
+    ])
+    const strict = runDesignContractCheck(tempRoot)
+    assert.notEqual(strict.status, 0)
+    const strictOutput = JSON.parse(strict.stderr)
+    const compat = runDesignContractCheck(tempRoot, ['--compat'])
+    assert.equal(compat.status, 0, compat.stderr)
+    const compatOutput = JSON.parse(compat.stdout)
+    assert.equal(compatOutput.status, 'compatible-with-warnings')
+    assert.equal(compatOutput.warningCount, strictOutput.errors.length)
+    assert.deepEqual(compatOutput.warnings, strictOutput.errors)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
 test('design contract semantic validation resolves mapping IDs and split files', () => {
   const danglingRoot = mkdtempSync(join(tmpdir(), 'ae-design-semantic-'))
   const traversalRoot = mkdtempSync(join(tmpdir(), 'ae-design-semantic-'))

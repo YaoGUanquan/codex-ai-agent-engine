@@ -293,8 +293,8 @@
       "tier": "meta",
       "entry": "/ae-update",
       "target": "更新 AE 插件",
-      "purpose": "从指定 Git 仓库更新项目本地 AE for Codex 安装，需要网络和 Git 操作确认。",
-      "script": "node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-agent-engine.git --branch main"
+      "purpose": "从指定 Git 仓库更新当前用户的全局 AE for Codex runtime、personal plugin 与 Cursor skill 副本，需要网络和 Git 操作确认。",
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' ae-update --repo https://github.com/YaoGUanquan/codex-ai-agent-engine.git --branch main"
     },
     {
       "name": "ae-language",
@@ -302,7 +302,7 @@
       "entry": "/ae-language",
       "target": "切换显示语言",
       "purpose": "切换本地 AE skill 列表显示语言为中文、英文或双语。",
-      "script": "node scripts/set-ae-language.mjs --lang zh-CN|en|bilingual"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' set-ae-language --lang zh-CN|en|bilingual --project-root <absolute-project>"
     }
   ],
   "commands": [
@@ -314,42 +314,42 @@
     {
       "name": "check-ae-artifacts",
       "purpose": "检查 docs/ae 中 PRD、计划和其他 AE 产物 frontmatter 的基本合规性。",
-      "script": "node scripts/check-ae-artifacts.mjs [--target <project>]"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' check-ae-artifacts [--project-root <absolute-project>]"
     },
     {
       "name": "check-design-contract",
       "purpose": "检查 docs/ae/designs/**/design.md 设计契约的 frontmatter、必需章节、稳定 ID、显式省略维度、映射表和一致性字段。",
-      "script": "node scripts/check-design-contract.mjs [--target <project>]"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' check-design-contract [--project-root <absolute-project>] [--compat]"
     },
     {
       "name": "check-memory-knowledge-contract",
       "purpose": "验证 docs/08-ai-memory/00-registry.json 的声明式记忆元数据、证据关系、路径安全和目标文件完整性。",
-      "script": "node scripts/check-memory-knowledge-contract.mjs [--root <path>]"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' check-memory-knowledge-contract [--project-root <absolute-project>] [--root <repo-relative-dir>]"
     },
     {
       "name": "ae-memory-query",
       "purpose": "只读检索已登记的 Markdown 记忆；至少指定 topic、path 或 relation 之一，未登记内容不会被扫描。",
-      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' ae-memory-query [--root <path>] (--topic <topic>|--path <path>|--relation <type>) [--limit 20]"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' ae-memory-query [--project-root <absolute-project>] [--root <repo-relative-dir>] (--topic <topic>|--path <path>|--relation <type>) [--limit 20]"
     },
     {
       "name": "ae-knowledge-map",
       "purpose": "输出已声明的记忆到 AE 产物关系图，并为每条边保留 declared provenance 和证据路径。",
-      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' ae-knowledge-map [--root <path>] [--limit 20]"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' ae-knowledge-map [--project-root <absolute-project>] [--root <repo-relative-dir>] [--limit 20]"
     },
     {
       "name": "ae-knowledge-query",
       "purpose": "按路径和方向查询已声明的文档关系；不推断反向关系或源代码依赖。",
-      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' ae-knowledge-query [--root <path>] --path <path> [--relation <type>] [--direction incoming|outgoing|both]"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' ae-knowledge-query [--project-root <absolute-project>] [--root <repo-relative-dir>] --path <path> [--relation <type>] [--direction incoming|outgoing|both]"
     },
     {
       "name": "ae-graph-build",
       "purpose": "Build a shallow dependency graph JSON snapshot with freshness metadata for pre-Phase 2 file and import relation preview.",
-      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' ae-graph-build [--root <path>] [--limit 500] [--edge-limit <count>]"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' ae-graph-build [--project-root <absolute-project>] [--root <repo-relative-dir>] [--limit 500] [--edge-limit <count>]"
     },
     {
       "name": "ae-graph-query",
       "purpose": "Query the shallow dependency graph by path or keyword and report freshness metadata.",
-      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' ae-graph-query [--root <path>] (--path <file>|--keyword <text>)"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' ae-graph-query [--project-root <absolute-project>] [--root <repo-relative-dir>] (--path <file>|--keyword <text>)"
     },
     {
       "name": "claude-delegate",
@@ -399,7 +399,7 @@
     {
       "name": "skill-audit",
       "purpose": "Audit every distributed AE skill and its maintenance mirror, or recheck a pinned external skill watchlist without rewriting AE skills.",
-      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' skill-audit [--watch] [--remote-commit <sha>] [--out <path>]"
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' skill-audit [--watch] [--source <id>] [--remote-commit <sha>] [--changed-path <repo-relative-path>] [--out <path>]"
     }
   ],
   "artifactPaths": {

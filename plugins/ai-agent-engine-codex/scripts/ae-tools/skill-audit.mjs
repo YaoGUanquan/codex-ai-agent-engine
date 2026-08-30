@@ -79,8 +79,8 @@ function watchExternalSkills(worktree, opts) {
     watchlist: watchlistRel,
     sources: [],
     limitations: [
-      'watch compares pinned commits only; it does not rewrite AE skills or memory',
-      'live git ls-remote may be unavailable; use --remote-commit for deterministic checks',
+      'watch compares pinned commits and optional caller-supplied changed paths; it does not rewrite AE skills, memory, or the watchlist',
+      'live git ls-remote may be unavailable; use --remote-commit and repeat --changed-path for deterministic checks',
     ],
   }
   let watchlistPath
@@ -96,7 +96,15 @@ function watchExternalSkills(worktree, opts) {
   }
   const watchlist = JSON.parse(readFileSync(watchlistPath, 'utf8'))
   const requested = opts.source ? String(opts.source) : null
-  const sources = Array.isArray(watchlist.sources) ? watchlist.sources : []
+  const sources = Array.isArray(watchlist.sources)
+    ? watchlist.sources.map((source) => ({
+        ...source,
+        pinnedCommit: validateCommit(source.pinnedCommit, `watchlist pinnedCommit for ${source.id || source.sourceUrl || 'unknown source'}`),
+      }))
+    : []
+  if (!requested && sources.length > 1 && (opts['remote-commit'] !== undefined || opts['changed-path'] !== undefined)) {
+    throw new Error('--source is required when explicit remote-commit or changed-path evidence is used with multiple watched sources')
+  }
   result.sources = sources
     .filter((source) => !requested || source.id === requested || source.sourceUrl === requested)
     .map((source) => inspectWatchedSource(source, opts))
@@ -107,14 +115,17 @@ function watchExternalSkills(worktree, opts) {
 }
 
 function inspectWatchedSource(source, opts) {
-  const affected = uniqueSkills(source.adopted)
+  const adoptedSkills = uniqueSkills(source.adopted)
+  const changedPaths = normalizeChangedPaths(opts['changed-path'])
   const base = {
     id: source.id || null,
     sourceUrl: source.sourceUrl || null,
     license: source.license || null,
     pinnedCommit: source.pinnedCommit || null,
     refSource: source.refSource || 'HEAD',
-    adoptedSkills: affected,
+    sourceRole: source.sourceRole || 'supplementary-research',
+    capabilityDomains: Array.isArray(source.capabilityDomains) ? source.capabilityDomains : [],
+    adoptedSkills,
     rejected: Array.isArray(source.rejected) ? source.rejected : [],
     recommendation: 'none',
   }
@@ -126,26 +137,78 @@ function inspectWatchedSource(source, opts) {
       freshnessMethod: remote.freshnessMethod,
       reason: remote.reason,
       observedCommit: null,
+      impactStatus: 'unavailable',
+      candidateSkills: [],
       affectedSkills: [],
     }
   }
   const stale = remote.observedCommit !== source.pinnedCommit
+  const affectedSkills = stale && changedPaths.length > 0
+    ? matchAffectedSkills(source.adopted, changedPaths)
+    : []
+  const impactStatus = !stale
+    ? 'current'
+    : changedPaths.length === 0
+      ? 'stale-impact-unverified'
+      : affectedSkills.length > 0
+        ? 'stale-affected'
+        : 'stale-unrelated'
   return {
     ...base,
     freshness: stale ? 'stale' : 'current',
     freshnessMethod: remote.freshnessMethod,
     observedCommit: remote.observedCommit,
-    affectedSkills: stale ? affected : [],
-    recommendation: stale ? 'recheck-adopted-skills' : 'none',
+    impactStatus,
+    changedPathEvidence: changedPaths,
+    candidateSkills: impactStatus === 'stale-impact-unverified' ? adoptedSkills : [],
+    affectedSkills,
+    recommendation: impactStatus === 'stale-affected'
+      ? 'recheck-affected-skills'
+      : impactStatus === 'stale-impact-unverified'
+        ? 'collect-changed-path-evidence'
+        : 'none',
   }
 }
 
+function normalizeChangedPaths(value) {
+  const values = value === undefined ? [] : Array.isArray(value) ? value : [value]
+  return [...new Set(values.map((item) => normalizeChangedPath(String(item))))]
+}
+
+function normalizeChangedPath(value) {
+  const normalized = value.trim().replaceAll('\\', '/')
+  if (!normalized || normalized.startsWith('/') || /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(normalized) || normalized.split('/').includes('..')) {
+    throw new Error(`Invalid --changed-path: ${value}`)
+  }
+  const repoRelative = normalized.split('/').filter((part) => part && part !== '.').join('/')
+  if (!repoRelative) throw new Error(`Invalid --changed-path: ${value}`)
+  return repoRelative
+}
+
+function matchAffectedSkills(adopted, changedPaths) {
+  const matched = []
+  for (const item of Array.isArray(adopted) ? adopted : []) {
+    const upstreamPaths = Array.isArray(item.upstreamPaths)
+      ? item.upstreamPaths
+      : item.upstream
+        ? [item.upstream]
+        : []
+    const matches = upstreamPaths.some((upstreamPath) => {
+      const normalized = normalizeChangedPath(String(upstreamPath))
+      return changedPaths.some((changedPath) => changedPath === normalized || changedPath.startsWith(`${normalized}/`))
+    })
+    if (matches && item.aeSkill && !matched.includes(item.aeSkill)) matched.push(item.aeSkill)
+  }
+  return matched
+}
+
 function resolveRemoteCommit(source, opts) {
-  if (opts['remote-commit']) {
+  if (opts['remote-commit'] !== undefined) {
+    if (Array.isArray(opts['remote-commit'])) throw new Error('--remote-commit must be provided exactly once')
     return {
       freshness: 'observed',
       freshnessMethod: 'explicit-remote-commit',
-      observedCommit: String(opts['remote-commit']),
+      observedCommit: validateCommit(opts['remote-commit'], '--remote-commit'),
     }
   }
   if (truthy(opts['no-fetch'])) {
@@ -186,8 +249,14 @@ function resolveRemoteCommit(source, opts) {
   return {
     freshness: 'observed',
     freshnessMethod: 'git-ls-remote',
-    observedCommit,
+    observedCommit: validateCommit(observedCommit, 'git ls-remote commit'),
   }
+}
+
+function validateCommit(value, label) {
+  const commit = typeof value === 'string' ? value.trim() : ''
+  if (!/^[0-9a-fA-F]{40}$/.test(commit)) throw new Error(`Invalid ${label}: expected exactly 40 hexadecimal characters`)
+  return commit.toLowerCase()
 }
 
 function uniqueSkills(adopted) {
@@ -201,6 +270,8 @@ function unavailableSource(id, freshnessMethod, reason) {
     freshnessMethod,
     reason,
     observedCommit: null,
+    impactStatus: 'unavailable',
+    candidateSkills: [],
     affectedSkills: [],
     recommendation: 'none',
   }

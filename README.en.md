@@ -92,7 +92,7 @@ node scripts/ae-tools.mjs help
 - `ae-skill-creator`: create or update Codex skills.
 - `ae-skill-audit`: audit external agent/skill repositories and extract AE-fit improvements.
 - `ae-agent-creator`: create Codex-compatible agent prompts and delegation templates.
-- `ae-update`: update the project-local AE for Codex installation.
+- `ae-update`: update the current user's global AE for Codex runtime, personal plugin, and Cursor skill copies.
 - `ae-language`: advanced entrypoint for switching project-local AE skill display language.
 
 The helper CLI is available through:
@@ -504,7 +504,19 @@ Working rule: any change that touches distributable plugin content (`plugins/ai-
 
 ## Version Updates
 
+### 0.3.37 (2026-08-30)
+- Fixed global updater exit-code propagation and temporary clone cleanup on failure, added local Git fixture regression coverage, and aligned ae-update wording with global installation behavior.
+
+### 0.3.36 (2026-08-30)
+- Global help routes update, language, and checker commands through the user dispatcher; `ae-update` runs global-installer preview/apply from a cloned release.
+- `--project-root` selects a project, memory/knowledge `--root` is repository-relative, graph keeps generic read-only scans, and design checks add explicit `--compat` reporting.
+
 Full history lives in [CHANGELOG.en.md](CHANGELOG.en.md); this section keeps only the latest five versions, and entries beyond that window move to the changelog on each release.
+
+### 0.3.35 (2026-08-30)
+- Upgrade external skill watches to path-evidence semantics: Gitee AE is the `primary-upstream`, while Taste, Impeccable, and mattpocock are supplementary research sources. `affectedSkills` is populated only when repeated `--changed-path` values match adopted `upstreamPaths`; a changed HEAD alone produces `stale-impact-unverified` candidates. An explicit remote commit must be one 40-character hexadecimal value, and drive-relative or URI-like paths are rejected.
+- Add a shared UI Direction Contract, `audit` / `refine` / `adjust` / `harden` routing, design-template integration, evidence-backed visual review, and screenshot validity/contradiction rerun gates. Four replay scenarios preserve operational UI, existing baselines, and mobile constraints without copying external prompts, detectors, or runtimes.
+- Verification: both focused test groups, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check` passed. `npm test` ran 160 tests: 158 passed and 2 returned `EPERM` before product assertions because this Windows host cannot create the test symlinks. Passing checks prove path-impact output, conditional UI Direction Contract enforcement, skill/source mirrors, contracts, and install distribution consistency; they do not prove the symlink-escape cases, user-perceived visual improvement, pixel-perfect fidelity, or browser acceptance that was not run.
 
 ### 0.3.34 (2026-08-22)
 - Track `mattpocock/skills` as a recheckable source: `skill-audit --watch` compares the pinned commit with a remote observation and reports only `current` / `stale` / `unavailable` plus affected AE skills. It does not rewrite skills or memory.
@@ -513,19 +525,6 @@ Full history lives in [CHANGELOG.en.md](CHANGELOG.en.md); this section keeps onl
 ### 0.3.33 (2026-08-22)
 - Report generation now supports Git-friendly Markdown output alongside the existing offline self-contained HTML view; the audit counter now counts individual findings, including deferred findings.
 - Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`.
-
-### 0.3.32 (2026-08-22)
-- Add Codex-native parallel worker request contracts, self-contained offline HTML reports, a local Markdown issue tracker, and a static audit across all 40 skills. Claude/OpenCode runtime behavior, background agents, automatic commits, and external tracker runtimes remain outside AE.
-- Strengthen `ae-debug`, `ae-tdd`, `ae-tasks`, `ae-review`, and `ae-refactor` with falsifiable diagnostics, independent oracles, tracer bullets, Standards/Spec review axes, and deep-module judgment. Issues reject invalid transitions, dependency cycles, and resolved path escapes; reports escape input and use no CDN by default.
-- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`. These checks prove local helpers, skill mirrors, and install/distribution contracts; they do not prove that a Codex parent uses worker suggestions, external tracker synchronization, browser visual acceptance, or skill outcomes in real projects.
-
-### 0.3.31 (2026-08-17)
-- Project installation now requires an explicit target and uses recorded component ownership, staging backups, recovery, and explicit `--replace-modified` authorization before replacing changed or unknown managed content. Local static previews are loopback-only and reject canonical link escapes; evidence writes are serialized; quoted CSV/TSV input and review-contract selector validation are hardened.
-- Verification: `npm.cmd test`, `npm.cmd run check`, `npm.cmd run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`. These checks prove local installer, helper, mirror, and distribution contracts only; they do not prove target-project deployment, external network serving, or browser acceptance.
-
-### 0.3.30 (2026-08-13)
-- Global apply now copies each personal-plugin `ae-*` skill into a real directory at the current user's `~/.cursor/skills/<name>` (not a symlink or junction). Cursor does not track skill-directory symlinks, so the 0.3.29 links never appeared in `/ae`. Legacy links that still resolve to the personal plugin are replaced with matching copies without `--retire-modified`; user-edited `ae-*` entries still require that authorization. It does not recreate `~/.agents/skills` and never writes `~/.cursor/skills-cursor`.
-- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`. These checks prove isolated-home copy creation, legacy-link upgrades, foreign Cursor skill retention, failed-batch rollback, and preview/doc contract consistency. They do not prove the current Cursor chat's `/ae` palette refreshed; open a new Cursor thread to observe slash discovery.
 
 #### 0.3.28 (2026-08-13)
 - Global refresh: synchronize the root package and plugin manifest versions, then refresh the current user's AE plugin and dispatcher through the personal marketplace global-install flow; project-level docs, source, and user project data are unchanged.

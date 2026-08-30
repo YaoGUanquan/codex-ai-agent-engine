@@ -12,6 +12,7 @@ upstream-ai-agent-engine/
 .ae/
 .codex/ae-skill-profiles.yaml
 docs/ae/gates/*.json
+docs/ae/evidence/artifacts/review-contract/
 docs/ae/brainstorms/
 docs/ae/reviews/
 docs/ae/handoffs/

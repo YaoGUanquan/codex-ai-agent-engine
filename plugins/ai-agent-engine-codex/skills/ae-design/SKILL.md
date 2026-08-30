@@ -56,6 +56,8 @@ Every design contract must include:
 - acceptance and test-case contracts that downstream `ae-plan`, `ae-work`, and `ae-review` can verify;
 - explicit deferred decisions and explicit omitted dimensions rather than silent defaults.
 
+When the UI/UX dimension is triggered, read `../ae-frontend-design/references/ui-direction-contract.md` and include its compact UI Direction Contract under UI/UX. Existing project tokens and supplied designs outrank contextual inference; mark material choices `verified`, `inferred`, or `assumed`. A runnable static interaction specification may be design evidence, but it cannot replace requirements, security, concurrency, non-functional, or source-code verification contracts.
+
 Keep the contract compact. Include only dimensions that affect implementation, review, or validation. If the artifact becomes too large to scan, keep `design.md` as the overview and split dimension details into sibling Markdown files listed in the Split Manifest.
 
 ## Risk-Scaled Test Design
