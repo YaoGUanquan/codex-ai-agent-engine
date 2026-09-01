@@ -9,16 +9,17 @@
 - Important paths:
 {{importantPaths}}
 
+## Project Commands
+
+{{scripts}}
+
 ## Project Rules
 
 - Read existing documentation before changing behavior.
 - Keep changes scoped to the requested task.
 - Prefer the project's existing patterns over new abstractions.
 - Do not overwrite user work or revert unrelated changes.
-- Record AE workflow artifacts under `docs/ae`.
-- Record active process notes under `docs/00-process/active`.
-- Archive completed process notes under `docs/00-process/archive/YYYY-MM/<task-name>` or `docs/99-archive/YYYY-MM/<topic>`.
-- Record durable AI memory under `docs/08-ai-memory`.
+{{aeWorkflowRules}}
 
 ## Encoding Rules
 
