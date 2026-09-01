@@ -45,3 +45,14 @@ Modes may compose, but select one primary owner. Do not create a new skill or ch
 ## Evidence Boundary
 
 Review findings must cite this contract, supplied design input, existing tokens/baseline, an accessibility or responsive requirement, or valid browser evidence. Personal preference without one of those anchors is not a defect. Visual acceptance remains `unverified` when captures are blank, cropped, blocked, missing relevant assets, or contradicted by the user.
+
+## Motion implementation hints (runtime-neutral)
+
+When the target project chooses a JavaScript motion runtime, use these portable review cues; they are not a dependency recommendation:
+
+- Prefer transform and opacity changes for movement and visibility; use layout properties only when the layout itself is the product behavior.
+- Use one coordinated timeline or state transition for related elements instead of chains of arbitrary delays; every sequence must expose a usable final state.
+- Scope animation to the component lifecycle and clean up listeners, timelines, and scroll observers on unmount or route change.
+- Recalculate scroll- or layout-dependent positions only after material layout changes, and debounce resize-driven work.
+- Treat `prefers-reduced-motion` as a first-class direction choice: reduce distance, duration, or sequencing, or skip decorative motion entirely.
+- Verify motion at the lowest supported viewport/device class; a smooth desktop capture is not evidence of mobile performance.
