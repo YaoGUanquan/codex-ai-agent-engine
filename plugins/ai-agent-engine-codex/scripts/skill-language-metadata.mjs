@@ -101,10 +101,10 @@ export const skillMetadata = {
   },
   'ae-init': {
     display: { en: 'AE Init', zh: 'AE 初始化' },
-    en: 'Initialize project docs, archive rules, and AI memory',
-    zh: '初始化项目文档、归档规则和 AI 记忆库',
-    promptEn: 'Use $ae-init to initialize AGENTS.md, docs/ae, docs/00-process, and docs/08-ai-memory for this project.',
-    promptZh: '使用 $ae-init 初始化当前项目的 AGENTS.md、docs/ae、docs/00-process 和 docs/08-ai-memory。',
+    en: 'Initialize AGENTS.md with selectable AE docs and safe regeneration',
+    zh: '初始化 AGENTS.md、可选 AE 文档和安全再生成边界',
+    promptEn: 'Use $ae-init to preview and initialize AGENTS.md with the appropriate minimal, ae-core, or full profile.',
+    promptZh: '使用 $ae-init 预览并按 minimal、ae-core 或 full profile 初始化 AGENTS.md 与 AE 文档。',
   },
   'ae-language': {
     display: { en: 'AE Language', zh: 'AE 切换语言' },

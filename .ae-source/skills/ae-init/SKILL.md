@@ -5,7 +5,7 @@ description: Use when the user asks for AE init, /ae-init, initialize a project 
 
 # AE Init
 
-Initialize the target project with Codex guidance, AE workflow folders, process/archive docs, UTF-8 rules, and durable AI memory.
+Initialize the target project with AGENTS.md guidance and a selectable AE documentation scaffold. The command keeps the client-neutral AGENTS.md convention separate from Codex-specific instruction precedence.
 
 This skill is intentionally conservative. It turns "initialize this project" into a verified project setup, not a broad documentation rewrite.
 
@@ -21,10 +21,12 @@ This skill is intentionally conservative. It turns "initialize this project" int
 1. Confirm the current working directory is the target project.
 2. Read existing project guidance first: `AGENTS.md`, `README*`, package or build metadata, and existing `docs/` conventions when present.
 3. Inspect `git status --short` when the target is a Git repository and avoid overwriting user-owned files.
-4. Run a preview first:
+4. Run a preview first. `ae-core` is the default profile; use `minimal` for only `AGENTS.md` or `full` for the legacy complete directory set:
 
 ```powershell
 node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" init --dry-run
+node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" init --dry-run --profile minimal
+node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" init --dry-run --profile full
 ```
 
 5. Choose language from the user request or existing project language:
@@ -36,33 +38,45 @@ node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" init --lang bilingual
 
 Use the default only when no project signal or user preference points to Chinese or bilingual templates.
 
-6. Run the real init only after the target project and language are clear:
+6. When the repository has subprojects or existing instruction files, preview the bounded candidates and Codex-specific precedence before writing:
+
+```powershell
+node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" init --dry-run --nested preview --explain-instructions
+```
+
+Nested candidates are advisory. Do not create nested `AGENTS.md` files without project-owner judgment.
+
+7. Run the real init only after the target project, profile, and language are clear:
 
 ```powershell
 node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" init
 ```
 
-7. Verify the result by checking the command JSON plus the expected core paths: `AGENTS.md`, `docs/ae` (including canonical `docs/ae/prds`), `docs/00-process`, and `docs/08-ai-memory`. Init no longer creates the legacy `docs/ai-memory` compatibility pointer on new projects.
-8. On Windows, verify Chinese Markdown with explicit UTF-8 reads or Git diff before treating mojibake as file corruption.
+8. Verify the command JSON and the selected profile boundary. `minimal` creates only `AGENTS.md`; `ae-core` also creates canonical `docs/ae`, `docs/00-process`, and `docs/08-ai-memory` paths; `full` adds the legacy numbered documentation directories. Init does not create the legacy `docs/ai-memory` compatibility pointer.
+9. Check `conflicted_files`. New files have a bounded AE-managed region; `--force` replaces only that region and preserves surrounding user content. Legacy marker-only files are preserved as conflicts because their user-authored changes cannot be distinguished safely.
+10. On Windows, verify Chinese Markdown with explicit UTF-8 reads or Git diff before treating mojibake as file corruption.
 
 ## Success Criteria
 
 - The target project is unambiguous.
 - Existing non-managed files are preserved.
 - The init command reports created, skipped, and updated files clearly.
-- The generated `AGENTS.md` and docs contain the AE init marker where overwrite safety depends on it.
+- The generated `AGENTS.md` includes repository-derived package scripts when available.
+- Generated files contain one bounded AE-managed region where regeneration safety depends on it.
+- Instruction explanation labels Codex precedence as client-specific and nested discovery as bounded advice.
 - A minimal validation command ran, such as `node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" help` or a dry-run/init JSON inspection.
 
 ## Rules
 
 - Do not run init from an installer temp directory.
 - Existing files are skipped by default.
-- Use `--force` only when the user explicitly wants managed AE init files regenerated.
-- If `--force` is used, confirm the target files contain the AE init marker before relying on overwrite behavior.
+- Use `--force` only when the user explicitly wants bounded managed regions regenerated.
+- Do not convert a legacy marker-only conflict into a whole-file overwrite. Preserve the file and migrate its managed region manually.
+- `--nested preview` never authorizes creating nested instruction files.
 - Treat PowerShell mojibake as a display issue until UTF-8 reads or Git diff prove file corruption.
 - Do not add project-specific policies, architecture claims, or workflow obligations that were not discovered from the repository or requested by the user.
 - If the command is unavailable, stop and report the missing script path instead of hand-creating the full scaffold from memory.
 
 ## Final Response
 
-Report the target directory, language, created files, skipped files, validation command, and any files intentionally left untouched.
+Report the target directory, language, profile, created/updated/skipped/conflicted files, nested candidates when requested, validation command, and any files intentionally left untouched.

@@ -1046,6 +1046,109 @@ test('init provisions the canonical prds directory and stops creating the legacy
   }
 })
 
+test('init profiles bound the scaffold and generated AGENTS.md includes real package scripts', () => {
+  const minimalRoot = mkdtempSync(join(tmpdir(), 'ae-init-minimal-'))
+  const coreRoot = mkdtempSync(join(tmpdir(), 'ae-init-core-'))
+  const fullRoot = mkdtempSync(join(tmpdir(), 'ae-init-full-'))
+  try {
+    writeFileSync(join(minimalRoot, 'package.json'), JSON.stringify({
+      name: 'profile-fixture',
+      scripts: { test: 'node --test', lint: 'eslint .', unusual: 'first\n## injected `heading`' },
+    }), 'utf8')
+    const minimal = runNodeScriptJson(['scripts/ae-tools.mjs', 'init', '--profile', 'minimal', '--project-root', minimalRoot], minimalRoot)
+    assert.equal(minimal.profile, 'minimal')
+    assert.deepEqual(minimal.created_directories, [])
+    assert.deepEqual(minimal.created_files, ['AGENTS.md'])
+    const agents = readFileSync(join(minimalRoot, 'AGENTS.md'), 'utf8')
+    assert.match(agents, /## Project Commands/)
+    assert.match(agents, /`npm run test` - node --test/)
+    assert.match(agents, /`npm run lint` - eslint \./)
+    assert.match(agents, /`npm run unusual` - first ## injected `heading`/)
+    assert.doesNotMatch(agents, /^## injected/m)
+    assert.match(agents, /Do not pre-create AE workflow directories/)
+    assert.doesNotMatch(agents, /Record AE workflow artifacts under `docs\/ae`/)
+    assert.ok(minimal.notes.includes('The minimal profile creates only AGENTS.md and does not pre-create AE workflow directories.'))
+    assert.equal((agents.match(/<!-- ae-codex:init managed -->/g) || []).length, 1)
+    assert.equal((agents.match(/<!-- \/ae-codex:init managed -->/g) || []).length, 1)
+
+    const core = runNodeScriptJson(['scripts/ae-tools.mjs', 'init', '--dry-run', '--project-root', coreRoot], coreRoot)
+    assert.equal(core.profile, 'ae-core')
+    assert.ok(core.created_directories.includes('docs/ae/prds'))
+    assert.ok(core.created_directories.includes('docs/08-ai-memory'))
+    assert.ok(!core.created_directories.includes('docs/01-history'))
+    const bilingual = runNodeScriptJson(['scripts/ae-tools.mjs', 'init', '--profile', 'minimal', '--lang', 'bilingual', '--project-root', coreRoot], coreRoot)
+    assert.deepEqual(bilingual.created_files, ['AGENTS.md'])
+    const bilingualAgents = readFileSync(join(coreRoot, 'AGENTS.md'), 'utf8')
+    assert.match(bilingualAgents, /## 项目画像/)
+    assert.match(bilingualAgents, /## Project Profile/)
+    assert.equal((bilingualAgents.match(/<!-- ae-codex:init managed -->/g) || []).length, 1)
+    assert.equal((bilingualAgents.match(/<!-- \/ae-codex:init managed -->/g) || []).length, 1)
+
+    const full = runNodeScriptJson(['scripts/ae-tools.mjs', 'init', '--dry-run', '--profile', 'full', '--project-root', fullRoot], fullRoot)
+    assert.ok(full.created_directories.includes('docs/01-history'))
+    assert.ok(full.created_directories.includes('docs/99-archive'))
+
+    const invalid = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'ae-tools.mjs'), 'init', '--profile', 'wide', '--project-root', fullRoot], { cwd: fullRoot, encoding: 'utf8', stdio: 'pipe' })
+    assert.equal(invalid.status, 1)
+    assert.match(invalid.stderr, /--profile must be minimal, ae-core, or full/)
+  } finally {
+    rmSync(minimalRoot, { recursive: true, force: true })
+    rmSync(coreRoot, { recursive: true, force: true })
+    rmSync(fullRoot, { recursive: true, force: true })
+  }
+})
+
+test('init explains Codex overrides and previews bounded nested instruction candidates without writing them', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-init-instructions-'))
+  try {
+    writeFileSync(join(tempRoot, 'package.json'), JSON.stringify({ name: 'instruction-fixture' }), 'utf8')
+    writeFileSync(join(tempRoot, 'AGENTS.md'), '# standard\n', 'utf8')
+    writeFileSync(join(tempRoot, 'AGENTS.override.md'), '# override\n', 'utf8')
+    mkdirSync(join(tempRoot, 'packages', 'api'), { recursive: true })
+    writeFileSync(join(tempRoot, 'packages', 'api', 'package.json'), JSON.stringify({ name: 'api' }), 'utf8')
+    const result = runNodeScriptJson([
+      'scripts/ae-tools.mjs', 'init', '--dry-run', '--profile', 'minimal', '--explain-instructions', '--nested', 'preview', '--project-root', tempRoot,
+    ], tempRoot)
+    assert.deepEqual(result.instruction_inventory.codex_effective_files, ['AGENTS.override.md'])
+    assert.match(result.instruction_inventory.codex_precedence, /Codex selects AGENTS\.override\.md before AGENTS\.md/)
+    assert.deepEqual(result.nested_candidates.map((candidate) => candidate.suggested_path), ['packages/api/AGENTS.md'])
+    assert.equal(existsSync(join(tempRoot, 'packages', 'api', 'AGENTS.md')), false)
+
+    const invalid = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'ae-tools.mjs'), 'init', '--nested', 'write', '--project-root', tempRoot], { cwd: tempRoot, encoding: 'utf8', stdio: 'pipe' })
+    assert.equal(invalid.status, 1)
+    assert.match(invalid.stderr, /--nested must be preview/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('init force replaces only bounded managed regions and reports legacy marker conflicts', () => {
+  const boundedRoot = mkdtempSync(join(tmpdir(), 'ae-init-bounded-'))
+  const legacyRoot = mkdtempSync(join(tmpdir(), 'ae-init-legacy-'))
+  try {
+    writeFileSync(join(boundedRoot, 'package.json'), JSON.stringify({ name: 'bounded', scripts: { test: 'old-test' } }), 'utf8')
+    runNodeScriptJson(['scripts/ae-tools.mjs', 'init', '--profile', 'minimal', '--project-root', boundedRoot], boundedRoot)
+    const generated = readFileSync(join(boundedRoot, 'AGENTS.md'), 'utf8')
+    writeFileSync(join(boundedRoot, 'AGENTS.md'), `# User preface\n\n${generated}\n# User appendix\n`, 'utf8')
+    writeFileSync(join(boundedRoot, 'package.json'), JSON.stringify({ name: 'bounded', scripts: { test: 'new-test' } }), 'utf8')
+    const updated = runNodeScriptJson(['scripts/ae-tools.mjs', 'init', '--profile', 'minimal', '--force', '--project-root', boundedRoot], boundedRoot)
+    assert.deepEqual(updated.updated_files, ['AGENTS.md'])
+    const after = readFileSync(join(boundedRoot, 'AGENTS.md'), 'utf8')
+    assert.match(after, /^# User preface/)
+    assert.match(after, /`npm run test` - new-test/)
+    assert.match(after, /# User appendix\n$/)
+
+    writeFileSync(join(legacyRoot, 'AGENTS.md'), '<!-- ae-codex:init managed -->\n# User-owned legacy additions\n', 'utf8')
+    const beforeLegacy = readFileSync(join(legacyRoot, 'AGENTS.md'), 'utf8')
+    const conflict = runNodeScriptJson(['scripts/ae-tools.mjs', 'init', '--profile', 'minimal', '--force', '--project-root', legacyRoot], legacyRoot)
+    assert.deepEqual(conflict.conflicted_files.map((item) => item.path), ['AGENTS.md'])
+    assert.equal(readFileSync(join(legacyRoot, 'AGENTS.md'), 'utf8'), beforeLegacy)
+  } finally {
+    rmSync(boundedRoot, { recursive: true, force: true })
+    rmSync(legacyRoot, { recursive: true, force: true })
+  }
+})
+
 test('gate records each repeated validation flag separately', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-gate-validation-'))
   try {

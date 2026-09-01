@@ -24,8 +24,8 @@
       "tier": "meta",
       "entry": "/ae-init",
       "target": "初始化项目",
-      "purpose": "初始化当前项目的 AGENTS.md、AE 工作流目录、过程文档、归档规则、UTF-8 中文处理规则和长期 AI 记忆库。",
-      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' init [--lang en|zh-CN|bilingual] [--dry-run] [--force]",
+      "purpose": "按 minimal、ae-core 或 full profile 初始化 AGENTS.md 与 AE 文档，并可预览 Codex 指令优先级和嵌套候选。",
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' init [--profile minimal|ae-core|full] [--lang en|zh-CN|bilingual] [--dry-run] [--force] [--nested preview] [--explain-instructions]",
       "artifactPath": "AGENTS.md, docs/ae, docs/00-process, docs/08-ai-memory"
     },
     {
@@ -308,8 +308,8 @@
   "commands": [
     {
       "name": "init",
-      "purpose": "初始化当前项目的 Codex 项目说明、AE 工作流目录、过程文档、归档规则、UTF-8 中文处理规则和长期 AI 记忆库文档。",
-      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' init [--lang en|zh-CN|bilingual] [--dry-run] [--force]"
+      "purpose": "按可选 profile 初始化 AGENTS.md 与 AE 文档；安全更新受管区块，并提供只读嵌套/优先级诊断。",
+      "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' init [--profile minimal|ae-core|full] [--lang en|zh-CN|bilingual] [--dry-run] [--force] [--nested preview] [--explain-instructions]"
     },
     {
       "name": "check-ae-artifacts",
