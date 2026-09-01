@@ -4,6 +4,15 @@
 
 English: [CHANGELOG.en.md](CHANGELOG.en.md)
 
+### 0.3.39（2026-09-01）
+- `ae-init` 新增 `minimal`、默认 `ae-core` 与兼容旧完整目录集的 `full` profile；生成的 `AGENTS.md` 纳入实际 package scripts，并提供 `--nested preview` 与 `--explain-instructions` 只读诊断。
+- 新生成文件改用单一受管起止区块；`--force` 只替换区块并保留外部用户内容，legacy marker-only 文件报告冲突而不覆盖。登记 MIT 许可的 `agentsmd/agents.md` 开放格式来源，并将 Codex override 行为限定为 OpenAI 客户端语义。
+- 验证：init 聚焦测试 4/4 通过，`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs` 与 `git diff --check` 通过；`npm test` 共 167 项，165 项通过，2 项因当前 Windows 主机禁止创建测试 symlink 而在产品断言前 `EPERM`。这些检查不证明所有 AGENTS.md 客户端采用相同优先级，也不证明建议的嵌套候选需要创建。
+
+### 0.3.38（2026-08-31）
+- 审计 `greensock/gsap-skills` 并吸收可移植动效方法：transform/opacity 优先、协调式时间线、生命周期清理、布局刷新节流与最低设备验证；将 GSAP 纳入外部 freshness watch，但不引入运行时或复制示例。
+- 验证：`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`、`git diff --check`。
+
 ### 0.3.37（2026-08-30）
 - 修复全局更新器失败时的退出码传播与临时 clone 清理，新增本地 Git fixture 回归测试，并统一 ae-update 的全局安装说明。
 - 验证：`npm run check`、`npm run check:smoke`、`node --test tests/ae-tools.test.mjs --test-name-pattern="global updater"`；全量测试的两个 Windows 符号链接 fixture 仍受 `EPERM` 环境限制。

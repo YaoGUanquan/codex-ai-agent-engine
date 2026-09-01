@@ -136,6 +136,22 @@
       "role": "global updater transaction and release validation boundaries",
       "topics": ["installer", "global-update", "cursor", "release", "validation"],
       "reviewStatus": "current"
+    },
+    {
+      "id": "motion-guidance-adaptation",
+      "path": "docs/08-ai-memory/18-motion-guidance-adaptation.md",
+      "kind": "memory",
+      "role": "runtime-neutral motion guidance and external-source boundary",
+      "topics": ["frontend", "motion", "gsap", "accessibility", "provenance"],
+      "reviewStatus": "current"
+    },
+    {
+      "id": "agents-md-aware-init",
+      "path": "docs/08-ai-memory/19-agents-md-aware-init.md",
+      "kind": "memory",
+      "role": "AGENTS.md-aware initialization and regeneration safety",
+      "topics": ["agents-md", "init", "codex", "managed-region", "distribution"],
+      "reviewStatus": "current"
     }
   ],
   "relations": [
@@ -730,7 +746,97 @@
       "type": "documents",
       "evidence": {
         "path": "docs/08-ai-memory/17-global-update-hardening.md",
-        "note": "The maintainer graph records the 0.3.37 global update hardening node and its validation boundary."
+        "note": "The maintainer graph records global update hardening through the installed 0.3.39 release and its validation boundary."
+      }
+    },
+    {
+      "from": "motion-guidance-adaptation",
+      "to": "docs/ae/prds/2026-08-31-gsap-motion-guidance-adaptation-prd.md",
+      "type": "documents",
+      "evidence": {
+        "path": "docs/08-ai-memory/18-motion-guidance-adaptation.md",
+        "note": "The memory records the runtime-neutral requirements and rejects dependency adoption without target-project authority."
+      }
+    },
+    {
+      "from": "motion-guidance-adaptation",
+      "to": "docs/ae/plans/2026-08-31-001-gsap-motion-guidance-adaptation-plan.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/18-motion-guidance-adaptation.md",
+        "note": "The completed plan defines the source/mirror, provenance, release, and validation units."
+      }
+    },
+    {
+      "from": "motion-guidance-adaptation",
+      "to": "docs/ae/experience/2026-08-31-gsap-motion-guidance-adaptation.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/18-motion-guidance-adaptation.md",
+        "note": "The experience note preserves the adopted methods, rejected runtime, and proof boundary."
+      }
+    },
+    {
+      "from": "motion-guidance-adaptation",
+      "to": "docs/ae/solutions/2026-08-31-gsap-skills-audit.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/18-motion-guidance-adaptation.md",
+        "note": "The audit contains the pinned commit, MIT license evidence, and adaptation map."
+      }
+    },
+    {
+      "from": "motion-guidance-adaptation",
+      "to": "docs/ae/graphs/maintainer-artifact-graph.md",
+      "type": "documents",
+      "evidence": {
+        "path": "docs/08-ai-memory/18-motion-guidance-adaptation.md",
+        "note": "The maintainer graph links the external audit to frontend guidance and durable memory."
+      }
+    },
+    {
+      "from": "agents-md-aware-init",
+      "to": "AGENTS.md",
+      "type": "supports",
+      "evidence": {
+        "path": "docs/08-ai-memory/19-agents-md-aware-init.md",
+        "note": "The init safety model preserves project-owned guidance outside one bounded AE-managed region."
+      }
+    },
+    {
+      "from": "agents-md-aware-init",
+      "to": "docs/ae/prds/2026-09-01-agents-md-aware-init-prd.md",
+      "type": "documents",
+      "evidence": {
+        "path": "docs/08-ai-memory/19-agents-md-aware-init.md",
+        "note": "The memory records the completed profile, diagnostics, overwrite-safety, and distribution requirements."
+      }
+    },
+    {
+      "from": "agents-md-aware-init",
+      "to": "docs/ae/plans/2026-09-01-001-agents-md-aware-init-plan.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/19-agents-md-aware-init.md",
+        "note": "The completed plan defines the implementation, distribution, and regression units."
+      }
+    },
+    {
+      "from": "agents-md-aware-init",
+      "to": "docs/ae/experience/2026-09-01-agents-md-aware-init.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/19-agents-md-aware-init.md",
+        "note": "The experience note records the implementation details, global installation operation, and validation boundary."
+      }
+    },
+    {
+      "from": "agents-md-aware-init",
+      "to": "docs/ae/graphs/maintainer-artifact-graph.md",
+      "type": "documents",
+      "evidence": {
+        "path": "docs/08-ai-memory/19-agents-md-aware-init.md",
+        "note": "The maintainer graph maps the open-format source, init implementation, tests, release, and durable memory."
       }
     }
   ]

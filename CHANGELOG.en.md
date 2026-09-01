@@ -4,6 +4,15 @@ This file is the complete release history of AI Agent Engine for Codex (since 0.
 
 中文版本: [CHANGELOG.md](CHANGELOG.md)
 
+### 0.3.39 (2026-09-01)
+- Add `minimal`, default `ae-core`, and legacy-complete `full` profiles to `ae-init`; generated `AGENTS.md` guidance now includes actual package scripts and exposes read-only `--nested preview` plus `--explain-instructions` diagnostics.
+- New generated files use one managed start/end region. `--force` replaces only that region and preserves surrounding user content, while legacy marker-only files report conflicts without being overwritten. Register the MIT-licensed `agentsmd/agents.md` open-format source and keep Codex override behavior scoped to the OpenAI client.
+- Validation: all 4 focused init tests, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check` passed. `npm test` ran 167 tests: 165 passed and 2 returned `EPERM` before product assertions because this Windows host cannot create test symlinks. These checks do not prove identical precedence across all AGENTS.md clients or that suggested nested candidates should be created.
+
+### 0.3.38 (2026-08-31)
+- Audited `greensock/gsap-skills` and adopted portable motion guidance: transform/opacity preference, coordinated timelines, lifecycle cleanup, debounced layout refresh, and lowest-device verification; added GSAP to the external freshness watch without importing its runtime or examples.
+- Validation: `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, `git diff --check`.
+
 ### 0.3.37 (2026-08-30)
 - Fixed global updater exit-code propagation and temporary clone cleanup on failure, added local Git fixture regression coverage, and aligned ae-update wording with global installation behavior.
 - Validation: `npm run check`, `npm run check:smoke`, and `node --test tests/ae-tools.test.mjs --test-name-pattern="global updater"`; two full-suite Windows symlink fixture tests remain environment-limited by `EPERM`.

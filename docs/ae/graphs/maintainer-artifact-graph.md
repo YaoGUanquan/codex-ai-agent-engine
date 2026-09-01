@@ -1,5 +1,5 @@
 <!-- ae-codex:reference -->
-# Maintainer Artifact Graph (2026-08-11, extended 2026-08-30)
+# Maintainer Artifact Graph (2026-08-11, extended 2026-09-01)
 
 Curated map of the August 2026 optimization wave through Cursor dual-client discovery (`cd20d47` / 0.3.30) and the 0.3.31–0.3.34 interface, orchestration, and external-skill watch batch. For machine-readable edges see `docs/08-ai-memory/00-registry.json`.
 
@@ -22,7 +22,9 @@ flowchart LR
   orch["Report / issue / skill-audit<br/>0.3.32-0.3.33"]
   watch["mattpocock watch<br/>0.3.34"]
   update["global update hardening<br/>0.3.37"]
-  scan --> fe --> struct --> full --> kb1 --> kb2 --> kb3 --> kb4 --> prds --> distill --> cursor --> iface --> orch --> watch --> update
+  motion["GSAP guidance adaptation<br/>0.3.38"]
+  agents["AGENTS.md-aware init<br/>0.3.39"]
+  scan --> fe --> struct --> full --> kb1 --> kb2 --> kb3 --> kb4 --> prds --> distill --> cursor --> iface --> orch --> watch --> update --> motion --> agents
 ```
 
 ## Code module graph (ae-tools, post-0.3.20)
@@ -117,6 +119,12 @@ flowchart LR
 | `docs/ae/experience/2026-08-13-cursor-user-skill-discovery.md` | records | 0.3.29 links superseded by 0.3.30 copies | Live `/ae` probe |
 | `docs/ae/references/global-ae-install-contract.md` | documents | Codex personal plugin + Cursor copies | Dual discovery surfaces |
 | `docs/00-process/archive/2026-08/cursor-user-skill-discovery/summary.md` | archives | Cursor discovery plan | Process closure |
+| `docs/ae/solutions/2026-08-31-gsap-skills-audit.md` | documents | runtime-neutral frontend motion cues | Pinned MIT source, adopted/rejected boundary |
+| `docs/ae/experience/2026-08-31-gsap-motion-guidance-adaptation.md` | records | 0.3.38 frontend guidance adaptation | Validation and browser-evidence boundary |
+| `docs/08-ai-memory/18-motion-guidance-adaptation.md` | documents | GSAP research-input boundary | Durable frontend motion rule |
+| `docs/ae/plans/2026-09-01-001-agents-md-aware-init-plan.md` | implements | `ae-tools/init.mjs`, templates, skill/catalog mirrors | 0.3.39 profiles, diagnostics, managed regions |
+| `docs/ae/experience/2026-09-01-agents-md-aware-init.md` | records | 0.3.39 init delivery and global apply | Validation and client-semantics boundary |
+| `docs/08-ai-memory/19-agents-md-aware-init.md` | documents | init safety and compatibility rules | Durable AGENTS.md-aware contract |
 
 ## Skill mirror invariant
 
@@ -216,3 +224,32 @@ flowchart LR
 | `docs/08-ai-memory/16-mattpocock-skills-watch.md` | documents | watchlist and recheck workflow | Durable memory |
 | `docs/ae/experience/2026-08-22-codex-orchestration-and-mattpocock-watch.md` | records | 0.3.32–0.3.34 | Authority and proof boundary |
 | `docs/ae/issues/AEI-20260822-003.md` | tracks | later stale `--watch` results | Follow-up only |
+
+## Motion guidance and AGENTS.md-aware init (0.3.38–0.3.39)
+
+```mermaid
+flowchart LR
+  gsap["greensock/gsap-skills<br/>pinned MIT source"]
+  audit["GSAP audit"]
+  motion["runtime-neutral motion guidance"]
+  motionMemory["memory 18"]
+  agentsSource["agentsmd/agents.md<br/>open format"]
+  codexDocs["OpenAI Codex instruction semantics"]
+  initPlan["AGENTS.md-aware init plan"]
+  initCode["init.mjs + templates"]
+  tests["focused init tests"]
+  initMemory["memory 19"]
+  gsap --> audit --> motion --> motionMemory
+  agentsSource --> initPlan
+  codexDocs --> initPlan
+  initPlan --> initCode --> tests --> initMemory
+```
+
+| From | Relation | To | Role |
+| --- | --- | --- | --- |
+| `docs/ae/references/external-skill-watchlist.json` | records | `greensock-gsap-skills` and `agents-md-open-format` | Pinned provenance and path-scoped impact |
+| `docs/ae/solutions/2026-08-31-gsap-skills-audit.md` | adapts | frontend design references | No runtime dependency or copied examples |
+| `docs/ae/prds/2026-09-01-agents-md-aware-init-prd.md` | documents | profile, diagnostics, overwrite safety | WHAT and acceptance criteria |
+| `docs/ae/plans/2026-09-01-001-agents-md-aware-init-plan.md` | implements | init CLI, templates, tests, distribution metadata | U1–U3 delivery chain |
+| `docs/08-ai-memory/18-motion-guidance-adaptation.md` | references | GSAP experience and audit | Durable motion boundary |
+| `docs/08-ai-memory/19-agents-md-aware-init.md` | references | init experience and plan | Durable init safety boundary |

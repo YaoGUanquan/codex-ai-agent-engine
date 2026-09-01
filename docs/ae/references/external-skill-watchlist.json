@@ -115,6 +115,55 @@
         {"upstream": "skills/in-progress/retro", "upstreamPaths": ["skills/in-progress/retro"], "note": "Experimental design notes only; revisit after functional release and repeated local need."},
         {"upstream": "wayfinder", "note": "multi-session decision maps; revisit only if AE handoff/issue linkage is insufficient"}
       ]
+    },
+    {
+      "id": "greensock-gsap-skills",
+      "sourceRole": "supplementary-research",
+      "sourceUrl": "https://github.com/greensock/gsap-skills",
+      "license": "MIT",
+      "licenseEvidence": "https://github.com/greensock/gsap-skills/blob/main/LICENSE",
+      "pinnedCommit": "aed9cfd3277740755f6bfc1155c7aa645403b760",
+      "refSource": "HEAD",
+      "freshnessMethod": "git-ls-remote",
+      "checkedAt": "2026-08-31T00:00:00+08:00",
+      "capabilityDomains": ["animation-guidance", "motion-performance", "framework-lifecycle", "reduced-motion"],
+      "adaptationBoundary": "Independently express runtime-neutral motion review methods. Do not copy the external skill catalog, install instructions, GSAP runtime, examples, or provider-specific integrations.",
+      "adopted": [
+        {"upstream": "transform/opacity performance guidance", "upstreamPaths": ["skills/gsap-performance/SKILL.md", "skills/gsap-core/SKILL.md"], "aeSkill": "ae-frontend-design", "evidence": "Motion review cues prefer compositor-friendly properties and avoid layout thrash when equivalent behavior exists."},
+        {"upstream": "matchMedia reduced-motion and responsive cleanup", "upstreamPaths": ["skills/gsap-core/SKILL.md", "skills/gsap-react/SKILL.md", "skills/gsap-frameworks/SKILL.md"], "aeSkill": "ae-frontend-design", "evidence": "Responsive and reduced-motion behavior must be declared and lifecycle-scoped."},
+        {"upstream": "timeline coordination over arbitrary delays", "upstreamPaths": ["skills/gsap-timeline/SKILL.md"], "aeSkill": "ae-frontend-design", "evidence": "Related motion should communicate one state transition and preserve a usable completion state."}
+      ],
+      "rejected": [
+        {"pattern": "default recommendation of GSAP or external skill installation", "reason": "target-project dependency choice is outside this workflow repository and must follow its existing stack, license, and performance budget"},
+        {"pattern": "framework-specific GSAP snippets and examples", "reason": "runtime-specific source is not portable to the Codex skill contract"}
+      ],
+      "watch": [
+        {"upstream": "performance and accessibility guidance", "upstreamPaths": ["skills/gsap-performance", "skills/gsap-core", "skills/gsap-react", "skills/gsap-frameworks"], "note": "Re-audit when these paths change; freshness alone does not prove impact on adopted AE guidance."}
+      ]
+    },
+    {
+      "id": "agents-md-open-format",
+      "sourceRole": "supplementary-research",
+      "sourceUrl": "https://github.com/agentsmd/agents.md",
+      "license": "MIT",
+      "licenseEvidence": "https://github.com/agentsmd/agents.md/blob/main/LICENSE",
+      "pinnedCommit": "6ae22720966e9cca6b2c2dd0780fb7265a87a46c",
+      "refSource": "HEAD",
+      "freshnessMethod": "git-ls-remote",
+      "checkedAt": "2026-09-01T00:00:00+08:00",
+      "capabilityDomains": ["project-guidance", "nested-instructions", "agent-interoperability"],
+      "adaptationBoundary": "Use the open Markdown format and general nested-guidance method as reference. Keep Codex-specific override, merge, size-limit, and discovery behavior tied to official OpenAI documentation; do not claim runtime parity across clients or copy upstream site code.",
+      "adopted": [
+        {"upstream": "simple Markdown guidance format", "upstreamPaths": ["README.md", "components/FAQSection.tsx"], "aeSkill": "ae-init", "evidence": "Generated project guidance remains ordinary Markdown with no invented required schema."},
+        {"upstream": "nested subproject guidance", "upstreamPaths": ["components/HowToUseSection.tsx"], "aeSkill": "ae-init", "evidence": "Init may preview bounded nested candidates but does not create them automatically."}
+      ],
+      "rejected": [
+        {"pattern": "universal nearest-file or override runtime semantics", "reason": "client implementations differ; Codex behavior is documented and labeled separately"},
+        {"pattern": "verbatim website, examples, or application code", "reason": "the project adapts the public method and evidence, not source-derived implementation text"}
+      ],
+      "watch": [
+        {"upstream": "format and nesting guidance", "upstreamPaths": ["README.md", "components/FAQSection.tsx", "components/HowToUseSection.tsx"], "note": "Re-audit wording changes without treating the website as a cross-client runtime specification."}
+      ]
     }
   ]
 }

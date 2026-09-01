@@ -12,6 +12,14 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 
 中文文档: [README.md](README.md)
 
+### 0.3.39 (2026-09-01)
+- Align `ae-init` with the open AGENTS.md format through `minimal` / `ae-core` / `full` profiles, real project commands, Codex override explanation, and bounded nested-candidate previews. New files use managed regions; `--force` no longer replaces whole files, and legacy marker-only files are preserved as conflicts.
+- Validation: all 4 focused init tests, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check` passed. `npm test` ran 167 tests: 165 passed and 2 returned `EPERM` before product assertions because this Windows host cannot create test symlinks. These checks prove the local CLI, templates, skill mirror, and distribution contracts; they do not imply that every AGENTS.md client implements Codex override semantics.
+
+### 0.3.38 (2026-08-31)
+- Audited `greensock/gsap-skills` and added portable motion performance, lifecycle, and reduced-motion review cues to `ae-frontend-design`; no GSAP runtime is bundled.
+- Validation: `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, `git diff --check`.
+
 ## When To Use It
 
 Use this plugin when you want a Codex project to keep repeatable engineering workflows close to the repository:
@@ -48,6 +56,9 @@ Useful init variants:
 ```bash
 node scripts/ae-tools.mjs init --lang zh-CN
 node scripts/ae-tools.mjs init --lang bilingual
+node scripts/ae-tools.mjs init --profile minimal
+node scripts/ae-tools.mjs init --profile full
+node scripts/ae-tools.mjs init --dry-run --nested preview --explain-instructions
 node scripts/ae-tools.mjs init --dry-run
 ```
 
@@ -228,7 +239,7 @@ After installation, run init from the target project root:
 node scripts/ae-tools.mjs init
 ```
 
-This creates:
+The default `ae-core` profile creates:
 
 - `AGENTS.md`: project-facing Codex guidance;
 - `docs/ae`: AE workflow artifacts such as plans, reviews, handoffs, and experience notes;
@@ -237,13 +248,19 @@ This creates:
 
 The canonical requirements directory is `docs/ae/prds`. Starting in 0.3.22, init no longer creates the legacy `docs/ai-memory` compatibility directory; existing projects keep that directory if it is already present.
 
-Existing files are skipped by default. `--force` only overwrites files that contain the AE init marker.
+`--profile minimal` creates only `AGENTS.md`; `--profile full` also retains the legacy complete numbered documentation-directory set. Generated guidance lists commands actually discovered from `package.json` and does not invent missing commands.
+
+Use `--dry-run --nested preview --explain-instructions` to inspect bounded subproject candidates, existing `AGENTS.md` / `AGENTS.override.md` files, and Codex-specific precedence. Nested candidates are advisory and never written automatically; other clients may use different loading semantics.
+
+Existing files are skipped by default. Newly generated files contain an explicit AE managed start/end region; `--force` replaces only that region and preserves surrounding content. Legacy marker-only files cannot distinguish user edits reliably, so they are returned in `conflicted_files` and left unchanged.
 
 Generated text files are written as UTF-8. On Windows, PowerShell can render valid UTF-8 Chinese text as garbled output, so verify with explicit UTF-8 reads or Git diff before rewriting files.
 
 ## External References
 
 This repository keeps a clear Codex-native boundary:
+
+- `https://agents.md/` and `https://github.com/agentsmd/agents.md` provide the open-format and nested-guidance reference. Codex override and merge ordering comes from official OpenAI documentation and is not presented as universal client behavior.
 
 - `https://gitee.com/jiangqiang1996/ai-agent-engine` is the main AE workflow reference.
 - `https://github.com/obra/superpowers` informs parts of the planning, debugging, TDD, verification, and delivery-gate workflow design.
@@ -517,14 +534,6 @@ Full history lives in [CHANGELOG.en.md](CHANGELOG.en.md); this section keeps onl
 - Upgrade external skill watches to path-evidence semantics: Gitee AE is the `primary-upstream`, while Taste, Impeccable, and mattpocock are supplementary research sources. `affectedSkills` is populated only when repeated `--changed-path` values match adopted `upstreamPaths`; a changed HEAD alone produces `stale-impact-unverified` candidates. An explicit remote commit must be one 40-character hexadecimal value, and drive-relative or URI-like paths are rejected.
 - Add a shared UI Direction Contract, `audit` / `refine` / `adjust` / `harden` routing, design-template integration, evidence-backed visual review, and screenshot validity/contradiction rerun gates. Four replay scenarios preserve operational UI, existing baselines, and mobile constraints without copying external prompts, detectors, or runtimes.
 - Verification: both focused test groups, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check` passed. `npm test` ran 160 tests: 158 passed and 2 returned `EPERM` before product assertions because this Windows host cannot create the test symlinks. Passing checks prove path-impact output, conditional UI Direction Contract enforcement, skill/source mirrors, contracts, and install distribution consistency; they do not prove the symlink-escape cases, user-perceived visual improvement, pixel-perfect fidelity, or browser acceptance that was not run.
-
-### 0.3.34 (2026-08-22)
-- Track `mattpocock/skills` as a recheckable source: `skill-audit --watch` compares the pinned commit with a remote observation and reports only `current` / `stale` / `unavailable` plus affected AE skills. It does not rewrite skills or memory.
-- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`. These checks prove the watchlist, recheck command, and source/mirror locks for the adapted skills; they do not prove later upstream commits or skill outcomes in real projects.
-
-### 0.3.33 (2026-08-22)
-- Report generation now supports Git-friendly Markdown output alongside the existing offline self-contained HTML view; the audit counter now counts individual findings, including deferred findings.
-- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`.
 
 #### 0.3.28 (2026-08-13)
 - Global refresh: synchronize the root package and plugin manifest versions, then refresh the current user's AE plugin and dispatcher through the personal marketplace global-install flow; project-level docs, source, and user project data are unchanged.
