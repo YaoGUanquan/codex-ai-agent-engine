@@ -17,3 +17,4 @@ Use this checklist when implementing or reviewing frontend design and UI impleme
 13. Default to static UI or minimal CSS state feedback. Treat timeline/physics motion, exported animation assets, and 3D/data scenes as conditional target-project choices rather than workflow dependencies.
 14. Provide a `prefers-reduced-motion` or equivalent platform-respecting alternative for material motion, and keep a usable completion state available without waiting for animation.
 15. Do not use decorative particle backgrounds for ordinary application surfaces. Use visual effects only when they communicate a user-relevant state, relationship, or outcome.
+16. If a JavaScript animation runtime is used by the target project, prefer transform/opacity over layout properties, coordinate related changes as a timeline or state transition, clean up on unmount/route change, and verify reduced-motion behavior at the smallest supported viewport.
