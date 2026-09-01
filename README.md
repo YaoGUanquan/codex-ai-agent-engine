@@ -47,6 +47,9 @@ node scripts/ae-tools.mjs init
 ```bash
 node scripts/ae-tools.mjs init --lang zh-CN
 node scripts/ae-tools.mjs init --lang bilingual
+node scripts/ae-tools.mjs init --profile minimal
+node scripts/ae-tools.mjs init --profile full
+node scripts/ae-tools.mjs init --dry-run --nested preview --explain-instructions
 node scripts/ae-tools.mjs init --dry-run
 ```
 
@@ -57,6 +60,14 @@ node scripts/ae-tools.mjs help
 ```
 
 ## 版本更新记录
+
+### 0.3.39（2026-09-01）
+- `ae-init` 对齐 AGENTS.md 开放格式：新增 `minimal` / `ae-core` / `full` profile、真实项目命令、Codex override 解释和有界嵌套候选预览；新文件使用受管区块，`--force` 不再整文件覆盖，legacy marker-only 文件会报告冲突并保留。
+- 验证：init 聚焦测试 4/4 通过，`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs` 与 `git diff --check` 通过；`npm test` 共 167 项，165 项通过，2 项因当前 Windows 主机禁止创建测试 symlink 而在产品断言前 `EPERM`。这些检查证明本地 CLI、模板、skill mirror 和分发合同，不代表所有 AGENTS.md 客户端采用 Codex 的 override 语义。
+
+### 0.3.38（2026-08-31）
+- 审计 `greensock/gsap-skills`，将可移植的动效性能、生命周期与 reduced-motion 复核规则纳入 `ae-frontend-design`；不引入 GSAP 运行时。
+- 验证：`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`、`git diff --check`。
 
 ### 0.3.37（2026-08-30）
 - 修复全局更新器失败时的退出码传播与临时 clone 清理，新增本地 Git fixture 回归测试，并统一 ae-update 的全局安装说明。
@@ -71,14 +82,6 @@ node scripts/ae-tools.mjs help
 - 外部 skill watch 升级为路径证据语义：Gitee AE 登记为 `primary-upstream`，Taste、Impeccable 与 mattpocock 登记为补充研究源；仅在重复 `--changed-path` 与 `upstreamPaths` 匹配时填充 `affectedSkills`，HEAD 变化本身只产生 `stale-impact-unverified` 候选；显式 remote commit 必须是唯一的 40 位十六进制值，drive-relative/URI-like 路径会被拒绝。
 - 前端链新增共享 UI Direction Contract、`audit` / `refine` / `adjust` / `harden` 精修路由、设计模板集成、证据化视觉 review 与截图有效性/反例重开门禁；四类场景回放明确保留 operational UI、既有基线与移动端约束，不复制外部 prompt、detector 或 runtime。
 - 验证：两组聚焦测试、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs` 与 `git diff --check` 通过；`npm test` 共 160 项，158 项通过，2 项因当前 Windows 主机禁止创建测试 symlink 而在产品断言前返回 `EPERM`。已通过的检查证明路径匹配输出、条件式 UI Direction Contract、skill/source mirror、契约与安装分发一致性；不证明 symlink 逃逸用例、真实项目中的用户审美提升、像素级一致性或未执行的浏览器验收。
-
-### 0.3.34（2026-08-22）
-- 将 `mattpocock/skills` 纳入可复检跟踪：`skill-audit --watch` 比较钉提交与远程观察，只报告 `current` / `stale` / `unavailable` 和受影响 AE skill，不自动改写 skill 或记忆。
-- 验证：`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`、`git diff --check`。这些检查证明跟踪清单、复检命令和已改 skill 的源/镜像锁定；不证明上游后续提交的内容，也不证明真实项目中的 skill 效果。
-
-### 0.3.33（2026-08-22）
-- 报告生成现在支持 Git 友好的 Markdown 输出，同时保留现有离线自包含 HTML 视图；技能审计计数改为统计每条 finding，包括 defer 记录中的 finding。
-- 验证：`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`、`git diff --check`。
 
 #### 0.3.28（2026-08-13）
 - 全局更新：同步根包与插件 manifest 版本，并通过个人 marketplace 的全局安装流程刷新当前用户的 AE 插件与 dispatcher；不改变项目级文档、源码或用户项目数据。
@@ -263,7 +266,7 @@ codex plugin list
 node scripts/ae-tools.mjs init
 ```
 
-这个命令会创建：
+默认 `ae-core` profile 会创建：
 
 - `AGENTS.md`：面向 Codex 的项目说明；
 - `docs/ae`：计划、审查、交接、经验等 AE 工作流产物；
@@ -272,7 +275,11 @@ node scripts/ae-tools.mjs init
 
 需求正典目录为 `docs/ae/prds`。自 0.3.22 起，init 不再创建 `docs/ai-memory` 兼容目录；存量项目中已有的该目录保持原样。
 
-默认不会覆盖已有文件。只有在使用 `--force` 且文件包含 AE init marker 时，才会覆盖受管文件。
+`--profile minimal` 只创建 `AGENTS.md`；`--profile full` 额外保留旧版完整编号文档目录集合。生成的 `AGENTS.md` 会列出从 `package.json` 实际发现的命令，不会猜测缺失命令。
+
+使用 `--dry-run --nested preview --explain-instructions` 可查看有界子项目候选、现有 `AGENTS.md` / `AGENTS.override.md` 和 Codex 专属优先级。嵌套候选只是建议，不会自动创建文件；其他客户端可能采用不同的加载语义。
+
+默认不会覆盖已有文件。新生成文件包含明确的 AE 受管起止区块；`--force` 只替换该区块并保留区块外内容。旧版 marker-only 文件无法可靠区分用户修改，会出现在 `conflicted_files` 中并保持原样。
 
 生成的文本文件统一按 UTF-8 写入。Windows 上 PowerShell 可能把合法 UTF-8 中文显示成乱码；改写文件前，先用显式 UTF-8 读取或 Git diff 验证。
 
@@ -281,6 +288,7 @@ node scripts/ae-tools.mjs init
 当前仓库保留了清晰的 Codex 边界：
 
 - `https://gitee.com/jiangqiang1996/ai-agent-engine` 主要提供 AE 风格工作流能力模型；
+- `https://agents.md/` 与 `https://github.com/agentsmd/agents.md` 提供 AGENTS.md 开放格式和嵌套指导参考；Codex 的 override 与合并顺序以 OpenAI 官方文档为准，不推广为所有客户端的统一运行时行为；
 - `https://github.com/obra/superpowers` 主要提供计划、调试、TDD、验证和交付门禁方面的方法论参考；
 - `https://github.com/openai/plugins` 主要提供前后端开发、Web 应用、平台技能打包方式和部分领域技能设计参考。
 - `https://github.com/github/spec-kit` 主要提供 constitution、需求质量清单、任务拆解和跨产物分析方面的方法论参考。
