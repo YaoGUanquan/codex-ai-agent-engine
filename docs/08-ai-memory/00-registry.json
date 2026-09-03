@@ -152,6 +152,22 @@
       "role": "AGENTS.md-aware initialization and regeneration safety",
       "topics": ["agents-md", "init", "codex", "managed-region", "distribution"],
       "reviewStatus": "current"
+    },
+    {
+      "id": "persistence-contract-governance",
+      "path": "docs/08-ai-memory/20-persistence-contract-governance.md",
+      "kind": "memory",
+      "role": "durable table, entity, enum, and exception contract",
+      "topics": ["persistence", "database", "primary-key", "mybatis-plus", "migration"],
+      "reviewStatus": "current"
+    },
+    {
+      "id": "frontend-component-data-access-governance",
+      "path": "docs/08-ai-memory/21-frontend-component-data-access-governance.md",
+      "kind": "memory",
+      "role": "frontend component reuse and API access ownership contract",
+      "topics": ["frontend", "components", "api", "data-access", "design-system"],
+      "reviewStatus": "current"
     }
   ],
   "relations": [
@@ -837,6 +853,78 @@
       "evidence": {
         "path": "docs/08-ai-memory/19-agents-md-aware-init.md",
         "note": "The maintainer graph maps the open-format source, init implementation, tests, release, and durable memory."
+      }
+    },
+    {
+      "from": "persistence-contract-governance",
+      "to": "docs/ae/prds/2026-09-03-persistence-contract-governance-prd.md",
+      "type": "documents",
+      "evidence": {
+        "path": "docs/08-ai-memory/20-persistence-contract-governance.md",
+        "note": "The memory records the explicit primary-key, lifecycle, entity, enum, and exception requirements."
+      }
+    },
+    {
+      "from": "persistence-contract-governance",
+      "to": "docs/ae/plans/2026-09-03-001-persistence-contract-governance-plan.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/20-persistence-contract-governance.md",
+        "note": "The plan defines the shared backend reference, skill routing, tests, and release units."
+      }
+    },
+    {
+      "from": "persistence-contract-governance",
+      "to": "docs/ae/experience/2026-09-03-persistence-contract-governance.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/20-persistence-contract-governance.md",
+        "note": "The experience note preserves the durable decisions and bounded validation result."
+      }
+    },
+    {
+      "from": "persistence-contract-governance",
+      "to": "docs/ae/graphs/maintainer-artifact-graph.md",
+      "type": "documents",
+      "evidence": {
+        "path": "docs/08-ai-memory/20-persistence-contract-governance.md",
+        "note": "The maintainer graph maps the 0.3.40 persistence governance delivery chain."
+      }
+    },
+    {
+      "from": "frontend-component-data-access-governance",
+      "to": "docs/ae/prds/2026-09-03-frontend-component-data-access-governance-prd.md",
+      "type": "documents",
+      "evidence": {
+        "path": "docs/08-ai-memory/21-frontend-component-data-access-governance.md",
+        "note": "The memory records the target-project reuse and frontend ownership requirements."
+      }
+    },
+    {
+      "from": "frontend-component-data-access-governance",
+      "to": "docs/ae/plans/2026-09-03-002-frontend-component-data-access-governance-plan.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/21-frontend-component-data-access-governance.md",
+        "note": "The plan defines the shared contract, workflow routing, regression, and release units."
+      }
+    },
+    {
+      "from": "frontend-component-data-access-governance",
+      "to": "docs/ae/experience/2026-09-03-frontend-component-data-access-governance.md",
+      "type": "references",
+      "evidence": {
+        "path": "docs/08-ai-memory/21-frontend-component-data-access-governance.md",
+        "note": "The experience note preserves the reuse ladder, API boundary, and validation result."
+      }
+    },
+    {
+      "from": "frontend-component-data-access-governance",
+      "to": "docs/ae/graphs/maintainer-artifact-graph.md",
+      "type": "documents",
+      "evidence": {
+        "path": "docs/08-ai-memory/21-frontend-component-data-access-governance.md",
+        "note": "The maintainer graph maps the 0.3.41 frontend governance delivery chain."
       }
     }
   ]

@@ -1,5 +1,5 @@
 <!-- ae-codex:reference -->
-# Maintainer Artifact Graph (2026-08-11, extended 2026-09-01)
+# Maintainer Artifact Graph (2026-08-11, extended 2026-09-03)
 
 Curated map of the August 2026 optimization wave through Cursor dual-client discovery (`cd20d47` / 0.3.30) and the 0.3.31–0.3.34 interface, orchestration, and external-skill watch batch. For machine-readable edges see `docs/08-ai-memory/00-registry.json`.
 
@@ -125,6 +125,28 @@ flowchart LR
 | `docs/ae/plans/2026-09-01-001-agents-md-aware-init-plan.md` | implements | `ae-tools/init.mjs`, templates, skill/catalog mirrors | 0.3.39 profiles, diagnostics, managed regions |
 | `docs/ae/experience/2026-09-01-agents-md-aware-init.md` | records | 0.3.39 init delivery and global apply | Validation and client-semantics boundary |
 | `docs/08-ai-memory/19-agents-md-aware-init.md` | documents | init safety and compatibility rules | Durable AGENTS.md-aware contract |
+
+## Persistence and frontend governance (0.3.40-0.3.41)
+
+```mermaid
+flowchart LR
+  persistencePrd["0.3.40 persistence PRD"] --> persistencePlan["persistence plan"] --> persistenceCode["backend persistence contract"]
+  persistenceCode --> persistenceTests["focused + mirror + release checks"] --> persistenceMemory["memory 20"]
+  frontendPrd["0.3.41 frontend/API PRD"] --> frontendPlan["frontend/API plan"] --> frontendCode["component/data-access contract"]
+  frontendCode --> frontendTests["focused + mirror + install checks"] --> frontendMemory["memory 21"]
+  persistenceMemory --> globalUpdate["0.3.41 local global update"]
+  frontendMemory --> globalUpdate
+```
+
+| From | Relation | To | Role |
+| --- | --- | --- | --- |
+| `docs/ae/prds/2026-09-03-persistence-contract-governance-prd.md` | documents | `ae-backend/references/persistence-contract.md` | Explicit primary-key, lifecycle, entity, enum, and exception decisions |
+| `docs/ae/plans/2026-09-03-001-persistence-contract-governance-plan.md` | implements | backend/SQL/review skill routing | 0.3.40 delivery units |
+| `docs/ae/experience/2026-09-03-persistence-contract-governance.md` | records | `docs/08-ai-memory/20-persistence-contract-governance.md` | Durable persistence decisions and bounded proof |
+| `docs/ae/prds/2026-09-03-frontend-component-data-access-governance-prd.md` | documents | `ae-frontend-design/references/component-data-access-contract.md` | Reuse ladder, component states, and API ownership |
+| `docs/ae/plans/2026-09-03-002-frontend-component-data-access-governance-plan.md` | implements | frontend/design/review/Web skill routing | 0.3.41 delivery units |
+| `docs/ae/experience/2026-09-03-frontend-component-data-access-governance.md` | records | `docs/08-ai-memory/21-frontend-component-data-access-governance.md` | Durable frontend/API decisions and bounded proof |
+| `global-install operation b962e201-414a-415a-bc5b-fc8042951df8` | records | `0.3.41` runtime and Cursor update | Current-user global installation transaction; local operational evidence |
 
 ## Skill mirror invariant
 

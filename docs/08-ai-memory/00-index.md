@@ -29,8 +29,12 @@
 - `17-global-update-hardening.md`：全局更新事务、版本同步、Codex personal plugin 与 Cursor skill 副本验证边界。
 - `18-motion-guidance-adaptation.md`：外部动画技能的 runtime-neutral 适配、GSAP 依赖拒绝和浏览器证据边界。
 - `19-agents-md-aware-init.md`：AGENTS.md-aware init profiles、Codex 专属优先级、有界发现与受管区块安全规则。
+- `20-persistence-contract-governance.md`：新表主键、生命周期、MyBatis-Plus 条件字段、枚举和异常治理边界。
+- `21-frontend-component-data-access-governance.md`：前端组件复用层级、弹窗/列表/表单状态、API 请求分层和第三次抽取复审规则。
 - GSAP 动效指导适配记录在 `docs/ae/experience/2026-08-31-gsap-motion-guidance-adaptation.md`，对应 PRD、计划和审计产物保持可追溯。
 - AGENTS.md-aware init 0.3.39 记录在 `docs/ae/experience/2026-09-01-agents-md-aware-init.md`，当前用户全局安装操作为 `62805a3a-f18d-4de9-a4b9-22ba2353c50c`。
+- 持久化契约治理 0.3.40 记录在 `docs/ae/experience/2026-09-03-persistence-contract-governance.md` 与 `20-persistence-contract-governance.md`。
+- 前端组件与数据访问治理 0.3.41 记录在 `docs/ae/experience/2026-09-03-frontend-component-data-access-governance.md` 与 `21-frontend-component-data-access-governance.md`。
 - 0.3.32–0.3.34 编排/报告/issue/审计/跟踪批次记录在 `docs/ae/experience/2026-08-22-codex-orchestration-and-mattpocock-watch.md` 与图谱 `docs/ae/graphs/maintainer-artifact-graph.md`。
 - Frontend motion governance is recorded in `03-key-workflows.md`, `05-decision-log.md`, and `docs/ae/experience/2026-07-28-frontend-motion-governance.md`.
 - Authenticated API smoke fillable request-config handoff is recorded in `03-key-workflows.md`, `04-known-pitfalls.md`, `05-decision-log.md`, and `docs/ae/experience/2026-08-10-api-smoke-fillable-request-config.md`.
