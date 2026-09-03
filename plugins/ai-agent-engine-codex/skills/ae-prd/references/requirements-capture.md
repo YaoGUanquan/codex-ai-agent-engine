@@ -25,6 +25,8 @@ Include these only when they materially affect planning:
 - validation-evidence profile for a public API, persisted data, external-service, deployment, or browser boundary.
 - perspective collision outcomes when a collision pass shaped the scope.
 
+For a new durable table or material persistence change, also capture the table lifecycle, primary-key strategy and external exposure, deletion/retention, concurrency, audit ownership, persisted enum compatibility, exception/error contract, and migration/rollback boundary. Use `../../ae-backend/references/persistence-contract.md`; do not silently select auto-increment or UUID.
+
 ## Template
 
 Omit optional subsections that do not contain real information. Do not write placeholder text.

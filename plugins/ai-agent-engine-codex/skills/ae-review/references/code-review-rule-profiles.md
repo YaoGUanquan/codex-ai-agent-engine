@@ -67,6 +67,10 @@ Use this sub-lens only when the diff changes visual direction or the task explic
 
 Check whether the changed hierarchy, typography, palette, density, expressiveness, motion, responsive behavior, and preserve/replace boundary contradict their recorded direction. A screenshot can support the finding only after the browser evidence-validity gate passes. A blank, cropped, blocked, asset-failed, or user-contradicted capture requires rerun or an `unverified` result, not a visual pass.
 
+### Component And Data-Access Sub-Lens
+
+When the task creates or changes dialogs, drawers, lists, tables, forms, reusable styling, API clients, services, queries, or mutations, read `../../ae-frontend-design/references/component-data-access-contract.md`. Check whether the diff bypasses an existing target-project component, token, client, service, or query owner without a concrete incompatibility; whether a shared component absorbs domain permission/business behavior; whether a third equivalent pattern was added without extraction review; and whether rendering components duplicate raw requests, auth, envelope parsing, transforms, pagination decoding, cancellation, retry, or error normalization. Do not require a cross-framework library or flag a repository-specific framework loader, server boundary, or feature-specific exception that has a documented behavioral reason.
+
 ## package.json
 
 Check for:

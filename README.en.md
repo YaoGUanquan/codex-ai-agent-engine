@@ -12,6 +12,16 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 
 中文文档: [README.md](README.md)
 
+### 0.3.41 (2026-09-03)
+- Add an `ae-frontend-design` component and data-access contract: frontend work first inspects and reuses target-project tokens, semantic components, API clients, services, and query/mutation patterns; dialogs/drawers, lists/tables, forms, and request states have consistent ownership boundaries.
+- Add extraction review before a third equivalent implementation, and prohibit rendering components from duplicating raw HTTP, auth, envelopes, transforms, paging, cancellation, retry, or error normalization when a local owner exists. No cross-framework component package or default HTTP dependency is added.
+- Validation commands: `node --test --test-name-pattern "frontend component and data-access governance" tests/skills-docs.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These prove local skill, mirror, and install-distribution contracts only, not target-project API, browser, or deployment behavior.
+
+### 0.3.40 (2026-09-03)
+- Add an `ae-backend` persistence contract and route `ae-ideate`, `ae-brainstorm`, `ae-prd`, `ae-design`, `ae-sql`, `ae-review`, and `ae-lfg` through one decision baseline for new tables or persistence changes: confirm auto-increment BIGINT versus UUID and external exposure before implementation; never invent a default.
+- Add conditional Java/MyBatis-Plus guidance for `@Version`, `@TableLogic`, audit filling, soft-delete index/restore semantics, optimistic-lock conflicts, stable enum codes, and exception mapping; non-MyBatis-Plus stacks and non-applicable table types do not inherit the template.
+- Validation commands: `node --test --test-name-pattern "backend language guidance and fullstack contract alignment" tests/skills-docs.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. They prove local skill, mirror, and install-distribution contracts only, not target-project database, authenticated API, browser, or deployment behavior.
+
 ### 0.3.39 (2026-09-01)
 - Align `ae-init` with the open AGENTS.md format through `minimal` / `ae-core` / `full` profiles, real project commands, Codex override explanation, and bounded nested-candidate previews. New files use managed regions; `--force` no longer replaces whole files, and legacy marker-only files are preserved as conflicts.
 - Validation: all 4 focused init tests, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check` passed. `npm test` ran 167 tests: 165 passed and 2 returned `EPERM` before product assertions because this Windows host cannot create test symlinks. These checks prove the local CLI, templates, skill mirror, and distribution contracts; they do not imply that every AGENTS.md client implements Codex override semantics.
@@ -524,16 +534,7 @@ Working rule: any change that touches distributable plugin content (`plugins/ai-
 ### 0.3.37 (2026-08-30)
 - Fixed global updater exit-code propagation and temporary clone cleanup on failure, added local Git fixture regression coverage, and aligned ae-update wording with global installation behavior.
 
-### 0.3.36 (2026-08-30)
-- Global help routes update, language, and checker commands through the user dispatcher; `ae-update` runs global-installer preview/apply from a cloned release.
-- `--project-root` selects a project, memory/knowledge `--root` is repository-relative, graph keeps generic read-only scans, and design checks add explicit `--compat` reporting.
-
 Full history lives in [CHANGELOG.en.md](CHANGELOG.en.md); this section keeps only the latest five versions, and entries beyond that window move to the changelog on each release.
-
-### 0.3.35 (2026-08-30)
-- Upgrade external skill watches to path-evidence semantics: Gitee AE is the `primary-upstream`, while Taste, Impeccable, and mattpocock are supplementary research sources. `affectedSkills` is populated only when repeated `--changed-path` values match adopted `upstreamPaths`; a changed HEAD alone produces `stale-impact-unverified` candidates. An explicit remote commit must be one 40-character hexadecimal value, and drive-relative or URI-like paths are rejected.
-- Add a shared UI Direction Contract, `audit` / `refine` / `adjust` / `harden` routing, design-template integration, evidence-backed visual review, and screenshot validity/contradiction rerun gates. Four replay scenarios preserve operational UI, existing baselines, and mobile constraints without copying external prompts, detectors, or runtimes.
-- Verification: both focused test groups, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check` passed. `npm test` ran 160 tests: 158 passed and 2 returned `EPERM` before product assertions because this Windows host cannot create the test symlinks. Passing checks prove path-impact output, conditional UI Direction Contract enforcement, skill/source mirrors, contracts, and install distribution consistency; they do not prove the symlink-escape cases, user-perceived visual improvement, pixel-perfect fidelity, or browser acceptance that was not run.
 
 #### 0.3.28 (2026-08-13)
 - Global refresh: synchronize the root package and plugin manifest versions, then refresh the current user's AE plugin and dispatcher through the personal marketplace global-install flow; project-level docs, source, and user project data are unchanged.

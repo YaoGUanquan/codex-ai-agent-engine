@@ -4,6 +4,16 @@ This file is the complete release history of AI Agent Engine for Codex (since 0.
 
 中文版本: [CHANGELOG.md](CHANGELOG.md)
 
+### 0.3.41 (2026-09-03)
+- Add an `ae-frontend-design`-owned component and data-access contract, routing `ae-web-app`, `ae-web-forge`, `ae-design`, `ae-review`, and `ae-lfg` through reuse and ownership decisions for dialog, drawer, list, table, form, style, API-call, query, and mutation work.
+- Define the token/primitive, shared semantic component, feature component, and route hierarchy; add dialog/drawer, list/table, and form state contracts plus extraction review before a third equivalent implementation. When a local owner exists, rendering components must not duplicate raw HTTP, auth, envelopes, transforms, pagination, cancellation, retry, or error normalization.
+- Validation commands: `node --test --test-name-pattern "frontend component and data-access governance" tests/skills-docs.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`; proof is limited to local skill/mirror/install distribution contracts, not target-project runtime behavior.
+
+### 0.3.40 (2026-09-03)
+- Add an `ae-backend` persistence contract so requirements, design, backend, SQL, review, and full-workflow skills agree on primary-key, lifecycle, audit, deletion, concurrency, enum, exception, and migration decisions for new tables; unresolved keys must ask auto-increment BIGINT versus UUID rather than defaulting.
+- Restrict Java/MyBatis-Plus `@Version`, `@TableLogic`, and `FieldFill` examples to confirmed framework and applicable table types, with soft-delete, optimistic-lock, enum, and exception-translation constraints.
+- Validation commands: `node --test --test-name-pattern "backend language guidance and fullstack contract alignment" tests/skills-docs.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`; proof is limited to local skill/mirror/install distribution contracts, not target-project runtime behavior.
+
 ### 0.3.39 (2026-09-01)
 - Add `minimal`, default `ae-core`, and legacy-complete `full` profiles to `ae-init`; generated `AGENTS.md` guidance now includes actual package scripts and exposes read-only `--nested preview` plus `--explain-instructions` diagnostics.
 - New generated files use one managed start/end region. `--force` replaces only that region and preserves surrounding user content, while legacy marker-only files report conflicts without being overwritten. Register the MIT-licensed `agentsmd/agents.md` open-format source and keep Codex override behavior scoped to the OpenAI client.

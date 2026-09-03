@@ -4,6 +4,16 @@
 
 English: [CHANGELOG.en.md](CHANGELOG.en.md)
 
+### 0.3.41（2026-09-03）
+- 新增 `ae-frontend-design` 归属的组件与数据访问契约，并让 `ae-web-app`、`ae-web-forge`、`ae-design`、`ae-review` 与 `ae-lfg` 在弹窗、抽屉、列表、表格、表单、样式、API 请求、query 或 mutation 变更时共享复用与所有权边界。
+- 统一 token/primitives、共享语义组件、feature 组件、route 编排的层级；新增弹窗/抽屉、列表/表格、表单状态契约，以及“第三次同类实现前抽取审查”规则。已有本地 owner 时，渲染组件不得重复实现原始 HTTP、认证、响应包、字段转换、分页、取消、重试或错误归一化。
+- 验证命令：`node --test --test-name-pattern "frontend component and data-access governance" tests/skills-docs.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs` 与 `git diff --check`；证明边界仅为本地 skill/镜像/安装分发合同，不包含目标项目运行时。
+
+### 0.3.40（2026-09-03）
+- 新增 `ae-backend` 持久化契约，并让需求、设计、后端、SQL、审查和全流程技能对新表统一确认主键策略、表生命周期、审计、删除、并发、枚举、异常与迁移边界；未确认时必须询问自增 BIGINT 或 UUID，不能默认。
+- Java/MyBatis-Plus 指引将 `@Version`、`@TableLogic`、`FieldFill` 审计字段示例限制为已确认框架和适用表类型，并补充软删除、乐观锁、枚举和统一异常映射约束。
+- 验证命令：`node --test --test-name-pattern "backend language guidance and fullstack contract alignment" tests/skills-docs.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs` 与 `git diff --check`；证明边界仅为本地 skill/镜像/安装分发合同，不包含目标项目运行时。
+
 ### 0.3.39（2026-09-01）
 - `ae-init` 新增 `minimal`、默认 `ae-core` 与兼容旧完整目录集的 `full` profile；生成的 `AGENTS.md` 纳入实际 package scripts，并提供 `--nested preview` 与 `--explain-instructions` 只读诊断。
 - 新生成文件改用单一受管起止区块；`--force` 只替换区块并保留外部用户内容，legacy marker-only 文件报告冲突而不覆盖。登记 MIT 许可的 `agentsmd/agents.md` 开放格式来源，并将 Codex override 行为限定为 OpenAI 客户端语义。

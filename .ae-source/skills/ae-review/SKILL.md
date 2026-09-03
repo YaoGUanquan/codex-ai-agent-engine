@@ -56,7 +56,7 @@ For diff-like scopes:
 
 ## Persona Selection
 
-Read `references/review-personas.md`. Use the smallest useful reviewer set. Quick selection: a code diff starts with correctness, testing, standards, and maintainability; add security, api-contract, reliability, data-migrations, or performance only when the matching trigger exists; a document starts with coherence and feasibility plus content-conditional lenses. Do not spawn sub-agents unless the user explicitly requested/allowed parallel agent work. If sub-agents are allowed, each reviewer is read-only and must return evidence-backed findings.
+Read `references/review-personas.md`. Use the smallest useful reviewer set. Quick selection: a code diff starts with correctness, testing, standards, and maintainability; add security, api-contract, reliability, data-migrations, or performance only when the matching trigger exists; a document starts with coherence and feasibility plus content-conditional lenses. For new tables, entity persistence changes, or migrations, read `../ae-backend/references/persistence-contract.md` and add the data-migrations lens. For frontend component, style, form, query, mutation, or client-access changes, read `../ae-frontend-design/references/component-data-access-contract.md` and apply the Frontend Components / Styles profile with the API-contract lens when data access changes. Do not spawn sub-agents unless the user explicitly requested/allowed parallel agent work. If sub-agents are allowed, each reviewer is read-only and must return evidence-backed findings.
 
 When reviewer selection is non-trivial, generate a deterministic contract before dispatching lanes:
 

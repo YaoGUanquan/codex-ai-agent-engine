@@ -43,6 +43,8 @@ Use risk-based dimension triggers before writing content:
 
 For dimensions that are not triggered, record explicit omitted dimensions in the overview as `<dimension>: explicitly-omitted` with a short reason. Required dimensions cannot be omitted without returning to the user or PRD for scope clarification.
 
+When the database dimension is triggered, read `../ae-backend/references/persistence-contract.md`. Each affected `T-XXX` must record lifecycle, primary-key decision and external exposure, audit ownership, deletion/retention semantics, concurrency policy, enum representation, constraints/indexes, migration ordering, rollback, and the error outcome for version conflicts. A project-specific convention may answer a decision; otherwise leave it open and ask the user instead of selecting a default.
+
 ## Contract Requirements
 
 Use `references/design-contract-template.md` when writing `design.md`.
@@ -56,7 +58,7 @@ Every design contract must include:
 - acceptance and test-case contracts that downstream `ae-plan`, `ae-work`, and `ae-review` can verify;
 - explicit deferred decisions and explicit omitted dimensions rather than silent defaults.
 
-When the UI/UX dimension is triggered, read `../ae-frontend-design/references/ui-direction-contract.md` and include its compact UI Direction Contract under UI/UX. Existing project tokens and supplied designs outrank contextual inference; mark material choices `verified`, `inferred`, or `assumed`. A runnable static interaction specification may be design evidence, but it cannot replace requirements, security, concurrency, non-functional, or source-code verification contracts.
+When the UI/UX dimension is triggered, read `../ae-frontend-design/references/ui-direction-contract.md` and `../ae-frontend-design/references/component-data-access-contract.md`. Include the compact UI Direction Contract and selected component/data-access reuse boundary under UI/UX. Existing project tokens and supplied designs outrank contextual inference; mark material choices `verified`, `inferred`, or `assumed`. A runnable static interaction specification may be design evidence, but it cannot replace requirements, security, concurrency, non-functional, or source-code verification contracts.
 
 Keep the contract compact. Include only dimensions that affect implementation, review, or validation. If the artifact becomes too large to scan, keep `design.md` as the overview and split dimension details into sibling Markdown files listed in the Split Manifest.
 

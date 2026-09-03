@@ -22,7 +22,7 @@ Capture what should be built before implementation planning. This skill answers 
 2. Read existing project docs and nearby feature context before making claims.
 3. Classify the request as quick answer, lightweight requirement, standard PRD, or deep PRD.
 4. Ask one focused question only when the answer changes scope, success criteria, risk, or validation; use no more than three clarification questions before recording explicit assumptions.
-5. Pressure-test the request before writing: confirm the real problem, success signal, scope boundary, non-goals, and whether any product decision is still missing.
+5. Pressure-test the request before writing: confirm the real problem, success signal, scope boundary, non-goals, and whether any product decision is still missing. For durable tables or persistence changes, read `../ae-backend/references/persistence-contract.md` and record unresolved primary-key, lifecycle, deletion, concurrency, audit, enum, and error-contract decisions as open questions rather than defaults.
 6. Record goals, affected users or systems, requirements with stable IDs, acceptance criteria, non-goals, constraints, validation expectations, assumptions, and open questions.
 7. Keep implementation details out of the PRD unless the requirement itself is technical. Technical choices belong in `ae-plan`.
 8. When creating or updating a PRD artifact, use `references/requirements-capture.md` as the output contract and write it under `docs/ae/prds/` with frontmatter:

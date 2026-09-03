@@ -16,6 +16,10 @@ Classify every statement before writing or reviewing it, then apply the safeguar
 3. State ordering dependencies between the migration and the code deploy.
 4. Estimate lock duration on representative row counts when a table is large or hot.
 
+## Durable Table Alignment
+
+For a new table or material persistence change, read `../../ae-backend/references/persistence-contract.md` and verify that DDL matches the confirmed lifecycle, primary-key strategy, externally exposed identifier contract, audit ownership, deletion/retention, concurrency, enum codes, constraints, and indexes. Do not invent a key strategy or enum value. When MyBatis-Plus is in use, verify generated DDL and entity annotations agree; logical deletion and optimistic locking still require application-level query/conflict behavior.
+
 ## Review Checks
 
 1. Every `UPDATE` or `DELETE` has a `WHERE` clause reviewed against an expected row count (`SELECT COUNT(*)` with the same predicate first).

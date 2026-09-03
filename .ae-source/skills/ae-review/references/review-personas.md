@@ -12,7 +12,7 @@ Use these personas as review lenses. In Codex they are not automatically registe
 - api-contract-reviewer: request/response compatibility, serialization, public types.
 - reliability-reviewer: recovery, retries, timeouts, background work, operational failure.
 - performance-reviewer: algorithmic cost, database access, caching, frontend rendering.
-- data-migrations-reviewer: schema changes, migrations, backfills, rollback.
+- data-migrations-reviewer: schema changes, migrations, backfills, rollback, primary-key/lifecycle decisions, entity-to-DDL alignment, soft-delete/index semantics, optimistic conflicts, persisted enums, and audit ownership.
 - architecture-strategist: structural fit, boundaries, pattern consistency.
 
 ## Document Domain
@@ -43,7 +43,7 @@ Start with correctness, testing, standards, maintainability for code diffs.
 Add security for auth, public APIs, data handling, credentials, file upload, or third-party integration.
 Add api-contract for API surface changes.
 Add reliability for async, infra, queues, retries, jobs, or failure recovery.
-Add data-migrations for database/schema/data movement.
+Add data-migrations for database/schema/data movement; for a new table or material persistence change, apply `../../ae-backend/references/persistence-contract.md` as the review baseline.
 Add performance for hot paths, large data, caching, or render-heavy UI.
 For documents, always include coherence and feasibility, then add conditional lenses based on content.
 Add requirements-reviewer for requirements or PRDs.

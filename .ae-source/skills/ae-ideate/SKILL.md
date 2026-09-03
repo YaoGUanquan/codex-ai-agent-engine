@@ -15,6 +15,10 @@ Generate useful options before requirements are fixed.
 4. Recommend the smallest next step.
 5. If the user wants to proceed, route to `ae-brainstorm` for requirements or `ae-plan` when the target is already clear.
 
+## Durable Data (Conditional)
+
+When an option creates or materially changes durable data, compare table lifecycle, primary-key strategy, external identifier exposure, deletion, concurrency, and migration cost. Do not choose auto-increment or UUID by default; route the decision to `../ae-backend/references/persistence-contract.md`.
+
 ## Rules
 
 - Do not invent business facts, stakeholders, or hidden constraints.

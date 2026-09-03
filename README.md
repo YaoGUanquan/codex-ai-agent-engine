@@ -61,6 +61,16 @@ node scripts/ae-tools.mjs help
 
 ## 版本更新记录
 
+### 0.3.41（2026-09-03）
+- 新增 `ae-frontend-design` 组件与数据访问契约：前端实现必须先检查并复用目标项目已有的 token、语义组件、API client、service 与 query/mutation 模式；弹窗/抽屉、列表/表格、表单和请求状态具备统一边界。
+- 新增“第三次同类实现前进行抽取审查”规则，禁止在已有本地 owner 时由渲染组件重复处理原始 HTTP、认证、响应包、字段转换、分页、取消、重试或错误归一化；不引入跨框架组件库或默认 HTTP 依赖。
+- 验证命令：`node --test --test-name-pattern "frontend component and data-access governance" tests/skills-docs.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke` 与 `git diff --check`。这些检查只证明本地 skill、镜像与安装分发合同，不证明目标项目 API、浏览器或部署行为。
+
+### 0.3.40（2026-09-03）
+- 新增 `ae-backend` 持久化契约，并让 `ae-ideate`、`ae-brainstorm`、`ae-prd`、`ae-design`、`ae-sql`、`ae-review` 与 `ae-lfg` 在新表或持久化变更时共享同一决策基线：必须先确认自增 BIGINT 或 UUID 主键及其对外暴露边界；未确认时不得默认选择。
+- Java/MyBatis-Plus 指引新增条件式 `@Version`、`@TableLogic`、审计字段填充、软删除索引/恢复、乐观锁冲突、稳定枚举 code 与统一异常映射规则；不要求非 MyBatis-Plus 或不适用表类型套用该模板。
+- 验证命令：`node --test --test-name-pattern "backend language guidance and fullstack contract alignment" tests/skills-docs.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke` 与 `git diff --check`。这些检查只证明本地 skill、镜像与安装分发合同，不证明目标项目数据库、认证 API、浏览器或部署行为。
+
 ### 0.3.39（2026-09-01）
 - `ae-init` 对齐 AGENTS.md 开放格式：新增 `minimal` / `ae-core` / `full` profile、真实项目命令、Codex override 解释和有界嵌套候选预览；新文件使用受管区块，`--force` 不再整文件覆盖，legacy marker-only 文件会报告冲突并保留。
 - 验证：init 聚焦测试 4/4 通过，`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs` 与 `git diff --check` 通过；`npm test` 共 167 项，165 项通过，2 项因当前 Windows 主机禁止创建测试 symlink 而在产品断言前 `EPERM`。这些检查证明本地 CLI、模板、skill mirror 和分发合同，不代表所有 AGENTS.md 客户端采用 Codex 的 override 语义。
@@ -72,16 +82,7 @@ node scripts/ae-tools.mjs help
 ### 0.3.37（2026-08-30）
 - 修复全局更新器失败时的退出码传播与临时 clone 清理，新增本地 Git fixture 回归测试，并统一 ae-update 的全局安装说明。
 
-### 0.3.36（2026-08-30）
-- 全局 help 的 update、language 和 checker 命令统一经过用户级 dispatcher；`ae-update` 从 cloned release 运行全局 installer 的 preview/apply。
-- `--project-root` 明确选择项目；memory/knowledge 的 `--root` 为仓库内相对目录，graph 保留无项目只读扫描；设计检查新增 `--compat` 报告模式。
-
 完整历史见 [CHANGELOG.md](CHANGELOG.md)；本节仅保留最近 5 个版本，发布时超出窗口的条目迁移到 CHANGELOG。
-
-### 0.3.35（2026-08-30）
-- 外部 skill watch 升级为路径证据语义：Gitee AE 登记为 `primary-upstream`，Taste、Impeccable 与 mattpocock 登记为补充研究源；仅在重复 `--changed-path` 与 `upstreamPaths` 匹配时填充 `affectedSkills`，HEAD 变化本身只产生 `stale-impact-unverified` 候选；显式 remote commit 必须是唯一的 40 位十六进制值，drive-relative/URI-like 路径会被拒绝。
-- 前端链新增共享 UI Direction Contract、`audit` / `refine` / `adjust` / `harden` 精修路由、设计模板集成、证据化视觉 review 与截图有效性/反例重开门禁；四类场景回放明确保留 operational UI、既有基线与移动端约束，不复制外部 prompt、detector 或 runtime。
-- 验证：两组聚焦测试、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs` 与 `git diff --check` 通过；`npm test` 共 160 项，158 项通过，2 项因当前 Windows 主机禁止创建测试 symlink 而在产品断言前返回 `EPERM`。已通过的检查证明路径匹配输出、条件式 UI Direction Contract、skill/source mirror、契约与安装分发一致性；不证明 symlink 逃逸用例、真实项目中的用户审美提升、像素级一致性或未执行的浏览器验收。
 
 #### 0.3.28（2026-08-13）
 - 全局更新：同步根包与插件 manifest 版本，并通过个人 marketplace 的全局安装流程刷新当前用户的 AE 插件与 dispatcher；不改变项目级文档、源码或用户项目数据。

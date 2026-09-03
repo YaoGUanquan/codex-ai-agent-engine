@@ -12,12 +12,13 @@ Implement or modify backend behavior using the repository's actual API, service,
 1. Read `references/backend-workflow.md`.
 2. Inspect the relevant routes, controllers, handlers, services, repositories, schemas, migrations, and tests before editing.
 3. Identify the exact contract being changed: request shape, response shape, auth boundary, permission rule, persistence behavior, and error handling.
-4. Read the language guidance matching the repository stack: `references/java-guidance.md` for Java and JVM stacks, `references/go-guidance.md` for Go, `references/python-guidance.md` for Python services, `references/c-guidance.md` for C, `references/cpp-guidance.md` for C++, `references/csharp-guidance.md` for C#/.NET. For other backend languages, follow the repository's existing conventions without inventing a new structure.
-5. Implement the smallest backend path that satisfies the requested behavior.
-6. Update or add narrow tests around the changed contract, then expand validation when the change touches shared behavior.
-7. Before final signoff, read `references/api-contract-checklist.md`; when a frontend consumes the changed API, walk its Frontend-Backend Alignment section explicitly.
-8. Use `ae-sql` for SQL generation or migration review and `ae-swagger-parser` when an OpenAPI contract needs inspection.
-9. Report the changed behavior, validation evidence, and any rollout or migration considerations.
+4. When durable data is created or materially changed, read `references/persistence-contract.md` before selecting identifiers, fields, indexes, deletion, concurrency, enum, migration, or exception behavior.
+5. Read the language guidance matching the repository stack: `references/java-guidance.md` for Java and JVM stacks, `references/go-guidance.md` for Go, `references/python-guidance.md` for Python services, `references/c-guidance.md` for C, `references/cpp-guidance.md` for C++, `references/csharp-guidance.md` for C#/.NET. For other backend languages, follow the repository's existing conventions without inventing a new structure.
+6. Implement the smallest backend path that satisfies the requested behavior.
+7. Update or add narrow tests around the changed contract, then expand validation when the change touches shared behavior.
+8. Before final signoff, read `references/api-contract-checklist.md`; when a frontend consumes the changed API, walk its Frontend-Backend Alignment section explicitly.
+9. Use `ae-sql` for SQL generation or migration review and `ae-swagger-parser` when an OpenAPI contract needs inspection.
+10. Report the changed behavior, validation evidence, and any rollout or migration considerations.
 
 ## Rules
 

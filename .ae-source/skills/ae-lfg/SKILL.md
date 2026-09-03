@@ -20,7 +20,7 @@ Follow `references/pipeline.md`.
 
 Default chain:
 
-1. ae-brainstorm if requirements are unclear or durable decisions are needed.
+1. ae-brainstorm if requirements are unclear or durable decisions are needed. When durable data is created or materially changed, require the decisions in `../ae-backend/references/persistence-contract.md` before implementation. When frontend component, style, form, query, mutation, or API-access work is in scope, require the reuse and ownership decisions in `../ae-frontend-design/references/component-data-access-contract.md` before implementation.
 2. Confirm requirements readiness: outcome, acceptance criteria, non-goals, chosen approach, validation expectations, and open questions.
 3. ae-review domain:document for any created requirements artifact.
 4. ae-plan for S4 work, including plan readiness and self-review.
