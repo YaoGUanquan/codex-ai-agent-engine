@@ -134,6 +134,15 @@ Use equivalence classes and boundary values for constrained inputs; decision tab
 
 ### T-XXX - <table or durable data structure>
 
+- Lifecycle: mutable aggregate | association | append-only audit/event/outbox | reference/dictionary
+- Primary key and external exposure: <repository-confirmed choice or explicit open question; never an invented default>
+- Audit ownership: <server principal/system actor or explicitly omitted>
+- Deletion and retention: <logical/physical/append-only semantics and restore policy>
+- Concurrency: <optimistic/pessimistic/not-applicable and conflict outcome>
+- Enum representation: <stable persisted code, unknown/retired-value behavior>
+- Constraints/indexes: <business uniqueness, foreign keys, query-serving indexes>
+- Migration/rollback: <ordering, compatibility, recovery boundary>
+
 ## UI/UX
 
 ### UI Direction Contract (Required When UI/UX Is Triggered)
@@ -148,6 +157,7 @@ Use equivalence classes and boundary values for constrained inputs; decision tab
 - Avoid list:
 - Confidence/evidence: <verified | inferred | assumed for each material choice>
 - Runnable-spec evidence: <absent | provided-unverified | browser-valid | drifted | superseded; this is evidence, not authority over requirements/security/NFR/source>
+- Component and data-access reuse: <selected token/primitive/semantic/feature/route layer; existing transport/service/query owner; explicit exception when reuse is unsafe>
 
 ### ST-XXX - <UI state machine or state>
 

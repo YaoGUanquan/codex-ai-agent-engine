@@ -3,7 +3,7 @@
 Use this sequence for repository-grounded web application work:
 
 1. Detect the framework, routing model, component library, and dev commands.
-2. Define the target route, user action path, and required data or auth dependencies.
+2. Define the target route, user action path, required data or auth dependencies, and the existing component/data-access owners to reuse.
 3. Implement the smallest complete flow that the user can exercise.
 4. Preserve the local UI language, form patterns, and state-management conventions.
 5. Validate with build or test commands first, then browser checks for the final user flow.

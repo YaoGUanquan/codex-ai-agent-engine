@@ -26,10 +26,13 @@ Operational, public-service, regulated, and accessibility-priority surfaces norm
 | Expressiveness | contextual `low` / `medium` / `high`, with a reason tied to audience and job |
 | Motion purpose | state, relationship, feedback, or outcome communicated; otherwise `none` |
 | Responsive intent | priority content, reflow/collapse behavior, target viewports and input modes |
+| Component and data-access reuse | selected tokens/primitives/semantic/feature/route layer; existing transport/service/query owner; explicit exception when reuse is unsafe |
 | Avoid list | explicit visual, content, accessibility, performance, or brand violations |
 | Confidence and evidence | each material choice marked `verified`, `inferred`, or `assumed`, with its source |
 
 A self-contained static interaction specification may provide route, layout, field, state, responsive, and interaction evidence. It does not replace canonical requirements, security, concurrency, non-functional, production behavior, or source-code verification. When spec and source differ, list the differences and request an authority decision; do not choose a synchronization direction silently.
+
+For dialogs, drawers, lists, tables, forms, styles, API calls, queries, or mutations, also read `component-data-access-contract.md`. This direction contract records the visual/reuse boundary; the component/data-access contract assigns implementation ownership.
 
 ## Refinement Modes
 

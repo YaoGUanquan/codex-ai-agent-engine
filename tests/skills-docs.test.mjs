@@ -1179,6 +1179,51 @@ test('frontend UI direction, refinement, and visual evidence contracts stay alig
   assert.match(replay, /measured design-quality improvement/i)
 })
 
+test('frontend component and data-access governance is present in source and mirror skills', () => {
+  const contractSourcePath = 'plugins/ai-agent-engine-codex/skills/ae-frontend-design/references/component-data-access-contract.md'
+  const contractMirrorPath = '.ae-source/skills/ae-frontend-design/references/component-data-access-contract.md'
+  const contractSource = readFileSync(resolve(repoRoot, contractSourcePath), 'utf8')
+  const contractMirror = readFileSync(resolve(repoRoot, contractMirrorPath), 'utf8')
+  assert.equal(contractMirror, contractSource, 'component/data-access contract mirror should match plugin source')
+  for (const expectation of [
+    /## Discover Before Build/,
+    /## Ownership Ladder/,
+    /## Dialog And Drawer Contract/,
+    /## List And Table Contract/,
+    /## Form Contract/,
+    /## Data-Access Contract/,
+    /Do not introduce ad-hoc raw HTTP calls in rendering components/,
+    /Before a third independently implemented equivalent/,
+  ]) {
+    assert.match(contractSource, expectation, `component/data-access contract should include ${expectation}`)
+  }
+
+  for (const [skillName, expectation] of [
+    ['ae-frontend-design', /component-data-access-contract\.md/],
+    ['ae-web-app', /component-data-access-contract\.md/],
+    ['ae-web-forge', /component-data-access-contract\.md/],
+    ['ae-design', /component-data-access-contract\.md/],
+    ['ae-review', /component-data-access-contract\.md/],
+    ['ae-lfg', /component-data-access-contract\.md/],
+  ]) {
+    const source = readSkillBody('plugins/ai-agent-engine-codex/skills', skillName)
+    const mirror = readSkillBody('.ae-source/skills', skillName)
+    assert.equal(mirror, source, `${skillName} mirror should match plugin source`)
+    assert.match(source, expectation, `${skillName} should route applicable work to the component/data-access contract`)
+  }
+
+  const qualitySource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-frontend-design/references/web-ui-quality.md'), 'utf8')
+  const directionSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-frontend-design/references/ui-direction-contract.md'), 'utf8')
+  const webAppWorkflow = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-web-app/references/web-app-workflow.md'), 'utf8')
+  const designTemplate = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-design/references/design-contract-template.md'), 'utf8')
+  const reviewProfile = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-review/references/code-review-rule-profiles.md'), 'utf8')
+  assert.match(qualitySource, /component-data-access-contract\.md/)
+  assert.match(directionSource, /Component and data-access reuse/)
+  assert.match(webAppWorkflow, /existing component\/data-access owners to reuse/)
+  assert.match(designTemplate, /Component and data-access reuse/)
+  assert.match(reviewProfile, /Component And Data-Access Sub-Lens/)
+})
+
 test('design contract requires UI Direction Contract only when a UI dimension is triggered', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-design-ui-direction-'))
   const designPath = 'docs/ae/designs/sample-2026-07-07/design.md'
@@ -1290,6 +1335,47 @@ test('backend language guidance and fullstack contract alignment are present in 
   assert.equal(sqlChecklistMirror, sqlChecklistSource, 'sql safety checklist mirror should match plugin source')
   assert.match(sqlChecklistSource, /## Operation Risk Tiers/)
   assert.match(sqlChecklistSource, /## Migration Safety/)
+
+  const persistenceSourcePath = 'plugins/ai-agent-engine-codex/skills/ae-backend/references/persistence-contract.md'
+  const persistenceMirrorPath = '.ae-source/skills/ae-backend/references/persistence-contract.md'
+  const persistenceSource = readFileSync(resolve(repoRoot, persistenceSourcePath), 'utf8')
+  const persistenceMirror = readFileSync(resolve(repoRoot, persistenceMirrorPath), 'utf8')
+  assert.equal(persistenceMirror, persistenceSource, 'persistence contract mirror should match plugin source')
+  for (const expectation of [
+    /mutable business aggregate/i,
+    /Do not default to either option/i,
+    /本次新增持久化表的主键策略选择自增 BIGINT，还是 UUID？是否需要对外暴露该 ID？/,
+    /@Version/,
+    /@TableLogic/,
+    /not language ordinal positions/i,
+    /established exception handler/i,
+  ]) {
+    assert.match(persistenceSource, expectation, `persistence contract should include ${expectation}`)
+  }
+
+  for (const [skillName, expectation] of [
+    ['ae-ideate', /persistence-contract\.md/],
+    ['ae-brainstorm', /persistence-contract\.md/],
+    ['ae-prd', /persistence-contract\.md/],
+    ['ae-design', /persistence-contract\.md/],
+    ['ae-backend', /references\/persistence-contract\.md/],
+    ['ae-sql', /persistence-contract\.md/],
+    ['ae-review', /persistence-contract\.md/],
+    ['ae-lfg', /persistence-contract\.md/],
+  ]) {
+    const source = readSkillBody('plugins/ai-agent-engine-codex/skills', skillName)
+    const mirror = readSkillBody('.ae-source/skills', skillName)
+    assert.equal(mirror, source, `${skillName} mirror should match plugin source`)
+    assert.match(source, expectation, `${skillName} should route persistence work to the shared contract`)
+  }
+
+  const javaGuidance = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-backend/references/java-guidance.md'), 'utf8')
+  assert.match(javaGuidance, /## MyBatis-Plus Entity Governance \(Conditional\)/)
+  assert.match(javaGuidance, /FieldFill\.INSERT_UPDATE/)
+
+  const designTemplate = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-design/references/design-contract-template.md'), 'utf8')
+  assert.match(designTemplate, /Primary key and external exposure/)
+  assert.match(designTemplate, /Enum representation/)
 })
 
 test('legacy frontend stack counterparts are present in source and mirror skills', () => {
