@@ -4,6 +4,21 @@
 
 English: [CHANGELOG.en.md](CHANGELOG.en.md)
 
+### 0.3.44（2026-09-10）
+- 修复 Cursor 已索引 `ae-reverse-engineering`、但 `SKILL.md` 英文 frontmatter 导致中文“授权逆向”难以发现的问题；新增中英文能力词及 `/ae-reverse-engineering`、`$ae-reverse-engineering` 显式调用词。
+- 原有授权确认、静态优先和防御性安全边界保持不变；新增回归断言锁定 Cursor 实际读取的 frontmatter 与 source/mirror 一致性。
+- 验证覆盖聚焦测试、全量测试、合同检查、安装烟测、发布说明、diff 格式与当前用户全局安装；静态证据不替代 Cursor 重新加载后的 UI 人工确认。
+
+### 0.3.43（2026-09-10）
+- 新增模型中立适配合同，核心工作流按任务风险、验收标准、当前工具 schema 与实测能力调整深度，不按模型标签或固定 `reasoning_effort` 推断运行时能力。
+- `ae-init` 生成规则新增失败可见、根因与结构性修复、渐进式指令加载、仓库脚本验证排序、diff 复核和证据分层；`minimal` 与 `ae-core/full` 保持不同深度。
+- 技能契约检查扩展到相对 Markdown 链接；验证覆盖聚焦测试、全量测试、合同检查、安装烟测、发布说明和 diff 格式。证明边界不包含所有 GPT-5.6/GPT-6 供应商或 Codex host 的运行时等同行为。
+
+### 0.3.42（2026-09-08）
+- Java/Spring Controller 测试新增结构边界：测试源码不得继承带 Spring MVC 映射或 OpenAPI 接口注解的生产 Controller，避免静态扫描器将继承映射发布为重复接口。受保护认证或请求上下文 seam 使用既有 MVC slice、直接实例化加 mocks 或 Mockito spy/proxy；`@Hidden` 与 Javadoc ignore 不作为保障。
+- `ae-tdd` 新增 JVM Web Controller 测试段；回归测试同时锁定规则文本与 source/mirror 一致性。
+- 验证命令：`node --test --test-name-pattern "backend language guidance and fullstack contract alignment|mattpocock-adapted guidance" tests/skills-docs.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs` 与 `git diff --check`。证明边界仅为本地 skill、镜像与安装分发合同，不包含目标项目运行时或第三方 IDE 插件行为。
+
 ### 0.3.41（2026-09-03）
 - 新增 `ae-frontend-design` 归属的组件与数据访问契约，并让 `ae-web-app`、`ae-web-forge`、`ae-design`、`ae-review` 与 `ae-lfg` 在弹窗、抽屉、列表、表格、表单、样式、API 请求、query 或 mutation 变更时共享复用与所有权边界。
 - 统一 token/primitives、共享语义组件、feature 组件、route 编排的层级；新增弹窗/抽屉、列表/表格、表单状态契约，以及“第三次同类实现前抽取审查”规则。已有本地 owner 时，渲染组件不得重复实现原始 HTTP、认证、响应包、字段转换、分页、取消、重试或错误归一化。
