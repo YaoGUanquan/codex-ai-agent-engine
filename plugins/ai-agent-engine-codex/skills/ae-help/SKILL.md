@@ -15,6 +15,7 @@ List and explain the Codex-native AI Agent Engine entrypoints in the local displ
 
 ## Boundaries
 
+- For model compatibility or instruction behavior, read `references/model-adaptation-contract.md`. Explain capability-driven AE behavior separately from provider model catalogs, reasoning-level metadata, and host-specific tool availability.
 - Do not claim OpenCode `config.command` slash commands are installed in Codex.
 - Explain that `/ae-*` names are compatibility labels. In Codex, reliable triggers are installed skill names, explicit `$ae-*` invocation, natural-language requests such as "use ae-work" / "使用 ae-work", and any enabled-skill search surfaces exposed by the active Codex App.
 - When mentioning `/` visibility, phrase it as Codex skill-backed discoverability that must be verified in the active app, not as command registration implemented by this project.

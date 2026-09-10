@@ -72,6 +72,8 @@ test('authorized reverse engineering skill is discoverable and keeps defensive b
 
   assert.equal(mirror, source, 'ae-reverse-engineering mirror should match plugin source')
   assert.equal(templateMirror, templateSource, 'analysis report template mirror should match plugin source')
+  assert.match(source, /^description: .*\/ae-reverse-engineering.*\$ae-reverse-engineering.*授权逆向/m)
+  assert.match(source, /^description: .*分析前必须确认授权、来源与证据边界。$/m)
   for (const expectation of [
     /Authorization Gate/,
     /license bypass/i,
@@ -1372,6 +1374,15 @@ test('backend language guidance and fullstack contract alignment are present in 
   const javaGuidance = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-backend/references/java-guidance.md'), 'utf8')
   assert.match(javaGuidance, /## MyBatis-Plus Entity Governance \(Conditional\)/)
   assert.match(javaGuidance, /FieldFill\.INSERT_UPDATE/)
+  assert.match(javaGuidance, /do not make test classes subclasses of a production Controller/i)
+  assert.match(javaGuidance, /Static source scanners can treat inherited mappings as duplicate endpoints/i)
+
+  const tddWorkflowSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-tdd/references/tdd-workflow.md'), 'utf8')
+  const tddWorkflowMirror = readFileSync(resolve(repoRoot, '.ae-source/skills/ae-tdd/references/tdd-workflow.md'), 'utf8')
+  assert.equal(tddWorkflowMirror, tddWorkflowSource, 'ae-tdd workflow mirror should match plugin source')
+  assert.match(tddWorkflowSource, /JVM web-controller test harnesses/)
+  assert.match(tddWorkflowSource, /do not subclass a production Controller in test source/i)
+  assert.match(tddWorkflowSource, /Mockito spy\/proxy/)
 
   const designTemplate = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-design/references/design-contract-template.md'), 'utf8')
   assert.match(designTemplate, /Primary key and external exposure/)
@@ -1397,6 +1408,27 @@ test('legacy frontend stack counterparts are present in source and mirror skills
       assert.match(source, expectation, `${fileName} should include ${expectation}`)
     }
   }
+})
+
+test('core workflows share a model-neutral adaptation contract', () => {
+  const contractSourcePath = 'plugins/ai-agent-engine-codex/skills/ae-help/references/model-adaptation-contract.md'
+  const contractMirrorPath = '.ae-source/skills/ae-help/references/model-adaptation-contract.md'
+  const contractSource = readFileSync(resolve(repoRoot, contractSourcePath), 'utf8')
+  const contractMirror = readFileSync(resolve(repoRoot, contractMirrorPath), 'utf8')
+  assert.equal(contractMirror, contractSource)
+  for (const expectation of [
+    /not a model name/, /hard-coded reasoning-effort value/, /active tool schema/,
+    /Do not persist transcripts or private reasoning/, /Stop when the requested acceptance criteria/,
+  ]) assert.match(contractSource, expectation)
+
+  for (const skillName of ['ae-brainstorm', 'ae-lfg', 'ae-plan', 'ae-work', 'ae-review', 'ae-init']) {
+    const source = readSkillBody('plugins/ai-agent-engine-codex/skills', skillName)
+    const mirror = readSkillBody('.ae-source/skills', skillName)
+    assert.equal(mirror, source, `${skillName} mirror should match plugin source`)
+    assert.match(source, /model-adaptation-contract\.md/, `${skillName} should route through the shared contract`)
+  }
+  const help = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-help')
+  assert.match(help, /references\/model-adaptation-contract\.md/)
 })
 
 test('cross-artifact verification vocabulary is conditional and mirrored', () => {

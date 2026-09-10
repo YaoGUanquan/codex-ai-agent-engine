@@ -21,6 +21,10 @@
 - Do not overwrite user work or revert unrelated changes.
 {{aeWorkflowRules}}
 
+## Engineering Execution
+
+{{engineeringRules}}
+
 ## Encoding Rules
 
 - Read and write text files as UTF-8, preferably UTF-8 without BOM.
@@ -29,5 +33,4 @@
 
 ## Validation
 
-- Run the narrowest relevant validation before delivery.
-- If validation cannot be run, state the reason and remaining risk.
+{{validationRules}}

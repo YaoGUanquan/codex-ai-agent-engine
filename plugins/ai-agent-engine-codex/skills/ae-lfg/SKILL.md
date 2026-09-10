@@ -7,6 +7,8 @@ description: Use when the user explicitly asks for ae-lfg, /ae-lfg, $ae-lfg, "us
 
 Run the full AE engineering workflow in Codex. This is an orchestrator skill: it coordinates ae-brainstorm, ae-plan, ae-work, ae-review, validation, and final gate evidence.
 
+Apply the [model-adaptation contract](../ae-help/references/model-adaptation-contract.md). Route and scale the workflow from task class, risk, acceptance criteria, and observed tools rather than model labels or assumed reasoning settings. Reuse already-valid artifacts and gates instead of repeating ceremony.
+
 ## First Steps
 
 1. Read `references/task-routing.md` and classify the request.

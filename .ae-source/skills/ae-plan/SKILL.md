@@ -9,6 +9,7 @@ Create a durable implementation plan. Planning answers how to build; it does not
 
 ## Operating Principles
 
+- Apply the [model-adaptation contract](../ae-help/references/model-adaptation-contract.md): plan from observed capability and evidence boundaries, not model labels, private reasoning assumptions, or hard-coded reasoning effort.
 - Keep the plan as small as the requested outcome allows.
 - Prefer repo-grounded facts over generic architecture advice.
 - Separate known facts, assumptions, open questions, and deferred work.

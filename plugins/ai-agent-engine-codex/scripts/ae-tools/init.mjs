@@ -215,6 +215,8 @@ function loadLangTemplates(lang, context, profile) {
     importantPaths: formatList(context.importantPaths, fallback),
     scripts: formatList(context.scripts, fallback),
     aeWorkflowRules: aeWorkflowRules(lang, profile),
+    engineeringRules: engineeringRules(lang, profile),
+    validationRules: validationRules(lang, context.validationScripts, profile),
   }
   return Object.fromEntries(templateKeys.map((key) => [key, renderTemplate(lang, key, replacements)]))
 }
@@ -240,6 +242,54 @@ function aeWorkflowRules(lang, profile) {
       ].join('\n')
 }
 
+function engineeringRules(lang, profile) {
+  const minimal = lang === 'zh-CN'
+    ? [
+        '- 让失败明确暴露；不要伪造成功、吞掉错误，或仅为通过任务增加静默降级。',
+        '- 根据仓库证据和任务风险推进；只有缺失信息会改变行为、架构、安全或验证边界时才提问。',
+      ]
+    : [
+        '- Keep failures visible; do not fabricate success, swallow errors, or add silent degradation merely to make the task pass.',
+        '- Proceed from repository evidence and task risk; ask only when missing information changes behavior, architecture, security, or validation.',
+      ]
+  if (profile === 'minimal') return minimal.join('\n')
+
+  const extended = lang === 'zh-CN'
+    ? [
+        '- 修复问题时先追踪根因，不要只消除表面症状。',
+        '- 当变更涉及重复业务逻辑、共享校验或权限、API/数据契约、状态同步或数据完整性时，按结构性变更处理：先明确不变量和唯一真源，再移除过时路径。',
+        '- 只加载当前任务触发的参考资料，不重复已经生效的上级规则；达到请求的验收标准和证据边界后停止。',
+      ]
+    : [
+        '- Trace the root cause before fixing a problem; do not only silence the visible symptom.',
+        '- Treat duplicated business logic, shared validation or permissions, API/data contracts, state synchronization, and data-integrity boundaries as structural changes: define the invariant and single source of truth before removing obsolete paths.',
+        '- Load only references triggered by the current task, avoid repeating effective higher-priority rules, and stop when the requested acceptance and evidence boundary is satisfied.',
+      ]
+  return [...minimal, ...extended].join('\n')
+}
+
+function validationRules(lang, scripts, profile) {
+  const commands = scripts.length > 0
+    ? scripts.map((script) => `- ${script}`).join('\n')
+    : (lang === 'zh-CN'
+        ? '- 未检测到仓库定义的验证命令；先检查构建元数据，不要猜测命令。'
+        : '- No repository-defined validation command was detected; inspect build metadata before choosing a command.')
+  const rules = lang === 'zh-CN'
+    ? [
+        '- 按适用范围运行下列仓库已定义命令；从聚焦行为检查开始，再执行静态/类型检查、受影响构建和 smoke。不要把不相关命令当成强制清单。',
+        commands,
+        '- 交付前复查当前任务 diff，检查重复逻辑、隐藏降级、第二真源、未说明的行为变化、薄弱测试和安全回归。',
+        '- 如果无法验证，说明原因、未验证边界和剩余风险；低层检查不能证明更高层运行时、浏览器或部署结果。',
+      ]
+    : [
+        '- Run the applicable repository-defined commands below, starting with focused behavior checks, then static/type checks, affected builds, and smoke checks. Do not treat irrelevant commands as mandatory.',
+        commands,
+        '- Before delivery, review the task-scoped diff for duplicate logic, hidden fallback, second sources of truth, unmentioned behavior changes, weak tests, and security regressions.',
+        '- If validation cannot run, state the reason, unverified boundary, and residual risk; a lower-level check does not prove runtime, browser, or deployment behavior.',
+      ]
+  return (profile === 'minimal' ? [rules[0], rules[1], rules[3]] : rules).join('\n')
+}
+
 function renderTemplate(lang, key, replacements) {
   // Normalize CRLF so a CRLF checkout cannot change generated file bytes.
   const raw = readText(join(templatesRoot, lang, `${key}.md`)).replace(/\r\n/g, '\n')
@@ -255,6 +305,7 @@ function detectProjectContext(worktree) {
   const indicators = []
   const importantPaths = []
   const scripts = []
+  const validationScripts = []
   if (packageJson) {
     indicators.push('Node.js package.json')
     if (packageJson.type) indicators.push(`package type: ${packageJson.type}`)
@@ -262,6 +313,7 @@ function detectProjectContext(worktree) {
     for (const [name, command] of Object.entries(packageJson.scripts || {})) {
       scripts.push(`\`${markdownInlineCode(`${runner} run ${name}`)}\` - ${markdownSingleLine(command)}`)
     }
+    validationScripts.push(...detectValidationScripts(packageJson.scripts || {}, runner))
   }
   const pathSignals = [
     ['pom.xml', 'Maven Java project'],
@@ -290,7 +342,25 @@ function detectProjectContext(worktree) {
     indicators: [...new Set(indicators)].slice(0, 20),
     importantPaths: [...new Set(importantPaths)].slice(0, 20),
     scripts: scripts.slice(0, 20),
+    validationScripts: validationScripts.slice(0, 20),
   }
+}
+
+function detectValidationScripts(scripts, runner) {
+  return Object.keys(scripts)
+    .map((name) => ({ name, priority: validationPriority(name) }))
+    .filter((entry) => entry.priority !== null)
+    .sort((a, b) => a.priority - b.priority || a.name.localeCompare(b.name))
+    .map((entry) => `\`${markdownInlineCode(`${runner} run ${entry.name}`)}\``)
+}
+
+function validationPriority(name) {
+  const normalized = name.toLowerCase()
+  if (/^(test|spec)(:|$)/.test(normalized) && !/(e2e|integration|smoke)/.test(normalized)) return 10
+  if (/(typecheck|type-check|check-types|lint|static)/.test(normalized) || normalized === 'check') return 20
+  if (/^(build|compile)(:|$)/.test(normalized)) return 30
+  if (/(smoke|integration|e2e)/.test(normalized)) return 40
+  return null
 }
 
 function managedRegionStatus(content) {

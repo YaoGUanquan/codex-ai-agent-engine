@@ -97,7 +97,41 @@ test('check-skill-contract reports ok without external dependencies', () => {
   const result = runNodeScript('scripts/check-skill-contract.mjs')
   assert.equal(result.status, 'ok')
   assert.equal(result.skillCount, result.checkedSkills)
+  assert.ok(result.checkedMarkdownFiles >= result.checkedSkills)
   assert.equal(result.errors.length, 0)
+})
+
+test('check-skill-contract rejects broken relative Markdown references', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-skill-links-'))
+  try {
+    for (const root of ['plugins/ai-agent-engine-codex/skills', '.ae-source/skills']) {
+      const skillDir = join(tempRoot, root, 'ae-fixture')
+      mkdirSync(join(skillDir, 'agents'), { recursive: true })
+      writeFileSync(join(skillDir, 'SKILL.md'), [
+        '---',
+        'name: ae-fixture',
+        'description: Fixture skill with a deliberately broken relative Markdown reference.',
+        '---',
+        '',
+        '# Fixture',
+        '',
+        'Read [the missing contract](references/missing.md).',
+        '',
+      ].join('\n'), 'utf8')
+      writeFileSync(join(skillDir, 'agents', 'openai.yaml'), 'interface:\n  display_name: "Fixture"\n', 'utf8')
+    }
+
+    const result = spawnSync(process.execPath, [resolve(repoRoot, 'scripts/check-skill-contract.mjs'), '--target', tempRoot], {
+      cwd: repoRoot,
+      encoding: 'utf8',
+      stdio: 'pipe',
+    })
+    assert.equal(result.status, 1)
+    assert.match(result.stderr, /linked Markdown file does not exist/)
+    assert.match(result.stderr, /references\/missing\.md/)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
 })
 
 test('distribution skill roots contain only ae-* skill directories', () => {

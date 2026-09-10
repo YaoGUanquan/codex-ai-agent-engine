@@ -9,6 +9,7 @@ Clarify what should be built. Produce a requirements artifact only when it will 
 
 ## Operating Principles
 
+- Apply the [model-adaptation contract](../ae-help/references/model-adaptation-contract.md): scale clarification to decision risk, use repository evidence before questions, and stop when requirements are ready for the next workflow stage.
 - Understand the current repository context before asking detailed questions.
 - Ask one focused question at a time when the answer changes scope, design, or acceptance.
 - Do not ask the user for facts that can be discovered from repository files, existing docs, or safe read-only commands.

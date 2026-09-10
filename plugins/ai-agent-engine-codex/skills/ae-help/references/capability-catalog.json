@@ -15,8 +15,8 @@
       "name": "ae-help",
       "tier": "meta",
       "entry": "/ae-help",
-      "target": "查看当前能力",
-      "purpose": "查看本地 AE for Codex 已安装的工作流入口和使用边界。",
+      "target": "查看当前能力与模型适配",
+      "purpose": "查看本地 AE for Codex 已安装的工作流入口、使用边界，以及 model compatibility、模型中立适配和 reasoning_effort 元数据边界。",
       "script": "node '$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs' help [query]"
     },
     {

@@ -4,14 +4,16 @@ import { dirname, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
+const targetRoot = resolve(readArg('--target') || repoRoot)
 const skillRoots = [
-  resolve(repoRoot, 'plugins', 'ai-agent-engine-codex', 'skills'),
-  resolve(repoRoot, '.ae-source', 'skills'),
+  resolve(targetRoot, 'plugins', 'ai-agent-engine-codex', 'skills'),
+  resolve(targetRoot, '.ae-source', 'skills'),
 ]
 const maxDescriptionLength = 1024
 const errors = []
 const warnings = []
 let checkedSkills = 0
+let checkedMarkdownFiles = 0
 
 for (const root of skillRoots) {
   validateSkillRoot(root)
@@ -19,8 +21,10 @@ for (const root of skillRoots) {
 
 const result = {
   status: errors.length === 0 ? 'ok' : 'failed',
-  checkedRoots: skillRoots.map((root) => toPosix(relative(repoRoot, root))),
+  targetRoot,
+  checkedRoots: skillRoots.map((root) => toPosix(relative(targetRoot, root))),
   checkedSkills,
+  checkedMarkdownFiles,
   skillCount: checkedSkills,
   errors,
   warnings,
@@ -41,7 +45,7 @@ function validateSkillRoot(root) {
   }
 
   for (const entry of readdirSync(root, { withFileTypes: true })) {
-    const relEntry = toPosix(relative(repoRoot, resolve(root, entry.name)))
+    const relEntry = toPosix(relative(targetRoot, resolve(root, entry.name)))
     if (!entry.isDirectory() || !entry.name.startsWith('ae-')) {
       errors.push({ path: relEntry, message: 'skill root entries must be ae-* directories only' })
       continue
@@ -54,7 +58,7 @@ function validateSkillDirectory(skillDir, dirName) {
   ensureInsideRepo(skillDir, 'skillDir')
   const skillFile = resolve(skillDir, 'SKILL.md')
   const metadataFile = resolve(skillDir, 'agents', 'openai.yaml')
-  const relSkillDir = toPosix(relative(repoRoot, skillDir))
+  const relSkillDir = toPosix(relative(targetRoot, skillDir))
 
   if (!existsSync(skillFile)) {
     errors.push({ path: relSkillDir, message: 'missing SKILL.md' })
@@ -96,7 +100,10 @@ function validateSkillDirectory(skillDir, dirName) {
     })
   }
 
-  validateSkillLinks(skillFile, content)
+  for (const markdownFile of collectMarkdownFiles(skillDir)) {
+    checkedMarkdownFiles++
+    validateMarkdownLinks(markdownFile, readFileSync(markdownFile, 'utf8'))
+  }
 }
 
 function parseFrontmatter(content) {
@@ -127,30 +134,60 @@ function parseScalar(value) {
   return value
 }
 
-function validateSkillLinks(file, content) {
-  const linkPattern = /\[[^\]]+\]\(([^)]+SKILL\.md(?:#[^)]+)?)\)/g
+function collectMarkdownFiles(directory) {
+  const files = []
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const path = resolve(directory, entry.name)
+    if (entry.isDirectory() && !entry.isSymbolicLink()) files.push(...collectMarkdownFiles(path))
+    else if (entry.isFile() && entry.name.endsWith('.md')) files.push(path)
+  }
+  return files.sort((a, b) => a.localeCompare(b))
+}
+
+function validateMarkdownLinks(file, content) {
+  const linkPattern = /\[[^\]]*\]\(([^)]+)\)/g
   let match
   while ((match = linkPattern.exec(content)) !== null) {
-    const rawTarget = match[1].split('#')[0]
-    if (/^[a-z]+:\/\//i.test(rawTarget)) continue
+    let rawTarget = match[1].trim()
+    if (rawTarget.startsWith('<') && rawTarget.endsWith('>')) rawTarget = rawTarget.slice(1, -1)
+    rawTarget = rawTarget.split('#')[0].split('?')[0]
+    if (!rawTarget || rawTarget.startsWith('#') || /^[a-z]+:/i.test(rawTarget) || rawTarget.startsWith('/')) continue
+    if (!rawTarget.toLowerCase().endsWith('.md')) continue
 
     const target = resolve(dirname(file), rawTarget)
-    ensureInsideRepo(target, 'skillLink')
+    if (!isInsideTarget(target)) {
+      errors.push({
+        path: toPosix(relative(targetRoot, file)),
+        target: rawTarget,
+        message: 'relative Markdown link escapes the target repository',
+      })
+      continue
+    }
     if (!existsSync(target) || !statSync(target).isFile()) {
       errors.push({
-        path: toPosix(relative(repoRoot, file)),
+        path: toPosix(relative(targetRoot, file)),
         target: rawTarget,
-        message: 'linked SKILL.md does not exist',
+        message: 'linked Markdown file does not exist',
       })
     }
   }
 }
 
 function ensureInsideRepo(path, label) {
-  const relPath = relative(repoRoot, path)
+  const relPath = relative(targetRoot, path)
   if (relPath === '' || relPath.startsWith('..') || /^[A-Za-z]:/.test(relPath)) {
     throw new Error(`${label} must stay inside repository: ${path}`)
   }
+}
+
+function isInsideTarget(path) {
+  const relPath = relative(targetRoot, path)
+  return relPath === '' || (!relPath.startsWith('..') && !/^[A-Za-z]:/.test(relPath))
+}
+
+function readArg(name) {
+  const index = process.argv.indexOf(name)
+  return index >= 0 ? process.argv[index + 1] || null : null
 }
 
 function toPosix(value) {
