@@ -7,6 +7,7 @@ AI Agent Engine for Codex 是一个面向 Codex 的项目级工程工作流插�
 > 也参考了 https://github.com/openai/plugins 和 https://github.com/obra/superpowers 中部分开发技能设计。<br>
 > 也参考了 https://github.com/affaan-m/everything-claude-code 中关于外部 skill 仓库治理、持续学习、验证循环和 Codex 适配边界的设计。<br>
 > 也参考了 https://github.com/github/spec-kit 中关于 constitution、需求质量清单、任务拆解和跨产物分析的工作流设计，但不引入其 runtime。<br>
+> 也参考了 https://github.com/lili-luo/aicoding-cookbook 中关于失败可见、结构性修复、分层验证和停止条件的方法；仅重写可移植方法，不复制其未声明仓库级许可证的文本。<br>
 > 这不是 OpenCode runtime 的直接移植，而是 Codex 原生 skill、项目级插件文件和本地脚本的实现方式。
 
 English: [README.en.md](README.en.md)
@@ -61,6 +62,21 @@ node scripts/ae-tools.mjs help
 
 ## 版本更新记录
 
+### 0.3.44（2026-09-10）
+- 修复 Cursor 中 `ae-reverse-engineering` 已被索引但按中文“授权逆向”难以发现的问题：Cursor 实际读取 `SKILL.md` frontmatter，而不是 Codex 的 `agents/openai.yaml` 显示名；技能描述现包含中英文能力说明、`/ae-reverse-engineering` 与 `$ae-reverse-engineering` 显式调用词。
+- 保留原有授权门、静态优先和防御性边界，不扩展许可证绕过、凭据窃取、持久化、检测规避、主动利用、目标扫描或未授权交互能力。
+- 验证命令：授权逆向聚焦测试、`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`、`git diff --check` 与当前用户全局安装烟测。静态检查可证明 frontmatter、镜像和分发副本一致；Cursor UI 可见性仍需重新加载窗口或新建对话后人工确认。
+
+### 0.3.43（2026-09-10）
+- 新增模型中立适配合同：核心 AE 工作流按任务风险、验收标准、当前工具 schema 与实测能力调整深度，不再按 GPT-5.6、GPT-6 或其他模型标签推断工具、上下文、私有推理或 `reasoning_effort`；供应商模型目录不一致明确归类为运行时元数据问题。
+- `ae-init` 生成的 `AGENTS.md` 新增失败可见、根因与结构性修复、指令渐进加载、按仓库已有脚本排序验证、交付前 diff 复核与证据分层规则；`minimal` 保持精简，`ae-core/full` 提供完整规则，不猜测不存在的命令。
+- 技能契约检查扩展到 skill 目录中的相对 Markdown 链接；验证命令：模型适配与 init 聚焦测试、`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs` 与 `git diff --check`。这些检查只证明本地指令、生成器、镜像和安装分发合同，不证明所有模型、供应商或 Codex host 的等同行为。
+
+### 0.3.42（2026-09-08）
+- Java/Spring Controller 测试新增结构边界：测试源码不得继承带 Spring MVC 映射或 OpenAPI 接口注解的生产 Controller，避免 Apifox 等静态扫描器把继承映射误识别为重复接口；明确使用现有 MVC slice、直接实例化加 mocks 或 Mockito spy/proxy 覆盖受保护请求上下文 seam，`@Hidden` 与 Javadoc ignore 不作为保障。
+- `ae-tdd` 新增 JVM Web Controller 测试段，并以 source/mirror 回归断言锁定该约束与镜像一致性。
+- 验证命令：`node --test --test-name-pattern "backend language guidance and fullstack contract alignment|mattpocock-adapted guidance" tests/skills-docs.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs` 与 `git diff --check`。这些检查仅证明本地 skill、镜像与安装分发合同，不证明目标项目运行时或第三方 IDE 插件行为。
+
 ### 0.3.41（2026-09-03）
 - 新增 `ae-frontend-design` 组件与数据访问契约：前端实现必须先检查并复用目标项目已有的 token、语义组件、API client、service 与 query/mutation 模式；弹窗/抽屉、列表/表格、表单和请求状态具备统一边界。
 - 新增“第三次同类实现前进行抽取审查”规则，禁止在已有本地 owner 时由渲染组件重复处理原始 HTTP、认证、响应包、字段转换、分页、取消、重试或错误归一化；不引入跨框架组件库或默认 HTTP 依赖。
@@ -70,17 +86,6 @@ node scripts/ae-tools.mjs help
 - 新增 `ae-backend` 持久化契约，并让 `ae-ideate`、`ae-brainstorm`、`ae-prd`、`ae-design`、`ae-sql`、`ae-review` 与 `ae-lfg` 在新表或持久化变更时共享同一决策基线：必须先确认自增 BIGINT 或 UUID 主键及其对外暴露边界；未确认时不得默认选择。
 - Java/MyBatis-Plus 指引新增条件式 `@Version`、`@TableLogic`、审计字段填充、软删除索引/恢复、乐观锁冲突、稳定枚举 code 与统一异常映射规则；不要求非 MyBatis-Plus 或不适用表类型套用该模板。
 - 验证命令：`node --test --test-name-pattern "backend language guidance and fullstack contract alignment" tests/skills-docs.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke` 与 `git diff --check`。这些检查只证明本地 skill、镜像与安装分发合同，不证明目标项目数据库、认证 API、浏览器或部署行为。
-
-### 0.3.39（2026-09-01）
-- `ae-init` 对齐 AGENTS.md 开放格式：新增 `minimal` / `ae-core` / `full` profile、真实项目命令、Codex override 解释和有界嵌套候选预览；新文件使用受管区块，`--force` 不再整文件覆盖，legacy marker-only 文件会报告冲突并保留。
-- 验证：init 聚焦测试 4/4 通过，`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs` 与 `git diff --check` 通过；`npm test` 共 167 项，165 项通过，2 项因当前 Windows 主机禁止创建测试 symlink 而在产品断言前 `EPERM`。这些检查证明本地 CLI、模板、skill mirror 和分发合同，不代表所有 AGENTS.md 客户端采用 Codex 的 override 语义。
-
-### 0.3.38（2026-08-31）
-- 审计 `greensock/gsap-skills`，将可移植的动效性能、生命周期与 reduced-motion 复核规则纳入 `ae-frontend-design`；不引入 GSAP 运行时。
-- 验证：`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`、`git diff --check`。
-
-### 0.3.37（2026-08-30）
-- 修复全局更新器失败时的退出码传播与临时 clone 清理，新增本地 Git fixture 回归测试，并统一 ae-update 的全局安装说明。
 
 完整历史见 [CHANGELOG.md](CHANGELOG.md)；本节仅保留最近 5 个版本，发布时超出窗口的条目迁移到 CHANGELOG。
 

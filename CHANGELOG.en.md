@@ -4,6 +4,21 @@ This file is the complete release history of AI Agent Engine for Codex (since 0.
 
 中文版本: [CHANGELOG.md](CHANGELOG.md)
 
+### 0.3.44 (2026-09-10)
+- Fix Cursor discovery for `ae-reverse-engineering`: the skill was indexed, but its English-only `SKILL.md` frontmatter made Chinese searches such as `授权逆向` ineffective. Add bilingual capability terms and explicit `/ae-reverse-engineering` and `$ae-reverse-engineering` invocation tokens.
+- Keep the existing authorization, static-first, and defensive safety boundaries unchanged, and add regression assertions for Cursor-consumed frontmatter plus source/mirror consistency.
+- Validation covers focused and full tests, contract checks, install smoke, release notes, diff formatting, and the current-user global install. Static evidence does not replace manual Cursor UI confirmation after reload.
+
+### 0.3.43 (2026-09-10)
+- Add a model-neutral adaptation contract so core workflows scale from task risk, acceptance criteria, active tool schemas, and observed capabilities instead of model labels or fixed `reasoning_effort` assumptions.
+- Strengthen init-generated guidance with fail-visible behavior, root-cause and structural-fix decisions, progressive instruction loading, repository-script validation ordering, diff review, and proof-tier boundaries while preserving concise `minimal` output.
+- Extend skill contract checks to relative Markdown links. Validation covers focused and full tests, contract checks, install smoke, release notes, and diff formatting; it does not prove runtime equivalence across every GPT-5.6/GPT-6 provider or Codex host.
+
+### 0.3.42 (2026-09-08)
+- Add a Java/Spring Controller-test structural boundary: test source must not subclass a production Controller carrying Spring MVC mappings or OpenAPI endpoint annotations, preventing static scanners from publishing inherited mappings as duplicate endpoints. For protected authentication or request-context seams, use an existing MVC slice, a directly instantiated Controller with mocks, or a Mockito spy/proxy; `@Hidden` and Javadoc ignore markers are not enforcement.
+- Add a JVM web-controller section to `ae-tdd`; regression tests lock both the rule text and source/mirror consistency.
+- Validation commands: `node --test --test-name-pattern "backend language guidance and fullstack contract alignment|mattpocock-adapted guidance" tests/skills-docs.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`. Proof is limited to local skill, mirror, and installation-distribution contracts, not target-project runtime or third-party IDE-plugin behavior.
+
 ### 0.3.41 (2026-09-03)
 - Add an `ae-frontend-design`-owned component and data-access contract, routing `ae-web-app`, `ae-web-forge`, `ae-design`, `ae-review`, and `ae-lfg` through reuse and ownership decisions for dialog, drawer, list, table, form, style, API-call, query, and mutation work.
 - Define the token/primitive, shared semantic component, feature component, and route hierarchy; add dialog/drawer, list/table, and form state contracts plus extraction review before a third equivalent implementation. When a local owner exists, rendering components must not duplicate raw HTTP, auth, envelopes, transforms, pagination, cancellation, retry, or error normalization.

@@ -7,10 +7,26 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 > It also draws on selected development-skill ideas from https://github.com/openai/plugins and https://github.com/obra/superpowers.<br>
 > It also draws on external skill repository governance, continuous learning, verification-loop, and Codex adaptation boundary ideas from https://github.com/affaan-m/everything-claude-code.<br>
 > It also adapts selected Spec Kit workflow ideas from https://github.com/github/spec-kit without vendoring its runtime.<br>
+> It also references fail-visible debugging, structural-fix, layered-validation, and stop-condition methods from https://github.com/lili-luo/aicoding-cookbook; only portable methods are rewritten, and text without a repository-wide declared license is not copied.<br>
 > It also adapts selected minimality and over-engineering review ideas from https://github.com/DietrichGebert/ponytail without importing its runtime, hooks, or persona mode.<br>
 > It is not a direct OpenCode runtime port. It uses Codex skills, project-local plugin files, and local scripts.
 
 中文文档: [README.md](README.md)
+
+### 0.3.44 (2026-09-10)
+- Fix `ae-reverse-engineering` being indexed by Cursor but hard to discover with Chinese terms such as `授权逆向`. Cursor reads `SKILL.md` frontmatter rather than the Codex-specific `agents/openai.yaml` display name, so the skill description now includes bilingual capability terms plus `/ae-reverse-engineering` and `$ae-reverse-engineering` explicit invocations.
+- Preserve the authorization gate, static-first workflow, and defensive scope. This does not add license bypass, credential theft, persistence, detection evasion, active exploitation, target scanning, or unauthorized interaction capabilities.
+- Validation commands: focused reverse-engineering tests, `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, `git diff --check`, and the current-user global installation smoke. Static checks prove frontmatter, mirror, and distributed-copy consistency; Cursor UI visibility still requires manual confirmation after reloading the window or opening a new chat.
+
+### 0.3.43 (2026-09-10)
+- Add a model-neutral adaptation contract: core AE workflows scale from task risk, acceptance criteria, active tool schemas, and observed capabilities instead of inferring tools, context, private reasoning, or `reasoning_effort` from GPT-5.6, GPT-6, or another model label. Provider catalog mismatches remain runtime metadata defects.
+- Strengthen init-generated `AGENTS.md` with fail-visible behavior, root-cause and structural-fix decisions, progressive instruction loading, ordered repository-defined validation commands, final diff review, and proof-tier boundaries. `minimal` stays concise; `ae-core/full` receive the complete rules, and no missing command is invented.
+- Extend skill contract checks to relative Markdown links under skill directories. Validation commands: focused model-adaptation and init tests, `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`. These prove local instruction, generator, mirror, and install-distribution contracts only, not equivalent behavior across every model, provider, or Codex host.
+
+### 0.3.42 (2026-09-08)
+- Add a Java/Spring Controller-test structural boundary: test source must not subclass a production Controller carrying Spring MVC mappings or OpenAPI endpoint annotations, because static scanners such as Apifox can publish inherited mappings as duplicate endpoints. Use an existing MVC slice, a directly instantiated Controller with mocks, or a Mockito spy/proxy for protected request-context seams; `@Hidden` and Javadoc ignore markers are not enforcement.
+- Add a JVM web-controller section to `ae-tdd`, with source/mirror regression assertions for the rule and mirror consistency.
+- Validation commands: `node --test --test-name-pattern "backend language guidance and fullstack contract alignment|mattpocock-adapted guidance" tests/skills-docs.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`. These prove only local skill, mirror, and installation-distribution contracts, not target-project runtime or third-party IDE-plugin behavior.
 
 ### 0.3.41 (2026-09-03)
 - Add an `ae-frontend-design` component and data-access contract: frontend work first inspects and reuses target-project tokens, semantic components, API clients, services, and query/mutation patterns; dialogs/drawers, lists/tables, forms, and request states have consistent ownership boundaries.
@@ -21,14 +37,6 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 - Add an `ae-backend` persistence contract and route `ae-ideate`, `ae-brainstorm`, `ae-prd`, `ae-design`, `ae-sql`, `ae-review`, and `ae-lfg` through one decision baseline for new tables or persistence changes: confirm auto-increment BIGINT versus UUID and external exposure before implementation; never invent a default.
 - Add conditional Java/MyBatis-Plus guidance for `@Version`, `@TableLogic`, audit filling, soft-delete index/restore semantics, optimistic-lock conflicts, stable enum codes, and exception mapping; non-MyBatis-Plus stacks and non-applicable table types do not inherit the template.
 - Validation commands: `node --test --test-name-pattern "backend language guidance and fullstack contract alignment" tests/skills-docs.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. They prove local skill, mirror, and install-distribution contracts only, not target-project database, authenticated API, browser, or deployment behavior.
-
-### 0.3.39 (2026-09-01)
-- Align `ae-init` with the open AGENTS.md format through `minimal` / `ae-core` / `full` profiles, real project commands, Codex override explanation, and bounded nested-candidate previews. New files use managed regions; `--force` no longer replaces whole files, and legacy marker-only files are preserved as conflicts.
-- Validation: all 4 focused init tests, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check` passed. `npm test` ran 167 tests: 165 passed and 2 returned `EPERM` before product assertions because this Windows host cannot create test symlinks. These checks prove the local CLI, templates, skill mirror, and distribution contracts; they do not imply that every AGENTS.md client implements Codex override semantics.
-
-### 0.3.38 (2026-08-31)
-- Audited `greensock/gsap-skills` and added portable motion performance, lifecycle, and reduced-motion review cues to `ae-frontend-design`; no GSAP runtime is bundled.
-- Validation: `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, `git diff --check`.
 
 ## When To Use It
 
@@ -530,9 +538,6 @@ The **2026-08-11 full skill-portfolio audit (all 40 skills read one by one)** is
 Working rule: any change that touches distributable plugin content (`plugins/ai-agent-engine-codex/`) must bump both SemVer versions and add the release entry to both the README and the CHANGELOG (each README keeps only the latest five entries; older entries move to the changelog); repository-side refactors (root `scripts/`, `tests/`, docs) do not bump the version but must ship with `npm run check` and `npm test` fully green.
 
 ## Version Updates
-
-### 0.3.37 (2026-08-30)
-- Fixed global updater exit-code propagation and temporary clone cleanup on failure, added local Git fixture regression coverage, and aligned ae-update wording with global installation behavior.
 
 Full history lives in [CHANGELOG.en.md](CHANGELOG.en.md); this section keeps only the latest five versions, and entries beyond that window move to the changelog on each release.
 
