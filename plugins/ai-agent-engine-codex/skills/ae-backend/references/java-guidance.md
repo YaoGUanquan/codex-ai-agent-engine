@@ -19,6 +19,7 @@ Check these before claiming a backend change is done:
 4. Nullability: keep null contracts explicit across DTO boundaries; do not let `Optional` fields or unchecked nulls cross serialization silently.
 5. Concurrency: no shared mutable state in singleton beans; no blocking calls inside reactive or async paths that starve the worker pool.
 6. Time and money: use `java.time` types with explicit zones and `BigDecimal` for money; never `double` for amounts or implicit server-default timezones.
+7. Controller tests: do not make test classes subclasses of a production Controller carrying Spring MVC mapping or OpenAPI endpoint annotations. Static source scanners can treat inherited mappings as duplicate endpoints. Use the repository's MVC slice, a direct Controller instance with mocks, or a Mockito spy/proxy for protected request-context seams. `@Hidden` or Javadoc ignore markers are not an enforcement boundary.
 
 ## Transactions And Persistence Boundaries
 

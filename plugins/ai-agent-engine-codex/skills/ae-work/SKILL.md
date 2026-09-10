@@ -9,6 +9,7 @@ Execute a plan or tightly scoped task with safety checks, validation, and delive
 
 ## Operating Principles
 
+- Apply the [model-adaptation contract](../ae-help/references/model-adaptation-contract.md): use active tool schemas and repository evidence, preserve compact resumable state for long work, and stop at the requested acceptance boundary.
 - Read before editing and let the repository's existing structure decide the shape of the change.
 - Prefer the smallest behaviorally complete patch over broad cleanup.
 - Keep a clear chain from request, to changed files, to validation evidence.

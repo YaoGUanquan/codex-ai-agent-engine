@@ -21,6 +21,10 @@
 - 不覆盖用户已有工作，不回退无关变更。
 {{aeWorkflowRules}}
 
+## 工程执行
+
+{{engineeringRules}}
+
 ## 中文与编码规则
 
 - 文档、JSON、YAML、SQL、脚本和生成文本统一使用 UTF-8，优先 UTF-8 无 BOM。
@@ -29,5 +33,4 @@
 
 ## 验证
 
-- 交付前运行最小且相关的验证命令。
-- 如果无法验证，说明原因和剩余风险。
+{{validationRules}}

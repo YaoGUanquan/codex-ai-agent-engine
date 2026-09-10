@@ -7,6 +7,8 @@ description: Use when the user asks for ae-review, /ae-review, $ae-review, "use 
 
 Perform AE-style layered review of code or documents.
 
+Apply the [model-adaptation contract](../ae-help/references/model-adaptation-contract.md). Select review depth and lenses from the changed boundary and evidence risk, not from the reviewing model's name or assumed capability; stop after the scoped verdict is supported.
+
 ## Scope First
 
 Read `references/scope-detection.md`. Determine exactly one scope and one domain before reviewing.

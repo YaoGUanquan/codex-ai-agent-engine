@@ -240,6 +240,13 @@ test('help can find markitdown and static server capabilities', () => {
   assert.match(serverOutput, /static-server/)
 })
 
+test('help can find model compatibility guidance', () => {
+  const output = runNodeScriptRaw('node scripts/ae-tools.mjs help model compatibility')
+  assert.match(output, /ae-help/)
+  assert.match(output, /model compatibility/)
+  assert.doesNotMatch(output, /没有匹配的 AE 能力/)
+})
+
 test('tiered capability help groups every skill and preserves filtered output', () => {
   const sourcePath = resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-help/references/capability-catalog.json')
   const mirrorPath = resolve(repoRoot, '.ae-source/skills/ae-help/references/capability-catalog.json')
@@ -1050,10 +1057,19 @@ test('init profiles bound the scaffold and generated AGENTS.md includes real pac
   const minimalRoot = mkdtempSync(join(tmpdir(), 'ae-init-minimal-'))
   const coreRoot = mkdtempSync(join(tmpdir(), 'ae-init-core-'))
   const fullRoot = mkdtempSync(join(tmpdir(), 'ae-init-full-'))
+  const guidanceRoot = mkdtempSync(join(tmpdir(), 'ae-init-guidance-'))
   try {
     writeFileSync(join(minimalRoot, 'package.json'), JSON.stringify({
       name: 'profile-fixture',
-      scripts: { test: 'node --test', lint: 'eslint .', unusual: 'first\n## injected `heading`' },
+      scripts: {
+        build: 'node build.mjs',
+        smoke: 'node smoke.mjs',
+        lint: 'eslint .',
+        test: 'node --test',
+        'test:unit': 'node --test unit',
+        typecheck: 'tsc --noEmit',
+        unusual: 'first\n## injected `heading`',
+      },
     }), 'utf8')
     const minimal = runNodeScriptJson(['scripts/ae-tools.mjs', 'init', '--profile', 'minimal', '--project-root', minimalRoot], minimalRoot)
     assert.equal(minimal.profile, 'minimal')
@@ -1067,6 +1083,20 @@ test('init profiles bound the scaffold and generated AGENTS.md includes real pac
     assert.doesNotMatch(agents, /^## injected/m)
     assert.match(agents, /Do not pre-create AE workflow directories/)
     assert.doesNotMatch(agents, /Record AE workflow artifacts under `docs\/ae`/)
+    assert.match(agents, /Keep failures visible/)
+    assert.doesNotMatch(agents, /Treat duplicated business logic/)
+    const validationCommands = [
+      '`npm run test`',
+      '`npm run test:unit`',
+      '`npm run lint`',
+      '`npm run typecheck`',
+      '`npm run build`',
+      '`npm run smoke`',
+    ]
+    for (let index = 1; index < validationCommands.length; index++) {
+      assert.ok(agents.lastIndexOf(validationCommands[index - 1]) < agents.lastIndexOf(validationCommands[index]))
+    }
+    assert.equal(agents.match(/`npm run unusual`/g)?.length, 1, 'non-validation scripts stay only in Project Commands')
     assert.ok(minimal.notes.includes('The minimal profile creates only AGENTS.md and does not pre-create AE workflow directories.'))
     assert.equal((agents.match(/<!-- ae-codex:init managed -->/g) || []).length, 1)
     assert.equal((agents.match(/<!-- \/ae-codex:init managed -->/g) || []).length, 1)
@@ -1084,6 +1114,13 @@ test('init profiles bound the scaffold and generated AGENTS.md includes real pac
     assert.equal((bilingualAgents.match(/<!-- ae-codex:init managed -->/g) || []).length, 1)
     assert.equal((bilingualAgents.match(/<!-- \/ae-codex:init managed -->/g) || []).length, 1)
 
+    writeFileSync(join(guidanceRoot, 'package.json'), JSON.stringify({ name: 'guidance-fixture', scripts: { test: 'node --test' } }), 'utf8')
+    runNodeScriptJson(['scripts/ae-tools.mjs', 'init', '--project-root', guidanceRoot], guidanceRoot)
+    const guidedAgents = readFileSync(join(guidanceRoot, 'AGENTS.md'), 'utf8')
+    assert.match(guidedAgents, /Treat duplicated business logic/)
+    assert.match(guidedAgents, /Before delivery, review the task-scoped diff/)
+    assert.match(guidedAgents, /lower-level check does not prove runtime, browser, or deployment behavior/)
+
     const full = runNodeScriptJson(['scripts/ae-tools.mjs', 'init', '--dry-run', '--profile', 'full', '--project-root', fullRoot], fullRoot)
     assert.ok(full.created_directories.includes('docs/01-history'))
     assert.ok(full.created_directories.includes('docs/99-archive'))
@@ -1095,6 +1132,7 @@ test('init profiles bound the scaffold and generated AGENTS.md includes real pac
     rmSync(minimalRoot, { recursive: true, force: true })
     rmSync(coreRoot, { recursive: true, force: true })
     rmSync(fullRoot, { recursive: true, force: true })
+    rmSync(guidanceRoot, { recursive: true, force: true })
   }
 })
 

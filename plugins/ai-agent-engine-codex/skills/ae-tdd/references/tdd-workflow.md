@@ -24,3 +24,7 @@ Frontend test harnesses:
 - Use the repository's existing runner, such as Vitest, Jest, or the framework CLI, with its component-testing library before considering any new harness.
 - Write the failing test against user-visible behavior: rendered output, roles and labels, and interaction results, not component internals.
 - A DOM-simulation pass in jsdom or similar does not prove real-browser behavior such as layout, focus order, or navigation. State that boundary when the change depends on it, and route real-browser acceptance to `ae-test-browser`.
+
+JVM web-controller test harnesses:
+
+- For Spring MVC or OpenAPI Controllers, do not subclass a production Controller in test source merely to override a protected authentication or request-context helper. Source scanners can inherit and publish its endpoint mappings. Prefer the repository's MVC slice, a direct Controller instance with mocks, or a Mockito spy/proxy; annotations such as `@Hidden` and Javadoc ignore markers do not prevent this class of scanner defect.

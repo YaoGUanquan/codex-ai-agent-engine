@@ -11,6 +11,7 @@ This skill is intentionally conservative. It turns "initialize this project" int
 
 ## Operating Principles
 
+- Apply the [model-adaptation contract](../ae-help/references/model-adaptation-contract.md): generated guidance must remain capability-driven, concise, and free of model-name or reasoning-effort assumptions.
 - State assumptions before acting when the target directory, language, or overwrite intent is unclear.
 - Prefer the smallest initialization that makes AE workflows usable; do not add speculative project process docs.
 - Touch only AE init-managed files and directories unless the user explicitly asks for broader cleanup.

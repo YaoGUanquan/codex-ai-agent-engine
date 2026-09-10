@@ -1,6 +1,6 @@
 ---
 name: ae-reverse-engineering
-description: Use when the user asks for authorized reverse engineering, defensive binary or mobile analysis, malware forensics, compatibility research, or a local CTF/training artifact. Establish authorization, artifact provenance, and evidence before analysis.
+description: Performs authorized reverse engineering and defensive artifact analysis. Use for /ae-reverse-engineering, $ae-reverse-engineering, 授权逆向、二进制或移动端分析、恶意软件取证、兼容性研究，或本地 CTF/训练工件；分析前必须确认授权、来源与证据边界。
 ---
 
 # AE Authorized Reverse Engineering
