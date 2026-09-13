@@ -5,6 +5,8 @@ description: Use when the user asks for AE init, /ae-init, initialize a project 
 
 # AE Init
 
+Before running helper commands, resolve `aeEntry` using the [runtime entry contract](../ae-help/references/runtime-entry.md).
+
 Initialize the target project with AGENTS.md guidance and a selectable AE documentation scaffold. The command keeps the client-neutral AGENTS.md convention separate from Codex-specific instruction precedence.
 
 This skill is intentionally conservative. It turns "initialize this project" into a verified project setup, not a broad documentation rewrite.
@@ -25,16 +27,16 @@ This skill is intentionally conservative. It turns "initialize this project" int
 4. Run a preview first. `ae-core` is the default profile; use `minimal` for only `AGENTS.md` or `full` for the legacy complete directory set:
 
 ```powershell
-node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" init --dry-run
-node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" init --dry-run --profile minimal
-node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" init --dry-run --profile full
+node "$aeEntry" init --dry-run
+node "$aeEntry" init --dry-run --profile minimal
+node "$aeEntry" init --dry-run --profile full
 ```
 
 5. Choose language from the user request or existing project language:
 
 ```powershell
-node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" init --lang zh-CN
-node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" init --lang bilingual
+node "$aeEntry" init --lang zh-CN
+node "$aeEntry" init --lang bilingual
 ```
 
 Use the default only when no project signal or user preference points to Chinese or bilingual templates.
@@ -42,7 +44,7 @@ Use the default only when no project signal or user preference points to Chinese
 6. When the repository has subprojects or existing instruction files, preview the bounded candidates and Codex-specific precedence before writing:
 
 ```powershell
-node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" init --dry-run --nested preview --explain-instructions
+node "$aeEntry" init --dry-run --nested preview --explain-instructions
 ```
 
 Nested candidates are advisory. Do not create nested `AGENTS.md` files without project-owner judgment.
@@ -50,7 +52,7 @@ Nested candidates are advisory. Do not create nested `AGENTS.md` files without p
 7. Run the real init only after the target project, profile, and language are clear:
 
 ```powershell
-node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" init
+node "$aeEntry" init
 ```
 
 8. Verify the command JSON and the selected profile boundary. `minimal` creates only `AGENTS.md`; `ae-core` also creates canonical `docs/ae`, `docs/00-process`, and `docs/08-ai-memory` paths; `full` adds the legacy numbered documentation directories. Init does not create the legacy `docs/ai-memory` compatibility pointer.
@@ -65,7 +67,7 @@ node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" init
 - The generated `AGENTS.md` includes repository-derived package scripts when available.
 - Generated files contain one bounded AE-managed region where regeneration safety depends on it.
 - Instruction explanation labels Codex precedence as client-specific and nested discovery as bounded advice.
-- A minimal validation command ran, such as `node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" help` or a dry-run/init JSON inspection.
+- A minimal validation command ran, such as `node "$aeEntry" help` or a dry-run/init JSON inspection.
 
 ## Rules
 

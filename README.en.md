@@ -13,6 +13,16 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 
 中文文档: [README.md](README.md)
 
+### 0.3.46 (2026-09-13)
+- Unify runtime entry selection with one read-only resolver: prefer the project wrapper and use the current-user global dispatcher only when the path is absent. Invalid paths, dangling links and command failures remain visible; never silently change versions or retry commands.
+- Active skills and the capability catalog use the `node "$aeEntry"` template with a shared bootstrap reference. Help emits shell-safe PowerShell/POSIX assignments for its actual invocation path; command arguments and authorization boundaries stay unchanged.
+- Validation commands: `node --test tests/runtime-entry.test.mjs tests/instruction-audit.test.mjs tests/skills-docs.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. Focused tests cover both shells, consumer installation and an isolated global dispatcher, not a real global update, host discovery or GPT-6 Astra routing/token gains. See the delivery review for full-suite results.
+
+### 0.3.45 (2026-09-13)
+- First audit optimization batch: distinguish canonical plugin source, maintenance mirror, consumer installation, and generated outputs; remove obsolete README release entries while retaining full history in CHANGELOG.
+- Narrow the three frontend skill triggers, reuse existing routing decisions, and load visual references conditionally. Add six positive/negative routing cases while retaining safety and browser evidence gates. Runtime entry unification remains pending.
+- Validation commands: `node --test tests/instruction-audit.test.mjs tests/skills-docs.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These prove static instruction, mirror, and isolated installation-distribution contracts only, not measured GPT-6 Astra routing accuracy, token savings, or real-model compatibility.
+
 ### 0.3.44 (2026-09-10)
 - Fix `ae-reverse-engineering` being indexed by Cursor but hard to discover with Chinese terms such as `授权逆向`. Cursor reads `SKILL.md` frontmatter rather than the Codex-specific `agents/openai.yaml` display name, so the skill description now includes bilingual capability terms plus `/ae-reverse-engineering` and `$ae-reverse-engineering` explicit invocations.
 - Preserve the authorization gate, static-first workflow, and defensive scope. This does not add license bypass, credential theft, persistence, detection evasion, active exploitation, target scanning, or unauthorized interaction capabilities.
@@ -27,16 +37,6 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 - Add a Java/Spring Controller-test structural boundary: test source must not subclass a production Controller carrying Spring MVC mappings or OpenAPI endpoint annotations, because static scanners such as Apifox can publish inherited mappings as duplicate endpoints. Use an existing MVC slice, a directly instantiated Controller with mocks, or a Mockito spy/proxy for protected request-context seams; `@Hidden` and Javadoc ignore markers are not enforcement.
 - Add a JVM web-controller section to `ae-tdd`, with source/mirror regression assertions for the rule and mirror consistency.
 - Validation commands: `node --test --test-name-pattern "backend language guidance and fullstack contract alignment|mattpocock-adapted guidance" tests/skills-docs.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`. These prove only local skill, mirror, and installation-distribution contracts, not target-project runtime or third-party IDE-plugin behavior.
-
-### 0.3.41 (2026-09-03)
-- Add an `ae-frontend-design` component and data-access contract: frontend work first inspects and reuses target-project tokens, semantic components, API clients, services, and query/mutation patterns; dialogs/drawers, lists/tables, forms, and request states have consistent ownership boundaries.
-- Add extraction review before a third equivalent implementation, and prohibit rendering components from duplicating raw HTTP, auth, envelopes, transforms, paging, cancellation, retry, or error normalization when a local owner exists. No cross-framework component package or default HTTP dependency is added.
-- Validation commands: `node --test --test-name-pattern "frontend component and data-access governance" tests/skills-docs.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These prove local skill, mirror, and install-distribution contracts only, not target-project API, browser, or deployment behavior.
-
-### 0.3.40 (2026-09-03)
-- Add an `ae-backend` persistence contract and route `ae-ideate`, `ae-brainstorm`, `ae-prd`, `ae-design`, `ae-sql`, `ae-review`, and `ae-lfg` through one decision baseline for new tables or persistence changes: confirm auto-increment BIGINT versus UUID and external exposure before implementation; never invent a default.
-- Add conditional Java/MyBatis-Plus guidance for `@Version`, `@TableLogic`, audit filling, soft-delete index/restore semantics, optimistic-lock conflicts, stable enum codes, and exception mapping; non-MyBatis-Plus stacks and non-applicable table types do not inherit the template.
-- Validation commands: `node --test --test-name-pattern "backend language guidance and fullstack contract alignment" tests/skills-docs.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. They prove local skill, mirror, and install-distribution contracts only, not target-project database, authenticated API, browser, or deployment behavior.
 
 ## When To Use It
 
@@ -465,7 +465,8 @@ Copy-Item scripts\ae-tools.mjs D:\codes\your-project\scripts\ae-tools.mjs
 ## Repository Layout
 
 ```text
-.agents/                         # Project-local self-install for this repo
+.ae-source/skills/               # Maintenance mirror, not an independent discovery root
+.agents/                         # Consumer installation layout, not this repository's skill source
 plugins/ai-agent-engine-codex/   # Codex plugin package
 scripts/ae-tools.mjs             # Root helper wrapper
 scripts/install-project.mjs      # Project-level installer
@@ -531,7 +532,7 @@ The **2026-08-11 fullstack skill symmetry release (0.3.21)** landed backend lang
 The **2026-08-11 full skill-portfolio audit (all 40 skills read one by one)** is complete: the five-layer structure (workflow spine 10 / implementation lanes 9 / verification lanes 2 / standalone tools 8 / meta-governance 11) is healthy overall, routing boundaries, evidence-tier wording, and handoff routing re-checked consistent, with no regression in prior governance items; full evidence, findings, and batch trade-offs live in `docs/ae/solutions/2026-08-11-skill-portfolio-optimization-audit.md`. New items below (12 first, 13-14 as one version-bump batch, 15 on-demand):
 
 12. **Extend cross-skill reference link checking** (repository-side, no version bump, do first): `scripts/check-skill-contract.mjs` currently validates only links that target `SKILL.md`; references consumed across skill directories by 8+ skills (`local-runtime-smoke-gate.md`, `api-contract-checklist.md`, `validation-evidence-profile.md`, and others) have no link guard, so a rename or move breaks them silently. Extend validation to every relative `.md` link in SKILL.md and references (optionally backtick-quoted paths), and add a name-set assertion across the README capability list, the capability catalog, and the skill directories, with TDD-covered positive and negative cases.
-13. **Unify the runtime entry story** (distributable content, version bump): 12 skill files plus the capability catalog hardcode the global dispatcher path `$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs` in 46 command examples, while the README-recommended project-level install only provides the `scripts/ae-tools.mjs` entry, and skill docs mention that fallback in just 2 places. Add one shared "runtime entry resolution" note (project wrapper first, global dispatcher fallback, identical CLI contract), unify all command examples, and lock the form with a contract test.
+13. ~~**Unify the runtime entry story**~~ (implemented, 0.3.46): active examples use `node "$aeEntry"` with the [shared resolution contract](plugins/ai-agent-engine-codex/skills/ae-help/references/runtime-entry.md) and read-only resolver. Prefer the project wrapper; use the current-user global dispatcher only when absent, never after a broken installation or command failure. Focused tests cover both shells, consumer and isolated global installs. Installed-version capabilities still require inspecting actual help; identical behavior across all versions is not claimed.
 14. **Complete the ae-help artifact contract table** (distributable content, same batch as 13): the path table in `artifact-contract.md` is missing rows for seven artifact families in active use - `docs/ae/designs`, `docs/ae/tasks`, `docs/ae/evidence`, `docs/ae/integrity`, `docs/ae/experience`, `docs/ae/work-reports`, and `docs/ae/constitution.md`; complete the table, document the boundary between `solutions` (external audits / solution research) and `experience` (retrospectives of completed work), and fold the rows into the directory-declaration regression assertions established in 0.3.25.
 15. **On-demand items** (policy set, no active to-do until a trigger fires): move the seven lane-level sections of `ae-review` into references (trigger: another lane is added, or one real defect traces to a skipped lane); add a refactoring-methodology reference to `ae-refactor` - behavior baseline, characterization tests, seam analysis, incremental strategy (trigger: one attributable methodology miss in a real refactor task; a distributable change that bumps the version at that time); add one minimal "scenario card" replay checklist per workflow-spine skill under `docs/ae/templates/` (trigger: before a 0.4.x major version, or one delivery defect caused by skipped skill guidance).
 
@@ -540,15 +541,6 @@ Working rule: any change that touches distributable plugin content (`plugins/ai-
 ## Version Updates
 
 Full history lives in [CHANGELOG.en.md](CHANGELOG.en.md); this section keeps only the latest five versions, and entries beyond that window move to the changelog on each release.
-
-#### 0.3.28 (2026-08-13)
-- Global refresh: synchronize the root package and plugin manifest versions, then refresh the current user's AE plugin and dispatcher through the personal marketplace global-install flow; project-level docs, source, and user project data are unchanged.
-- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`. These checks prove version, skill mirror, install contracts, and global preview/install flow consistency; they do not represent runtime acceptance in target projects.
-
-#### 0.3.26 (2026-08-11)
-- Add minimal legacy counterpart sections to the frontend guidance: `svelte-guidance.md` gains Svelte 4 (stores and `$:` reactive statements) counterparts, `angular-guidance.md` gains NgModule-era counterparts, and `vue-guidance.md` gains Options API counterparts; each sits beside the modern baseline with the stack-conditional first line and the "match existing repository style" fallback unchanged. A new regression test locks the sections and mirror equality (red first, then green).
-- Add the maintainer map `docs/ae/references/frontend-quality-contract-map.md` recording the five correspondence groups, two coverage gaps, and existing test locks across `web-ui-quality.md`, the `ae-review` Frontend Components / Styles lens, and `browser-acceptance.md`; the map is descriptive, is not a fourth contract surface, and adds no checker. This batch closes roadmap items 7 and 10 early at the user's direction (the recorded triggers had not fired; see the 2026-08-11 decision-log entry).
-- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`. These checks prove skill docs, mirror, and distribution contracts only, not runtime acceptance of legacy stacks (Svelte 4 / NgModule / Options API) in any target project.
 
 ## Publishing To GitHub
 

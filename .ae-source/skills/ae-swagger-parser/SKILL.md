@@ -5,6 +5,8 @@ description: Use when the user asks to inspect, summarize, filter, or explain Sw
 
 # AE Swagger Parser
 
+Before running helper commands, resolve `aeEntry` using the [runtime entry contract](../ae-help/references/runtime-entry.md).
+
 Summarize or inspect Swagger/OpenAPI specs without calling business APIs.
 
 ## Workflow
@@ -13,7 +15,7 @@ Summarize or inspect Swagger/OpenAPI specs without calling business APIs.
 2. For local files, run:
 
 ```powershell
-node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" swagger <source> method:POST keyword:login mode:detail
+node "$aeEntry" swagger <source> method:POST keyword:login mode:detail
 ```
 
 3. For remote URLs, use Codex network/browsing approval rules. Do not fetch remote specs with shell unless authorized.

@@ -4,6 +4,16 @@ This file is the complete release history of AI Agent Engine for Codex (since 0.
 
 中文版本: [CHANGELOG.md](CHANGELOG.md)
 
+### 0.3.46 (2026-09-13)
+- Unify runtime entry selection with one read-only resolver: prefer the project wrapper and use the current-user global dispatcher only when the path is absent. Invalid paths, dangling links and command failures remain visible; never silently change versions or retry commands.
+- Active skills and the capability catalog use the `node "$aeEntry"` template with a shared bootstrap reference. Help emits shell-safe PowerShell/POSIX assignments for its actual invocation path; command arguments and authorization boundaries stay unchanged.
+- Validation commands: `node --test tests/runtime-entry.test.mjs tests/instruction-audit.test.mjs tests/skills-docs.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. Focused tests cover both shells, consumer installation and an isolated global dispatcher, not a real global update, host discovery or GPT-6 Astra routing/token gains. See the delivery review for full-suite results.
+
+### 0.3.45 (2026-09-13)
+- First audit optimization batch: distinguish canonical plugin source, maintenance mirror, consumer installation, and generated outputs; remove obsolete README release entries while retaining full history in CHANGELOG.
+- Narrow the three frontend skill triggers, reuse existing routing decisions, and load visual references conditionally. Add six positive/negative routing cases while retaining safety and browser evidence gates. Runtime entry unification remains pending.
+- Validation commands: `node --test tests/instruction-audit.test.mjs tests/skills-docs.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These prove static instruction, mirror, and isolated installation-distribution contracts only, not measured GPT-6 Astra routing accuracy, token savings, or real-model compatibility.
+
 ### 0.3.44 (2026-09-10)
 - Fix Cursor discovery for `ae-reverse-engineering`: the skill was indexed, but its English-only `SKILL.md` frontmatter made Chinese searches such as `授权逆向` ineffective. Add bilingual capability terms and explicit `/ae-reverse-engineering` and `$ae-reverse-engineering` invocation tokens.
 - Keep the existing authorization, static-first, and defensive safety boundaries unchanged, and add regression assertions for Cursor-consumed frontmatter plus source/mirror consistency.

@@ -5,6 +5,8 @@ description: Use when the user asks to audit an external agent, skill, Claude Co
 
 # AE Skill Audit
 
+Before running helper commands, resolve `aeEntry` using the [runtime entry contract](../ae-help/references/runtime-entry.md).
+
 Audit external agent and skill repositories, then translate useful patterns into Codex-native AE improvement options.
 
 ## Operating Principles
@@ -18,7 +20,7 @@ Audit external agent and skill repositories, then translate useful patterns into
 
 1. Identify the external source, license, supported harnesses, and primary capability model.
 2. Verify source freshness before analysis when network is available:
-   - for a tracked source in `docs/ae/references/external-skill-watchlist.json`, run `node scripts/ae-tools.mjs skill-audit --watch` and treat `current`, `stale`, or `unavailable` as evidence, not as permission to rewrite skills;
+   - for a tracked source in `docs/ae/references/external-skill-watchlist.json`, run `node "$aeEntry" skill-audit --watch` and treat `current`, `stale`, or `unavailable` as evidence, not as permission to rewrite skills;
    - otherwise run `git ls-remote <repo-url> HEAD` or `git ls-remote <repo-url> <branch-or-tag>`;
    - record `sourceUrl`, `observedCommit`, `refSource`, and `inspectedFiles`;
    - if the user supplied a short hash such as `6d4d686`, resolve it to a full commit in a local clone or mark it `unreachable-short-hash`;

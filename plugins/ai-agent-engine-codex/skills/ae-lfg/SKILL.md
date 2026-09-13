@@ -5,6 +5,8 @@ description: Use when the user explicitly asks for ae-lfg, /ae-lfg, $ae-lfg, "us
 
 # AE LFG
 
+Before running helper commands, resolve `aeEntry` using the [runtime entry contract](../ae-help/references/runtime-entry.md).
+
 Run the full AE engineering workflow in Codex. This is an orchestrator skill: it coordinates ae-brainstorm, ae-plan, ae-work, ae-review, validation, and final gate evidence.
 
 Apply the [model-adaptation contract](../ae-help/references/model-adaptation-contract.md). Route and scale the workflow from task class, risk, acceptance criteria, and observed tools rather than model labels or assumed reasoning settings. Reuse already-valid artifacts and gates instead of repeating ceremony.
@@ -13,7 +15,7 @@ Apply the [model-adaptation contract](../ae-help/references/model-adaptation-con
 
 1. Read `references/task-routing.md` and classify the request.
 2. If the request is not S4 multi-step implementation, route to the narrower skill and explain the route briefly.
-3. From the target project root, run `node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" recovery` to inspect existing `docs/ae` artifacts when the repository has project files. This is a project-level wrapper command installed under `scripts/`; do not look for a separate recovery script inside the `ae-lfg` skill directory.
+3. From the target project root, run `node "$aeEntry" recovery` to inspect existing `docs/ae` artifacts when the repository has project files. The selected entry is the project wrapper or current-user dispatcher; do not look for a separate recovery script inside the `ae-lfg` skill directory.
 4. Do not modify project files before the workflow reaches ae-work and Git/worktree checks are complete.
 
 ## Pipeline

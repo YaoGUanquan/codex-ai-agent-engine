@@ -5,6 +5,8 @@ description: Use when the user asks Codex to delegate analysis, patch proposals,
 
 # AE Claude Code
 
+Before running helper commands, resolve `aeEntry` using the [runtime entry contract](../ae-help/references/runtime-entry.md).
+
 Use local Claude Code CLI as a controlled external worker while Codex remains the orchestrator, reviewer, and delivery agent.
 
 ## Official Codex Plugin Relationship
@@ -27,13 +29,13 @@ OpenAI's `codex@openai-codex` Claude Code plugin works in the opposite direction
 ## Workflow
 
 1. Clarify the delegation goal: analysis, review, patch proposal, or explicitly approved isolated write.
-2. Run `node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" claude-delegate --check` from the project root.
+2. Run `node "$aeEntry" claude-delegate --check` from the project root.
 3. If the command reports `status: skip`, tell the user Claude Code CLI is unavailable and continue with Codex-only work.
 4. Build a narrow prompt that includes task scope, forbidden files, validation expectations, and output format.
 5. For advice or patch proposals, run:
 
 ```powershell
-node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" claude-delegate --prompt-file <repo-relative-file>
+node "$aeEntry" claude-delegate --prompt-file <repo-relative-file>
 ```
 
 6. The default wrapper uses JSON output, no session persistence, `plan` permission, `Read,Grep,Glob` only, and disabled slash commands. It is a read-only analysis lane, not an interactive Claude session.
@@ -59,7 +61,7 @@ If any gate fails, fall back to read-only or patch-proposal mode.
 For simple project-root delegation, prefer:
 
 ```powershell
-node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" claude-delegate --prompt-file <repo-relative-file>
+node "$aeEntry" claude-delegate --prompt-file <repo-relative-file>
 ```
 
 Cross-directory audits may require direct Claude CLI arguments so the external repository is readable while the current worktree remains controlled. Keep the scope read-only and explicit, for example:
@@ -86,8 +88,8 @@ Do not ask Claude to fabricate test results, credentials, environment state, or 
 
 ## Validation
 
-- Availability: `node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" claude-delegate --check`.
-- Help discovery: `node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" help claude`.
+- Availability: `node "$aeEntry" claude-delegate --check`.
+- Help discovery: `node "$aeEntry" help claude`.
 - Official-plugin availability in Claude Code: `claude plugins list --json`, then confirm `codex@openai-codex` is enabled with `scope: "user"` when the user needs it across projects.
 - After any applied output: run the narrowest meaningful project validation and inspect `git diff`.
 

@@ -4,6 +4,16 @@
 
 English: [CHANGELOG.en.md](CHANGELOG.en.md)
 
+### 0.3.46（2026-09-13）
+- 统一运行时命令入口：共享只读解析器优先选择项目 wrapper，仅路径缺失时选择当前用户全局 dispatcher；无效路径、损坏链接和执行失败明确报错，不静默切换安装版本或自动重试命令。
+- 活跃技能与 capability catalog 使用 `node "$aeEntry"` 模板，沿共享 reference 完成初始化；help 输出实际启动入口的 PowerShell/POSIX 安全变量赋值，保留原命令参数与权限边界。
+- 验证命令：`node --test tests/runtime-entry.test.mjs tests/instruction-audit.test.mjs tests/skills-docs.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。专项测试包含双 shell、consumer 安装与隔离全局 dispatcher；不证明真实全局安装更新、宿主发现或 GPT-6 Astra 路由/token 收益，完整测试结果以交付审查记录为准。
+
+### 0.3.45（2026-09-13）
+- 审计优化第一批：明确插件源、维护镜像、consumer 安装和生成物边界；清理 README 旧版条目，完整历史保留在 CHANGELOG。
+- 收窄前端三个技能的触发元数据，复用已有路由决策，按需加载视觉参考；新增六组路由正反例，保留安全与浏览器证据门禁。运行时入口统一仍待处理。
+- 验证命令：`node --test tests/instruction-audit.test.mjs tests/skills-docs.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。仅证明静态指令、镜像和隔离安装分发合同；不证明 GPT-6 Astra 实测路由准确率、token 节省或真实模型兼容性。
+
 ### 0.3.44（2026-09-10）
 - 修复 Cursor 已索引 `ae-reverse-engineering`、但 `SKILL.md` 英文 frontmatter 导致中文“授权逆向”难以发现的问题；新增中英文能力词及 `/ae-reverse-engineering`、`$ae-reverse-engineering` 显式调用词。
 - 原有授权确认、静态优先和防御性安全边界保持不变；新增回归断言锁定 Cursor 实际读取的 frontmatter 与 source/mirror 一致性。

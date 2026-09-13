@@ -1,6 +1,6 @@
 ---
 name: ae-web-app
-description: Use when the user asks for AE web app, /ae-web-app, web frontend implementation, React or Next app work, admin UI, dashboard, routed Web app implementation, light full-stack flow, or deployment-readiness for a web product.
+description: Use for /ae-web-app or $ae-web-app, Web app behavior, API integration, auth, forms with state or persistence, route logic, and light full-stack implementation. Not the owner for visual-only styling or screenshot matching; use ae-frontend-design for those. Use ae-web-forge only when the frontend task needs lane selection.
 ---
 
 # AE Web App
@@ -24,6 +24,8 @@ Build or extend a web application using the existing repository stack and conven
 ## Implementation Lane
 
 Use this skill after `ae-web-forge` has selected the Web app lane, or when the user directly asks to implement Web app behavior.
+
+Keep one primary implementation owner. Reuse an existing routing decision while scope is unchanged; do not route back through `ae-web-forge` merely to repeat intake. Load another skill only for a concrete additional responsibility or validation boundary.
 
 This skill owns implementation details for:
 

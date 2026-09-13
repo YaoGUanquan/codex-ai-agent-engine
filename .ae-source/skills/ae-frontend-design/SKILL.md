@@ -1,6 +1,6 @@
 ---
 name: ae-frontend-design
-description: Use when the user asks for AE frontend design, /ae-frontend-design, UI implementation, design input interpretation, page or app prototype, dashboard, form flow, visual baseline preservation, or frontend UX build with validation.
+description: Use for /ae-frontend-design or $ae-frontend-design, focused visual-only UI implementation, screenshot or Figma matching, layout, typography, responsive styling, and visual refinement. Not the owner for API, auth, persistence, or route behavior; use ae-web-app for those. Use ae-web-forge only when the frontend task needs lane selection.
 ---
 
 # AE Frontend Design And UI Implementation
@@ -9,7 +9,7 @@ Design and implement frontend UI surfaces using the repository's existing stack,
 
 ## Workflow
 
-1. Read `references/web-ui-quality.md`, `references/ui-direction-contract.md`, and `references/component-data-access-contract.md`.
+1. Read `references/web-ui-quality.md`. Load `references/ui-direction-contract.md` when creating or changing visual direction, and `references/component-data-access-contract.md` when changing components, interaction shells, or data access. Do not reload an unchanged contract already available in the current context.
 2. Inspect the existing frontend stack, routing, design system, component library, assets, and local conventions.
 3. Identify the route, user workflow, design input, visual baseline, data dependencies, and adjacent screens the UI must support. Record the compact UI Direction Contract; label inferred or assumed choices instead of silently defaulting them.
 4. If there is a screenshot, Figma link, existing page, or written design spec, treat it as a constraint and preserve its measurable visual baseline unless the user asks for redesign.
