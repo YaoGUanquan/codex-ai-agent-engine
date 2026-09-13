@@ -57,6 +57,8 @@
 
 ## 维护规则
 
+- 指令路由、运行时入口与 Cursor 独立更新边界见 `22-instruction-routing-and-runtime-entry.md`；发布验证来源见 `docs/ae/experience/2026-09-13-instruction-runtime-delivery.md`。
+
 开始任务时先读本索引，再按主题读取相关文件。任务结束时判断是否产生新的稳定知识；没有则说明本次无需更新 AI 记忆库。
 
 ## 2026-06-19 Addendum

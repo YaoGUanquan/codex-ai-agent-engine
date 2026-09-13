@@ -247,6 +247,32 @@ flowchart LR
 | `docs/ae/experience/2026-08-22-codex-orchestration-and-mattpocock-watch.md` | records | 0.3.32–0.3.34 | Authority and proof boundary |
 | `docs/ae/issues/AEI-20260822-003.md` | tracks | later stale `--watch` results | Follow-up only |
 
+## Instruction Routing And Runtime Entry (0.3.45-0.3.46)
+
+```mermaid
+flowchart LR
+  auditSep["2026-09-05 instruction audit"] --> routingSep["frontend ownership and metadata"]
+  auditSep --> entryPlan["runtime entry plan"]
+  entryPlan --> resolverSep["ae-help resolver + shared contract"]
+  resolverSep --> examplesSep["skills + catalog + help"]
+  examplesSep --> testsSep["runtime-entry tests"]
+  routingSep --> testsRouting["instruction-audit tests"]
+  testsSep --> deliverySep["source-tiered delivery evidence"]
+  testsRouting --> deliverySep
+  deliverySep --> memorySep["memory 22 + registry"]
+  examplesSep --> cursorSep["Cursor copies; UI unverified"]
+```
+
+| From | Relation | To | Evidence Boundary |
+| --- | --- | --- | --- |
+| `docs/ae/solutions/2026-09-05-current-plugin-instruction-audit.md` | motivates | `docs/ae/plans/2026-09-13-001-runtime-entry-unification-plan.md` | F-004 |
+| `plugins/ai-agent-engine-codex/skills/ae-help/references/runtime-entry.md` | documents | `plugins/ai-agent-engine-codex/skills/ae-help/scripts/resolve-runtime-entry.mjs` | Selection only; no execution/retry |
+| `tests/runtime-entry.test.mjs` | validates | resolver, help, isolated installs | Local shell and installation proof |
+| `docs/ae/experience/2026-09-13-instruction-runtime-delivery.md` | records | user full-suite output and agent checks | User: 185 pass, 0 fail, 2 skipped; not a single 187-pass run |
+| `docs/08-ai-memory/22-instruction-routing-and-runtime-entry.md` | references | delivery, plan, tests | Declared knowledge, not inferred runtime state |
+
+This is a maintained artifact map. CLI shallow graph queries stay read-only and do not overwrite it.
+
 ## Motion guidance and AGENTS.md-aware init (0.3.38–0.3.39)
 
 ```mermaid
