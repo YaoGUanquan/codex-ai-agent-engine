@@ -62,6 +62,16 @@ node scripts/ae-tools.mjs help
 
 ## 版本更新记录
 
+### 0.3.46（2026-09-13）
+- 统一运行时命令入口：共享只读解析器优先选择项目 wrapper，仅路径缺失时选择当前用户全局 dispatcher；无效路径、损坏链接和执行失败明确报错，不静默切换安装版本或自动重试命令。
+- 活跃技能与 capability catalog 使用 `node "$aeEntry"` 模板，沿共享 reference 完成初始化；help 输出实际启动入口的 PowerShell/POSIX 安全变量赋值，保留原命令参数与权限边界。
+- 验证命令：`node --test tests/runtime-entry.test.mjs tests/instruction-audit.test.mjs tests/skills-docs.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。专项测试包含双 shell、consumer 安装与隔离全局 dispatcher；不证明真实全局安装更新、宿主发现或 GPT-6 Astra 路由/token 收益，完整测试结果以交付审查记录为准。
+
+### 0.3.45（2026-09-13）
+- 审计优化第一批：明确插件源、维护镜像、consumer 安装和生成物边界；清理 README 旧版条目，完整历史保留在 CHANGELOG。
+- 收窄前端三个技能的触发元数据，复用已有路由决策，按需加载视觉参考；新增六组路由正反例，保留安全与浏览器证据门禁。运行时入口统一仍待处理。
+- 验证命令：`node --test tests/instruction-audit.test.mjs tests/skills-docs.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。仅证明静态指令、镜像和隔离安装分发合同；不证明 GPT-6 Astra 实测路由准确率、token 节省或真实模型兼容性。
+
 ### 0.3.44（2026-09-10）
 - 修复 Cursor 中 `ae-reverse-engineering` 已被索引但按中文“授权逆向”难以发现的问题：Cursor 实际读取 `SKILL.md` frontmatter，而不是 Codex 的 `agents/openai.yaml` 显示名；技能描述现包含中英文能力说明、`/ae-reverse-engineering` 与 `$ae-reverse-engineering` 显式调用词。
 - 保留原有授权门、静态优先和防御性边界，不扩展许可证绕过、凭据窃取、持久化、检测规避、主动利用、目标扫描或未授权交互能力。
@@ -77,26 +87,7 @@ node scripts/ae-tools.mjs help
 - `ae-tdd` 新增 JVM Web Controller 测试段，并以 source/mirror 回归断言锁定该约束与镜像一致性。
 - 验证命令：`node --test --test-name-pattern "backend language guidance and fullstack contract alignment|mattpocock-adapted guidance" tests/skills-docs.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs` 与 `git diff --check`。这些检查仅证明本地 skill、镜像与安装分发合同，不证明目标项目运行时或第三方 IDE 插件行为。
 
-### 0.3.41（2026-09-03）
-- 新增 `ae-frontend-design` 组件与数据访问契约：前端实现必须先检查并复用目标项目已有的 token、语义组件、API client、service 与 query/mutation 模式；弹窗/抽屉、列表/表格、表单和请求状态具备统一边界。
-- 新增“第三次同类实现前进行抽取审查”规则，禁止在已有本地 owner 时由渲染组件重复处理原始 HTTP、认证、响应包、字段转换、分页、取消、重试或错误归一化；不引入跨框架组件库或默认 HTTP 依赖。
-- 验证命令：`node --test --test-name-pattern "frontend component and data-access governance" tests/skills-docs.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke` 与 `git diff --check`。这些检查只证明本地 skill、镜像与安装分发合同，不证明目标项目 API、浏览器或部署行为。
-
-### 0.3.40（2026-09-03）
-- 新增 `ae-backend` 持久化契约，并让 `ae-ideate`、`ae-brainstorm`、`ae-prd`、`ae-design`、`ae-sql`、`ae-review` 与 `ae-lfg` 在新表或持久化变更时共享同一决策基线：必须先确认自增 BIGINT 或 UUID 主键及其对外暴露边界；未确认时不得默认选择。
-- Java/MyBatis-Plus 指引新增条件式 `@Version`、`@TableLogic`、审计字段填充、软删除索引/恢复、乐观锁冲突、稳定枚举 code 与统一异常映射规则；不要求非 MyBatis-Plus 或不适用表类型套用该模板。
-- 验证命令：`node --test --test-name-pattern "backend language guidance and fullstack contract alignment" tests/skills-docs.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke` 与 `git diff --check`。这些检查只证明本地 skill、镜像与安装分发合同，不证明目标项目数据库、认证 API、浏览器或部署行为。
-
 完整历史见 [CHANGELOG.md](CHANGELOG.md)；本节仅保留最近 5 个版本，发布时超出窗口的条目迁移到 CHANGELOG。
-
-#### 0.3.28（2026-08-13）
-- 全局更新：同步根包与插件 manifest 版本，并通过个人 marketplace 的全局安装流程刷新当前用户的 AE 插件与 dispatcher；不改变项目级文档、源码或用户项目数据。
-- 验证：`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`。这些检查证明版本、技能镜像、安装契约和全局预览/安装流程一致，不代表目标项目运行时验收。
-
-#### 0.3.26（2026-08-11）
-- 前端指导补旧栈最小对照节：`svelte-guidance.md` 增 Svelte 4（stores 与 `$:` 反应语句）对照、`angular-guidance.md` 增 NgModule 时代对照、`vue-guidance.md` 增 Options API 对照，均与现代基线同文件并存，文件首行 stack-conditional 语句与"匹配仓库既有风格"兜底不变；新增回归用例锁定对照节与镜像一致（先红后绿）。
-- 新建维护者映射说明 `docs/ae/references/frontend-quality-contract-map.md`：登记 `web-ui-quality.md`、`ae-review` Frontend Components / Styles 镜头、`browser-acceptance.md` 之间 5 组对应关系、两处空档与既有测试锁；映射为描述性文档，不构成第 4 份契约面，不建校验脚本。本批为路线图第 7、10 条的提前收尾（用户决定，原触发条件未命中；见决策日志 2026-08-11 条目）。
-- 验证：`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs`。这些检查证明技能文档、镜像与分发合同一致，不代表任何目标项目对旧栈框架（Svelte 4 / NgModule / Options API）的运行时验收。
 
 ## 能力清单
 
@@ -495,7 +486,8 @@ Copy-Item scripts\ae-tools.mjs D:\codes\your-project\scripts\ae-tools.mjs
 ## 仓库结构
 
 ```text
-.agents/                         # 当前仓库自用的项目级安装示例
+.ae-source/skills/               # 插件技能维护镜像，不是独立发现入口
+.agents/                         # consumer 项目安装布局；本仓库不以此为技能源
 plugins/ai-agent-engine-codex/   # Codex 插件主体
 scripts/ae-tools.mjs             # 根辅助命令入口
 scripts/install-project.mjs      # 项目级安装脚本
@@ -561,7 +553,7 @@ node scripts/ae-tools.mjs ae-graph-build --root scripts
 2026-08-11 **全量技能盘点（40 个 skill 逐一审查）** 完成：五层结构（工作流主链 10 / 实现车道 9 / 验证车道 2 / 独立工具 8 / 元治理 11）整体健康，路由边界、证据分层词汇与交接路由复核一致，既有治理项无回退；完整证据、发现与批次对比见 `docs/ae/solutions/2026-08-11-skill-portfolio-optimization-audit.md`。新增事项如下（12 先行、13-14 同批升版本、15 按需触发）：
 
 12. **跨技能引用链接校验扩展**（仓库侧，不升版本，建议先行）：`scripts/check-skill-contract.mjs` 目前只校验指向 `SKILL.md` 的链接；`local-runtime-smoke-gate.md`、`api-contract-checklist.md`、`validation-evidence-profile.md` 等被 8+ 个技能跨目录引用的 references 无链接守护，重命名或移动即静默断链。扩展校验到 SKILL.md 与 references 中全部相对 `.md` 链接（可选覆盖反引号引用路径），并补 README 能力清单 ↔ capability-catalog ↔ 技能目录的名称集合级断言，TDD 覆盖正反例。
-13. **运行时入口口径统一**（插件内容，升版本）：12 个技能文件与 capability-catalog 共 46 处命令示例硬编码全局 dispatcher 路径 `$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs`，而 README 推荐的项目级安装只提供 `scripts/ae-tools.mjs` 入口，技能文档仅 2 处提到该回退。新增一条共享「运行时入口解析」说明（项目 wrapper 优先、全局 dispatcher 回退，两者 CLI 契约一致），统一全部命令示例并以 contract 测试锁定形式。
+13. ~~**运行时入口口径统一**~~（已实现，0.3.46）：活跃命令示例统一为 `node "$aeEntry"`，通过[共享解析合同](plugins/ai-agent-engine-codex/skills/ae-help/references/runtime-entry.md)及只读解析器选择入口。项目 wrapper 优先，只有缺失才使用当前用户全局 dispatcher；损坏安装和执行失败不触发第二入口。专项测试验证双 shell、consumer 与隔离全局安装；不同安装版本的能力差异仍须按实际 help 判断，不声称全版本 CLI 完全相同。
 14. **ae-help 工件契约表补全**（插件内容，与 13 同批）：`artifact-contract.md` 路径表缺 `docs/ae/designs`、`docs/ae/tasks`、`docs/ae/evidence`、`docs/ae/integrity`、`docs/ae/experience`、`docs/ae/work-reports`、`docs/ae/constitution.md` 七类实际在用产物的行；补全并写明 `solutions`（外部审计/方案研究）与 `experience`（自身工作复盘）的目录边界，纳入 0.3.25 已建立的目录声明回归断言。
 15. **按需触发项**（策略已定，命中前无主动待办）：`ae-review` 七段 lane 细则外移 references（触发：再新增 lane 或出现一次 lane 指引被跳过的实际缺陷）；`ae-refactor` 补重构方法论 reference——行为基线、特征化测试、接缝分析、增量策略（触发：真实重构任务出现一次可归因的方法论缺口，届时属插件内容变更须升版本）；工作流主链技能各 1 张「场景卡」最小回放清单落 `docs/ae/templates/`（触发：0.4.x 大版本前，或出现一次技能指引被跳过导致的交付缺陷）。
 

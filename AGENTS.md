@@ -9,15 +9,16 @@
 - Node.js package.json
 - package type: module
 - README.md
-- README.zh-CN.md
+- README.en.md
 - project-local Codex agents
 - plugin directory
 - scripts directory
 - docs directory
 - 重要路径：
 - README.md
-- README.zh-CN.md
-- .agents
+- README.en.md
+- plugins/ai-agent-engine-codex（可分发插件唯一源）
+- .ae-source/skills（维护镜像，不是独立技能入口）
 - plugins
 - scripts
 - docs
@@ -33,6 +34,10 @@
 - `npm run help` - node scripts/ae-tools.mjs help
 
 ## 项目规则
+
+- 本仓库的技能修改以 `plugins/ai-agent-engine-codex/skills` 为唯一源，随后同步 `.ae-source/skills`；不得分别维护两份行为。
+- `.agents/skills` 是 consumer 项目安装布局，不是本分发源仓库的技能源；不要把空的 `.agents` 骨架当成安装失败。
+- 当前能力盘点只扫描插件源；默认排除 `dist/`、`build/`、`coverage/`、`node_modules/` 和临时安装目录。生成物不得用于推断当前技能，不在审计任务中自动删除。
 
 - 修改行为前先阅读已有文档。
 - 变更范围保持在当前任务内。

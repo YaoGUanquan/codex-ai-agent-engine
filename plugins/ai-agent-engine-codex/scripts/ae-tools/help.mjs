@@ -32,6 +32,11 @@ export function printHelp(query) {
   lines.push('')
   lines.push(`来源参考: ${catalog.source.name} (${catalog.source.observedCommit.slice(0, 7)})`)
   lines.push(`运行边界: ${catalog.codexPort.runtimeBoundary}`)
+  lines.push(`入口解析: ${catalog.codexPort.runtimeEntry}`)
+  // Describe the entry that produced this help, without switching installed versions.
+  const entry = resolve(process.argv[1])
+  lines.push('', 'PowerShell:', '```powershell', `$aeEntry = '${entry.replaceAll("'", "''")}'`, '```')
+  lines.push('', 'POSIX shell:', '```sh', `aeEntry='${entry.replaceAll("'", "'\\''")}'`, '```')
   if (skills.length > 0) {
     lines.push('')
     lines.push('## 入口')

@@ -1,6 +1,6 @@
 ---
 name: ae-web-forge
-description: Use when the user asks for AE web forge, /ae-web-forge, unified frontend/web routing, design-to-implementation web work, frontend workflow orchestration, browser-accepted UI delivery, or deciding between AE frontend and web app skills.
+description: Use for /ae-web-forge or $ae-web-forge, broad or mixed frontend requests that need lane selection, or deciding between visual UI work and Web app behavior. Route to one primary implementation owner. Do not repeat intake for an already-scoped visual-only task, API or route change, or browser-only verification.
 ---
 
 # AE Web Forge
@@ -13,11 +13,13 @@ Run a target existence check before routing:
 
 1. Extract explicit paths, routes, page names, screenshot paths, Figma/design links, or output hints from the user request.
 2. Inspect matching repository files when the target appears to exist.
-3. If an existing target is found but the user did not say whether to modify, replace, or create a new variant, ask one focused question before editing.
+3. For an existing target, preserve and modify it by default when the requested change is clear. Ask one focused question only when replacement versus modification materially changes behavior, data integrity, or acceptance criteria.
 
 ## Four-Question Routing
 
 Answer the questions in order and record the result in the work summary:
+
+Reuse answers already established by the request or repository. Keep one primary implementation owner; do not load all implementation skills for intake or send an unchanged task back through routing. An explicit skill request stays with that skill unless a concrete missing responsibility requires a handoff. See [routing examples](references/routing-examples.md) for positive and negative boundaries.
 
 | Question | Meaning | Codex-native route |
 | --- | --- | --- |

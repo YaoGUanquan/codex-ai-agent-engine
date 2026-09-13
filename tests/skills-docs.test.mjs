@@ -883,8 +883,8 @@ test('upstream brainstorm and web workflow modernization is reflected in source 
 
   const metadata = skillMetadata['ae-frontend-design']
   assert.equal(metadata.display.zh, 'AE 前端设计')
-  assert.match(metadata.en, /Design and implement frontend UI/)
-  assert.match(metadata.zh, /前端设计与界面实现/)
+  assert.match(metadata.en, /focused visual-only UI/)
+  assert.match(metadata.zh, /聚焦视觉界面实现/)
   assert.doesNotMatch(metadata.zh, /首版|初版/)
 
   for (const catalogPath of [

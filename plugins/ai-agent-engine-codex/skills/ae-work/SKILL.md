@@ -5,6 +5,8 @@ description: Use when the user asks for ae-work, /ae-work, $ae-work, "use ae-wor
 
 # AE Work
 
+Before running helper commands, resolve `aeEntry` using the [runtime entry contract](../ae-help/references/runtime-entry.md).
+
 Execute a plan or tightly scoped task with safety checks, validation, and delivery evidence.
 
 ## Operating Principles
@@ -39,13 +41,13 @@ Then decide with the user when needed:
 For a plan file, run:
 
 ```powershell
-node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" task-analyze --mode plan --plan <path>
+node "$aeEntry" task-analyze --mode plan --plan <path>
 ```
 
 For a plain task, run:
 
 ```powershell
-node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" task-analyze --mode scan --task "<description>"
+node "$aeEntry" task-analyze --mode scan --task "<description>"
 ```
 
 Use the result to choose inline, serial, or parallel execution. Spawn sub-agents only when the user explicitly allowed parallel agent work and file ownership is disjoint. Use `references/work-subagent-template.md` for delegated prompts.
@@ -126,7 +128,7 @@ Read `references/shipping-workflow.md` before final response.
 When ready, run a final gate, for example:
 
 ```powershell
-node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" gate --workflow work --checkpoint final --plan <path> --validation "npm test" --review-status not_run --worktree-decision rejected --write-proof
+node "$aeEntry" gate --workflow work --checkpoint final --plan <path> --validation "npm test" --review-status not_run --worktree-decision rejected --write-proof
 ```
 
 Final response sections: completed, verified, unverified/unable to verify, Git operations, gate result, residual risks.

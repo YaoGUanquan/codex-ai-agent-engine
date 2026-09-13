@@ -5,11 +5,13 @@ description: Use when the user asks what AI Agent Engine or AE capabilities are 
 
 # AE Help
 
+Before running helper commands, resolve `aeEntry` using the [runtime entry contract](references/runtime-entry.md).
+
 List and explain the Codex-native AI Agent Engine entrypoints in the local display language.
 
 ## Workflow
 
-1. Run `node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" help` from the repository that contains this plugin. If the user gave a query, append it as plain arguments.
+1. Run `node "$aeEntry" help` from the target project root. If the user gave a query, append it as plain arguments. Use the current shell's `aeEntry` assignment printed by help; command examples remain templates, not executable strings to evaluate.
 2. Return the script output directly unless the user asked for a tailored recommendation.
 3. If the script is unavailable, read `references/capability-catalog.json` and summarize the matching capability in Chinese when the local metadata is Chinese.
 

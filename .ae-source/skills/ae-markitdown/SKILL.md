@@ -5,6 +5,8 @@ description: Use when the user asks to convert, read, extract, or normalize a lo
 
 # AE Markitdown
 
+Before running helper commands, resolve `aeEntry` using the [runtime entry contract](../ae-help/references/runtime-entry.md).
+
 Convert local workspace files into Markdown for review, planning, archival, or LLM input.
 
 ## Workflow
@@ -13,7 +15,7 @@ Convert local workspace files into Markdown for review, planning, archival, or L
 2. For supported lightweight formats, run:
 
 ```powershell
-node "$HOME/.agents/ai-agent-engine-codex/bin/ae.mjs" markitdown <file> [--format html|csv|tsv|json|yaml|xml|text|markdown]
+node "$aeEntry" markitdown <file> [--format html|csv|tsv|json|yaml|xml|text|markdown]
 ```
 
 3. Use the returned `markdown` field as the normalized content. Preserve the `file`, `format`, and `fileSize` metadata when citing conversion evidence.
