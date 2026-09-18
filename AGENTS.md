@@ -78,3 +78,15 @@
 - 两处版本必须完全一致；更新脚本复制完整插件目录，因此目标项目更新后以插件 manifest 的版本作为已安装版本。
 - 只调整文档而不改变可分发插件内容时，不单独升级插件版本；版本升级必须由回归测试和安装烟测验证。
 - 每次递增可分发版本时，必须在 `README.md`、`README.en.md` 与 `CHANGELOG.md`、`CHANGELOG.en.md` 追加对应的 `### <version>（YYYY-MM-DD）` 或 `### <version> (YYYY-MM-DD)` 条目，至少说明修改摘要、验证命令及其证明边界；README 版本节仅保留最近 5 条，超出窗口的条目迁移到对应 CHANGELOG（CHANGELOG 为完整历史），README 须保留 CHANGELOG 链接；运行 `node scripts/check-release-notes.mjs` 验证版本、日期、摘要与 README/CHANGELOG 映射。
+
+<!-- ae-git-request:start -->
+## Git 请求执行入口
+
+- 本节为可移植项目契约，不包含个人绝对路径。已配置外部文档的用户，从全局规则确认 `<AE_DOCS_HOME>` 后读取其 `GIT-WORKFLOW.md`；未配置时按本节和仓库既有 Git 规则执行，外部 docs 写入须先确认根目录与登记关系。
+- “提交 Git 并推送”同时授权本次任务的本地提交与普通推送，无须逐步重复确认；不包含合并、强推、发布或删除。讨论/引用此示例不构成执行请求。
+- “我自己用 IDEA 推送”仅做获准本地提交，不尝试 CLI push。CLI 权限/网络失败时保留提交并提供实际分支、SHA、remote/目标及 IDEA 操作；不虚报推送成功。
+- 项目已有分支流及提交备注优先，默认 `type(scope): subject`。只处理任务所属改动，并审查全部待推送提交。目标有歧义、出现冲突或非快进时停止受阻步骤，不自动 pull/rebase/stash/强推。
+- 合并时相关外部 docs 单独归并至目标分支并验证；Git、push、MR、docs、CI 分别报告。IDEA Merge/Push 不会同步外部 docs；外部规则路径不表示本项目历史文档迁移已经完成。
+- 新增/修改数据库结构、索引、初始化数据、修复或迁移时，按阿里手册适用建表、索引、SQL 规约审查，沿用项目迁移机制；已配置公共规则时同时读取 `<AE_DOCS_HOME>/SQL-VERSIONING.md`。版本必要 SQL/迁移代码必须留仓库纳入 Git；只有临时查询、草稿、执行证据放外部 docs，不自动修改历史迁移。
+- 提交/合并同时检查 SQL 版本冲突、依赖、不可变已执行脚本和升级验证；SQL Git 交付与测试/生产执行分别报告。提交、推送、合并不授权数据库写入，数据库执行方式按当前项目约定。
+<!-- ae-git-request:end -->
