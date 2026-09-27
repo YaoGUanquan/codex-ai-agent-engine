@@ -30,6 +30,8 @@ Check these before claiming a backend change is done:
 
 ## MyBatis-Plus Entity Governance (Conditional)
 
+For MyBatis-Plus queries, pagination/count or batch writes, first apply [the version-aware data-access guidance](mybatis-plus-data-access.md) with the shared [data-access contract](data-access-contract.md). Entity annotations alone do not govern query cardinality, count rewriting, actual batch execution or chunk commits.
+
 Apply this section only when the repository already uses MyBatis-Plus and its local conventions support these columns. First classify the table: mutable business aggregates can require this pattern; association tables, append-only audit/event/outbox tables, and reference/dictionary tables may intentionally omit some or all fields.
 
 1. For every new durable table, confirm the primary-key strategy from repository evidence or ask: `本次新增持久化表的主键策略选择自增 BIGINT，还是 UUID？是否需要对外暴露该 ID？` Do not choose a default.

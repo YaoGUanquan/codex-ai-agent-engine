@@ -7,6 +7,8 @@ description: Use when the user asks for AE SQL, /ae-sql, database query, schema 
 
 Generate, review, or execute SQL with explicit safety boundaries.
 
+For query/list/count/export or multi-row writes, apply the [data-access and scale contract](../ae-backend/references/data-access-contract.md). Compare set-based and bounded batch execution, distinguish flush from commit, and preserve atomicity instead of generating unjustified per-row submissions. For large joins/aggregates, compare indexes and maintained read models; verify data and count separately. This adds no database execution permission.
+
 ## Workflow
 
 1. Identify database type, target environment, tables, and whether the request is read-only or write.

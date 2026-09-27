@@ -7,6 +7,8 @@ description: Use when the user asks for AE API testing, /ae-test-api, API/interf
 
 Verify a changed backend API surface with the target repository's existing contracts, test harness, and HTTP client.
 
+For list/count, bulk mutation/import or async-job endpoints, use the [data-access and scale contract](../ae-backend/references/data-access-contract.md) to select page identity/total, scope, chunk failure/retry, progress and persisted-completion assertions. Accepted/enqueued is not saved/completed. API success does not establish query plans, batching or throughput; record those as separate proof and never initiate load tests or database writes without authorization.
+
 ## Workflow
 
 1. Read `references/api-verification-record.md` before selecting tests or writing evidence.

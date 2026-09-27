@@ -99,6 +99,14 @@ try {
   if (installedPluginManifest.version !== sourcePluginManifest.version) {
     throw new Error(`Installed plugin version mismatch: expected ${sourcePluginManifest.version}, got ${installedPluginManifest.version}`)
   }
+  for (const name of ['data-access-contract', 'read-model-design', 'async-bulk-write', 'mybatis-plus-data-access']) {
+    const skillPath = `ae-backend/references/${name}.md`
+    const source = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills', skillPath), 'utf8')
+    for (const layout of ['plugins/ai-agent-engine-codex/skills', '.agents/skills']) {
+      const installed = readFileSync(resolve(targetRoot, layout, skillPath), 'utf8')
+      if (installed !== source) throw new Error(`Installed data-access reference mismatch: ${layout}/${skillPath}`)
+    }
+  }
   if (!existsSync(existingTemplatePath)) {
     throw new Error('Install removed a pre-existing user docs/ae/templates file')
   }

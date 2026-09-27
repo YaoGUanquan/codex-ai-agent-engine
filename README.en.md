@@ -13,6 +13,11 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 
 中文文档: [README.md](README.md)
 
+### 0.3.47 (2026-09-24)
+- Add a conditional data-access contract across 14 requirement, design, implementation, refactoring, diagnosis and acceptance skills: query budgets, logical pagination units, separate count validation, and execution-batch versus transaction-commit boundaries.
+- Compare auxiliary lookup/extension tables and precomputed read models with consistency, backfill and rebuild costs. Durable async bulk saving covers acceptance, backpressure, chunks, idempotency, checkpoints, recovery and completion. MyBatis-Plus choices depend on actual versions; no blanket count-disable, table or queue requirement.
+- Validation commands: `node --test tests/data-access-contract.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These verify instruction structure, reviewer selection, mirrors and isolated installation distribution, not model adherence, business-database performance, real async recovery or a current-user installation update.
+
 ### 0.3.46 (2026-09-13)
 - Unify runtime entry selection with one read-only resolver: prefer the project wrapper and use the current-user global dispatcher only when the path is absent. Invalid paths, dangling links and command failures remain visible; never silently change versions or retry commands.
 - Active skills and the capability catalog use the `node "$aeEntry"` template with a shared bootstrap reference. Help emits shell-safe PowerShell/POSIX assignments for its actual invocation path; command arguments and authorization boundaries stay unchanged.
@@ -32,11 +37,6 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 - Add a model-neutral adaptation contract: core AE workflows scale from task risk, acceptance criteria, active tool schemas, and observed capabilities instead of inferring tools, context, private reasoning, or `reasoning_effort` from GPT-5.6, GPT-6, or another model label. Provider catalog mismatches remain runtime metadata defects.
 - Strengthen init-generated `AGENTS.md` with fail-visible behavior, root-cause and structural-fix decisions, progressive instruction loading, ordered repository-defined validation commands, final diff review, and proof-tier boundaries. `minimal` stays concise; `ae-core/full` receive the complete rules, and no missing command is invented.
 - Extend skill contract checks to relative Markdown links under skill directories. Validation commands: focused model-adaptation and init tests, `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`. These prove local instruction, generator, mirror, and install-distribution contracts only, not equivalent behavior across every model, provider, or Codex host.
-
-### 0.3.42 (2026-09-08)
-- Add a Java/Spring Controller-test structural boundary: test source must not subclass a production Controller carrying Spring MVC mappings or OpenAPI endpoint annotations, because static scanners such as Apifox can publish inherited mappings as duplicate endpoints. Use an existing MVC slice, a directly instantiated Controller with mocks, or a Mockito spy/proxy for protected request-context seams; `@Hidden` and Javadoc ignore markers are not enforcement.
-- Add a JVM web-controller section to `ae-tdd`, with source/mirror regression assertions for the rule and mirror consistency.
-- Validation commands: `node --test --test-name-pattern "backend language guidance and fullstack contract alignment|mattpocock-adapted guidance" tests/skills-docs.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`. These prove only local skill, mirror, and installation-distribution contracts, not target-project runtime or third-party IDE-plugin behavior.
 
 ## When To Use It
 

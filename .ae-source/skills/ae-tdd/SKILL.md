@@ -7,6 +7,8 @@ description: Use when the user asks for AE TDD, /ae-tdd, red-green-refactor, tes
 
 Use red-green-refactor when the behavior is precise enough to test before implementation.
 
+For database-backed lists/counts or bulk/async persistence, select regression cases from the [data-access and scale contract](../ae-backend/references/data-access-contract.md). Use independent expected IDs/totals, bounded query/commit observations and persisted restart outcomes as applicable. A mocked pagination flag, successful enqueue or batch method invocation cannot substitute for target-engine SQL, transaction or crash-recovery evidence.
+
 ## Workflow
 
 1. Read `references/tdd-workflow.md`.

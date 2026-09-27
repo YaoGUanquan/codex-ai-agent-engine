@@ -11,6 +11,8 @@ Run the full AE engineering workflow in Codex. This is an orchestrator skill: it
 
 Apply the [model-adaptation contract](../ae-help/references/model-adaptation-contract.md). Route and scale the workflow from task class, risk, acceptance criteria, and observed tools rather than model labels or assumed reasoning settings. Reuse already-valid artifacts and gates instead of repeating ceremony.
 
+For database-backed lists/queries or bulk/async persistence, carry the [data-access and scale contract](../ae-backend/references/data-access-contract.md) through requirements, design/plan, work, review and validation. Reuse one decision record for scale, totals, read-model ownership, atomicity and completion; do not let a direct implementation route bypass it. Static plugin tests are not target-database load or recovery evidence.
+
 ## First Steps
 
 1. Read `references/task-routing.md` and classify the request.

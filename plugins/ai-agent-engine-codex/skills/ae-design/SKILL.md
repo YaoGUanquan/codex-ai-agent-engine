@@ -45,6 +45,8 @@ For dimensions that are not triggered, record explicit omitted dimensions in the
 
 When the database dimension is triggered, read `../ae-backend/references/persistence-contract.md`. Each affected `T-XXX` must record lifecycle, primary-key decision and external exposure, audit ownership, deletion/retention semantics, concurrency policy, enum representation, constraints/indexes, migration ordering, rollback, and the error outcome for version conflicts. A project-specific convention may answer a decision; otherwise leave it open and ask the user instead of selecting a default.
 
+For database-backed list/query/count or write paths, apply the [data-access and scale contract](../ae-backend/references/data-access-contract.md) even if the schema is unchanged. Record the applicable Data Access Budget in the design. Large/hot queries require comparison of direct/indexed access and auxiliary/read-model options; large or async writes require batch, transaction, durable completion and recovery decisions. Include architecture, database, non-functional, observability and test dimensions where these decisions cross their boundaries; do not require every dimension for bounded single-row CRUD.
+
 ## Contract Requirements
 
 Use `references/design-contract-template.md` when writing `design.md`.
