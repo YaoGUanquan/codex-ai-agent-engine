@@ -2,32 +2,47 @@
 import { clonePlain, isPlainObject } from './utils.mjs'
 
 export function parseSimpleYaml(text) {
+  if (Buffer.byteLength(text, 'utf8') > 1024 * 1024) throw new Error('YAML exceeds the 1 MiB parser budget')
   const root = {}
   const stack = [{ indent: -1, value: root }]
+  const indents = new WeakMap()
   const lines = text.replace(/\r\n/g, '\n').split('\n')
 
   for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
     const rawLine = lines[lineIndex]
+    if (/^\s*\t/.test(rawLine)) throw new Error(`YAML tabs are not supported at line ${lineIndex + 1}`)
     const withoutComment = stripYamlComment(rawLine)
     if (!withoutComment.trim()) continue
     const indent = withoutComment.match(/^ */)?.[0].length ?? 0
     const trimmed = withoutComment.trim()
+    if (trimmed === '---' && Object.keys(root).length === 0) continue
+    if (stack.length > 64) throw new Error('YAML nesting exceeds 64 levels')
     while (stack.length > 1 && indent <= stack[stack.length - 1].indent) stack.pop()
     const parent = stack[stack.length - 1].value
+    if (!indents.has(parent)) indents.set(parent, indent)
+    if (indents.get(parent) !== indent) throw new Error(`Invalid YAML indentation at line ${lineIndex + 1}`)
 
     if (trimmed.startsWith('- ')) {
       if (!Array.isArray(parent)) throw new Error(`Unsupported YAML sequence placement: ${trimmed}`)
-      const item = parseYamlSequenceItem(trimmed.slice(2).trim(), lines, lineIndex)
+      const value = trimmed.slice(2).trim()
+      const item = parseYamlSequenceItem(value, lines, lineIndex)
       parent.push(item)
-      if (isPlainObject(item)) stack.push({ indent, value: item })
+      if (isPlainObject(item)) {
+        stack.push({ indent, value: item })
+        const sep = mappingSeparator(value)
+        if (sep > 0 && !value.slice(sep + 1).trim()) {
+          stack.push({ indent: indent + 2, value: item[parseKey(value.slice(0, sep).trim())] })
+        }
+      }
       continue
     }
 
-    const sep = trimmed.indexOf(':')
+    const sep = mappingSeparator(trimmed)
     if (sep < 0) throw new Error(`Unsupported YAML line: ${trimmed}`)
-    const key = trimmed.slice(0, sep).trim()
+    const key = parseKey(trimmed.slice(0, sep).trim())
     const rest = trimmed.slice(sep + 1).trim()
     if (!isPlainObject(parent)) throw new Error(`Unsupported YAML mapping placement: ${trimmed}`)
+    if (Object.hasOwn(parent, key)) throw new Error(`Duplicate YAML key: ${key}`)
 
     if (rest) {
       parent[key] = parseYamlScalar(rest)
@@ -44,9 +59,9 @@ export function parseSimpleYaml(text) {
 }
 
 function parseYamlSequenceItem(value, lines, lineIndex) {
-  const sep = value.indexOf(':')
+  const sep = mappingSeparator(value)
   if (sep > 0) {
-    const key = value.slice(0, sep).trim()
+    const key = parseKey(value.slice(0, sep).trim())
     const rest = value.slice(sep + 1).trim()
     return {
       [key]: rest ? parseYamlScalar(rest) : nextYamlContainer(lines, lineIndex) || {},
@@ -84,20 +99,57 @@ function parseYamlScalar(value) {
   if (value === 'false') return false
   if (value === 'null') return null
   if (/^-?\d+(\.\d+)?$/.test(value)) return Number(value)
-  if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-    return value.slice(1, -1)
+  if (value.startsWith('"')) {
+    try { return JSON.parse(value) } catch { throw new Error('Invalid or unsupported YAML double-quoted scalar') }
+  }
+  if (value.startsWith("'")) {
+    if (!/^'(?:[^']|'')*'$/.test(value)) throw new Error('Invalid YAML single-quoted scalar')
+    return value.slice(1, -1).replaceAll("''", "'")
   }
   if (value.startsWith('[') && value.endsWith(']')) {
     const inner = value.slice(1, -1).trim()
     if (!inner) return []
-    return inner.split(',').map((item) => parseYamlScalar(item.trim()))
+    const items = []
+    let start = 0
+    let quote = null
+    for (let i = 0; i <= inner.length; i++) {
+      const char = inner[i]
+      if (quote) {
+        if (char === quote && inner[i - 1] !== '\\') quote = null
+      } else if (char === "'" || char === '"') quote = char
+      else if (char === ',' || i === inner.length) { items.push(parseYamlScalar(inner.slice(start, i).trim())); start = i + 1 }
+      else if ('[]{}'.includes(char)) throw new Error('Nested YAML flow collections are not supported; use block mappings/sequences')
+    }
+    if (quote) throw new Error('Unterminated YAML flow scalar')
+    return items
   }
+  if (value === '{}') return {}
+  if (/^[\[\]{}|>&*!%@`]/.test(value) || /:\s/.test(value)) throw new Error(`Unsupported or malformed YAML scalar: ${value}`)
   return value
 }
 
-function resolveRefs(value, root, seen = new Set()) {
+function parseKey(value) {
+  const key = /^['"]/.test(value) ? parseYamlScalar(value) : value
+  if (typeof key !== 'string' || !key || ['__proto__', 'prototype', 'constructor', '<<'].includes(key)) throw new Error(`Unsupported YAML key: ${value}`)
+  return key
+}
+
+function mappingSeparator(value) {
+  let quote = null
+  for (let i = 0; i < value.length; i++) {
+    const char = value[i]
+    if (quote) {
+      if (char === quote && value[i - 1] !== '\\') quote = null
+    } else if (char === "'" || char === '"') quote = char
+    else if (char === ':' && (i + 1 === value.length || /\s/.test(value[i + 1]))) return i
+  }
+  return -1
+}
+
+function resolveRefs(value, root, seen = new Set(), budget = { remaining: 20000 }, depth = 0) {
+  if (--budget.remaining < 0 || depth > 64) throw new Error('YAML reference expansion exceeds node/depth budget')
   if (Array.isArray(value)) {
-    for (let i = 0; i < value.length; i++) value[i] = resolveRefs(value[i], root, seen)
+    for (let i = 0; i < value.length; i++) value[i] = resolveRefs(value[i], root, seen, budget, depth + 1)
     return value
   }
   if (!isPlainObject(value)) return value
@@ -106,12 +158,12 @@ function resolveRefs(value, root, seen = new Set()) {
     const target = resolveJsonPointer(root, value.$ref)
     if (target) {
       seen.add(value.$ref)
-      const resolved = resolveRefs(clonePlain(target), root, seen)
+      const resolved = resolveRefs(clonePlain(target), root, seen, budget, depth + 1)
       seen.delete(value.$ref)
       return { ...resolved, ...Object.fromEntries(Object.entries(value).filter(([key]) => key !== '$ref')) }
     }
   }
-  for (const [key, child] of Object.entries(value)) value[key] = resolveRefs(child, root, seen)
+  for (const [key, child] of Object.entries(value)) value[key] = resolveRefs(child, root, seen, budget, depth + 1)
   return value
 }
 

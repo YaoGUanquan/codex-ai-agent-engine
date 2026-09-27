@@ -1,66 +1,34 @@
+<!-- ae-memory-router:v1 -->
 <!-- ae-codex:init managed -->
 # AI 记忆索引
 
-## 目的
-
-- 这里是当前项目的标准长期 AI 记忆库。
-- 只沉淀稳定、可复用、跨会话仍有价值的知识。
-- 不记录一次性调试日志、临时命令输出或未确认猜测。
+本文件只做路由，最多 4096 UTF-8 字节、80 行。禁止追加日期流水、完成清单、SQL 或经验正文。
 
 ## 文件导航
 
-- `00-registry.json`：经人工维护的机器可读元数据与证据关系；Markdown 记忆仍是唯一权威来源。
 - `01-project-context.md`：项目定位、技术栈、路径和本地约束。
 - `02-architecture-boundaries.md`：模块边界、职责边界和集成点。
 - `03-key-workflows.md`：长期复用的关键流程。
 - `04-known-pitfalls.md`：历史坑点、易混淆边界和编码问题。
 - `05-decision-log.md`：长期有效的决策。
 - `06-agent-maintenance-rules.md`：AI 读取和更新记忆的规则。
-- `07-computer-use-video-skills.md`：Computer Use、图像提示和视频编辑技能的稳定边界。
-- `08-phase-two-tooling.md`：Phase 2 图谱、merge、浏览器/DevTools 路由决策。
-- `09-multi-agent-auto-config.md`：`multi_agent.enabled: auto` 的默认策略、升级路径和安全边界。
-- `10-minimality-review.md`：Ponytail-inspired minimality gate and complexity review adaptation boundaries.
-- `11-ocr-review-guidance.md`：OCR-inspired diff review discipline, rule profiles, deterministic engineering audit, and prompt pattern boundaries.
-- `12-codex-skill-slash-discoverability.md`：Codex skill-backed discoverability decision, wording boundaries, Cursor copy surface, and validation workflow.
-- `13-review-inventory-and-advisory-impact.md`：审查文件清单、顾问式影响分析和证据边界。
-- `14-document-encoding-evidence.md`：2026-08-17 文档严格 UTF-8 解码证据、PowerShell 显示边界和新增文本规则。
-- `15-interface-safety-and-reliability.md`：项目安装、本地预览、证据账本与结构化转换的稳定安全和可靠性边界。
-- `16-mattpocock-skills-watch.md`：`mattpocock/skills` 的钉提交、已采用映射、拒绝运行时和 `--watch` 复检边界。
-- `17-global-update-hardening.md`：全局更新事务、版本同步、Codex personal plugin 与 Cursor skill 副本验证边界。
-- `18-motion-guidance-adaptation.md`：外部动画技能的 runtime-neutral 适配、GSAP 依赖拒绝和浏览器证据边界。
-- `19-agents-md-aware-init.md`：AGENTS.md-aware init profiles、Codex 专属优先级、有界发现与受管区块安全规则。
-- `20-persistence-contract-governance.md`：新表主键、生命周期、MyBatis-Plus 条件字段、枚举和异常治理边界。
-- `21-frontend-component-data-access-governance.md`：前端组件复用层级、弹窗/列表/表单状态、API 请求分层和第三次抽取复审规则。
-- GSAP 动效指导适配记录在 `docs/ae/experience/2026-08-31-gsap-motion-guidance-adaptation.md`，对应 PRD、计划和审计产物保持可追溯。
-- AGENTS.md-aware init 0.3.39 记录在 `docs/ae/experience/2026-09-01-agents-md-aware-init.md`，当前用户全局安装操作为 `62805a3a-f18d-4de9-a4b9-22ba2353c50c`。
-- 持久化契约治理 0.3.40 记录在 `docs/ae/experience/2026-09-03-persistence-contract-governance.md` 与 `20-persistence-contract-governance.md`。
-- 前端组件与数据访问治理 0.3.41 记录在 `docs/ae/experience/2026-09-03-frontend-component-data-access-governance.md` 与 `21-frontend-component-data-access-governance.md`。
-- 0.3.32–0.3.34 编排/报告/issue/审计/跟踪批次记录在 `docs/ae/experience/2026-08-22-codex-orchestration-and-mattpocock-watch.md` 与图谱 `docs/ae/graphs/maintainer-artifact-graph.md`。
-- Frontend motion governance is recorded in `03-key-workflows.md`, `05-decision-log.md`, and `docs/ae/experience/2026-07-28-frontend-motion-governance.md`.
-- Authenticated API smoke fillable request-config handoff is recorded in `03-key-workflows.md`, `04-known-pitfalls.md`, `05-decision-log.md`, and `docs/ae/experience/2026-08-10-api-smoke-fillable-request-config.md`.
-- Per-user global AE migration, project-data locality, and personal-plugin discovery are recorded in `03-key-workflows.md`, `04-known-pitfalls.md`, `05-decision-log.md`, and `docs/ae/experience/2026-08-10-global-project-install-migration.md`.
-- Cursor user-level skill copies (0.3.30; 0.3.29 links superseded) are recorded in `01-project-context.md`, `02-architecture-boundaries.md`, `03-key-workflows.md`, `04-known-pitfalls.md`, `05-decision-log.md`, `12-codex-skill-slash-discoverability.md`, and `docs/ae/experience/2026-08-13-cursor-user-skill-discovery.md`.
-- Structural debt refactor (ae-tools split, layered check, domain tests, import-cycle guard) is recorded in `02-architecture-boundaries.md`, `03-key-workflows.md`, `04-known-pitfalls.md`, `05-decision-log.md`, `docs/ae/references/ae-tools-module-layout.md`, and `docs/ae/experience/2026-08-11-structural-debt-refactor.md`.
-- Frontend skill optimization (0.3.18–0.3.19, four frameworks + cross-skill lenses) is recorded in `03-key-workflows.md`, `05-decision-log.md`, and `docs/ae/experience/2026-08-11-frontend-skill-optimization.md` (commit `a51ef3c`).
-- Fullstack skill optimization (backend language guides, FE/BE contract checklist, debug/sql safety) is recorded in `02-architecture-boundaries.md`, `03-key-workflows.md`, `05-decision-log.md`, `docs/ae/experience/2026-08-11-fullstack-skill-optimization.md`, and plan `docs/ae/plans/2026-08-11-002-fullstack-skill-optimization-plan.md`.
-- Knowledge-base governance batch one (0.3.22: canonical `docs/ae/prds`, init stops creating `docs/ai-memory`, review-package fingerprint, evidence retention, external-samples registration) is recorded in `03-key-workflows.md`, `05-decision-log.md`, `docs/ae/experience/2026-08-11-knowledge-base-governance.md`, and plan `docs/ae/plans/2026-08-11-003-knowledge-base-governance-plan.md`.
-- Knowledge-base governance batch two (0.3.23: `tidy` command, gate flag accumulation, skill refinements, memory size budgets) is recorded in `03-key-workflows.md`, `05-decision-log.md`, `06-agent-maintenance-rules.md`, `docs/ae/experience/2026-08-11-governance-batch-two.md`, and plan `docs/ae/plans/2026-08-11-004-governance-batch-two-plan.md`.
-- Knowledge-base governance batch three (0.3.24: tidy archive merge, post-update auto-maintenance, memoryBudget report) is recorded in `03-key-workflows.md`, `05-decision-log.md`, `docs/ae/experience/2026-08-11-governance-batch-three.md`, and plan `docs/ae/plans/2026-08-11-005-governance-batch-three-plan.md`.
-- Knowledge-base governance batch four (repository-side: release-notes split to CHANGELOGs with a five-entry README window, process-archive closeout, deferred legacy-stack and frontend-contract dispositions) is recorded in `05-decision-log.md`, `docs/ae/experience/2026-08-11-governance-batch-four.md`, and plan `docs/ae/plans/2026-08-11-006-governance-batch-four-plan.md`.
-- Requirements-artifact path unification (0.3.25: capability-catalog artifactPath, ae-help artifact contract, and ae-review scope detection unified on `docs/ae/prds`) is recorded in plan `docs/ae/plans/2026-08-11-007-prds-artifact-path-unification-plan.md` and archive `docs/00-process/archive/2026-08/prds-artifact-path-unification/summary.md`.
-- Memory distillation (2026-08-11: `05`/`03` rotated within the 15KB budget) is recorded in `03-key-workflows.md`, `04-known-pitfalls.md`, `docs/ae/experience/2026-08-11-memory-distillation.md`, and shards under `docs/99-archive/2026-08/memory-distillation/`.
-- Maintainer knowledge graph: declared relations in `00-registry.json`; human map in `docs/ae/graphs/maintainer-artifact-graph.md`; directory boundary in `docs/ae/graphs/README.md`. Shallow CLI graphs remain read-only (no `graph.json` persistence).
-- Document encoding evidence (2026-08-17: 516 `docs/` text files strict-decoded with zero failures and zero `U+FFFD` files) is recorded in `14-document-encoding-evidence.md`, with PRD/design/plan and graph links declared in `00-registry.json`.
-- Interface optimization review (2026-08-17: project installer ownership/recovery, static-preview containment, ledger serialization, and CSV parsing) is recorded in `15-interface-safety-and-reliability.md` and `docs/ae/solutions/2026-08-17-interface-optimization-roadmap.md`.
-- 蒸馏归档分片（2026-08-11）：`docs/99-archive/2026-08/memory-distillation/`——`05-decision-log.md` 的 2026-05 至 07 决策全文与 `03-key-workflows.md` 的六个适配期工作流全文；源文件保留索引与指针。
 - `99-prompt-template.md`：初始化或维护记忆库的提示词模板。
 
-## 维护规则
+## 按需检索
 
-- 指令路由、运行时入口与 Cursor 独立更新边界见 `22-instruction-routing-and-runtime-entry.md`；发布验证来源见 `docs/ae/experience/2026-09-13-instruction-runtime-delivery.md`。
+- 先检查索引体积；超预算时不要整篇加载。解析运行时入口后用 `ae-memory-index` 查看。
+- 用 `ae-memory-search --query "<关键词>" --limit 5` 定位，再按返回路径和行号读取必要片段；`--path <记忆目录内相对路径>` 缩小范围。
+- `--history` 只查拆分的旧索引，不代表现行合同。`scan.complete=false` 不能推断没有其他匹配。
+- `00-registry.json` 若存在，使用 `ae-memory-query` 查询已登记主题/关系，不全量加载 JSON。
+- 外部 docs 先解析当前项目/分支，再显式传 `--docs-root`；禁止混读其他分支。
 
-开始任务时先读本索引，再按主题读取相关文件。任务结束时判断是否产生新的稳定知识；没有则说明本次无需更新 AI 记忆库。
+## 更新
 
-## 2026-06-19 Addendum
+只在用户要求时更新对应专题；每个专题最多 15KiB，超额先蒸馏或拆分。新入口按领域分组，不为每次任务增加根导航。更新后运行 `ae-memory-index --check`。历史整理先用 `--compact` 预览，授权写入还需 `--apply --expect-sha256 <预览哈希>`；无新增稳定知识则不写入。
 
-- Claude Code best-practice adaptation is recorded in `docs/ae/experience/2026-06-19-claude-code-best-practice-adaptation.md` and, since the 2026-08-11 distillation, in the archive shards under `docs/99-archive/2026-08/memory-distillation/`; the generic external-research workflow remains in `03-key-workflows.md`.
+## Preserved Index History
+
+- Source SHA-256: `5a87d7f95b0b1d8b2c3a2563b7a62f5779771c949eff129d1a2fe1f89ff0ee09`.
+- 1 ordered, immutable pages: `00-index-history-5a87d7f95b0b1d8b2c3a2563b7a62f5779771c949eff129d1a2fe1f89ff0ee09-*.md`.
+- Search these historical fragments only with `ae-memory-search --history --query "<text>"`.
+- Do not append new events here or to the history pages. Update the owning topic.

@@ -233,12 +233,14 @@ function aeWorkflowRules(lang, profile) {
         '- 执行中的过程记录放在 `docs/00-process/active`。',
         '- 已完成的过程记录归档到 `docs/00-process/archive/YYYY-MM/<task-name>` 或 `docs/99-archive/YYYY-MM/<topic>`。',
         '- 长期 AI 记忆记录在 `docs/08-ai-memory`。',
+        '- 文档增长治理：索引最多 4096 字节/80 行，记忆专题、开发历史和滚动台账最多 15KiB；托管文档用 `ae-docs-append` 自动分页，相关更新后运行 `ae-docs-maintain --check`。正式文档、SQL 和证据不自动拆改。',
       ].join('\n')
     : [
         '- Record AE workflow artifacts under `docs/ae`.',
         '- Record active process notes under `docs/00-process/active`.',
         '- Archive completed process notes under `docs/00-process/archive/YYYY-MM/<task-name>` or `docs/99-archive/YYYY-MM/<topic>`.',
         '- Record durable AI memory under `docs/08-ai-memory`.',
+        '- Bound indexes to 4096 bytes/80 lines and memory/history/rolling logs to 15KiB. Use `ae-docs-append` for managed documents and `ae-docs-maintain --check` after relevant updates; do not automatically rewrite formal docs, SQL or evidence.',
       ].join('\n')
 }
 

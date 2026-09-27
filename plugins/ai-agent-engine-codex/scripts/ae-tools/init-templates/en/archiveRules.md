@@ -29,3 +29,11 @@
 
 - Update the active note with the archive path before moving it, or leave a small index if the project wants one.
 - Update `docs/08-ai-memory` only with stable reusable knowledge, not raw task logs.
+
+## Growing Documents
+
+- Keep navigation within 4096 UTF-8 bytes/80 lines and history, memory topics and rolling issue/remediation logs within 15KiB.
+- Use `ae-docs-maintain --path <docs-relative-file> --compact` to preview lossless pagination. Authorized apply requires the preview source hash; existing history remains recoverable.
+- Append to managed history/topics with `ae-docs-append --path <file> --entry <bounded-record.md>` and both preview hashes on apply. Never append events to a router or immutable page.
+- Run `ae-docs-maintain --check` after relevant writes. Resolve external context before specifying `--docs-root`.
+- Formal plans/designs/API, SQL, fixtures, structured registries and JSONL evidence chains are excluded from automatic rewriting; use bounded format-specific retrieval. No automatic deletion or scheduled maintenance.

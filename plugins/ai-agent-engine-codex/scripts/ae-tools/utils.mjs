@@ -1,5 +1,5 @@
 ﻿// Shared low-level helpers for ae-tools command modules.
-import { existsSync, readFileSync, readdirSync, realpathSync } from 'node:fs'
+import { closeSync, existsSync, fstatSync, lstatSync, openSync, opendirSync, readFileSync, readSync, readdirSync, realpathSync } from 'node:fs'
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { createHash } from 'node:crypto'
 
@@ -161,6 +161,145 @@ export function listFiles(dir) {
     }
   }
   return out
+}
+
+export function boundedInteger(value, fallback, name, min = 1, max = 1_000_000) {
+  if (value === undefined) return fallback
+  if (!['string', 'number'].includes(typeof value) || String(value).trim() === '') throw new Error(`${name} requires an integer`)
+  const parsed = Number(value)
+  if (!Number.isSafeInteger(parsed) || parsed < min || parsed > max) throw new Error(`${name} must be an integer from ${min} to ${max}`)
+  return parsed
+}
+
+export function scanOptions(opts = {}, defaults = {}) {
+  return {
+    maxFiles: boundedInteger(opts['file-limit'] ?? opts.limit, defaults.maxFiles ?? 500, '--file-limit', 1, 10000),
+    maxEntries: boundedInteger(opts['entry-limit'], defaults.maxEntries ?? 20000, '--entry-limit', 1, 100000),
+    maxDepth: boundedInteger(opts['max-depth'], defaults.maxDepth ?? 32, '--max-depth', 0, 128),
+    maxFileBytes: boundedInteger(opts['max-file-bytes'], defaults.maxFileBytes ?? 1024 * 1024, '--max-file-bytes', 1, 16 * 1024 * 1024),
+    maxTotalBytes: boundedInteger(opts['max-total-bytes'], defaults.maxTotalBytes ?? 16 * 1024 * 1024, '--max-total-bytes', 1, 256 * 1024 * 1024),
+    maxErrors: boundedInteger(opts['max-errors'], defaults.maxErrors ?? 20, '--max-errors', 1, 1000),
+    maxMs: boundedInteger(opts['max-ms'], defaults.maxMs ?? 10000, '--max-ms', 1, 120000),
+  }
+}
+
+// Read the descriptor, not a second path lookup; reject growth and replacement races.
+export function readBoundedText(path, maxBytes = 1024 * 1024) {
+  const before = lstatSync(path)
+  if (!before.isFile() || before.isSymbolicLink()) throw new Error('not a regular non-link file')
+  if (before.size > maxBytes) throw new Error(`file exceeds byte limit ${maxBytes}`)
+  const fd = openSync(path, 'r')
+  try {
+    const opened = fstatSync(fd)
+    if (!opened.isFile() || opened.ino !== before.ino || opened.dev !== before.dev || opened.size > maxBytes) throw new Error('file changed before read')
+    const buffer = Buffer.alloc(Math.min(opened.size + 1, maxBytes + 1))
+    let bytes = 0
+    while (bytes < buffer.length) {
+      const count = readSync(fd, buffer, bytes, buffer.length - bytes, null)
+      if (!count) break
+      bytes += count
+    }
+    const after = fstatSync(fd)
+    if (bytes !== opened.size || after.size !== opened.size || after.mtimeMs !== opened.mtimeMs) throw new Error('file changed during read')
+    const data = buffer.subarray(0, bytes)
+    return { text: new TextDecoder('utf-8', { fatal: true }).decode(data), bytes, sha256: createHash('sha256').update(data).digest('hex'), mtimeMs: after.mtimeMs }
+  } finally {
+    closeSync(fd)
+  }
+}
+
+// Budgets cover traversal as well as returned results. Policy exclusions are not errors.
+export function scanFiles(root, options = {}) {
+  const limits = { ...scanOptions(), ...options }
+  for (const key of ['maxFiles', 'maxEntries', 'maxDepth', 'maxFileBytes', 'maxTotalBytes', 'maxErrors', 'maxMs']) {
+    boundedInteger(limits[key], undefined, key, key === 'maxDepth' ? 0 : 1, key.includes('Bytes') ? 256 * 1024 * 1024 : 1_000_000)
+  }
+  const files = []
+  const reasons = new Set()
+  const diagnostics = { entriesVisited: 0, filesMatched: 0, bytesRead: 0, bytesSelected: 0, skipped: {}, errors: [], errorCount: 0, samples: [] }
+  const start = Date.now()
+  let halted = false
+  const recordSkip = (path, reason, incomplete = true) => {
+    diagnostics.skipped[reason] = (diagnostics.skipped[reason] || 0) + 1
+    if (incomplete) reasons.add(reason)
+    if (incomplete && diagnostics.samples.length < 20) diagnostics.samples.push({ path: toPosix(relative(root, path)) || '.', reason })
+  }
+  const recordError = (path, error) => {
+    diagnostics.errorCount++
+    reasons.add('read-error')
+    if (diagnostics.errors.length < limits.maxErrors) diagnostics.errors.push({ path: toPosix(relative(root, path)) || '.', code: error.code || 'READ_FAILED', message: error.message })
+    if (diagnostics.errorCount >= limits.maxErrors) { reasons.add('error-limit'); halted = true }
+  }
+  const expired = () => {
+    if (Date.now() - start >= limits.maxMs) { reasons.add('time-limit'); halted = true }
+    return halted
+  }
+  const walk = (dir, depth) => {
+    if (expired()) return
+    let handle
+    const entries = []
+    try {
+      if (lstatSync(dir).isSymbolicLink()) { recordSkip(dir, 'symbolic-link'); return }
+      assertCanonicalContained(root, dir, 'scan directory')
+      handle = opendirSync(dir)
+      while (!expired()) {
+        const entry = handle.readSync()
+        if (!entry) break
+        if (diagnostics.entriesVisited >= limits.maxEntries) { reasons.add('entry-limit'); break }
+        diagnostics.entriesVisited++
+        entries.push(entry)
+      }
+    } catch (error) {
+      recordError(dir, error)
+    } finally {
+      handle?.closeSync()
+    }
+    entries.sort((left, right) => left.name.localeCompare(right.name))
+    for (const entry of entries) {
+      if (expired()) break
+      const path = join(dir, entry.name)
+      const relativePath = toPosix(relative(root, path))
+      if (entry.isSymbolicLink()) { recordSkip(path, 'symbolic-link'); continue }
+      if (entry.isDirectory()) {
+        if (options.excludeDir?.(entry.name, relativePath)) { recordSkip(path, 'excluded-directory', false); continue }
+        if (depth >= limits.maxDepth) { recordSkip(path, 'depth-limit'); continue }
+        if (diagnostics.entriesVisited >= limits.maxEntries) { recordSkip(path, 'entry-limit'); continue }
+        walk(path, depth + 1)
+        continue
+      }
+      if (!entry.isFile()) continue
+      if (options.excludeFile?.(entry.name, relativePath)) { recordSkip(path, 'excluded-file', false); continue }
+      if (options.include && !options.include(entry.name, relativePath)) continue
+      diagnostics.filesMatched++
+      if (files.length >= limits.maxFiles) { reasons.add('file-limit'); halted = true; break }
+      try {
+        assertCanonicalContained(root, path, 'scan file')
+        const st = lstatSync(path)
+        if (!st.isFile() || st.isSymbolicLink()) { recordSkip(path, 'changed-file'); continue }
+        if (st.size > limits.maxFileBytes) { recordSkip(path, 'file-byte-limit'); continue }
+        if (diagnostics.bytesSelected + st.size > limits.maxTotalBytes) { reasons.add('total-byte-limit'); halted = true; break }
+        const file = { path, relativePath, sizeBytes: st.size, mtimeMs: st.mtimeMs }
+        diagnostics.bytesSelected += st.size
+        if (options.readText) {
+          const content = readBoundedText(path, Math.min(st.size, limits.maxFileBytes))
+          diagnostics.bytesRead += content.bytes
+          if (content.text.includes('\0')) { recordSkip(path, 'binary-file'); continue }
+          Object.assign(file, content)
+        }
+        files.push(file)
+      } catch (error) {
+        recordError(path, error)
+      }
+    }
+  }
+  walk(resolve(root), 0)
+  files.sort((left, right) => left.relativePath.localeCompare(right.relativePath))
+  return {
+    files,
+    completeness: { complete: reasons.size === 0, reasons: [...reasons], scope: 'eligible non-link files under the selected root; policy exclusions omitted' },
+    diagnostics: { ...diagnostics, elapsedMs: Date.now() - start },
+    limits: Object.fromEntries(Object.entries(limits).filter(([key]) => key.startsWith('max'))),
+  }
 }
 
 export function uniqueObjects(items) {
