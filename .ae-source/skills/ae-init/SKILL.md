@@ -5,6 +5,8 @@ description: Use when the user asks for AE init, /ae-init, initialize a project 
 
 # AE Init
 
+For large repositories or multiple services, apply the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Inventory bounded scopes and existing ownership first; do not load every service or duplicate root instructions into every module.
+
 Before running helper commands, resolve `aeEntry` using the [runtime entry contract](../ae-help/references/runtime-entry.md).
 
 Initialize the target project with AGENTS.md guidance and a selectable AE documentation scaffold. The command keeps the client-neutral AGENTS.md convention separate from Codex-specific instruction precedence.

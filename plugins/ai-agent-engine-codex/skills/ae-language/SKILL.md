@@ -5,6 +5,8 @@ description: Use when the user asks for AE language, /ae-language, switch AE dis
 
 # AE Language
 
+For multi-copy language changes, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Inventory the exact managed copies and avoid overlapping installers/writers; metadata parity does not prove client reload or discovery.
+
 Switch local AE skill display language.
 
 ## Workflow

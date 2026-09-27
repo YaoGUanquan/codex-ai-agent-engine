@@ -5,6 +5,8 @@ description: Use when the user asks to preview, serve, or open a local static HT
 
 # AE Static Server
 
+For large local previews, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Bound served scope, resource lifetime and verification requests; this development helper is not a production or high-concurrency server.
+
 Before running helper commands, resolve `aeEntry` using the [runtime entry contract](../ae-help/references/runtime-entry.md).
 
 Serve a local static file or directory for browser preview.

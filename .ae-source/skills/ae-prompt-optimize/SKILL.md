@@ -5,6 +5,8 @@ description: Use when the user asks for AE prompt optimize, /ae-prompt-optimize,
 
 # AE Prompt Optimize
 
+For large or parallel assignments, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Make owned scope, resource budgets, stop conditions, state dependencies and required evidence explicit without inventing capacity or expanding authorization.
+
 Rewrite prompts into executable Codex instructions.
 
 ## Workflow

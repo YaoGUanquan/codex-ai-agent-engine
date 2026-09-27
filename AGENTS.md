@@ -47,6 +47,7 @@
 - 执行中的过程记录放在 `docs/00-process/active`。
 - 已完成的过程记录归档到 `docs/00-process/archive/YYYY-MM/<task-name>` 或 `docs/99-archive/YYYY-MM/<topic>`。
 - 长期 AI 记忆记录在 `docs/08-ai-memory`。
+- 文档增长治理：导航最多 4096 UTF-8 字节/80 行，记忆专题、开发历史和滚动台账最多 15KiB；托管文档用 `ae-docs-append` 自动分页。相关写入后运行 `ae-docs-maintain --check`，外部文档显式传已解析的 `--docs-root`；不自动拆改正式合同、SQL 或证据链。
 
 ## 工程执行
 
@@ -90,3 +91,15 @@
 - 新增/修改数据库结构、索引、初始化数据、修复或迁移时，按阿里手册适用建表、索引、SQL 规约审查，沿用项目迁移机制；已配置公共规则时同时读取 `<AE_DOCS_HOME>/SQL-VERSIONING.md`。版本必要 SQL/迁移代码必须留仓库纳入 Git；只有临时查询、草稿、执行证据放外部 docs，不自动修改历史迁移。
 - 提交/合并同时检查 SQL 版本冲突、依赖、不可变已执行脚本和升级验证；SQL Git 交付与测试/生产执行分别报告。提交、推送、合并不授权数据库写入，数据库执行方式按当前项目约定。
 <!-- ae-git-request:end -->
+
+<!-- ae-external-context:start -->
+## External Docs Context
+
+- External local documentation is rooted at `D:/AE-Docs`; tracked formal documentation and runtime inputs remain in this repository.
+- Before reading or writing local process documentation, run `node D:/AE-Docs/tools/docs-context.mjs --project "<current-worktree-root>"` and use only a successful `docsRoot` result.
+- The registry contract is `schemaVersion: 2`: keyed `registry.projects`, project `identity` plus `contexts`, and context manifests with `contextType/contextName/contextKey/docsRoot`.
+- A missing registration or context is a hard stop for writes. Initialize an empty context explicitly with `node D:/AE-Docs/tools/docs-context-init.mjs --project "<current-worktree-root>"`; unregistered workspaces additionally require `--project-id <stable-id>`.
+- Git projects resolve by Git common directory and current branch. Non-Git projects resolve only through an explicit `workspace-directory` identity; no Git branch is inferred.
+- Never fall back to another branch or workspace, copy historical documents wholesale, or recreate an external document inside the repository to hide a missing context.
+- External documents are not backed up by repository Git. Git delivery and external-doc reconciliation are separate operations with separate evidence.
+<!-- ae-external-context:end -->

@@ -5,6 +5,8 @@ description: Use when the user asks for AE skill creator, /ae-skill-creator, cre
 
 # AE Skill Creator
 
+For skills handling large or distributed work, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Route conditional guidance to a maintained owner and test failure/budget behavior rather than duplicating generic rules or claiming unsupported runtime capabilities.
+
 Create or update Codex skills using the local skill-creator standard.
 
 ## Operating Principles

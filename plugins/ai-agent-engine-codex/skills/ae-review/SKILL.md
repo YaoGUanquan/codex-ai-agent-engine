@@ -5,6 +5,8 @@ description: Use when the user asks for ae-review, /ae-review, $ae-review, "use 
 
 # AE Review
 
+For large-data, concurrent or distributed changes, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Review bounded work, contention, duplicate delivery, partial commit, mixed versions and recovery. Treat truncated graph/impact results as advisory, never as proof of full changed-file coverage.
+
 Before running helper commands, resolve `aeEntry` using the [runtime entry contract](../ae-help/references/runtime-entry.md).
 
 Perform AE-style layered review of code or documents.

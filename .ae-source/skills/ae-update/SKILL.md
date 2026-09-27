@@ -5,6 +5,8 @@ description: Use when the user asks for AE update, /ae-update, update the curren
 
 # AE Update
 
+For project/global updates across many consumers, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Verify source revision/fingerprint, target ownership, exclusive local writer and recoverable activation; report install, maintenance and client discovery independently.
+
 Before running helper commands, resolve `aeEntry` using the [runtime entry contract](../ae-help/references/runtime-entry.md).
 
 Update the current user's global AE for Codex installation.

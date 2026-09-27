@@ -308,6 +308,16 @@
   ],
   "commands": [
     {
+      "name": "recovery",
+      "purpose": "Inspect bounded resumable artifacts in one docs root; exclude navigation and immutable pages, expose completeness and path bases, and never infer registered project/branch identity.",
+      "script": "node \"$aeEntry\" recovery [--docs-root <absolute-resolved-docs-root>] [--type requirements|plan|review|gate|handoff|process-note] [--limit 100] [--file-limit 1000]"
+    },
+    {
+      "name": "task-analyze",
+      "purpose": "Suggest bounded source candidates or plan units with dependency and parallel-readiness checks; immutable document pages are read-only evidence, never writable worker ownership.",
+      "script": "node \"$aeEntry\" task-analyze (--mode plan --plan <path>|--mode scan --task <text> [--root <repo-relative-dir>] [--include-document-pages])"
+    },
+    {
       "name": "init",
       "purpose": "按可选 profile 初始化 AGENTS.md 与 AE 文档；安全更新受管区块，并提供只读嵌套/优先级诊断。",
       "script": "node \"$aeEntry\" init [--profile minimal|ae-core|full] [--lang en|zh-CN|bilingual] [--dry-run] [--force] [--nested preview] [--explain-instructions]"
@@ -328,9 +338,34 @@
       "script": "node \"$aeEntry\" check-memory-knowledge-contract [--project-root <absolute-project>] [--root <repo-relative-dir>]"
     },
     {
+      "name": "ae-memory-index",
+      "purpose": "审计短记忆入口和专题体积；旧入口无损分片默认只预览，显式写入必须提供当前源哈希。",
+      "script": "node \"$aeEntry\" ae-memory-index [--docs-root <absolute-resolved-docs-root>] [--check | --compact [--apply --expect-sha256 <hash>]]"
+    },
+    {
+      "name": "ae-memory-search",
+      "purpose": "独立的有界字面关键词检索，返回记忆路径、行号和短摘录；历史分片需显式选择，不改变声明式关系查询。",
+      "script": "node \"$aeEntry\" ae-memory-search --query <text> [--docs-root <absolute-resolved-docs-root>] [--path <memory-relative-file>] [--history] [--limit 5] [--excerpt 240]"
+    },
+    {
       "name": "ae-memory-query",
       "purpose": "只读检索已登记的 Markdown 记忆；至少指定 topic、path 或 relation 之一，未登记内容不会被扫描。",
       "script": "node \"$aeEntry\" ae-memory-query [--project-root <absolute-project>] [--root <repo-relative-dir>] (--topic <topic>|--path <path>|--relation <type>) [--limit 20]"
+    },
+    {
+      "name": "ae-docs-maintain",
+      "purpose": "分类审计记忆、开发历史、导航和滚动台账；超限内容无损分页，正式文档和证据不自动拆改。",
+      "script": "node \"$aeEntry\" ae-docs-maintain [--docs-root <absolute-resolved-docs-root>] [--check | --path <docs-relative-file> (--verify | --compact [--apply --expect-sha256 <hash>])]"
+    },
+    {
+      "name": "ae-docs-append",
+      "purpose": "向专题、开发历史和滚动台账追加有界记录，自动生成不可变分片；预览后应用须核对源和记录两项哈希。",
+      "script": "node \"$aeEntry\" ae-docs-append --path <docs-relative-file> --entry <docs-relative-record> [--docs-root <absolute-resolved-docs-root>] [--apply --expect-sha256 <source-hash> --expect-entry-sha256 <entry-hash>]"
+    },
+    {
+      "name": "ae-docs-search",
+      "purpose": "有界检索相关文档，自动跟随托管分片，返回续查路径、页号和行号；默认不扫描正式和归档证据。",
+      "script": "node \"$aeEntry\" ae-docs-search --query <text> [--docs-root <absolute-resolved-docs-root>] [--path <docs-relative-file>] [--page 1] [--line 1] [--limit 5]"
     },
     {
       "name": "ae-knowledge-map",
@@ -344,13 +379,13 @@
     },
     {
       "name": "ae-graph-build",
-      "purpose": "Build a shallow dependency graph JSON snapshot with freshness metadata for pre-Phase 2 file and import relation preview.",
-      "script": "node \"$aeEntry\" ae-graph-build [--project-root <absolute-project>] [--root <repo-relative-dir>] [--limit 500] [--edge-limit <count>]"
+      "purpose": "Build a bounded shallow dependency graph with content fingerprints, completeness and truncation diagnostics; generated document pages are excluded unless explicitly selected, and no snapshot is persisted.",
+      "script": "node \"$aeEntry\" ae-graph-build [--project-root <absolute-project>] [--root <repo-relative-dir>] [--include-document-pages] [--limit 500] [--edge-limit <count>] [--entry-limit 20000] [--max-depth 32] [--max-file-bytes 1048576] [--max-total-bytes 16777216] [--max-ms 10000]"
     },
     {
       "name": "ae-graph-query",
       "purpose": "Query the shallow dependency graph by path or keyword and report freshness metadata.",
-      "script": "node \"$aeEntry\" ae-graph-query [--project-root <absolute-project>] [--root <repo-relative-dir>] (--path <file>|--keyword <text>)"
+      "script": "node \"$aeEntry\" ae-graph-query [--project-root <absolute-project>] [--root <repo-relative-dir>] [--include-document-pages] (--path <file>|--keyword <text>)"
     },
     {
       "name": "claude-delegate",
@@ -369,8 +404,8 @@
     },
     {
       "name": "review-package",
-      "purpose": "Write a task or branch review bundle with commit list, diff stat, and contextual diff into an evidence artifact.",
-      "script": "node \"$aeEntry\" review-package --base <ref> --head <ref> [--out <path>]"
+      "purpose": "Write a task or branch review bundle with a complete changed-file inventory and optional bounded impact graph; document-page exclusions affect only advisory impact.",
+      "script": "node \"$aeEntry\" review-package --base <ref> --head <ref> [--out <path>] [--with-impact [--include-document-pages]]"
     },
     {
       "name": "evidence",
@@ -379,8 +414,8 @@
     },
     {
       "name": "markitdown",
-      "purpose": "Convert a local lightweight file to Markdown.",
-      "script": "node \"$aeEntry\" markitdown <file>"
+      "purpose": "Convert a bounded local lightweight file to Markdown with explicit row, column and output truncation diagnostics.",
+      "script": "node \"$aeEntry\" markitdown <file> [--row-limit 5000] [--column-limit 50] [--max-output-bytes 1048576]"
     },
     {
       "name": "static-server",
@@ -394,8 +429,8 @@
     },
     {
       "name": "issue",
-      "purpose": "Manage worktree-local AE issues and links to canonical plans, tasks, reviews, gates, and evidence.",
-      "script": "node \"$aeEntry\" issue <create|list|show|update|transition|link|depend|close|depends>"
+      "purpose": "Manage bounded worktree-local AE issues with pagination and owner-aware local write locks; not a distributed tracker.",
+      "script": "node \"$aeEntry\" issue <create|list|show|update|transition|link|depend|close|depends> [--limit 100] [--offset 0] [--file-limit 1000]"
     },
     {
       "name": "skill-audit",

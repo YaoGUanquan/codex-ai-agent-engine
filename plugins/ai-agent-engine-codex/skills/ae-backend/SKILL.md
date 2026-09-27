@@ -5,6 +5,8 @@ description: Use when the user asks for AE backend, /ae-backend, API implementat
 
 # AE Backend
 
+For bulk, concurrent or distributed service work, apply the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Trace transaction/enqueue boundaries, retry ownership, idempotency and pool/backpressure budgets alongside the existing data-access contract.
+
 Implement or modify backend behavior using the repository's actual API, service, data, and validation contracts.
 
 For database-backed lists/search/count/export, create/update/delete/import or batch/async persistence, apply the [data-access and scale contract](references/data-access-contract.md) before implementation, even without schema changes. Keep bounded single-row CRUD light; for scale-sensitive work record query/count budgets, read-model alternatives, batch/commit semantics and recovery evidence. Load its read-model, async and MyBatis-Plus references only when triggered.

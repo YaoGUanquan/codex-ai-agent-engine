@@ -5,6 +5,8 @@ description: Use when the user asks for AE task loop, /ae-task-loop, iterative r
 
 # AE Task Loop
 
+For long-running or distributed repair loops, apply the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Bound iterations, elapsed time and retries, checkpoint actual progress, and stop on non-idempotent or authorization failures instead of resubmitting work.
+
 Iterate on an exploratory task until fixed, verified, or clearly blocked.
 
 ## Operating Principles

@@ -5,6 +5,8 @@ description: Use when the user asks for AE browser testing, /ae-test-browser, br
 
 # AE Test Browser
 
+For large lists, concurrent updates or long-running jobs, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Validate bounded requests/rendering, stale-response handling and partial/terminal states; a browser smoke is not a backend load test.
+
 Validate UI behavior in a real browser.
 
 ## Workflow

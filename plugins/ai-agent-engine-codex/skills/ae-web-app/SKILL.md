@@ -5,6 +5,8 @@ description: Use for /ae-web-app or $ae-web-app, Web app behavior, API integrati
 
 # AE Web App
 
+For large datasets or concurrent/async interactions, apply the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Bound fetching and subscriptions, cancel obsolete requests, prevent stale responses from overwriting newer state, and preserve server-owned idempotency/completion semantics.
+
 Build or extend a web application using the existing repository stack and conventions. This is the Web app implementation skill selected by `ae-web-forge` or by an explicit user request for app implementation; it is not the unified frontend/Web routing entrypoint.
 
 ## Workflow

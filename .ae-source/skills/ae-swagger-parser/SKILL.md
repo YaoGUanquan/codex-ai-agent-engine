@@ -5,6 +5,8 @@ description: Use when the user asks to inspect, summarize, filter, or explain Sw
 
 # AE Swagger Parser
 
+For large or multi-service specifications, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Scope endpoint/tag extraction, bound parsing/reference expansion and expose unsupported YAML; static schemas do not prove live compatibility.
+
 Before running helper commands, resolve `aeEntry` using the [runtime entry contract](../ae-help/references/runtime-entry.md).
 
 Summarize or inspect Swagger/OpenAPI specs without calling business APIs.

@@ -5,6 +5,8 @@ description: Use when the user asks for AE refactor, /ae-refactor, refactoring p
 
 # AE Refactor
 
+For scale-sensitive refactoring, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Preserve concurrency, ordering and transaction invariants, measure the bottleneck, and separate rolling migration/backfill from behavior-preserving code movement.
+
 Plan behavior-preserving refactors before implementation.
 
 For data-access refactors, apply the [data-access and scale contract](../ae-backend/references/data-access-contract.md). Preserve logical result IDs/totals, authorization, ordering, atomicity and completion semantics. Compare indexed/set-based access, auxiliary read models and batching with measured or explicitly unverified costs; stale reads, partial commits or async acceptance are contract changes, not transparent optimizations.

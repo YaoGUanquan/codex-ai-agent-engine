@@ -5,6 +5,8 @@ description: Use when the user explicitly asks for ae-lfg, /ae-lfg, $ae-lfg, "us
 
 # AE LFG
 
+For a scale-sensitive workflow, apply the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md) across requirement, design, plan, work and acceptance. Carry workload assumptions and incomplete evidence between stages; do not restart broad scans or promote local tests to production proof.
+
 Before running helper commands, resolve `aeEntry` using the [runtime entry contract](../ae-help/references/runtime-entry.md).
 
 Run the full AE engineering workflow in Codex. This is an orchestrator skill: it coordinates ae-brainstorm, ae-plan, ae-work, ae-review, validation, and final gate evidence.
@@ -17,7 +19,7 @@ For database-backed lists/queries or bulk/async persistence, carry the [data-acc
 
 1. Read `references/task-routing.md` and classify the request.
 2. If the request is not S4 multi-step implementation, route to the narrower skill and explain the route briefly.
-3. From the target project root, run `node "$aeEntry" recovery` to inspect existing `docs/ae` artifacts when the repository has project files. The selected entry is the project wrapper or current-user dispatcher; do not look for a separate recovery script inside the `ae-lfg` skill directory.
+3. Resolve the project's documentation context first. For repository docs, run `node "$aeEntry" recovery` from the project root; for registered external docs, use `node "$aeEntry" recovery --docs-root "<resolved-absolute-docs-root>"`. Inspect `pathBase`, `docsPath`, `scope` and `completeness`; root selection does not prove registry/branch identity, and an incomplete scan cannot establish the global latest artifact. Use `--type plan` (or the relevant artifact type) to narrow recovery. Navigation and immutable pages are not resumable tasks; use owner-aware memory/docs search for their content. The selected entry is the project wrapper or current-user dispatcher, not a separate script in this skill.
 4. Do not modify project files before the workflow reaches ae-work and Git/worktree checks are complete.
 
 ## Pipeline

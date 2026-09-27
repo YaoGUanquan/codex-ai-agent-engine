@@ -5,6 +5,8 @@ description: Use for /ae-frontend-design or $ae-frontend-design, focused visual-
 
 # AE Frontend Design And UI Implementation
 
+For dense large-data interfaces, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md) for rendering and state constraints. Preserve pagination/virtualization boundaries and partial/error states; route API, concurrency and persistence changes to the behavior owner.
+
 Design and implement frontend UI surfaces using the repository's existing stack, design system, and validation path.
 
 ## Workflow

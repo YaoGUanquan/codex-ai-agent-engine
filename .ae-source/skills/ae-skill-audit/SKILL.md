@@ -5,6 +5,8 @@ description: Use when the user asks to audit an external agent, skill, Claude Co
 
 # AE Skill Audit
 
+For broad external skill inventories, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Bound discovery and excerpts, preserve license/source provenance, and distinguish static instruction coverage from executable or distributed-runtime proof.
+
 Before running helper commands, resolve `aeEntry` using the [runtime entry contract](../ae-help/references/runtime-entry.md).
 
 Audit external agent and skill repositories, then translate useful patterns into Codex-native AE improvement options.

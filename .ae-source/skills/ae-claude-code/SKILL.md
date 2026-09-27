@@ -5,6 +5,8 @@ description: Use when the user asks Codex to delegate analysis, patch proposals,
 
 # AE Claude Code
 
+For large delegated analysis, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Bound prompt/output bytes, duration and in-flight workers, retain disjoint ownership and avoid recursive delegation; process exit alone does not prove the assigned outcome.
+
 Before running helper commands, resolve `aeEntry` using the [runtime entry contract](../ae-help/references/runtime-entry.md).
 
 Use local Claude Code CLI as a controlled external worker while Codex remains the orchestrator, reviewer, and delivery agent.

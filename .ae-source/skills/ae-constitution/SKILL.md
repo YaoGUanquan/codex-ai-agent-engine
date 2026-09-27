@@ -5,6 +5,8 @@ description: Use when the user asks for AE constitution, project governance, dur
 
 # AE Constitution
 
+For shared large-system governance, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Record enforceable ownership, resource and evidence invariants; leave workload-specific capacity and technology choices with the owning design.
+
 Create or update durable project governance that later AE plans, reviews, and work gates can check.
 
 ## Workflow

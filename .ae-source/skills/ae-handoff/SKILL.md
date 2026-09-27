@@ -5,6 +5,8 @@ description: Use when the user asks for AE handoff, /ae-handoff, session handoff
 
 # AE Handoff
 
+For distributed or long-running work, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Preserve operation/checkpoint identity, completed versus pending partitions, ownership, source revision and partial evidence so the next session resumes without duplicate side effects.
+
 Create a durable handoff for continuing work later.
 
 ## Workflow
