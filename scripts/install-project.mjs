@@ -1,14 +1,19 @@
 #!/usr/bin/env node
-import { cpSync, existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, realpathSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs'
-import { createHash, randomUUID } from 'node:crypto'
+import { closeSync, cpSync, existsSync, fsyncSync, lstatSync, mkdirSync, openSync, readFileSync, readdirSync, realpathSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs'
+import { randomUUID } from 'node:crypto'
 import { dirname, isAbsolute, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawnSync } from 'node:child_process'
+import { withLocalOperationLock } from '../plugins/ai-agent-engine-codex/scripts/local-operation-lock.mjs'
+import { assertCanonicalContained, readBoundedText } from '../plugins/ai-agent-engine-codex/scripts/ae-tools/utils.mjs'
+import { fingerprintManagedPath } from '../plugins/ai-agent-engine-codex/scripts/path-fingerprint.mjs'
 
 const __filename = fileURLToPath(import.meta.url)
 const repoRoot = realpathSync(resolve(dirname(__filename), '..'))
 const args = process.argv.slice(2)
 const targetArg = readRequiredArg('--target')
+const recoverId = readArg('--recover')
+const failurePhase = readArg('--fail-at')
 const pluginName = 'ai-agent-engine-codex'
 const sourcePlugin = resolve(repoRoot, 'plugins', pluginName)
 const sourceTemplates = resolve(repoRoot, 'docs', 'ae', 'templates')
@@ -24,37 +29,50 @@ const lang = readArg('--lang') || readInstalledLang(targetRoot) || 'bilingual'
 if (!supportedLangs.has(lang)) fail('Usage: node scripts/install-project.mjs --target <project> [--lang en|zh-CN|bilingual] [--replace-modified]')
 
 const paths = targetPaths(targetRoot)
-const priorState = loadState(paths.state)
 const replaceModified = args.includes('--replace-modified')
-const components = sourceComponents(paths)
-const marketplace = prepareMarketplace(paths.marketplace)
-const removals = priorOwnedRetirements(paths, priorState)
-
+let outcome
 try {
-  preflight(components, marketplace, removals, priorState, replaceModified)
-  const operation = stageOperation(paths, components, marketplace, removals)
-  try {
-    applyComponents(components)
-    writeJson(paths.marketplace, marketplace.value)
-    for (const target of removals) rmSync(target, { recursive: true, force: true })
-    runLanguageSetter(lang, targetRoot)
-    writeState(paths.state, {
-      schemaVersion: 1,
-      pluginVersion: readPluginVersion(),
-      components: Object.fromEntries(components.map((component) => [component.rel, fingerprintPath(component.target)]).concat([[marketplace.rel, fingerprintPath(marketplace.target)]])),
-      installedAt: new Date().toISOString(),
-    })
-  } catch (error) {
-    restoreOperation(operation)
-    throw error
-  }
-  cleanupOperation(operation)
+  assertManagedPath(paths.lock)
+  mkdirSync(dirname(paths.lock), { recursive: true })
+  outcome = withLocalOperationLock(paths.lock, () => {
+    if (recoverId) return recoverOperation(recoverId)
+    if (existsSync(paths.active)) {
+      const active = JSON.parse(readBoundedText(paths.active, 16384).text)
+      throw new Error(`unfinished project install ${active.id}; inspect its journal and use --recover ${active.id} before retrying`)
+    }
+    const priorState = loadState(paths.state)
+    const components = sourceComponents(paths)
+    const marketplace = prepareMarketplace(paths.marketplace)
+    const removals = priorOwnedRetirements(paths, priorState)
+    preflight(components, marketplace, removals, priorState, replaceModified)
+    const operation = stageOperation(paths, components, marketplace, removals)
+    try {
+      prepareOperation(operation, components, marketplace)
+      injectFailure('staged')
+      applyComponents(operation)
+      operation.phase = 'completed'
+      saveOperation(operation)
+    } catch (error) {
+      operation.error = error.message
+      try {
+        restoreOperation(operation)
+      } catch (recoveryError) {
+        operation.phase = 'recovery-failed'
+        operation.recoveryError = recoveryError.message
+        saveOperation(operation)
+        throw new Error(`${error.message}; rollback failed (recovery-failed): ${recoveryError.message}; inspect ${operation.journal} and use --recover ${operation.id}`)
+      }
+      throw new Error(`${error.message}; rollback completed (rolled-back); operation ${operation.id}; journal ${operation.journal}`)
+    }
+    finishOperation(operation)
+    return { status: 'installed', operationId: operation.id, journal: toPosix(relative(targetRoot, operation.journal)), source_revision: operation.sourceRevision, source_fingerprint: operation.sourceFingerprint, activation: 'journaled-component-swap', phase: operation.phase }
+  }, { owner: 'project installer', leaseMs: 300000 })
 } catch (error) {
   fail(error instanceof Error ? error.message : String(error))
 }
 
 console.log(JSON.stringify({
-  status: 'installed',
+  ...outcome,
   targetRoot,
   plugin: 'plugins/ai-agent-engine-codex',
   marketplace: '.agents/plugins/marketplace.json',
@@ -80,6 +98,9 @@ function targetPaths(root) {
     scripts,
     state: resolve(root, '.agents', pluginName, 'project-install.json'),
     stageRoot: resolve(root, '.agents', pluginName, 'project-install-staging'),
+    lock: resolve(root, '.agents', pluginName, 'project-install.lock'),
+    active: resolve(root, '.agents', pluginName, 'active-operation.json'),
+    operations: resolve(root, '.agents', pluginName, 'project-install-operations'),
   }
 }
 
@@ -103,7 +124,8 @@ function sourceComponents(paths) {
 }
 
 function prepareMarketplace(target) {
-  const value = existsSync(target) ? JSON.parse(readFileSync(target, 'utf8')) : { name: 'local-codex-plugins', interface: { displayName: 'Local Codex Plugins' }, plugins: [] }
+  assertManagedPath(target)
+  const value = existsSync(target) ? JSON.parse(readBoundedText(target).text) : { name: 'local-codex-plugins', interface: { displayName: 'Local Codex Plugins' }, plugins: [] }
   if (!Array.isArray(value.plugins)) throw new Error(`marketplace plugins must be an array: ${target}`)
   const entry = { name: pluginName, source: { source: 'local', path: `./plugins/${pluginName}` }, policy: { installation: 'INSTALLED_BY_DEFAULT', authentication: 'ON_INSTALL' }, category: 'Coding' }
   const idx = value.plugins.findIndex((plugin) => plugin?.name === pluginName)
@@ -122,6 +144,7 @@ function priorOwnedRetirements(paths, state) {
 }
 
 function preflight(components, marketplace, removals, state, allowModified) {
+  for (const target of [...components.map((component) => component.target), marketplace.target, paths.state, ...removals]) assertManagedPath(target)
   for (const component of components) verifyReplaceable(component.target, component.rel, state, allowModified)
   const previousMarketplace = state?.components?.[marketplace.rel]
   if (existsSync(marketplace.target) && previousMarketplace && previousMarketplace !== fingerprintPath(marketplace.target) && !allowModified) throw new Error(`refusing to replace modified managed component: ${marketplace.rel}; rerun with --replace-modified after reviewing the target`)
@@ -141,52 +164,171 @@ function verifyReplaceable(target, rel, state, allowModified) {
 }
 
 function stageOperation(paths, components, marketplace, removals) {
-  const stage = resolve(paths.stageRoot, randomUUID())
-  const targets = [...components.map((component) => component.target), marketplace.target, paths.state, ...removals]
-  const changes = []
-  for (const target of [...new Set(targets)]) {
-    if (!existsSync(target)) { changes.push({ target, existed: false }); continue }
-    assertNotLink(target)
-    const backup = resolve(stage, String(changes.length))
-    mkdirSync(dirname(backup), { recursive: true })
-    cpSync(target, backup, { recursive: true, errorOnExist: true })
-    changes.push({ target, existed: true, backup })
+  const id = randomUUID()
+  const stage = resolve(paths.stageRoot, id)
+  const journal = resolve(paths.operations, `${id}.json`)
+  const operation = {
+    schemaVersion: 1, id, stage, journal, targetRoot, phase: 'staging', createdAt: new Date().toISOString(),
+    sourceRevision: sourceRevision(), sourceFingerprint: fingerprintPath(sourcePlugin), changes: [],
   }
-  return { stage, changes }
+  const targets = [...components.map((component) => component.target), marketplace.target, ...removals, paths.state]
+  operation.changes = [...new Set(targets)].map((target, index) => {
+    const rel = toPosix(relative(targetRoot, target))
+    return { rel, before: existsSync(target) ? fingerprintPath(target) : null, after: null, backup: resolve(stage, 'old', String(index)), staged: removals.includes(target) ? null : resolve(stage, 'new', rel), phase: 'pending' }
+  })
+  assertManagedPath(stage)
+  mkdirSync(stage, { recursive: true })
+  saveOperation(operation)
+  writeState(paths.active, { id })
+  return operation
 }
 
-function applyComponents(components) {
+function prepareOperation(operation, components, marketplace) {
+  const stagedRoot = resolve(operation.stage, 'new')
+  const sources = new Map()
   for (const component of components) {
-    mkdirSync(dirname(component.target), { recursive: true })
-    rmSync(component.target, { recursive: true, force: true })
-    if (component.source) cpSync(component.source, component.target, { recursive: true })
-    else writeFileSync(component.target, component.text, 'utf8')
+    const target = resolve(stagedRoot, component.rel)
+    assertManagedPath(target)
+    mkdirSync(dirname(target), { recursive: true })
+    if (component.source) {
+      const expected = fingerprintPath(component.source)
+      cpSync(component.source, target, { recursive: true, errorOnExist: true, force: false })
+      if (fingerprintPath(target) !== expected) throw new Error(`staged fingerprint mismatch: ${component.rel}`)
+      sources.set(component.source, expected)
+    } else writeFileSync(target, component.text, { encoding: 'utf8', flag: 'wx' })
+  }
+  writeState(resolve(stagedRoot, marketplace.rel), marketplace.value)
+  runLanguageSetter(lang, stagedRoot)
+  const validation = spawnSync(process.execPath, [resolve(stagedRoot, 'scripts', 'ae-tools.mjs'), 'help'], { cwd: stagedRoot, encoding: 'utf8', timeout: 30000, maxBuffer: 4 * 1024 * 1024, shell: false })
+  if (validation.error || validation.status !== 0) throw new Error(`staged CLI validation failed: ${validation.error?.message || validation.stderr}`)
+  for (const [source, expected] of sources) if (fingerprintPath(source) !== expected) throw new Error('source changed while staging; retry with a stable source')
+  if (fingerprintPath(sourcePlugin) !== operation.sourceFingerprint) throw new Error('source plugin changed while staging')
+  const replacements = [...components.map((component) => component.rel), marketplace.rel]
+  const state = {
+    schemaVersion: 1, pluginVersion: readPluginVersion(), installedAt: new Date().toISOString(),
+    operationId: operation.id, sourceRevision: operation.sourceRevision, sourceFingerprint: operation.sourceFingerprint,
+    components: Object.fromEntries(replacements.map((rel) => [rel, fingerprintPath(resolve(stagedRoot, rel))])),
+  }
+  const stateRel = toPosix(relative(targetRoot, paths.state))
+  writeState(resolve(stagedRoot, stateRel), state)
+  for (const change of operation.changes) change.after = change.staged ? fingerprintPath(change.staged) : null
+  operation.phase = 'prepared'
+  saveOperation(operation)
+}
+
+function applyComponents(operation) {
+  operation.phase = 'activating'
+  saveOperation(operation)
+  for (const [index, change] of operation.changes.entries()) {
+    const target = resolve(targetRoot, change.rel)
+    assertManagedPath(target)
+    const current = existsSync(target) ? fingerprintPath(target) : null
+    if (current !== change.before) throw new Error(`target changed after staging: ${change.rel}`)
+    if (change.staged && fingerprintPath(change.staged) !== change.after) throw new Error(`staged component changed: ${change.rel}`)
+    change.phase = 'moving-old'
+    saveOperation(operation)
+    if (change.before) moveManaged(target, change.backup)
+    injectFailure(`moved-old:${index}`)
+    if (change.staged) moveManaged(change.staged, target)
+    change.phase = 'activated'
+    saveOperation(operation)
+    injectFailure(`activated:${index}`)
   }
 }
 
 function restoreOperation(operation) {
+  operation.phase = 'rolling-back'
+  saveOperation(operation)
   for (const change of [...operation.changes].reverse()) {
-    rmSync(change.target, { recursive: true, force: true })
-    if (change.existed) { mkdirSync(dirname(change.target), { recursive: true }); cpSync(change.backup, change.target, { recursive: true, errorOnExist: true }) }
+    if (change.phase === 'pending' || change.phase === 'restored') continue
+    const target = resolve(targetRoot, change.rel)
+    assertManagedPath(target)
+    assertManagedPath(change.backup)
+    const current = existsSync(target) ? fingerprintPath(target) : null
+    if (current === change.before && !existsSync(change.backup)) {
+      change.phase = 'restored'
+      saveOperation(operation)
+      continue
+    }
+    if (current !== null && current !== change.after) throw new Error(`recovery conflict; target changed: ${change.rel}`)
+    if (change.before && (!existsSync(change.backup) || fingerprintPath(change.backup) !== change.before)) throw new Error(`missing or modified backup: ${change.rel}`)
+    if (current !== null) {
+      const discard = resolve(operation.stage, 'discard', String(operation.changes.indexOf(change)))
+      if (existsSync(discard)) throw new Error(`recovery discard conflict: ${change.rel}`)
+      moveManaged(target, discard)
+    }
+    if (change.before) moveManaged(change.backup, target)
+    change.phase = 'restored'
+    saveOperation(operation)
   }
-  cleanupOperation(operation)
+  operation.phase = 'rolled-back'
+  saveOperation(operation)
+  finishOperation(operation)
 }
 
-function cleanupOperation(operation) { if (existsSync(operation.stage)) rmSync(operation.stage, { recursive: true, force: true }) }
+function recoverOperation(id) {
+  if (!/^[a-f0-9-]{36}$/.test(id)) throw new Error('--recover requires an operation UUID')
+  const journal = resolve(paths.operations, `${id}.json`)
+  assertManagedPath(journal)
+  const operation = JSON.parse(readBoundedText(journal).text)
+  if (operation.id !== id || operation.targetRoot !== targetRoot || operation.journal !== journal || operation.stage !== resolve(paths.stageRoot, id) || !Array.isArray(operation.changes)) throw new Error('invalid recovery journal identity')
+  for (const [index, change] of operation.changes.entries()) {
+    if (typeof change.rel !== 'string' || !isInside(targetRoot, resolve(targetRoot, change.rel)) || change.backup !== resolve(operation.stage, 'old', String(index))) throw new Error('invalid recovery change path')
+    if (change.staged !== null && change.staged !== resolve(operation.stage, 'new', change.rel)) throw new Error('invalid recovery staging path')
+  }
+  if (['completed', 'rolled-back'].includes(operation.phase)) {
+    finishOperation(operation)
+    return { status: operation.phase, operationId: id }
+  }
+  const active = existsSync(paths.active) ? JSON.parse(readBoundedText(paths.active, 16384).text) : null
+  if (active?.id !== id) throw new Error('recovery operation is not the active operation; refusing to alter the target')
+  restoreOperation(operation)
+  return { status: 'rolled-back', operationId: id }
+}
+
+function saveOperation(operation) { writeState(operation.journal, operation) }
+function finishOperation(operation) {
+  assertManagedPath(operation.stage)
+  if (existsSync(operation.stage)) rmSync(operation.stage, { recursive: true, force: true })
+  assertManagedPath(paths.active)
+  if (existsSync(paths.active) && JSON.parse(readBoundedText(paths.active, 16384).text).id === operation.id) rmSync(paths.active)
+}
+function moveManaged(source, target) {
+  assertManagedPath(source)
+  assertManagedPath(target)
+  mkdirSync(dirname(target), { recursive: true })
+  renameSync(source, target)
+}
+function assertManagedPath(path) {
+  if (!isInside(targetRoot, path) || samePath(targetRoot, path)) throw new Error(`managed path escapes target: ${path}`)
+  let current = path
+  while (!samePath(current, targetRoot)) { assertNotLink(current); current = dirname(current) }
+  assertCanonicalContained(targetRoot, path, 'managed path')
+}
+function injectFailure(phase) {
+  if (failurePhase === phase) throw new Error(`injected failure at ${phase}`)
+}
+function sourceRevision() {
+  const result = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: repoRoot, encoding: 'utf8', timeout: 10000, maxBuffer: 65536, shell: false })
+  return result.status === 0 ? result.stdout.trim() : null
+}
 
 function loadState(path) {
+  assertManagedPath(path)
   if (!existsSync(path)) return null
   assertNotLink(path)
-  const state = JSON.parse(readFileSync(path, 'utf8'))
+  const state = JSON.parse(readBoundedText(path).text)
   if (state?.schemaVersion !== 1 || !state.components || typeof state.components !== 'object') throw new Error(`invalid project installer state: ${path}`)
   return state
 }
 
 function writeState(path, value) {
+  assertManagedPath(path)
   mkdirSync(dirname(path), { recursive: true })
-  const temp = `${path}.${process.pid}.tmp`
-  writeFileSync(temp, `${JSON.stringify(value, null, 2)}\n`, 'utf8')
-  renameSync(temp, path)
+  const temp = `${path}.${randomUUID()}.tmp`
+  const fd = openSync(temp, 'wx')
+  try { writeFileSync(fd, `${JSON.stringify(value, null, 2)}\n`, 'utf8'); fsyncSync(fd) } finally { closeSync(fd) }
+  try { renameSync(temp, path) } finally { if (existsSync(temp)) rmSync(temp) }
 }
 
 function prepareTargetRoot(input) {
@@ -224,19 +366,15 @@ function listFiles(root, prefix = '') {
 }
 
 function fingerprintPath(path) {
-  const hash = createHash('sha256')
-  visit(path, path, hash)
-  return hash.digest('hex')
+  const fingerprint = fingerprintManagedPath(path)
+  if (!fingerprint) throw new Error(`fingerprint source is missing: ${path}`)
+  return fingerprint.sha256
 }
-function visit(root, target, hash) {
-  assertNotLink(target)
-  const stat = statSync(target)
-  const rel = toPosix(relative(root, target)) || '.'
-  hash.update(`${stat.isDirectory() ? 'd' : 'f'}:${rel}:`)
-  if (stat.isDirectory()) for (const name of readdirSync(target).sort()) visit(root, resolve(target, name), hash)
-  else hash.update(readFileSync(target))
+function assertNotLink(path) {
+  let stat
+  try { stat = lstatSync(path) } catch (error) { if (error.code === 'ENOENT') return; throw error }
+  if (stat.isSymbolicLink()) throw new Error(`symbolic link or junction is not allowed in managed path: ${path}`)
 }
-function assertNotLink(path) { if (existsSync(path) && lstatSync(path).isSymbolicLink()) throw new Error(`symbolic link or junction is not allowed in managed path: ${path}`) }
 function overlaps(left, right) { return isInside(left, right) || isInside(right, left) }
 function isInside(root, target) { const rel = relative(root, target); return rel === '' || (!isAbsolute(rel) && !rel.startsWith('..') && !rel.includes(`..${sep}`)) }
 function samePath(left, right) { return process.platform === 'win32' ? left.toLowerCase() === right.toLowerCase() : left === right }
@@ -252,10 +390,9 @@ function readInstalledLang(targetRoot) {
 }
 function runLanguageSetter(language, targetRoot) {
   const script = resolve(targetRoot, 'plugins', pluginName, 'scripts', 'set-language.mjs')
-  const result = spawnSync(process.execPath, [script, '--target', targetRoot, '--lang', language], { stdio: 'inherit' })
+  const result = spawnSync(process.execPath, [script, '--target', targetRoot, '--lang', language], { stdio: 'pipe', encoding: 'utf8', timeout: 30000, maxBuffer: 1024 * 1024, shell: false })
   if (result.error) throw result.error
   if (result.status !== 0) throw new Error(`language setter failed with status ${result.status ?? 1}`)
 }
-function writeJson(path, value) { mkdirSync(dirname(path), { recursive: true }); writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`, 'utf8') }
 function toPosix(path) { return path.replace(/\\/g, '/') }
 function fail(message) { console.error(message); process.exit(1) }

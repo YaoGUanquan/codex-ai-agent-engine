@@ -5,6 +5,8 @@ import { basename, dirname, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createHash } from 'node:crypto'
 import { homedir } from 'node:os'
+import { withLocalOperationLock } from './local-operation-lock.mjs'
+import { assertCanonicalContained } from './ae-tools/utils.mjs'
 import {
   aeSkillComponents,
   allowedConsumerComponents,
@@ -34,9 +36,19 @@ export function runGlobalInstall(argv = process.argv.slice(2), { repoRoot = defa
   const home = opts.home || undefined
   const paths = userPaths(home)
   if (command === 'preview') return preview({ opts, repoRoot, paths })
-  if (command === 'apply') return apply({ opts, repoRoot, paths, commandRunner })
-  if (command === 'recover') return recover({ opts, paths })
-  if (command === 'purge') return purge({ opts, paths })
+  if (command === 'purge' && opts.apply !== true) return purge({ opts, paths })
+  if (['apply', 'recover', 'purge'].includes(command)) {
+    if (command === 'apply' && (opts.apply !== true || !opts.operation || !opts.confirm)) throw new Error('apply requires --apply --operation <preview-id> --confirm <preview-confirmation>')
+    assertCanonicalContained(paths.homeRoot, paths.runtimeRoot, 'global installer coordination')
+    mkdirSync(paths.runtimeRoot, { recursive: true })
+    const lockPath = resolve(paths.runtimeRoot, 'install.lock')
+    assertCanonicalContained(paths.homeRoot, lockPath, 'global installer lock')
+    return withLocalOperationLock(lockPath, () => {
+      if (command === 'apply') return apply({ opts, repoRoot, paths, commandRunner })
+      if (command === 'recover') return recover({ opts, paths })
+      return purge({ opts, paths })
+    }, { owner: 'global installer', leaseMs: 300000 })
+  }
   throw new Error('Usage: global-install <preview|apply|recover|purge> [--manifest <path>] [--home <path>]')
 }
 
@@ -76,8 +88,10 @@ function apply({ opts, repoRoot, paths, commandRunner }) {
   recoverInterrupted(paths)
   const manifest = loadManifest(opts.manifest, repoRoot)
   const normalized = normalizeManifest(manifest, { repoRoot, home: paths.homeRoot, allowCustomConsumers: Boolean(opts.manifest) })
-  if (opts.confirm !== confirmationFor(normalized, opts, paths, repoRoot)) throw new Error('preview confirmation does not match the current manifest, source root, or retirement authorization')
-  const operation = { id: opts.operation, status: 'in-progress', phase: 'preflight', createdAt: new Date().toISOString(), paths, sourceRoot: normalized.sourceRoot, manifest: normalized, changes: [], failAt: opts['fail-at'] || null }
+  const sourceFingerprint = fingerprintPath(resolve(repoRoot, 'plugins', pluginName))
+  if (opts.confirm !== confirmationFor(normalized, opts, paths, repoRoot, sourceFingerprint)) throw new Error('preview confirmation does not match the current manifest, source root, or retirement authorization')
+  const revision = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: repoRoot, encoding: 'utf8', timeout: 10000, maxBuffer: 65536, shell: false })
+  const operation = { id: opts.operation, status: 'in-progress', phase: 'preflight', createdAt: new Date().toISOString(), paths, sourceRoot: normalized.sourceRoot, sourceRevision: revision.status === 0 ? revision.stdout.trim() : null, sourceFingerprint, manifest: normalized, changes: [], failAt: opts['fail-at'] || null }
   const journal = journalPath(paths, operation.id)
   if (existsSync(journal)) throw new Error(`operation journal already exists: ${operation.id}`)
   operation.journal = journal
@@ -107,7 +121,7 @@ function apply({ opts, repoRoot, paths, commandRunner }) {
     activateGlobalRuntime(operation, repoRoot)
     verifyProtectedProjectState(operation.protectedProjectState)
     operation.phase = 'publish-cursor-skills'
-    publishCursorSkills(operation, repoRoot)
+    publishCursorSkills(operation)
     writeJournal(journal, operation)
     injectFailure(operation, 'publish-cursor-skills')
     operation.phase = 'register-codex-plugin'
@@ -181,7 +195,7 @@ function recoverInterrupted(paths) {
 function ensureUserTargetsAreSafe(paths, repoRoot, opts) {
   if (!isInside(paths.homeRoot, paths.agentsRoot) || !isInside(paths.homeRoot, paths.runtimeRoot) || !isInside(paths.homeRoot, paths.personalPluginsRoot) || !isInside(paths.homeRoot, paths.personalPluginRoot) || !isInside(paths.homeRoot, paths.personalMarketplace) || !isInside(paths.homeRoot, paths.cursorSkillsRoot) || !isInside(paths.homeRoot, paths.cursorReservedSkillsRoot)) throw new Error('global paths escape the current user home')
   if (resolve(repoRoot) === paths.runtimeRoot || isInside(paths.runtimeRoot, resolve(repoRoot)) || resolve(repoRoot) === paths.personalPluginRoot || isInside(paths.personalPluginRoot, resolve(repoRoot))) throw new Error('distribution source must not overlap a user runtime or plugin root')
-  const expectedRuntimeEntries = new Set(['operations', 'backups', 'staging', 'runtime', 'bin'])
+  const expectedRuntimeEntries = new Set(['operations', 'backups', 'staging', 'runtime', 'bin', 'install.lock'])
   const unexpectedRuntimeEntries = existsSync(paths.runtimeRoot)
     ? readDirectory(paths.runtimeRoot).filter((name) => !expectedRuntimeEntries.has(name))
     : []
@@ -292,11 +306,15 @@ function isKnownWrapper(path) {
 function stageRuntime(operation, repoRoot) {
   const stage = resolve(operation.paths.runtimeRoot, 'staging', operation.id)
   const source = resolve(repoRoot, 'plugins', pluginName)
+  operation.stage = stage
+  writeJournal(operation.journal, operation)
   mkdirSync(stage, { recursive: true })
   const stagedPlugin = resolve(stage, 'plugin')
   cpSync(source, stagedPlugin, { recursive: true, errorOnExist: true })
-  if (fingerprintPath(stagedPlugin).sha256 !== fingerprintPath(source).sha256) throw new Error('staged runtime fingerprint mismatch')
-  operation.stage = stage
+  if (fingerprintPath(stagedPlugin).sha256 !== operation.sourceFingerprint.sha256
+    || fingerprintPath(source).sha256 !== operation.sourceFingerprint.sha256) {
+    throw new Error('staged runtime does not match the confirmed source fingerprint')
+  }
 }
 
 function cleanConsumer(operation, root, repoRoot) {
@@ -363,8 +381,8 @@ function writePersonalMarketplace(operation) {
   replaceFileWithBackup(operation, target, `${JSON.stringify(next, null, 2)}\n`, 'personal-marketplace.json')
 }
 
-function publishCursorSkills(operation, repoRoot) {
-  const names = currentSkillNames(repoRoot)
+function publishCursorSkills(operation) {
+  const names = currentSkillNames(operation.paths.homeRoot)
   mkdirSync(operation.paths.cursorSkillsRoot, { recursive: true })
   for (const dest of aeSkillComponents(operation.paths.cursorSkillsRoot)) {
     const name = basename(dest)
@@ -565,9 +583,10 @@ function loadManifest(path, repoRoot) {
   return path ? readJson(resolve(path)) : buildFirstBatchManifest(repoRoot)
 }
 
-function confirmationFor(manifest, opts = {}, paths = null, repoRoot = null) {
+function confirmationFor(manifest, opts = {}, paths = null, repoRoot = null, sourceFingerprint = null) {
   return createHash('sha256').update(JSON.stringify({
     manifest,
+    sourceFingerprint: sourceFingerprint ?? (repoRoot ? fingerprintPath(resolve(repoRoot, 'plugins', pluginName)) : null),
     retireModified: opts['retire-modified'] === true,
     cursorSkills: paths && repoRoot ? classifyCursorSkills(paths, repoRoot) : [],
   })).digest('hex')
@@ -601,7 +620,7 @@ function serializable(operation) {
 }
 
 function report(operation) {
-  return { status: operation.status, operationId: operation.id, phase: operation.phase, journal: journalPath(operation.paths, operation.id), backupRoot: backupPath(operation.paths, operation.id), changes: operation.changes?.length || 0, error: operation.error || null }
+  return { status: operation.status, operationId: operation.id, phase: operation.phase, source_revision: operation.sourceRevision ?? null, source_fingerprint: operation.sourceFingerprint ?? null, journal: journalPath(operation.paths, operation.id), backupRoot: backupPath(operation.paths, operation.id), changes: operation.changes?.length || 0, error: operation.error || null }
 }
 
 function parseOptions(args) {

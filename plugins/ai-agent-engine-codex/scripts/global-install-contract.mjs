@@ -2,6 +2,7 @@ import { createHash, randomUUID } from 'node:crypto'
 import { existsSync, lstatSync, readdirSync, readFileSync, readlinkSync, realpathSync, statSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { basename, isAbsolute, relative, resolve, sep } from 'node:path'
+import { fingerprintManagedPath } from './path-fingerprint.mjs'
 
 export const pluginName = 'ai-agent-engine-codex'
 export const terminalOperationStates = new Set(['completed', 'rolled-back'])
@@ -161,11 +162,7 @@ function cursorSkillSource(paths, repoRoot, name) {
 }
 
 export function fingerprintPath(path) {
-  const target = resolve(path)
-  if (!existsSync(target)) return null
-  const hash = createHash('sha256')
-  visit(target, target, hash)
-  return { sha256: hash.digest('hex'), kind: statSync(target).isDirectory() ? 'directory' : 'file' }
+  return fingerprintManagedPath(path)
 }
 
 export function operationId() {
@@ -179,18 +176,6 @@ export function isInside(root, target) {
 
 export function overlaps(left, right) {
   return isInside(left, right) || isInside(right, left)
-}
-
-function visit(root, target, hash) {
-  const stat = lstatSync(target)
-  if (stat.isSymbolicLink()) throw new Error(`symbolic link is not allowed in managed component: ${target}`)
-  const rel = relative(root, target).replace(/\\/g, '/') || '.'
-  hash.update(`${stat.isDirectory() ? 'd' : 'f'}:${rel}:`)
-  if (stat.isDirectory()) {
-    for (const entry of readdirSync(target).sort()) visit(root, resolve(target, entry), hash)
-  } else {
-    hash.update(readFileSync(target))
-  }
 }
 
 function verifiedDirectory(path, label) {
