@@ -13,30 +13,32 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 
 中文文档: [README.md](README.md)
 
-### 0.3.47 (2026-09-24)
-- Add a conditional data-access contract across 14 requirement, design, implementation, refactoring, diagnosis and acceptance skills: query budgets, logical pagination units, separate count validation, and execution-batch versus transaction-commit boundaries.
-- Compare auxiliary lookup/extension tables and precomputed read models with consistency, backfill and rebuild costs. Durable async bulk saving covers acceptance, backpressure, chunks, idempotency, checkpoints, recovery and completion. MyBatis-Plus choices depend on actual versions; no blanket count-disable, table or queue requirement.
-- Validation commands: `node --test tests/data-access-contract.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These verify instruction structure, reviewer selection, mirrors and isolated installation distribution, not model adherence, business-database performance, real async recovery or a current-user installation update.
+### 0.3.52 (2026-09-27)
+- Fix reviewed installation recovery failures: reject missing arguments before locking and preserve bounded, redacted updater diagnostics, operation IDs and journal paths, distinguishing completed rollback from failed recovery.
+- Ordinary mentions of `ae-doc-pages:v1` no longer count as damaged routers. External document maintenance creates a durable report and per-file journal before mutation; reporting failures retain applied/pending recovery evidence and stop further writes.
+- Validation commands: `node --test tests/install-scripts.test.mjs tests/docs-lifecycle.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. Evidence covers local regressions, fault injection and isolated installation. Global updates require separate journal, Codex registration and Cursor-copy verification, not current-chat reload or production acceptance.
 
-### 0.3.46 (2026-09-13)
-- Unify runtime entry selection with one read-only resolver: prefer the project wrapper and use the current-user global dispatcher only when the path is absent. Invalid paths, dangling links and command failures remain visible; never silently change versions or retry commands.
-- Active skills and the capability catalog use the `node "$aeEntry"` template with a shared bootstrap reference. Help emits shell-safe PowerShell/POSIX assignments for its actual invocation path; command arguments and authorization boundaries stay unchanged.
-- Validation commands: `node --test tests/runtime-entry.test.mjs tests/instruction-audit.test.mjs tests/skills-docs.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. Focused tests cover both shells, consumer installation and an isolated global dispatcher, not a real global update, host discovery or GPT-6 Astra routing/token gains. See the delivery review for full-suite results.
+### 0.3.51 (2026-09-27)
+- Integrate bounded scanning with memory pagination: graph, task and review-impact scans exclude immutable pages by default. Explicit inclusion remains read-only evidence, including plan-declared pages; workers never acquire page write ownership, while changed-file review inventories remain intact.
+- Recovery accepts one absolute external docs root and artifact-type filtering with explicit path bases, scope and completeness. Invalid roots/options never fall back to repository docs, and location selection does not verify registered project/branch identity. Update LFG, worker guidance, the shared contract and help.
+- Coordinate with memory maintenance to unify Windows document case-alias identity and local locks while preserving legacy routers/pages; POSIX identities are not merged through blanket lowercasing.
+- Validation commands: `node --test tests/scale-memory-integration.test.mjs tests/docs-lifecycle.test.mjs tests/memory-navigation.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. Evidence covers isolated local integration, two-process exclusion, byte recovery and installation distribution, not live external migration, current-user installation, multi-host consistency or production throughput. See validation records for environment-specific skips.
 
-### 0.3.45 (2026-09-13)
-- First audit optimization batch: distinguish canonical plugin source, maintenance mirror, consumer installation, and generated outputs; remove obsolete README release entries while retaining full history in CHANGELOG.
-- Narrow the three frontend skill triggers, reuse existing routing decisions, and load visual references conditionally. Add six positive/negative routing cases while retaining safety and browser evidence gates. Runtime entry unification remains pending.
-- Validation commands: `node --test tests/instruction-audit.test.mjs tests/skills-docs.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These prove static instruction, mirror, and isolated installation-distribution contracts only, not measured GPT-6 Astra routing accuracy, token savings, or real-model compatibility.
+### 0.3.50 (2026-09-27)
+- Route all 40 skills through a role-specific shared scale/distributed contract for capacity, backpressure, idempotency, partitioning, recovery, mixed versions and evidence tiers; preserve specialized data-access and document-pagination ownership.
+- Bound graph/task/recovery/issue traversal, bytes and time with explicit incompleteness; avoid repeated backtracking on malformed import/export text. Add content-aware task candidates, fail-closed profile/YAML handling and visible conversion/OpenAPI truncation. Gate declarations are not execution evidence; blocked gates exit 1.
+- Stage and validate project installs with local writer locks, fingerprints and recovery journals. Bind global installation to previewed source content, clean failed staging, publish the verified copy and serialize writers; separate installed updates from failed maintenance. Component swaps are not a cross-component atomic transaction or a multi-host lock.
+- Validation commands: `node --test tests/scale-runtime.test.mjs tests/install-scripts.test.mjs tests/global-install.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. Evidence is limited to local helpers, isolated concurrency/recovery, static skills and distribution contracts. Privilege-blocked Windows file-link fixtures are explicitly skipped; target capacity, multi-host reliability, production acceptance and current-user installation remain unverified.
 
-### 0.3.44 (2026-09-10)
-- Fix `ae-reverse-engineering` being indexed by Cursor but hard to discover with Chinese terms such as `授权逆向`. Cursor reads `SKILL.md` frontmatter rather than the Codex-specific `agents/openai.yaml` display name, so the skill description now includes bilingual capability terms plus `/ae-reverse-engineering` and `$ae-reverse-engineering` explicit invocations.
-- Preserve the authorization gate, static-first workflow, and defensive scope. This does not add license bypass, credential theft, persistence, detection evasion, active exploitation, target scanning, or unauthorized interaction capabilities.
-- Validation commands: focused reverse-engineering tests, `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, `git diff --check`, and the current-user global installation smoke. Static checks prove frontmatter, mirror, and distributed-copy consistency; Cursor UI visibility still requires manual confirmation after reloading the window or opening a new chat.
+### 0.3.49 (2026-09-27)
+- Extend growth control to memory topics, development history, navigation and rolling logs with `ae-docs-maintain` audits/lossless pagination, `ae-docs-append` automatic bounded writes and resumable `ae-docs-search`. Routers have fixed budgets and original bytes remain recoverable.
+- Add explicit registered-external-docs batch maintenance bound to context manifests and preview hashes, with per-file verification. Update bilingual scaffolds, shipping gates and mirrors. Formal contracts, SQL, structured registries, JSONL chains and archives are not automatically rewritten; no background jobs or history deletion.
+- Validation commands: `node --test tests/docs-lifecycle.test.mjs tests/memory-navigation.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. Evidence covers local pagination/search, byte recovery and isolated distribution; live external application requires its per-file report, not a global installation, arbitrary-write protection or measured model token/latency gains.
 
-### 0.3.43 (2026-09-10)
-- Add a model-neutral adaptation contract: core AE workflows scale from task risk, acceptance criteria, active tool schemas, and observed capabilities instead of inferring tools, context, private reasoning, or `reasoning_effort` from GPT-5.6, GPT-6, or another model label. Provider catalog mismatches remain runtime metadata defects.
-- Strengthen init-generated `AGENTS.md` with fail-visible behavior, root-cause and structural-fix decisions, progressive instruction loading, ordered repository-defined validation commands, final diff review, and proof-tier boundaries. `minimal` stays concise; `ae-core/full` receive the complete rules, and no missing command is invented.
-- Extend skill contract checks to relative Markdown links under skill directories. Validation commands: focused model-adaptation and init tests, `npm test`, `npm run check`, `npm run check:smoke`, `node scripts/check-release-notes.mjs`, and `git diff --check`. These prove local instruction, generator, mirror, and install-distribution contracts only, not equivalent behavior across every model, provider, or Codex host.
+### 0.3.48 (2026-09-27)
+- Bound the memory router to 4096 UTF-8 bytes/80 lines and topics to 15KiB. Add `ae-memory-index` audit/check and source-hash-guarded lossless compaction; immutable pages preserve original bytes without deleting history or distilling other topics.
+- Add `ae-memory-search` bounded literal search: five short path/line excerpts by default, explicit historical scope, visible scan truncation and caller-resolved external docs roots. Declared relation queries remain unchanged; templates prohibit dated logs in the router.
+- Validation commands: `node --test tests/memory-navigation.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. Evidence covers local filesystem/CLI, mirrors and isolated installation contracts only; an isolated Axon sample is not live migration, global installation or measured model token/latency improvement.
 
 ## When To Use It
 
@@ -158,6 +160,17 @@ node scripts/ae-tools.mjs ae-knowledge-query --path docs/08-ai-memory/08-phase-t
 ```
 
 Memory queries only read registered Markdown and relations from `docs/08-ai-memory/00-registry.json`. A no-match returns only `no declared match`; unregistered documents are not searched. `ae-knowledge-map` and `ae-knowledge-query` return only `declared` relationships with their evidence. None of these commands creates a cache, database, graph file, or CodeGraph state.
+
+Router budgets and literal retrieval use separate commands:
+
+```powershell
+node scripts/ae-tools.mjs ae-memory-index --check
+node scripts/ae-tools.mjs ae-memory-search --query "crop" --limit 5
+node scripts/ae-tools.mjs ae-memory-search --query "timeout" --path 03-key-workflows.md
+node scripts/ae-tools.mjs ae-memory-index --compact
+```
+
+Keep `00-index.md` within 4096 bytes/80 lines and each topic within 15KiB. Search returns at most five 240-character excerpts by default, scanning top-level Markdown within 128 files/8MiB and a 512KiB per-file cap; use `--path` for nested topics. `--history` searches old-index fragments only. An incomplete scan is not proof of absence. Resolve the current project/branch before passing `--docs-root <absolute-docs-directory>`; roots are never merged. Compaction previews by default; authorized apply also requires `--apply --expect-sha256 <preview-hash>`. Verify adjacent pages before replacing the router; ordered concatenation and the source hash support recovery. Cross-page anchors/reference definitions are not rewritten, and historical validity is not inferred.
 
 Additional helper commands:
 

@@ -4,6 +4,33 @@
 
 English: [CHANGELOG.en.md](CHANGELOG.en.md)
 
+### 0.3.52（2026-09-27）
+- 修复审查发现的安装恢复问题：缺失参数在加锁前拒绝，更新失败保留有界脱敏诊断、操作 ID 和 journal 路径，明确区分已回滚与恢复失败。
+- 普通正文中的 `ae-doc-pages:v1` 格式名不再误判为损坏路由；外部文档维护在改写前建立报告和持久化逐文件日志，报告失败保留已应用清单、待核验文件和恢复信息并停止后续写入。
+- 验证命令：`node --test tests/install-scripts.test.mjs tests/docs-lifecycle.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。证据限于本地回归、故障注入和隔离安装；全局更新须另核验安装 journal、Codex 注册和 Cursor 副本，不代表当前会话已重新加载或生产验收。
+
+### 0.3.51（2026-09-27）
+- 打通规模化扫描与记忆分页：图、任务和审查影响分析默认排除不可变分片，显式纳入后仍只授予只读证据权限；计划模式也不能把分片变为 worker 写入所有权，审查改动清单始终保留真实变更。
+- recovery 支持单一绝对外部文档根与类型筛选，明确路径基准、范围和不完整性；错误根/参数不回退到仓库 docs，目录选择不等于已验证项目/分支登记。同步 LFG、工作委派、共享契约和 help 指引。
+- 联合记忆任务修复 Windows 文档大小写别名的身份与本地锁一致性，保留旧路由/分片兼容性；POSIX 不以统一小写合并不同文件。
+- 验证命令：`node --test tests/scale-memory-integration.test.mjs tests/docs-lifecycle.test.mjs tests/memory-navigation.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。证据限于本地隔离集成、双进程互斥、字节恢复和安装分发；不代表外部原文已迁移、当前用户安装已升级、跨主机一致性或生产吞吐验收，环境相关跳过以验证记录为准。
+
+### 0.3.50（2026-09-27）
+- 全部 40 个技能按职责接入共享规模化/分布式工程契约，覆盖容量、背压、幂等、分区、恢复、混合版本与证据分层；保留既有数据库专项和文档分页契约。
+- 图、任务、恢复和 Issue 分析增加遍历/字节/时间预算及不完整诊断，依赖提取消除异常 import/export 文本的重复回溯；任务支持内容匹配，配置/YAML 失败显式阻断并行就绪，转换和 OpenAPI 不再静默截断。gate 区分命令声明与执行记录，阻断返回退出码 1。
+- 项目安装增加暂存校验、写入锁、指纹和 journal 恢复；全局安装增加写入锁、预览源内容绑定、失败暂存清理及已校验副本发布；更新区分安装完成与维护失败。逐组件交换不等于跨组件原子事务，也不是跨主机锁。
+- 验证命令：`node --test tests/scale-runtime.test.mjs tests/install-scripts.test.mjs tests/global-install.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。仅证明本地工具、隔离并发/恢复、静态技能和安装分发合同；权限不足的 Windows 文件链接用例明确跳过，不代表真实目标项目容量、跨主机可靠性、生产验收或当前用户安装已升级。
+
+### 0.3.49（2026-09-27）
+- 将增长治理扩展到记忆专题、开发历史、导航和滚动台账：新增 `ae-docs-maintain` 分类审计/无损分页、`ae-docs-append` 自动分页写入与 `ae-docs-search` 有界续查，入口固定预算，历史原字节可恢复。
+- 新增已登记外部 docs 的显式批量维护工具，绑定 context manifest 和预览哈希，逐文件核验；更新中英文生成模板、收尾门禁和维护镜像。正式合同、SQL、结构化 registry、JSONL 证据链和归档不自动拆改，不创建后台任务或删除历史。
+- 验证命令：`node --test tests/docs-lifecycle.test.mjs tests/memory-navigation.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。证明本地分页/检索、字节恢复及隔离分发合同；实际外部应用以逐文件报告为准，不代表全局安装已更新、任意手工写入受阻或模型 token/延迟收益。
+
+### 0.3.48（2026-09-27）
+- 记忆入口改为最多 4096 UTF-8 字节/80 行的短导航，专题预算 15KiB；新增 `ae-memory-index` 审计/门禁及带源哈希校验的无损整理，历史分片保留原字节，不自动删除或蒸馏其他专题。
+- 新增 `ae-memory-search` 有界字面检索，默认返回 5 个短摘录及路径/行号；历史显式选择，扫描截断明确报告，外部 docs 由调用方先解析分支后显式传入。原声明式关系查询不变，读写模板禁止入口追加日期流水。
+- 验证命令：`node --test tests/memory-navigation.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。仅证明本地文件/CLI、镜像与隔离安装合同；Axon 隔离样本不代表原目录已迁移，全局安装和模型 token/延迟收益未验证。
+
 ### 0.3.47（2026-09-24）
 - 后端大数据量设计新增按需加载的数据访问契约，贯穿 14 个需求、设计、实现、重构、诊断与验收技能：明确查询预算、逻辑分页对象、独立 count 验收、批量执行与事务提交边界，避免无依据的逐条查询/提交。
 - 增加辅助查询表、业务扩展表、预计算读模型的方案比较与一致性、回填、重建约束；异步批量保存覆盖持久化接收、背压、分块事务、幂等、检查点、失败恢复和完成核验。MyBatis-Plus 按实际版本选择 count 与批处理方案，不全局关闭优化或强制新增表/队列。

@@ -4,6 +4,33 @@ This file is the complete release history of AI Agent Engine for Codex (since 0.
 
 中文版本: [CHANGELOG.md](CHANGELOG.md)
 
+### 0.3.52 (2026-09-27)
+- Fix reviewed installation recovery failures: reject missing arguments before locking and preserve bounded, redacted updater diagnostics, operation IDs and journal paths, distinguishing completed rollback from failed recovery.
+- Ordinary mentions of `ae-doc-pages:v1` no longer count as damaged routers. External document maintenance creates a durable report and per-file journal before mutation; reporting failures retain applied/pending recovery evidence and stop further writes.
+- Validation commands: `node --test tests/install-scripts.test.mjs tests/docs-lifecycle.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. Evidence covers local regressions, fault injection and isolated installation. Global updates require separate journal, Codex registration and Cursor-copy verification, not current-chat reload or production acceptance.
+
+### 0.3.51 (2026-09-27)
+- Integrate bounded scanning with memory pagination: graph, task and review-impact scans exclude immutable pages by default. Explicit inclusion remains read-only evidence, including plan-declared pages; workers never acquire page write ownership, while changed-file review inventories remain intact.
+- Recovery accepts one absolute external docs root and artifact-type filtering with explicit path bases, scope and completeness. Invalid roots/options never fall back to repository docs, and location selection does not verify registered project/branch identity. Update LFG, worker guidance, the shared contract and help.
+- Coordinate with memory maintenance to unify Windows document case-alias identity and local locks while preserving legacy routers/pages; POSIX identities are not merged through blanket lowercasing.
+- Validation commands: `node --test tests/scale-memory-integration.test.mjs tests/docs-lifecycle.test.mjs tests/memory-navigation.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. Evidence covers isolated local integration, two-process exclusion, byte recovery and installation distribution, not live external migration, current-user installation, multi-host consistency or production throughput. See validation records for environment-specific skips.
+
+### 0.3.50 (2026-09-27)
+- Route all 40 skills through a role-specific shared scale/distributed contract for capacity, backpressure, idempotency, partitioning, recovery, mixed versions and evidence tiers; preserve specialized data-access and document-pagination ownership.
+- Bound graph/task/recovery/issue traversal, bytes and time with explicit incompleteness; avoid repeated backtracking on malformed import/export text. Add content-aware task candidates, fail-closed profile/YAML handling and visible conversion/OpenAPI truncation. Gate declarations are not execution evidence; blocked gates exit 1.
+- Stage and validate project installs with local writer locks, fingerprints and recovery journals. Bind global installation to previewed source content, clean failed staging, publish the verified copy and serialize writers; separate installed updates from failed maintenance. Component swaps are not a cross-component atomic transaction or a multi-host lock.
+- Validation commands: `node --test tests/scale-runtime.test.mjs tests/install-scripts.test.mjs tests/global-install.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. Evidence is limited to local helpers, isolated concurrency/recovery, static skills and distribution contracts. Privilege-blocked Windows file-link fixtures are explicitly skipped; target capacity, multi-host reliability, production acceptance and current-user installation remain unverified.
+
+### 0.3.49 (2026-09-27)
+- Extend growth control to memory topics, development history, navigation and rolling logs with `ae-docs-maintain` audits/lossless pagination, `ae-docs-append` automatic bounded writes and resumable `ae-docs-search`. Routers have fixed budgets and original bytes remain recoverable.
+- Add explicit registered-external-docs batch maintenance bound to context manifests and preview hashes, with per-file verification. Update bilingual scaffolds, shipping gates and mirrors. Formal contracts, SQL, structured registries, JSONL chains and archives are not automatically rewritten; no background jobs or history deletion.
+- Validation commands: `node --test tests/docs-lifecycle.test.mjs tests/memory-navigation.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. Evidence covers local pagination/search, byte recovery and isolated distribution; live external application requires its per-file report, not a global installation, arbitrary-write protection or measured model token/latency gains.
+
+### 0.3.48 (2026-09-27)
+- Bound the memory router to 4096 UTF-8 bytes/80 lines and topics to 15KiB. Add `ae-memory-index` audit/check and source-hash-guarded lossless compaction; immutable pages preserve original bytes without deleting history or distilling other topics.
+- Add `ae-memory-search` bounded literal search: five short path/line excerpts by default, explicit historical scope, visible scan truncation and caller-resolved external docs roots. Declared relation queries remain unchanged; templates prohibit dated logs in the router.
+- Validation commands: `node --test tests/memory-navigation.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. Evidence covers local filesystem/CLI, mirrors and isolated installation contracts only; an isolated Axon sample is not live migration, global installation or measured model token/latency improvement.
+
 ### 0.3.47 (2026-09-24)
 - Add a conditional data-access contract across 14 requirement, design, implementation, refactoring, diagnosis and acceptance skills: query budgets, logical pagination units, separate count validation, and execution-batch versus transaction-commit boundaries.
 - Compare auxiliary lookup/extension tables and precomputed read models with consistency, backfill and rebuild costs. Durable async bulk saving covers acceptance, backpressure, chunks, idempotency, checkpoints, recovery and completion. MyBatis-Plus choices depend on actual versions; no blanket count-disable, table or queue requirement.
