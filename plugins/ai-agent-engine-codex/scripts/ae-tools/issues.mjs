@@ -1,7 +1,8 @@
-import { closeSync, existsSync, lstatSync, mkdirSync, openSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, lstatSync, mkdirSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative } from 'node:path'
 import { randomUUID } from 'node:crypto'
-import { assertCanonicalContained, normalizeArtifactOutputPath, parseOptions, safeResolve, toPosix } from './utils.mjs'
+import { withLocalOperationLock } from '../local-operation-lock.mjs'
+import { assertCanonicalContained, boundedInteger, normalizeArtifactOutputPath, parseOptions, readBoundedText, safeResolve, scanFiles, scanOptions, toPosix } from './utils.mjs'
 
 const states = new Set(['backlog', 'ready', 'in-progress', 'blocked', 'done', 'closed'])
 const priorities = new Set(['P0', 'P1', 'P2', 'P3'])
@@ -61,8 +62,20 @@ function createIssue(worktree, root, opts) {
 
 function listIssues(root, opts) {
   if (opts.status) validateState(String(opts.status))
-  const issues = loadIssues(root).filter((issue) => !opts.status || issue.status === String(opts.status)).sort((a, b) => a.id.localeCompare(b.id))
-  return { status: 'ok', action: 'list', issues }
+  const limit = boundedInteger(opts.limit, 100, '--limit', 1, 1000)
+  const offset = boundedInteger(opts.offset, 0, '--offset', 0, 10000)
+  const scan = scanFiles(root, { ...scanOptions({ ...opts, limit: undefined }, { maxFiles: 1000, maxFileBytes: 512 * 1024 }), maxDepth: 0, readText: true, include: (name) => /^AEI-\d{8}-\d{3}\.md$/.test(name) })
+  const matched = scan.files.map((file) => validateIssueRecord(parseIssue(file.text), file.relativePath.slice(0, -3)))
+    .filter((issue) => !opts.status || issue.status === String(opts.status)).sort((a, b) => a.id.localeCompare(b.id))
+  const issues = matched.slice(offset, offset + limit)
+  const hasMore = matched.length > offset + limit
+  return {
+    status: 'ok', action: 'list', issues,
+    pagination: { limit, offset, returned: issues.length, nextOffset: hasMore ? offset + limit : null, observedMatches: matched.length, totalIsExact: scan.completeness.complete, stableSnapshot: false },
+    completeness: { complete: scan.completeness.complete && !hasMore, reasons: [...scan.completeness.reasons, ...(hasMore ? ['result-limit'] : [])] },
+    diagnostics: scan.diagnostics,
+    limits: scan.limits,
+  }
 }
 
 function showIssue(worktree, root, opts) {
@@ -151,12 +164,6 @@ function dependencyQuery(worktree, root, opts) {
   return { status: 'ok', action: 'depends', issue: publicIssue(worktree, join(root, `${issue.id}.md`), issue), dependencies: issue.dependsOn.map((id) => requireIssue(root, id)) }
 }
 
-function loadIssues(root) {
-  return readdirSync(root)
-    .filter((name) => /^AEI-\d{8}-\d{3}\.md$/.test(name))
-    .map((name) => readIssueFile(root, name.slice(0, -3)))
-}
-
 function requireIssue(root, id) {
   const value = String(id || '').trim()
   if (!/^AEI-\d{8}-\d{3}$/.test(value)) throw new Error('issue id must match AEI-YYYYMMDD-NNN')
@@ -168,18 +175,29 @@ function requireIssue(root, id) {
 function readIssueFile(root, id) {
   const path = join(root, `${id}.md`)
   if (lstatSync(path).isSymbolicLink()) throw new Error(`issue record must not be a symbolic link: ${id}`)
-  const issue = parseIssue(readFileSync(path, 'utf8'))
+  const issue = parseIssue(readBoundedText(path, 512 * 1024).text)
+  return validateIssueRecord(issue, id)
+}
+
+function validateIssueRecord(issue, id) {
   if (issue.id !== id) throw new Error(`issue record ID does not match its filename: ${id}`)
   validateState(issue.status)
   validatePriority(issue.priority)
   return issue
 }
 
-function hasDependencyPath(root, startId, targetId, visited = new Set()) {
-  if (startId === targetId) return true
-  if (visited.has(startId)) return false
-  visited.add(startId)
-  return requireIssue(root, startId).dependsOn.some((id) => hasDependencyPath(root, id, targetId, visited))
+function hasDependencyPath(root, startId, targetId) {
+  const pending = [startId]
+  const visited = new Set()
+  while (pending.length) {
+    const id = pending.pop()
+    if (id === targetId) return true
+    if (visited.has(id)) continue
+    if (visited.size >= 1000 || pending.length > 10000) throw new Error('issue dependency traversal exceeds budget; dependency was not added')
+    visited.add(id)
+    pending.push(...requireIssue(root, id).dependsOn)
+  }
+  return false
 }
 
 function parseIssue(text) {
@@ -203,29 +221,19 @@ function renderIssue(issue) {
 function publicIssue(worktree, path, issue) { return { ...issue, path: toPosix(relative(worktree, path)) } }
 function validateState(value) { if (!states.has(value)) throw new Error(`issue status is not supported: ${value}`) }
 function validatePriority(value) { if (!priorities.has(value)) throw new Error(`issue priority is not supported: ${value}`) }
-function allocateId(root) { const date = new Date().toISOString().slice(0, 10).replaceAll('-', ''); const used = new Set(loadIssues(root).map((issue) => issue.id)); for (let n = 1; n <= 999; n++) { const id = `AEI-${date}-${String(n).padStart(3, '0')}`; if (!used.has(id)) return id } throw new Error('issue id space exhausted for today') }
+function allocateId(root) { const date = new Date().toISOString().slice(0, 10).replaceAll('-', ''); for (let n = 1; n <= 999; n++) { const id = `AEI-${date}-${String(n).padStart(3, '0')}`; if (!existsSync(join(root, `${id}.md`))) return id } throw new Error('issue id space exhausted for today (999); no record was overwritten') }
 function singleLine(value) { return String(value || '').replace(/[\r\n]+/g, ' ').trim() }
 function historyEvent(at, action, value, detail) { return { at, action, value, detail } }
 
 function writeIssue(path, issue, create = false) {
   if (create && existsSync(path)) throw new Error(`issue already exists: ${issue.id}`)
   const temp = `${path}.${process.pid}.${randomUUID()}.tmp`
-  writeFileSync(temp, renderIssue(issue), 'utf8')
+  const text = renderIssue(issue)
+  if (Buffer.byteLength(text, 'utf8') > 512 * 1024) throw new Error('issue record exceeds 512 KiB; archive history explicitly before updating')
+  writeFileSync(temp, text, { encoding: 'utf8', flag: 'wx' })
   try { renameSync(temp, path) } finally { rmSync(temp, { force: true }) }
 }
 
 function withIssueLock(root, action) {
-  const lockPath = join(root, 'issues.lock')
-  const deadline = Date.now() + 5_000
-  while (true) {
-    try {
-      const descriptor = openSync(lockPath, 'wx')
-      closeSync(descriptor)
-      break
-    } catch (error) {
-      if (error?.code !== 'EEXIST' || Date.now() >= deadline) throw new Error('issue tracker is busy; retry after the active writer finishes')
-      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 10)
-    }
-  }
-  try { return action() } finally { rmSync(lockPath, { force: true }) }
+  return withLocalOperationLock(join(root, 'issues.lock'), action, { owner: 'issue tracker' })
 }

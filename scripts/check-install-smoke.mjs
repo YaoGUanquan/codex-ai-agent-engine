@@ -142,6 +142,20 @@ try {
   if (recoveryResult.exists !== true || recoveryResult.worktree !== targetRoot) {
     throw new Error('Installed recovery command did not inspect the target project root')
   }
+  const externalDocs = resolve(targetRoot, 'external-docs-fixture')
+  mkdirSync(resolve(externalDocs, 'ae', 'plans'), { recursive: true })
+  writeFileSync(resolve(externalDocs, 'ae', 'plans', 'external-plan.md'), '# External fixture\n', 'utf8')
+  const externalRecovery = JSON.parse(run(process.execPath, [
+    resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'recovery', '--docs-root', externalDocs, '--type', 'plan',
+  ], { cwd: targetRoot }).stdout)
+  if (externalRecovery.docsRoot !== externalDocs || externalRecovery.pathBase !== 'docs-root'
+    || externalRecovery.contextVerified !== false || externalRecovery.candidates.length !== 1
+    || externalRecovery.candidates[0].path !== 'ae/plans/external-plan.md') {
+    throw new Error('Installed recovery did not honor its single explicit docs root and path base')
+  }
+  runExpectedFailure(process.execPath, [
+    resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'recovery', '--docs-root', resolve(externalDocs, 'absent'),
+  ], { cwd: targetRoot })
   run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'help', 'claude'], { cwd: targetRoot })
   const artifactResult = JSON.parse(run(process.execPath, [resolve(targetRoot, 'scripts', 'check-ae-artifacts.mjs')], { cwd: targetRoot }).stdout)
   if (artifactResult.status !== 'ok' || artifactResult.targetRoot !== targetRoot) {
@@ -163,6 +177,12 @@ try {
   }
   if (existsSync(resolve(targetRoot, 'docs', '08-ai-memory')) || existsSync(resolve(targetRoot, '.codegraph'))) {
     throw new Error('Installed memory commands created project memory or CodeGraph state without initialization')
+  }
+  for (const args of [['ae-memory-index', '--check'], ['ae-memory-search', '--query', 'fixture']]) {
+    const output = JSON.parse(runExpectedFailure(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), ...args], { cwd: targetRoot }).stdout)
+    if (output.status !== 'invalid' || existsSync(resolve(targetRoot, 'docs', '08-ai-memory'))) {
+      throw new Error('Installed memory navigation must reject missing state without creating it')
+    }
   }
   const claudeCheckResult = JSON.parse(run(process.execPath, [resolve(targetRoot, 'scripts', 'ae-tools.mjs'), 'claude-delegate', '--check'], { cwd: targetRoot }).stdout)
   if (!['ok', 'skip'].includes(claudeCheckResult.status) || typeof claudeCheckResult.available !== 'boolean') {
@@ -256,6 +276,55 @@ try {
     }
   }
 
+  const installedEntry = resolve(targetRoot, 'scripts', 'ae-tools.mjs')
+  run(process.execPath, [installedEntry, 'init', '--lang', 'zh-CN'], { cwd: targetRoot })
+  const navigationPreview = JSON.parse(run(process.execPath, [installedEntry, 'ae-memory-index', '--compact'], { cwd: targetRoot }).stdout)
+  const navigationApplied = JSON.parse(run(process.execPath, [
+    installedEntry, 'ae-memory-index', '--compact', '--apply', '--expect-sha256', navigationPreview.index.sha256,
+  ], { cwd: targetRoot }).stdout)
+  if (navigationApplied.mode !== 'applied' || navigationApplied.replacement.bytes > 4096) {
+    throw new Error('Installed memory compaction did not produce a bounded router')
+  }
+  run(process.execPath, [installedEntry, 'ae-memory-index', '--check'], { cwd: targetRoot })
+  const textMatches = JSON.parse(run(process.execPath, [
+    installedEntry, 'ae-memory-search', '--query', 'ae-memory-search', '--path', '00-index.md', '--limit', '1',
+  ], { cwd: targetRoot }).stdout)
+    if (textMatches.results.length !== 1 || textMatches.results[0].path !== '08-ai-memory/00-index.md') {
+      throw new Error('Installed text search did not return scoped memory evidence')
+    }
+    const topic = '08-ai-memory/03-key-workflows.md'
+    const docPreview = JSON.parse(run(process.execPath, [installedEntry, 'ae-docs-maintain', '--path', topic, '--compact'], { cwd: targetRoot }).stdout)
+    run(process.execPath, [installedEntry, 'ae-docs-maintain', '--path', topic, '--compact', '--apply', '--expect-sha256', docPreview.source.sha256], { cwd: targetRoot })
+    run(process.execPath, [installedEntry, 'ae-docs-maintain', '--path', topic, '--verify'], { cwd: targetRoot })
+    const entry = 'ae/experience/lifecycle-entry.md'
+    writeFileSync(resolve(targetRoot, 'docs', entry), '## Smoke\nlifecycle-needle\n', 'utf8')
+    const appendPreview = JSON.parse(run(process.execPath, [installedEntry, 'ae-docs-append', '--path', topic, '--entry', entry], { cwd: targetRoot }).stdout)
+    run(process.execPath, [installedEntry, 'ae-docs-append', '--path', topic, '--entry', entry, '--apply', '--expect-sha256', appendPreview.sourceSha256, '--expect-entry-sha256', appendPreview.entrySha256], { cwd: targetRoot })
+    const pageMatches = JSON.parse(run(process.execPath, [installedEntry, 'ae-docs-search', '--path', topic, '--query', 'lifecycle-needle'], { cwd: targetRoot }).stdout)
+    if (pageMatches.results.length !== 1) throw new Error('Installed paged document search lost the appended record')
+    run(process.execPath, [installedEntry, 'ae-docs-maintain', '--check'], { cwd: targetRoot })
+    const pagePath = pageMatches.results[0].path
+    const graphArgs = [installedEntry, 'ae-graph-build', '--root', 'docs']
+    const defaultGraph = JSON.parse(run(process.execPath, graphArgs, { cwd: targetRoot }).stdout)
+    if (defaultGraph.scope.documentPages !== 'excluded' || defaultGraph.nodes.some((node) => node.path === pagePath)
+      || !defaultGraph.diagnostics.scan.skipped['excluded-file']) {
+      throw new Error('Installed graph did not exclude immutable document pages by default')
+    }
+    const includedGraph = JSON.parse(run(process.execPath, [...graphArgs, '--include-document-pages'], { cwd: targetRoot }).stdout)
+    if (includedGraph.scope.documentPages !== 'included' || !includedGraph.nodes.some((node) => node.path === pagePath)) {
+      throw new Error('Installed graph lost explicit document-page inclusion')
+    }
+    const taskResult = JSON.parse(run(process.execPath, [
+      installedEntry, 'task-analyze', '--root', `docs/${topic.substring(0, topic.lastIndexOf('/'))}`,
+      '--task', 'lifecycle-needle', '--include-document-pages',
+    ], { cwd: targetRoot }).stdout)
+    const immutablePath = `docs/${pagePath}`
+    const worker = taskResult.worker_requests.find((item) => item.read_only_files.includes(immutablePath))
+    if (!worker || worker.owned_files.includes(immutablePath) || !worker.forbidden_files.includes(immutablePath)
+      || worker.lane !== 'read-only' || worker.authorization !== 'read-only-review') {
+      throw new Error('Installed task analysis granted write ownership to an immutable page')
+    }
+
   console.log(JSON.stringify({
     status: 'ok',
     targetRoot: relative(repoRoot, targetRoot),
@@ -282,7 +351,7 @@ try {
     verifiedMultiAgentPolicy: 'multi_agent_auto_analysis_by_default',
     verifiedSkillGovernancePolicy: 'source_mirror_metadata_and_path_safety',
     verifiedPluginVersion: installedPluginManifest.version,
-    verifiedCommands: ['recovery', 'claude-delegate', 'markitdown', 'static-server', 'report', 'issue', 'skill-audit', 'check-ae-artifacts', 'check-design-contract', 'check-memory-knowledge-contract', 'ae-memory-query'],
+    verifiedCommands: ['recovery', 'claude-delegate', 'markitdown', 'static-server', 'report', 'issue', 'skill-audit', 'check-ae-artifacts', 'check-design-contract', 'check-memory-knowledge-contract', 'ae-memory-query', 'ae-memory-index', 'ae-memory-search', 'ae-docs-maintain', 'ae-docs-append', 'ae-docs-search', 'ae-graph-build', 'task-analyze'],
   }, null, 2))
 } finally {
   cleanupTarget()

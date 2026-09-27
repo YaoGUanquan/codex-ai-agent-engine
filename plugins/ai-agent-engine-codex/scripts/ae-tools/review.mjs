@@ -3,8 +3,8 @@ import { mkdirSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, extname } from 'node:path'
 import { writeEvidenceRecord } from './evidence.mjs'
 import { runGitRequired, verifyGitRef } from './git.mjs'
-import { buildShallowGraph, collectSourceFiles, graphNodeKind } from './graph.mjs'
-import { clampInteger, normalizeArtifactOutputPath, parseOptions, redactOptions, safeName, safeResolve, scalarMarkdownCell, splitCsv, timestamp, toPosix, truthy } from './utils.mjs'
+import { buildShallowGraph, scanSourceFiles, graphNodeKind } from './graph.mjs'
+import { boundedInteger, normalizeArtifactOutputPath, parseOptions, redactOptions, safeName, safeResolve, scalarMarkdownCell, scanOptions, splitCsv, timestamp, toPosix, truthy } from './utils.mjs'
 
 export function reviewPackage(worktree, args) {
   const opts = parseOptions(args)
@@ -140,23 +140,28 @@ function parseGitNumStat(output) {
 }
 
 function buildReviewImpactContext(worktree, inventory, opts) {
-  const depth = clampInteger(Number(opts['impact-depth'] || opts.impactDepth || 2), 2, 0, 4)
-  const fileLimit = clampInteger(Number(opts['impact-file-limit'] || opts.impactFileLimit || 500), 500, 1, 5000)
-  const files = collectSourceFiles(worktree).slice(0, fileLimit)
+  const depth = boundedInteger(opts['impact-depth'] ?? opts.impactDepth, 2, '--impact-depth', 0, 4)
+  const fileLimit = boundedInteger(opts['impact-file-limit'] ?? opts.impactFileLimit, 500, '--impact-file-limit', 1, 5000)
+  const scan = scanSourceFiles(worktree, { ...scanOptions(opts), maxFiles: fileLimit, readText: true, includeDocumentPages: opts['include-document-pages'] })
+  const files = scan.files
   const graph = buildShallowGraph(worktree, files)
   const nodes = new Set(graph.nodes.map((node) => node.path))
   const seeds = inventory.files.map((file) => file.path).filter((path) => nodes.has(path))
   const unresolvedChangedFiles = inventory.files.map((file) => file.path).filter((path) => !nodes.has(path))
   const reached = new Map(seeds.map((path) => [path, { path, hops: 0, relations: ['changed'] }]))
   const queue = [...seeds]
-  while (queue.length > 0) {
-    const current = queue.shift()
+  const adjacency = new Map()
+  for (const edge of graph.edges) {
+    if (!adjacency.has(edge.from)) adjacency.set(edge.from, [])
+    if (!adjacency.has(edge.to)) adjacency.set(edge.to, [])
+    adjacency.get(edge.from).push({ neighbor: edge.to, relation: `depends-on:${edge.type}` })
+    adjacency.get(edge.to).push({ neighbor: edge.from, relation: `dependent:${edge.type}` })
+  }
+  for (let index = 0; index < queue.length; index++) {
+    const current = queue[index]
     const currentEntry = reached.get(current)
     if (!currentEntry || currentEntry.hops >= depth) continue
-    for (const edge of graph.edges) {
-      const neighbor = edge.from === current ? edge.to : edge.to === current ? edge.from : null
-      if (!neighbor) continue
-      const relation = edge.from === current ? `depends-on:${edge.type}` : `dependent:${edge.type}`
+    for (const { neighbor, relation } of adjacency.get(current) || []) {
       const existing = reached.get(neighbor)
       if (!existing) {
         reached.set(neighbor, { path: neighbor, hops: currentEntry.hops + 1, relations: [relation] })
@@ -171,6 +176,9 @@ function buildReviewImpactContext(worktree, inventory, opts) {
     depth,
     fileLimit,
     sourceFilesScanned: files.length,
+    scope: scan.scope,
+    completeness: { complete: scan.completeness.complete && graph.completeness.complete, reasons: [...new Set([...scan.completeness.reasons, ...graph.completeness.reasons])] },
+    diagnostics: { scan: scan.diagnostics, graph: graph.diagnostics },
     seedFiles: seeds,
     unresolvedChangedFiles,
     relatedFiles: [...reached.values()]
@@ -199,6 +207,8 @@ function reviewImpactMarkdown(impact) {
   const lines = [
     `- Status: ${impact.status}; depth: ${impact.depth}; source files scanned: ${impact.sourceFilesScanned}.`,
     `- Changed files represented in the graph: ${impact.seedFiles.length}.`,
+    `- Scan complete: ${impact.completeness.complete}; reasons: ${impact.completeness.reasons.join(', ') || 'none'}.`,
+    `- Generated document pages: ${impact.scope.documentPages}; changed-file review inventory is not filtered.`,
   ]
   if (impact.unresolvedChangedFiles.length > 0) lines.push(`- Unresolved changed files: ${impact.unresolvedChangedFiles.map((path) => `\`${path}\``).join(', ')}.`)
   if (impact.relatedFiles.length === 0) lines.push('- Related files: none found within the configured depth.')

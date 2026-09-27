@@ -247,7 +247,7 @@ function readTextTarget(root, path, maxBytes) {
   }
 }
 
-function safeFile(root, input) {
+export function safeFile(root, input) {
   const normalized = normalizeRepositoryPath(input)
   if (!normalized) return failure([`invalid repository-relative path: ${input}`])
   const candidate = resolve(root, normalized)

@@ -915,7 +915,7 @@ test('review-package writes a fingerprint artifact without the full diff body', 
       head,
       '--with-impact',
       '--impact-file-limit',
-      '0',
+      '1',
     ], tempRoot)
 
     assert.equal(result.status, 'ok')
@@ -1191,17 +1191,20 @@ test('gate records each repeated validation flag separately', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-gate-validation-'))
   try {
     mkdirSync(join(tempRoot, 'docs', 'ae'), { recursive: true })
-    const result = runNodeScriptJson([
-      'scripts/ae-tools.mjs',
+    const execution = spawnSync(process.execPath, [
+      resolve(repoRoot, 'scripts', 'ae-tools.mjs'),
       'gate',
       '--workflow', 'work',
       '--checkpoint', 'final',
       '--validation', 'npm run check',
       '--validation', 'npm test',
       '--review-status', 'approve',
-    ], tempRoot)
+    ], { cwd: tempRoot, encoding: 'utf8' })
+    assert.equal(execution.status, 1)
+    const result = JSON.parse(execution.stdout)
     assert.deepEqual(result.validation_commands, ['npm run check', 'npm test'], 'repeated --validation flags should accumulate')
-    assert.equal(result.status, 'pass')
+    assert.equal(result.status, 'block')
+    assert.equal(result.evidence_status, 'unverified')
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }
@@ -1481,18 +1484,36 @@ test('issue tracker creates, links, transitions, and lists local issues', () => 
   }
 })
 
-test('report and issue tracker reject canonical link escapes', () => {
+test('report and issue tracker reject canonical link escapes', async (t) => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-local-tools-guard-'))
   const outsideRoot = mkdtempSync(join(tmpdir(), 'ae-local-tools-outside-'))
   try {
     mkdirSync(join(tempRoot, 'docs', 'ae', 'evidence'), { recursive: true })
     writeFileSync(join(outsideRoot, 'report.json'), JSON.stringify({ title: 'outside' }), 'utf8')
-    symlinkSync(join(outsideRoot, 'report.json'), join(tempRoot, 'docs', 'ae', 'evidence', 'report.json'), 'file')
-    const report = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'ae-tools.mjs'), 'report', '--input', 'docs/ae/evidence/report.json'], { cwd: tempRoot, encoding: 'utf8', stdio: 'pipe' })
-    assert.equal(report.status, 1)
-    assert.match(report.stderr, /escapes worktree after resolution/)
-
+    // Junctions keep canonical-path coverage active without Windows file-symlink privileges.
     const linkType = process.platform === 'win32' ? 'junction' : 'dir'
+    await t.test('report rejects an external directory link', () => {
+      symlinkSync(outsideRoot, join(tempRoot, 'docs', 'ae', 'evidence', 'linked'), linkType)
+      const report = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'ae-tools.mjs'), 'report', '--input', 'docs/ae/evidence/linked/report.json'], { cwd: tempRoot, encoding: 'utf8', stdio: 'pipe' })
+      assert.equal(report.status, 1)
+      assert.match(report.stderr, /escapes worktree after resolution/)
+      assert.equal(existsSync(join(tempRoot, 'docs', 'ae', 'reports')), false)
+    })
+    await t.test('report rejects an external file link when file-link creation is available', (t) => {
+      try {
+        symlinkSync(join(outsideRoot, 'report.json'), join(tempRoot, 'docs', 'ae', 'evidence', 'report.json'), 'file')
+      } catch (error) {
+        if (process.platform === 'win32' && error.code === 'EPERM') {
+          t.skip('Windows file symlink privilege unavailable; file-link rejection remains unverified')
+          return
+        }
+        throw error
+      }
+      const report = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'ae-tools.mjs'), 'report', '--input', 'docs/ae/evidence/report.json'], { cwd: tempRoot, encoding: 'utf8', stdio: 'pipe' })
+      assert.equal(report.status, 1)
+      assert.match(report.stderr, /escapes worktree after resolution/)
+    })
+
     symlinkSync(outsideRoot, join(tempRoot, 'docs', 'ae', 'issues'), linkType)
     const issue = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'ae-tools.mjs'), 'issue', 'create', '--title', 'escape'], { cwd: tempRoot, encoding: 'utf8', stdio: 'pipe' })
     assert.equal(issue.status, 1)
@@ -1504,7 +1525,7 @@ test('report and issue tracker reject canonical link escapes', () => {
   }
 })
 
-test('static-server rejects non-loopback hosts and canonical path escapes', () => {
+test('static-server rejects non-loopback hosts and canonical path escapes', async (t) => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-static-server-guard-'))
   const outsideRoot = mkdtempSync(join(tmpdir(), 'ae-static-server-outside-'))
   try {
@@ -1516,11 +1537,30 @@ test('static-server rejects non-loopback hosts and canonical path escapes', () =
     const loopback = runNodeScriptJson(['scripts/ae-tools.mjs', 'static-server', 'index.html', '--host', 'localhost', '--dry-run'], tempRoot)
     assert.equal(loopback.host, 'localhost')
 
-    const linkPath = join(tempRoot, 'outside.html')
-    symlinkSync(join(outsideRoot, 'secret.html'), linkPath, 'file')
-    const escaped = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'ae-tools.mjs'), 'static-server', 'outside.html', '--dry-run'], { cwd: tempRoot, encoding: 'utf8', stdio: 'pipe' })
-    assert.equal(escaped.status, 1)
-    assert.match(escaped.stderr, /escapes workspace after resolution/)
+    await t.test('static server rejects an external directory link and its files', () => {
+      const linkType = process.platform === 'win32' ? 'junction' : 'dir'
+      symlinkSync(outsideRoot, join(tempRoot, 'linked'), linkType)
+      for (const target of ['linked', 'linked/secret.html']) {
+        const escaped = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'ae-tools.mjs'), 'static-server', target, '--dry-run'], { cwd: tempRoot, encoding: 'utf8', stdio: 'pipe' })
+        assert.equal(escaped.status, 1)
+        assert.match(escaped.stderr, /escapes workspace after resolution/)
+      }
+    })
+    await t.test('static server rejects an external file link when file-link creation is available', (t) => {
+      const linkPath = join(tempRoot, 'outside.html')
+      try {
+        symlinkSync(join(outsideRoot, 'secret.html'), linkPath, 'file')
+      } catch (error) {
+        if (process.platform === 'win32' && error.code === 'EPERM') {
+          t.skip('Windows file symlink privilege unavailable; file-link rejection remains unverified')
+          return
+        }
+        throw error
+      }
+      const escaped = spawnSync(process.execPath, [resolve(repoRoot, 'scripts', 'ae-tools.mjs'), 'static-server', 'outside.html', '--dry-run'], { cwd: tempRoot, encoding: 'utf8', stdio: 'pipe' })
+      assert.equal(escaped.status, 1)
+      assert.match(escaped.stderr, /escapes workspace after resolution/)
+    })
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
     rmSync(outsideRoot, { recursive: true, force: true })
@@ -1652,7 +1692,7 @@ test('task-analyze treats enabled auto as automatic safe suggestion', () => {
   }
 })
 
-test('task-analyze warns and falls back to auto for unknown multi-agent enabled values', () => {
+test('task-analyze disables parallelism for invalid explicit multi-agent enabled values', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-'))
   try {
     mkdirSync(join(tempRoot, '.codex'), { recursive: true })
@@ -1686,9 +1726,10 @@ test('task-analyze warns and falls back to auto for unknown multi-agent enabled 
     ].join('\n'), 'utf8')
 
     const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'task-analyze', '--mode', 'plan', '--plan', 'docs/ae/plans/plan.md'], tempRoot)
-    assert.equal(result.multi_agent_config.effective.enabled, 'auto')
-    assert.equal(result.execution_strategy, 'suggest_parallel')
-    assert.ok(result.warnings.includes('Ignoring unknown multi_agent.enabled: maybe'))
+    assert.equal(result.multi_agent_config.effective.enabled, false)
+    assert.equal(result.multi_agent_config.source, 'invalid')
+    assert.equal(result.execution_strategy, 'serial')
+    assert.ok(result.warnings.some((warning) => warning.includes('unsupported multi_agent.enabled: maybe')))
     assert.equal(result.parallel_eligibility.can_spawn_write_agents, false)
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })

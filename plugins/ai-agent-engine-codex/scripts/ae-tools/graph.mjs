@@ -1,11 +1,11 @@
 // Shallow dependency graph commands and source-file scanning shared with tasks/review.
-import { readdirSync } from 'node:fs'
 import { dirname, extname, join, relative } from 'node:path'
+import { isDocumentPage } from '../docs-lifecycle.mjs'
 import { gitFingerprint } from './git.mjs'
-import { extractFiles, normalizeRelPath, parseOptions, readText, safeResolve, stableHash, toPosix, uniqueObjects } from './utils.mjs'
+import { assertCanonicalContained, extractFiles, normalizeRelPath, parseOptions, readBoundedText, safeResolve, scanFiles, scanOptions, stableHash, toPosix } from './utils.mjs'
 
 const excludedDirs = new Set([
-  '.git', 'node_modules', 'dist', 'build', 'coverage', '.cache', '.next', '.nuxt', '__pycache__', '.ae',
+  '.git', 'node_modules', 'dist', 'build', 'coverage', '.cache', '.next', '.nuxt', '__pycache__', '.ae', '.venv', 'vendor', 'target',
 ])
 const excludedExts = new Set([
   '.png', '.jpg', '.jpeg', '.gif', '.webp', '.ico', '.bmp', '.woff', '.woff2', '.ttf', '.otf', '.eot',
@@ -23,13 +23,16 @@ const sourceNames = new Set(['Dockerfile', 'Makefile', 'Jenkinsfile'])
 export function graphBuild(worktree, args) {
   const opts = parseOptions(args)
   const root = opts.root ? safeResolve(worktree, opts.root) : worktree
+  assertCanonicalContained(worktree, root, 'graph root')
   const fileLimit = graphLimit(opts.limit, 500, '--limit')
   const edgeLimit = graphLimit(opts['edge-limit'], null, '--edge-limit')
-  const eligibleFiles = collectSourceFiles(root)
-  const files = eligibleFiles.slice(0, fileLimit.effective)
-  const graph = buildShallowGraph(root, files)
-  const allEdges = graph.edges
-  graph.edges = edgeLimit.effective === null ? allEdges : allEdges.slice(0, edgeLimit.effective)
+  const scan = scanSourceFiles(root, { ...scanOptions(opts), maxFiles: fileLimit.effective, readText: true, includeDocumentPages: opts['include-document-pages'] })
+  const files = scan.files
+  const graph = buildShallowGraph(root, files, { edgeLimit: edgeLimit.effective ?? 1000 })
+  const completeness = {
+    complete: scan.completeness.complete && graph.completeness.complete,
+    reasons: [...new Set([...scan.completeness.reasons, ...graph.completeness.reasons])],
+  }
   const store = {
     path: 'docs/ae/graphs/graph.json',
     schemaVersion: 1,
@@ -46,21 +49,27 @@ export function graphBuild(worktree, args) {
     externalDependencies: graph.externalDependencies,
     nodes: graph.nodes,
     edges: graph.edges,
-    freshness: graphFreshness(worktree, root, graph),
+    freshness: graphFreshness(worktree, root, graph, completeness, scan.scope),
+    scope: scan.scope,
+    completeness,
+    diagnostics: { scan: scan.diagnostics, graph: graph.diagnostics },
     limits: {
       files: {
         requested: fileLimit.requested,
         effective: fileLimit.effective,
-        eligible: eligibleFiles.length,
+        eligible: scan.diagnostics.filesMatched,
+        eligibleIsExact: scan.completeness.complete,
         returned: files.length,
-        truncated: eligibleFiles.length > files.length,
+        truncated: !scan.completeness.complete,
       },
       edges: {
         requested: edgeLimit.requested,
         effective: edgeLimit.effective,
         returned: graph.edges.length,
-        truncated: graph.edges.length < allEdges.length,
+        hardCap: edgeLimit.effective ?? 1000,
+        truncated: graph.completeness.reasons.includes('edge-limit'),
       },
+      scan: scan.limits,
     },
     store,
     limitations: [
@@ -78,6 +87,7 @@ export function graphQuery(worktree, args) {
   const graph = graphBuild(worktree, args)
   const keyword = opts.keyword ? String(opts.keyword).toLowerCase() : null
   const path = opts.path ? normalizeRelPath(String(opts.path)) : null
+  if (opts.path && !path) throw new Error('graph-query --path must be a valid relative file path')
   const matchedNodes = graph.nodes.filter((node) => {
     if (path && node.path !== path) return false
     if (keyword && ![node.path, node.kind, node.module].filter(Boolean).join(' ').toLowerCase().includes(keyword)) return false
@@ -93,6 +103,9 @@ export function graphQuery(worktree, args) {
     relatedEdges,
     externalDependencies: graph.externalDependencies.filter((dep) => !path || dep.from === path),
     freshness: graph.freshness,
+    scope: graph.scope,
+    completeness: graph.completeness,
+    diagnostics: graph.diagnostics,
     limits: graph.limits,
     store: graph.store,
     limitations: graph.limitations,
@@ -107,45 +120,47 @@ function graphLimit(value, defaultValue, option) {
   return { requested: parsed, effective: parsed }
 }
 
-function graphFreshness(worktree, root, graph) {
+function graphFreshness(worktree, root, graph, completeness, scope) {
   const input = {
     root: toPosix(relative(worktree, root)) || '.',
-    nodes: graph.nodes.map((node) => node.path),
+    nodes: graph.nodes.map((node) => ({ path: node.path, sha256: node.sha256 })),
     edges: graph.edges,
     externalDependencies: graph.externalDependencies,
     git: gitFingerprint(worktree),
+    completeness,
+    scope,
   }
   return {
-    status: 'fresh',
-    canUseAsEvidence: true,
+    status: completeness.complete ? 'fresh' : 'partial',
+    canUseAsEvidence: completeness.complete,
     fingerprint: stableHash(input),
-    basis: ['current filesystem scan completed during this command'],
+    basis: ['bounded current filesystem scan; fingerprint includes scanned content hashes; not a repository snapshot'],
     git: input.git,
   }
 }
 
 export function collectSourceFiles(root, dir = root) {
-  const out = []
-  let entries = []
-  try { entries = readdirSync(dir, { withFileTypes: true }) } catch { return out }
-  for (const entry of entries) {
-    const full = join(dir, entry.name)
-    if (entry.isDirectory()) {
-      if (!excludedDirs.has(entry.name)) out.push(...collectSourceFiles(root, full))
-      continue
-    }
-    if (!entry.isFile()) continue
-    if (entry.name.startsWith('.env')) continue
-    const ext = extname(entry.name)
-    if (excludedExts.has(ext)) continue
-    if (sourceExts.has(ext) || sourceNames.has(entry.name)) {
-      out.push({ path: full, relativePath: toPosix(relative(root, full)) })
-    }
-  }
-  return out.sort((a, b) => a.relativePath.localeCompare(b.relativePath))
+  assertCanonicalContained(root, dir, 'source root')
+  const scan = scanSourceFiles(dir)
+  const files = scan.files.map((file) => ({ ...file, relativePath: toPosix(relative(root, file.path)) }))
+  Object.defineProperty(files, 'scan', { value: { completeness: scan.completeness, diagnostics: scan.diagnostics, limits: scan.limits, scope: scan.scope } })
+  return files
 }
 
-export function buildShallowGraph(root, files) {
+export function scanSourceFiles(root, options = {}) {
+  const { includeDocumentPages = false, ...budgets } = options
+  if (typeof includeDocumentPages !== 'boolean') throw new Error('--include-document-pages is a flag without a value')
+  const scan = scanFiles(root, {
+    ...budgets,
+    excludeDir: (name) => excludedDirs.has(name),
+    excludeFile: (name) => !includeDocumentPages && isDocumentPage(name),
+    include: (name) => !name.startsWith('.env') && !excludedExts.has(extname(name).toLowerCase())
+      && (sourceExts.has(extname(name).toLowerCase()) || sourceNames.has(name)),
+  })
+  return { ...scan, scope: { documentPages: includeDocumentPages ? 'included' : 'excluded' } }
+}
+
+export function buildShallowGraph(root, files, { edgeLimit = 1000, externalLimit = 200 } = {}) {
   const fileSet = new Set(files.map((file) => file.relativePath))
   const nodes = files.map((file) => {
     const ext = extname(file.relativePath).toLowerCase()
@@ -153,32 +168,61 @@ export function buildShallowGraph(root, files) {
       path: file.relativePath,
       kind: graphNodeKind(file.relativePath, ext),
       module: file.relativePath.split('/')[0],
+      sha256: file.sha256 ?? null,
     }
   })
+  const nodesByPath = new Map(nodes.map((node) => [node.path, node]))
   const edges = []
   const external = []
+  const seenEdges = new Set()
+  const seenExternal = new Set()
+  const reasons = new Set()
+  const diagnostics = { errors: [], bytesRead: 0 }
+  const add = (out, seen, value, limit, reason) => {
+    const key = JSON.stringify(value)
+    if (seen.has(key)) return
+    if (out.length >= limit) { reasons.add(reason); return }
+    seen.add(key)
+    out.push(value)
+  }
   for (const file of files) {
-    const text = readText(file.path)
+    let text = file.text
+    if (text === undefined) {
+      try {
+        assertCanonicalContained(root, file.path, 'graph file')
+        const content = readBoundedText(file.path, Math.min(1024 * 1024, 16 * 1024 * 1024 - diagnostics.bytesRead))
+        text = content.text
+        diagnostics.bytesRead += content.bytes
+        nodesByPath.get(file.relativePath).sha256 = content.sha256
+      } catch (error) {
+        reasons.add('read-error')
+        diagnostics.errors.push({ path: file.relativePath, message: error.message })
+        if (diagnostics.errors.length >= 20) break
+        continue
+      }
+    }
     const deps = extractDependencies(text)
     for (const dep of deps) {
       if (dep.startsWith('.') || dep.startsWith('/')) {
         const resolved = resolveLocalDependency(file.relativePath, dep, fileSet)
-        if (resolved) edges.push({ from: file.relativePath, to: resolved, type: 'imports', specifier: dep, provenance: 'inferred' })
+        if (resolved) add(edges, seenEdges, { from: file.relativePath, to: resolved, type: 'imports', specifier: dep, provenance: 'inferred' }, edgeLimit, 'edge-limit')
       } else {
-        external.push({ from: file.relativePath, dependency: dep })
+        add(external, seenExternal, { from: file.relativePath, dependency: dep }, externalLimit, 'external-limit')
       }
     }
     for (const reference of extractFiles(text)) {
       if (fileSet.has(reference) && reference !== file.relativePath) {
-        edges.push({ from: file.relativePath, to: reference, type: 'mentions', provenance: 'inferred' })
+        add(edges, seenEdges, { from: file.relativePath, to: reference, type: 'mentions', provenance: 'inferred' }, edgeLimit, 'edge-limit')
       }
     }
   }
   return {
     nodes,
-    edges: uniqueObjects(edges).slice(0, 1000),
+    edges,
     entrypoints: detectGraphEntrypoints(fileSet),
-    externalDependencies: uniqueObjects(external).slice(0, 200),
+    externalDependencies: external,
+    completeness: { complete: reasons.size === 0, reasons: [...reasons] },
+    diagnostics,
   }
 }
 
@@ -193,13 +237,22 @@ export function graphNodeKind(path, ext) {
 function extractDependencies(text) {
   const deps = new Set()
   const patterns = [
-    /\bimport\s+(?:[^'"]+\s+from\s+)?['"]([^'"]+)['"]/g,
-    /\bexport\s+[^'"]+\s+from\s+['"]([^'"]+)['"]/g,
-    /\bimport\(\s*['"]([^'"]+)['"]\s*\)/g,
-    /\brequire\(\s*['"]([^'"]+)['"]\s*\)/g,
+    /\bimport\s+(['"])([^'"\r\n]+)\1/g,
+    /\b(?:import|require)\s*\(\s*(['"])([^'"\r\n]+)\1\s*\)/g,
   ]
   for (const pattern of patterns) {
-    for (const match of text.matchAll(pattern)) deps.add(match[1])
+    for (const match of text.matchAll(pattern)) deps.add(match[2])
+  }
+  // Track declaration boundaries without rescanning the remaining file for each keyword.
+  const tokens = /\b(import|export)\b|\bfrom\s+(['"])([^'"\r\n]+)\2|['";]/g
+  let declaration = false
+  for (const match of text.matchAll(tokens)) {
+    if (match[1]) {
+      declaration = true
+    } else {
+      if (declaration && match[3]) deps.add(match[3])
+      declaration = false
+    }
   }
   return [...deps]
 }

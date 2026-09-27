@@ -1,7 +1,7 @@
 // Swagger/OpenAPI local spec summaries.
 import { extname } from 'node:path'
 import { parseSimpleYaml } from './yaml.mjs'
-import { printJson, readText, safeResolve } from './utils.mjs'
+import { assertCanonicalContained, boundedInteger, printJson, readBoundedText, safeResolve } from './utils.mjs'
 
 export function printSwagger(args) {
   const opts = parseSwaggerArgs(args)
@@ -10,10 +10,17 @@ export function printSwagger(args) {
     throw new Error('Remote URL parsing must use Codex network approval first. Download the spec or provide a local file.')
   }
   const sourcePath = safeResolve(process.cwd(), opts.source)
+  assertCanonicalContained(process.cwd(), sourcePath, 'OpenAPI source')
   const spec = loadSpec(sourcePath)
   const operations = collectOperations(spec)
   const filtered = filterOperations(operations, opts)
   const mode = opts.mode || (opts.method && opts.path && filtered.length === 1 ? 'detail' : 'overview')
+  if (!['detail', 'overview'].includes(mode)) throw new Error('swagger mode must be detail or overview')
+  const limit = boundedInteger(opts.limit, mode === 'detail' ? 5 : 50, 'limit', 1, 100)
+  const offset = boundedInteger(opts.offset, 0, 'offset', 0, 100000)
+  const selected = filtered.slice(offset, offset + limit)
+  const operationsOut = selected.map(mode === 'detail' ? detailOperation : summaryOperation)
+  const schemaTruncated = JSON.stringify(operationsOut).includes('"truncated":true')
   const result = {
     source: opts.source,
     title: spec.info?.title || null,
@@ -22,13 +29,15 @@ export function printSwagger(args) {
     total_operations: operations.length,
     matched_operations: filtered.length,
     mode,
-    operations: mode === 'detail' ? filtered.slice(0, 5).map(detailOperation) : filtered.slice(0, 50).map(summaryOperation),
+    operations: operationsOut,
+    pagination: { limit, offset, nextOffset: offset + limit < filtered.length ? offset + limit : null },
+    completeness: { complete: offset === 0 && filtered.length <= limit && !schemaTruncated, reasons: [...(offset > 0 || filtered.length > limit ? ['operation-page'] : []), ...(schemaTruncated ? ['schema-limit'] : [])] },
   }
   printJson(result)
 }
 
 function loadSpec(path) {
-  const text = readText(path)
+  const text = readBoundedText(path).text
   const ext = extname(path).toLowerCase()
   if (ext === '.json' || text.trim().startsWith('{')) return JSON.parse(text)
   if (ext === '.yaml' || ext === '.yml' || /^[A-Za-z0-9_.-]+\s*:/m.test(text)) return parseSimpleYaml(text)
@@ -106,27 +115,29 @@ function summarizeRequestBody(body) {
   }
 }
 
-function summarizeSchema(schema) {
+function summarizeSchema(schema, budget = { remaining: 2000 }, depth = 0) {
   if (!schema) return null
+  if (--budget.remaining < 0 || depth >= 20) return { truncated: true, reason: 'schema-node-or-depth-limit' }
   if (schema.$ref) return { ref: schema.$ref }
   return {
     type: schema.type || null,
     format: schema.format || null,
     required: schema.required || undefined,
-    properties: schema.properties ? summarizeProperties(schema.properties) : undefined,
-    items: schema.items ? summarizeSchema(schema.items) : undefined,
+    properties: schema.properties ? summarizeProperties(schema.properties, budget, depth + 1) : undefined,
+    ...(schema.properties && Object.keys(schema.properties).length > 40 ? { truncated: true, reason: 'property-limit' } : {}),
+    items: schema.items ? summarizeSchema(schema.items, budget, depth + 1) : undefined,
   }
 }
 
-function summarizeProperties(properties) {
-  return Object.fromEntries(Object.entries(properties).slice(0, 40).map(([name, schema]) => [name, summarizeSchema(schema)]))
+function summarizeProperties(properties, budget, depth) {
+  return Object.fromEntries(Object.entries(properties).slice(0, 40).map(([name, schema]) => [name, summarizeSchema(schema, budget, depth)]))
 }
 
 function parseSwaggerArgs(args) {
   const opts = { source: null }
   for (const arg of args) {
     const idx = arg.indexOf(':')
-    if (idx > 0 && ['method', 'path', 'tag', 'keyword', 'mode'].includes(arg.slice(0, idx))) {
+    if (idx > 0 && ['method', 'path', 'tag', 'keyword', 'mode', 'limit', 'offset'].includes(arg.slice(0, idx))) {
       opts[arg.slice(0, idx)] = arg.slice(idx + 1)
     } else if (!opts.source) {
       opts.source = arg

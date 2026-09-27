@@ -1,9 +1,10 @@
 // task-analyze / task-brief commands: plan-unit extraction and multi-agent strategy.
 import { existsSync, mkdirSync, statSync, writeFileSync } from 'node:fs'
-import { dirname, extname, join } from 'node:path'
-import { collectSourceFiles } from './graph.mjs'
+import { dirname, extname, join, relative } from 'node:path'
+import { isDocumentPage } from '../docs-lifecycle.mjs'
+import { scanSourceFiles } from './graph.mjs'
 import { parseSimpleYaml } from './yaml.mjs'
-import { clampInteger, extractFiles, isPlainObject, normalizeArtifactOutputPath, parseOptions, readText, safeName, safeResolve, timestamp } from './utils.mjs'
+import { assertCanonicalContained, boundedInteger, extractFiles, isPlainObject, normalizeArtifactOutputPath, parseOptions, readBoundedText, safeName, safeResolve, scanOptions, timestamp, toPosix } from './utils.mjs'
 
 const stopWords = new Set('the a an in on at to for of with and or is are was were be been being have has had do does did will would could should may might can this that these those it its from by as not no but if then else when where how what which who why all each every both few some any most other such than too very just about after before into over under until up down out use using used fix add update remove create implement plan review task feature bug error issue'.split(' '))
 const defaultMultiAgentConfig = {
@@ -19,6 +20,7 @@ const defaultMultiAgentConfig = {
 }
 const multiAgentModes = new Set(['suggest', 'review_only', 'auto'])
 const multiAgentEnabledValues = new Set(['auto', true, false])
+const toWorktreePath = (root, path) => toPosix(relative(root, path))
 
 export function taskAnalyze(worktree, args) {
   const opts = parseOptions(args)
@@ -28,30 +30,56 @@ export function taskAnalyze(worktree, args) {
   if (mode === 'plan') {
     if (!opts.plan) throw new Error('task-analyze --mode plan requires --plan <path>')
     const planPath = safeResolve(worktree, opts.plan)
-    const text = readText(planPath)
+    assertCanonicalContained(worktree, planPath, 'plan')
+    const text = readBoundedText(planPath).text
     const units = extractPlanUnits(text)
+    if (units.length > 200 || units.some((unit) => unit.files.length > 1000)) throw new Error('plan analysis exceeds 200 units or 1000 files per unit; split the plan without truncating ownership')
     const enriched = units.map((unit, index) => ({ ...unit, priority: index + 1, suggested_validation: suggestValidation(unit.files.map((f) => f.path)) }))
     return buildTaskOutput(enriched, multiAgent.warnings, { multiAgent, source_mode: 'plan' })
   }
 
   const task = opts.task || opts._.join(' ')
+  if (typeof task !== 'string' || task.length > 4096) throw new Error('task description must be a string of at most 4096 characters')
   if (!task.trim()) throw new Error('task-analyze --mode scan requires --task <description> or trailing text')
   const keywords = extractKeywords(task)
-  const files = collectSourceFiles(worktree).filter((file) => matchesKeywords(file.relativePath, keywords)).slice(0, 30)
+  const root = opts.root ? safeResolve(worktree, opts.root) : worktree
+  assertCanonicalContained(worktree, root, 'task scan root')
+  const scan = scanSourceFiles(root, { ...scanOptions(opts, { maxFiles: 1000 }), readText: true, includeDocumentPages: opts['include-document-pages'] })
+  const contractWords = /distributed|concurren|bulk|batch|queue|分布式|并发|大数据|批量/i.test(task)
+    ? ['queue', 'retry', 'timeout', 'lock', 'transaction', 'batch', 'pagination', 'stream', 'idempotency']
+    : []
+  const matches = scan.files.map((file) => {
+    const pathMatches = keywords.filter((word) => file.relativePath.toLowerCase().includes(word))
+    const content = file.text.toLowerCase()
+    const contentMatches = keywords.filter((word) => content.includes(word))
+    const contractMatches = contractWords.filter((word) => content.includes(word))
+    return { ...file, score: pathMatches.length * 4 + contentMatches.length * 2 + contractMatches.length, match: { path: pathMatches, content: contentMatches, contract: contractMatches } }
+  }).filter((file) => file.score > 0).sort((left, right) => right.score - left.score || left.relativePath.localeCompare(right.relativePath))
+  const files = matches.slice(0, 30)
   const grouped = groupFiles(files)
   const units = grouped.length > 0
     ? grouped.map((group, index) => ({
       id: `S${index + 1}`,
       description: `Work related to ${group.label}`,
-      files: group.files.map((file) => ({ path: file.relativePath, source: 'tool_scan' })),
+      files: group.files.map((file) => ({ path: toWorktreePath(worktree, file.path), source: 'tool_scan', score: file.score, match: file.match })),
       suggested_validation: suggestValidation(group.files.map((file) => file.relativePath)),
       priority: index + 1,
     }))
     : [{ id: 'S1', description: task, files: [], suggested_validation: ['run the narrowest relevant project validation'], priority: 1 }]
-  return buildTaskOutput(units, [
+  const result = buildTaskOutput(units, [
     ...multiAgent.warnings,
+    'Scan matches are advisory candidates, not an ownership or completeness proof; verify contracts and callers manually.',
     ...(grouped.length === 0 ? ['No matching source files found; manual scoping required.'] : []),
   ], { multiAgent, source_mode: 'scan' })
+  const returned = units.reduce((count, unit) => count + unit.files.length, 0)
+  return {
+    ...result,
+    completeness: { complete: scan.completeness.complete && matches.length <= returned, reasons: [...scan.completeness.reasons, ...(matches.length > returned ? ['candidate-limit'] : [])] },
+    diagnostics: scan.diagnostics,
+    limits: scan.limits,
+    scope: scan.scope,
+    manual_scope_review_required: true,
+  }
 }
 
 export function taskBrief(worktree, args) {
@@ -62,7 +90,8 @@ export function taskBrief(worktree, args) {
   if (!unitId) throw new Error('task-brief requires --unit <id>')
 
   const planPath = safeResolve(worktree, plan)
-  const unit = extractPlanUnit(readText(planPath), unitId)
+  assertCanonicalContained(worktree, planPath, 'plan')
+  const unit = extractPlanUnit(readBoundedText(planPath).text, unitId)
   if (!unit) throw new Error(`task-brief could not find unit ${unitId} in ${plan}`)
 
   const outRel = opts.out ? normalizeArtifactOutputPath(String(opts.out), 'task-brief') : defaultTaskBriefArtifactPath(unitId)
@@ -120,8 +149,9 @@ function extractUnitDependencies(text) {
 
 function normalizeDependencyId(value) {
   const cleaned = String(value).trim().replace(/[),.;:]+$/, '')
+  if (/^(none|n\/a|not_applicable|null|无|无依赖|-+)$/i.test(cleaned)) return null
   const match = cleaned.match(/^(?:unit\s*)?(u\d+)$/i)
-  return match ? match[1].toUpperCase() : null
+  return match ? match[1].toUpperCase() : cleaned
 }
 
 function findNextMajorSection(text, startIndex) {
@@ -159,19 +189,13 @@ function extractKeywords(text) {
   const words = new Set()
   for (const match of text.matchAll(/[\p{L}\p{N}_./-]+/gu)) {
     const raw = match[0].toLowerCase()
-    if (raw.length < 3 || stopWords.has(raw)) continue
+    if (raw.length < 2 || stopWords.has(raw)) continue
     words.add(raw)
     for (const part of raw.split(/[./_-]+/)) {
       if (part.length >= 3 && !stopWords.has(part)) words.add(part)
     }
   }
-  return [...words]
-}
-
-function matchesKeywords(path, keywords) {
-  if (keywords.length === 0) return false
-  const lower = path.toLowerCase()
-  return keywords.some((keyword) => lower.includes(keyword))
+  return [...words].slice(0, 32)
 }
 
 function groupFiles(files) {
@@ -198,6 +222,16 @@ function suggestValidation(paths) {
 }
 
 function buildTaskOutput(units, warnings = [], options = {}) {
+  units = units.map((unit) => {
+    const files = unit.files.map((file) => isDocumentPage(file.path) ? { ...file, read_only: true } : file)
+    const readOnlyPaths = files.filter((file) => file.read_only).map((file) => file.path)
+    return readOnlyPaths.length
+      ? { ...unit, files, forbidden_files: [...new Set([...(unit.forbidden_files || []), ...readOnlyPaths])] }
+      : unit
+  })
+  if (units.some((unit) => unit.files.some((file) => file.read_only))) {
+    warnings = [...warnings, 'Immutable document pages are read-only evidence, never writable ownership; update their owning document through the document lifecycle commands.']
+  }
   const multiAgent = options.multiAgent || { config: { ...defaultMultiAgentConfig }, source: 'default', path: null, warnings: [] }
   const config = multiAgent.config
   const conflict_matrix = []
@@ -238,9 +272,10 @@ function buildTaskOutput(units, warnings = [], options = {}) {
   return {
     units,
     conflict_matrix,
-    parallel_groups: [{ id: 'G1', unit_ids: units.map((u) => u.id), is_parallel_safe: !hasConflict, blocker_reason: hasConflict ? 'shared files detected' : undefined }],
+    parallel_groups: [{ id: 'G1', unit_ids: units.map((u) => u.id), is_parallel_safe: canReadParallelize, blocker_reason: readBlockers.length ? readBlockers.join('; ') : undefined }],
     multi_agent_config: {
       source: multiAgent.source,
+      status: multiAgent.source === 'invalid' ? 'invalid' : 'valid',
       path: multiAgent.path,
       effective: config,
     },
@@ -273,7 +308,7 @@ function buildTaskOutput(units, warnings = [], options = {}) {
       decision: 'task-analyze reports readiness; the parent agent decides whether to spawn workers',
       read_only_default: true,
       write_requires_explicit_opt_in: true,
-      required_worker_fields: ['unit_id', 'owned_files', 'forbidden_files', 'depends_on', 'validation', 'prohibited_operations', 'return_format'],
+      required_worker_fields: ['unit_id', 'owned_files', 'read_only_files', 'forbidden_files', 'depends_on', 'validation', 'prohibited_operations', 'return_format'],
       abort_signals: ['shared files detected', 'unknown dependency', 'dirty Git state before write delegation', 'worker edits outside owned files', 'validation failure'],
     },
     worker_requests: workerRequests,
@@ -284,18 +319,24 @@ function buildTaskOutput(units, warnings = [], options = {}) {
 
 function buildWorkerRequests(units, waves, context) {
   const waveByUnit = new Map(waves.flatMap((wave) => wave.unit_ids.map((id) => [id, wave.id])))
-  return units.map((unit) => ({
-    unit_id: unit.id,
-    wave_id: waveByUnit.get(unit.id) || null,
-    owned_files: unit.files.map((file) => file.path),
-    forbidden_files: unit.forbidden_files || [],
-    depends_on: unit.depends_on || [],
-    lane: context.canReadParallelize ? 'read-or-write-after-parent-gate' : 'serial',
-    authorization: context.canWriteParallelize && context.config.mode === 'auto' && context.config.allow_write_agents ? 'explicit-parent-approval-required' : 'read-only-review-or-parent-execution',
-    validation: unit.suggested_validation || ['run project-specific validation'],
-    prohibited_operations: ['git add', 'git commit', 'git push', 'git reset', 'git checkout', 'destructive cleanup', 'service startup unless assigned'],
-    return_format: ['changed_files', 'tests_run', 'risks', 'conflicts'],
-  }))
+  return units.map((unit) => {
+    const ownedFiles = unit.files.filter((file) => !file.read_only).map((file) => file.path)
+    const readOnlyFiles = unit.files.filter((file) => file.read_only).map((file) => file.path)
+    const readOnlyUnit = readOnlyFiles.length > 0 && ownedFiles.length === 0
+    return {
+      unit_id: unit.id,
+      wave_id: waveByUnit.get(unit.id) || null,
+      owned_files: ownedFiles,
+      read_only_files: readOnlyFiles,
+      forbidden_files: unit.forbidden_files || [],
+      depends_on: unit.depends_on || [],
+      lane: readOnlyUnit ? 'read-only' : context.canReadParallelize ? 'read-or-write-after-parent-gate' : 'serial',
+      authorization: readOnlyUnit ? 'read-only-review' : context.canWriteParallelize && context.config.mode === 'auto' && context.config.allow_write_agents ? 'explicit-parent-approval-required' : 'read-only-review-or-parent-execution',
+      validation: unit.suggested_validation || ['run project-specific validation'],
+      prohibited_operations: ['git add', 'git commit', 'git push', 'git reset', 'git checkout', 'destructive cleanup', 'service startup unless assigned'],
+      return_format: ['changed_files', 'tests_run', 'risks', 'conflicts'],
+    }
+  })
 }
 
 function extractPlanUnit(text, unitId) {
@@ -334,42 +375,46 @@ function loadMultiAgentConfig(worktree) {
     }
   }
   try {
-    const profile = parseSimpleYaml(readText(profilePath))
-    const raw = isPlainObject(profile.multi_agent) ? profile.multi_agent : {}
+    assertCanonicalContained(worktree, profilePath, 'multi-agent profile')
+    const profile = parseSimpleYaml(readBoundedText(profilePath, 64 * 1024).text)
+    if (profile.multi_agent !== undefined && !isPlainObject(profile.multi_agent)) throw new Error('multi_agent must be a mapping')
+    const raw = profile.multi_agent ?? {}
     return {
-      config: normalizeMultiAgentConfig(raw, warnings),
+      config: normalizeMultiAgentConfig(raw),
       source: 'profile',
       path: '.codex/ae-skill-profiles.yaml',
       warnings,
     }
   } catch (error) {
-    warnings.push(`Ignoring invalid .codex/ae-skill-profiles.yaml multi_agent config: ${error.message}`)
+    warnings.push(`Invalid .codex/ae-skill-profiles.yaml multi_agent config: ${error.message}; parallel execution disabled until corrected`)
     return {
-      config: { ...defaultMultiAgentConfig },
-      source: 'default',
+      config: { ...defaultMultiAgentConfig, enabled: false, allow_write_agents: false },
+      source: 'invalid',
       path: '.codex/ae-skill-profiles.yaml',
       warnings,
     }
   }
 }
 
-function normalizeMultiAgentConfig(raw, warnings) {
+function normalizeMultiAgentConfig(raw) {
   const config = { ...defaultMultiAgentConfig }
   if (multiAgentEnabledValues.has(raw.enabled)) {
     config.enabled = raw.enabled
   } else if (raw.enabled !== undefined) {
-    warnings.push(`Ignoring unknown multi_agent.enabled: ${raw.enabled}`)
+    throw new Error(`unsupported multi_agent.enabled: ${raw.enabled}`)
   }
   for (const key of ['require_clean_git', 'require_plan_dependencies', 'require_disjoint_files', 'allow_write_agents', 'review_lanes_parallel']) {
+    if (raw[key] !== undefined && typeof raw[key] !== 'boolean') throw new Error(`multi_agent.${key} must be boolean`)
     if (typeof raw[key] === 'boolean') config[key] = raw[key]
   }
   if (typeof raw.mode === 'string' && multiAgentModes.has(raw.mode)) {
     config.mode = raw.mode
   } else if (raw.mode !== undefined) {
-    warnings.push(`Ignoring unknown multi_agent.mode: ${raw.mode}`)
+    throw new Error(`unsupported multi_agent.mode: ${raw.mode}`)
   }
-  config.max_workers = clampInteger(raw.max_workers, defaultMultiAgentConfig.max_workers, 1, 8)
-  config.min_parallel_units = clampInteger(raw.min_parallel_units, defaultMultiAgentConfig.min_parallel_units, 2, 8)
+  for (const key of Object.keys(raw)) if (!(key in defaultMultiAgentConfig)) throw new Error(`unsupported multi_agent field: ${key}`)
+  config.max_workers = boundedInteger(raw.max_workers, defaultMultiAgentConfig.max_workers, 'multi_agent.max_workers', 1, 8)
+  config.min_parallel_units = boundedInteger(raw.min_parallel_units, defaultMultiAgentConfig.min_parallel_units, 'multi_agent.min_parallel_units', 2, 8)
   return config
 }
 
@@ -382,10 +427,20 @@ function analyzeDependencies(units) {
       if (!unitIds.has(dependency)) unknown.push({ unit: unit.id, dependency })
     }
   }
+  const completed = new Set()
+  while (true) {
+    const ready = units.filter((unit) => !completed.has(unit.id) && (unit.depends_on || []).every((id) => completed.has(id)))
+    if (ready.length === 0) break
+    for (const unit of ready) completed.add(unit.id)
+  }
+  const unresolved = units.filter((unit) => !completed.has(unit.id)).map((unit) => unit.id)
+  const duplicateIds = units.length !== unitIds.size
   return {
     declarations_present: declarationsPresent,
     unknown,
-    is_valid: unknown.length === 0,
+    unresolved,
+    duplicateIds,
+    is_valid: unknown.length === 0 && unresolved.length === 0 && !duplicateIds,
   }
 }
 
@@ -396,10 +451,13 @@ function multiAgentBlockers(units, context) {
   if (config.max_workers < 2) blockers.push('multi_agent.max_workers is less than 2')
   if (units.length < config.min_parallel_units) blockers.push(`fewer than ${config.min_parallel_units} implementation units`)
   if (includeWriteBlockers && config.mode === 'review_only') blockers.push('multi_agent.mode is review_only; write workers remain disabled')
+  if (includeWriteBlockers && units.some((unit) => unit.files.length > 0 && unit.files.every((file) => file.read_only))) blockers.push('units containing only immutable document pages require read-only review, not write delegation')
   if (config.require_disjoint_files && hasConflict) blockers.push('shared files detected across units')
   if (config.require_plan_dependencies && sourceMode !== 'plan') blockers.push('plan mode is required for dependency-aware parallel execution')
   if (config.require_plan_dependencies && !dependencyReport.declarations_present) blockers.push('plan units must declare Depends on')
   for (const item of dependencyReport.unknown) blockers.push(`unknown dependency ${item.dependency} referenced by ${item.unit}`)
+  if (dependencyReport.unresolved.length) blockers.push(`cyclic or unresolved dependencies: ${dependencyReport.unresolved.join(', ')}`)
+  if (dependencyReport.duplicateIds) blockers.push('duplicate unit IDs')
   if (includeWriteBlockers && config.mode === 'auto' && !config.allow_write_agents) blockers.push('multi_agent.allow_write_agents is false')
   return blockers
 }

@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // Thin dispatcher for ae-tools commands. Command logic lives in ./ae-tools/*.mjs.
 import { knowledgeMap, knowledgeQuery, memoryQuery } from './memory-knowledge-contract.mjs'
+import { memoryIndex, memorySearch } from './memory-navigation.mjs'
+import { docsAppend, docsMaintain, docsSearch } from './docs-lifecycle.mjs'
 import { spawnSync } from 'node:child_process'
 import { resolveProjectRoot } from './project-root.mjs'
 import { fileURLToPath } from 'node:url'
@@ -40,7 +42,7 @@ function main() {
         printHelp(args.join(' ').trim())
         break
       case 'recovery':
-        printJson(recovery(worktree))
+        printJson(recovery(worktree, args))
         break
       case 'tidy':
         printJson(tidy(worktree, args))
@@ -66,9 +68,12 @@ function main() {
       case 'review-package':
         printJson(reviewPackage(worktree, args))
         break
-      case 'gate':
-        printJson(gate(worktree, args))
+      case 'gate': {
+        const result = gate(worktree, args)
+        printJson(result)
+        if (result.status !== 'pass') process.exitCode = 1
         break
+      }
       case 'swagger':
         printSwagger(args)
         break
@@ -106,6 +111,21 @@ function main() {
       case 'memory-query':
         printContractResult(memoryQuery(worktree, args))
         break
+      case 'ae-memory-index':
+        printContractResult(memoryIndex(worktree, args))
+        break
+      case 'ae-memory-search':
+        printContractResult(memorySearch(worktree, args))
+        break
+      case 'ae-docs-maintain':
+        printContractResult(docsMaintain(worktree, args))
+        break
+      case 'ae-docs-append':
+        printContractResult(docsAppend(worktree, args))
+        break
+      case 'ae-docs-search':
+        printContractResult(docsSearch(worktree, args))
+        break
       case 'ae-knowledge-map':
       case 'knowledge-map':
         printContractResult(knowledgeMap(worktree, args))
@@ -123,7 +143,7 @@ function main() {
         printJson(graphQuery(worktree, args))
         break
       default:
-        throw new Error(`Unknown command: ${command}\nAvailable: help, init, recovery, tidy, task-analyze, task-brief, report, issue, skill-audit, review-package, gate, swagger, claude-delegate, review-contract, evidence, markitdown, static-server, check-ae-artifacts, check-design-contract, check-memory-knowledge-contract, set-ae-language, ae-update, ae-memory-query, ae-knowledge-map, ae-knowledge-query, ae-graph-build, ae-graph-query`)
+        throw new Error(`Unknown command: ${command}\nAvailable: help, init, recovery, tidy, task-analyze, task-brief, report, issue, skill-audit, review-package, gate, swagger, claude-delegate, review-contract, evidence, markitdown, static-server, check-ae-artifacts, check-design-contract, check-memory-knowledge-contract, set-ae-language, ae-update, ae-memory-query, ae-memory-index, ae-memory-search, ae-docs-maintain, ae-docs-append, ae-docs-search, ae-knowledge-map, ae-knowledge-query, ae-graph-build, ae-graph-query`)
     }
   } catch (error) {
     console.error(formatError(error))
