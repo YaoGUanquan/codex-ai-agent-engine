@@ -76,6 +76,18 @@ Use this section only when required proof is absent, blocked, or unverified. Omi
 
 ## Assumptions
 
+## Data Access Budget (Conditional)
+
+Carry accepted backend data-access decisions into units and validation. Keep bounded single-row CRUD short, omit inapplicable fields and label unknown budgets.
+
+- Cardinality: rows, fan-out, payload and concurrency.
+- Query and count: logical row, filters/scope, query budget, totals, ordering and deep pages.
+- Read model: direct/indexed alternatives, ownership, freshness and maintenance cost.
+- Batch and transaction: execution/flush/commit boundaries, atomicity and idempotency.
+- Async acceptance: durable handoff, backpressure and completion when applicable.
+- Recovery: chunk retry/resume, read-model backfill/reconciliation and cutover.
+- Evidence: baseline, target, fixtures, commands and unverified runtime boundaries.
+
 ## Alternatives Considered
 
 - Recommended:

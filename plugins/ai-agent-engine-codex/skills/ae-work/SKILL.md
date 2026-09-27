@@ -65,6 +65,8 @@ If `.codex/ae-skill-profiles.yaml` contains `multi_agent.enabled: auto` or `mult
 
 ## Minimality Gate
 
+Before implementing a database-backed list/query/count or write path, apply the [data-access and scale contract](../ae-backend/references/data-access-contract.md). Reuse accepted design decisions; if scale, atomicity, totals, read-model freshness or async completion is materially unresolved, return to design before coding. Minimality does not justify N+1, per-row commits or in-memory async when the workload requires bounded set/batch or durable-job behavior.
+
 Before editing behavior, choose the smallest correct implementation that satisfies the request and repository constraints:
 
 - First ask whether the requested behavior needs new code at all; if configuration, documentation, deletion, or an existing path already satisfies it, use that route.

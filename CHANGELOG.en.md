@@ -4,6 +4,11 @@ This file is the complete release history of AI Agent Engine for Codex (since 0.
 
 中文版本: [CHANGELOG.md](CHANGELOG.md)
 
+### 0.3.47 (2026-09-24)
+- Add a conditional data-access contract across 14 requirement, design, implementation, refactoring, diagnosis and acceptance skills: query budgets, logical pagination units, separate count validation, and execution-batch versus transaction-commit boundaries.
+- Compare auxiliary lookup/extension tables and precomputed read models with consistency, backfill and rebuild costs. Durable async bulk saving covers acceptance, backpressure, chunks, idempotency, checkpoints, recovery and completion. MyBatis-Plus choices depend on actual versions; no blanket count-disable, table or queue requirement.
+- Validation commands: `node --test tests/data-access-contract.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These verify instruction structure, reviewer selection, mirrors and isolated installation distribution, not model adherence, business-database performance, real async recovery or a current-user installation update.
+
 ### 0.3.46 (2026-09-13)
 - Unify runtime entry selection with one read-only resolver: prefer the project wrapper and use the current-user global dispatcher only when the path is absent. Invalid paths, dangling links and command failures remain visible; never silently change versions or retry commands.
 - Active skills and the capability catalog use the `node "$aeEntry"` template with a shared bootstrap reference. Help emits shell-safe PowerShell/POSIX assignments for its actual invocation path; command arguments and authorization boundaries stay unchanged.

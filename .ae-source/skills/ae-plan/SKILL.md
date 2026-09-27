@@ -31,6 +31,8 @@ If any item is materially unclear, ask one focused question or route to `ae-brai
 
 When the plan crosses a public API, persisted data, external service, deployment, or browser boundary, load `references/validation-evidence-profile.md`. Select only the tiers that apply, record their preconditions and bounded claims, and make blocked or `unverified` proof visible. Do not infer a higher-tier result from a lower-tier check.
 
+For database-backed query/list/count or bulk/async write work, load the [data-access and scale contract](../ae-backend/references/data-access-contract.md) and carry the applicable Data Access Budget into owned units and acceptance checks. Resolve logical row/total, freshness, batch/commit and recovery decisions before coding. Include auxiliary-table backfill/reconciliation/cutover and durable-job failure tests when chosen; do not reduce a structural data-access problem to a loop rewrite.
+
 For tasks with multiple plausible designs, compare 2-3 approaches before selecting one. Keep the comparison short: fit, trade-off, risk, and why the recommended approach wins. When only one viable approach exists, state why the alternatives collapse instead of pretending there was a meaningful choice.
 
 For implementation-heavy plans, include the simplest viable route in that comparison: standard library, framework/native platform capability, existing dependency, deletion/configuration-only change, or the smallest new code path. New dependencies, abstractions, broad refactors, or extra files need a current requirement or repository pattern that justifies owning them now.

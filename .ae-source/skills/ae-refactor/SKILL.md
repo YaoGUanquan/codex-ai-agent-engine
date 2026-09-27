@@ -7,6 +7,8 @@ description: Use when the user asks for AE refactor, /ae-refactor, refactoring p
 
 Plan behavior-preserving refactors before implementation.
 
+For data-access refactors, apply the [data-access and scale contract](../ae-backend/references/data-access-contract.md). Preserve logical result IDs/totals, authorization, ordering, atomicity and completion semantics. Compare indexed/set-based access, auxiliary read models and batching with measured or explicitly unverified costs; stale reads, partial commits or async acceptance are contract changes, not transparent optimizations.
+
 Use the deep-module vocabulary when it improves a decision: module, interface, seam, adapter, depth, locality, and leverage. Apply the deletion test before proposing a wrapper or split: if deleting the module only moves complexity, it is shallow and the refactor needs a stronger seam. Record the behavior baseline, design alternatives, and the evidence that makes the proposed seam real rather than hypothetical.
 
 ## Workflow

@@ -67,6 +67,18 @@ When the design uses repository context, record the smallest evidence set that a
 
 Do not record secrets, credentials, private keys, local authentication values, or absolute paths. This section is not a repository inventory; list only evidence that constrains the design and keep unknown facts explicit.
 
+## Data Access Budget (Conditional)
+
+For database-backed queries or writes, record applicable decisions from the shared backend data-access contract. Bounded single-row CRUD can use a short inline record; omit non-applicable fields with a reason. Unknowns are not measured budgets.
+
+- Cardinality: rows, fan-out, payload and concurrency.
+- Query and count: logical row, filters/scope, query budget, total semantics, ordering and deep pages.
+- Read model: direct/indexed alternatives, canonical ownership, freshness and maintenance cost.
+- Batch and transaction: execution/flush/commit boundaries, atomicity and idempotency.
+- Async acceptance: durable handoff, backpressure and completion contract when applicable.
+- Recovery: failed chunks, resume, backfill/reconciliation and cutover when applicable.
+- Evidence: baseline, target, test fixtures, actual results and unverified runtime boundaries.
+
 ## Implementation Constraints
 
 - Repository paths:

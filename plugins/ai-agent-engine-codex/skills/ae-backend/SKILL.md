@@ -7,6 +7,8 @@ description: Use when the user asks for AE backend, /ae-backend, API implementat
 
 Implement or modify backend behavior using the repository's actual API, service, data, and validation contracts.
 
+For database-backed lists/search/count/export, create/update/delete/import or batch/async persistence, apply the [data-access and scale contract](references/data-access-contract.md) before implementation, even without schema changes. Keep bounded single-row CRUD light; for scale-sensitive work record query/count budgets, read-model alternatives, batch/commit semantics and recovery evidence. Load its read-model, async and MyBatis-Plus references only when triggered.
+
 ## Workflow
 
 1. Read `references/backend-workflow.md`.

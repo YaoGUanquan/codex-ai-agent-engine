@@ -62,6 +62,11 @@ node scripts/ae-tools.mjs help
 
 ## 版本更新记录
 
+### 0.3.47（2026-09-24）
+- 后端大数据量设计新增按需加载的数据访问契约，贯穿 14 个需求、设计、实现、重构、诊断与验收技能：明确查询预算、逻辑分页对象、独立 count 验收、批量执行与事务提交边界，避免无依据的逐条查询/提交。
+- 增加辅助查询表、业务扩展表、预计算读模型的方案比较与一致性、回填、重建约束；异步批量保存覆盖持久化接收、背压、分块事务、幂等、检查点、失败恢复和完成核验。MyBatis-Plus 按实际版本选择 count 与批处理方案，不全局关闭优化或强制新增表/队列。
+- 验证命令：`node --test tests/data-access-contract.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。仅验证指令结构、评审选择器、镜像及隔离安装分发；不证明模型遵循率、业务数据库性能、真实异步恢复或当前用户安装已更新。
+
 ### 0.3.46（2026-09-13）
 - 统一运行时命令入口：共享只读解析器优先选择项目 wrapper，仅路径缺失时选择当前用户全局 dispatcher；无效路径、损坏链接和执行失败明确报错，不静默切换安装版本或自动重试命令。
 - 活跃技能与 capability catalog 使用 `node "$aeEntry"` 模板，沿共享 reference 完成初始化；help 输出实际启动入口的 PowerShell/POSIX 安全变量赋值，保留原命令参数与权限边界。
@@ -81,11 +86,6 @@ node scripts/ae-tools.mjs help
 - 新增模型中立适配合同：核心 AE 工作流按任务风险、验收标准、当前工具 schema 与实测能力调整深度，不再按 GPT-5.6、GPT-6 或其他模型标签推断工具、上下文、私有推理或 `reasoning_effort`；供应商模型目录不一致明确归类为运行时元数据问题。
 - `ae-init` 生成的 `AGENTS.md` 新增失败可见、根因与结构性修复、指令渐进加载、按仓库已有脚本排序验证、交付前 diff 复核与证据分层规则；`minimal` 保持精简，`ae-core/full` 提供完整规则，不猜测不存在的命令。
 - 技能契约检查扩展到 skill 目录中的相对 Markdown 链接；验证命令：模型适配与 init 聚焦测试、`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs` 与 `git diff --check`。这些检查只证明本地指令、生成器、镜像和安装分发合同，不证明所有模型、供应商或 Codex host 的等同行为。
-
-### 0.3.42（2026-09-08）
-- Java/Spring Controller 测试新增结构边界：测试源码不得继承带 Spring MVC 映射或 OpenAPI 接口注解的生产 Controller，避免 Apifox 等静态扫描器把继承映射误识别为重复接口；明确使用现有 MVC slice、直接实例化加 mocks 或 Mockito spy/proxy 覆盖受保护请求上下文 seam，`@Hidden` 与 Javadoc ignore 不作为保障。
-- `ae-tdd` 新增 JVM Web Controller 测试段，并以 source/mirror 回归断言锁定该约束与镜像一致性。
-- 验证命令：`node --test --test-name-pattern "backend language guidance and fullstack contract alignment|mattpocock-adapted guidance" tests/skills-docs.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`node scripts/check-release-notes.mjs` 与 `git diff --check`。这些检查仅证明本地 skill、镜像与安装分发合同，不证明目标项目运行时或第三方 IDE 插件行为。
 
 完整历史见 [CHANGELOG.md](CHANGELOG.md)；本节仅保留最近 5 个版本，发布时超出窗口的条目迁移到 CHANGELOG。
 

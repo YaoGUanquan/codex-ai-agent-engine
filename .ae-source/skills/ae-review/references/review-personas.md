@@ -45,6 +45,7 @@ Add api-contract for API surface changes.
 Add reliability for async, infra, queues, retries, jobs, or failure recovery.
 Add data-migrations for database/schema/data movement; for a new table or material persistence change, apply `../../ae-backend/references/persistence-contract.md` as the review baseline.
 Add performance for hot paths, large data, caching, or render-heavy UI.
+For query/list/count and bulk/async persistence, use the [data-access contract](../../ae-backend/references/data-access-contract.md) for conditional performance, reliability, API-contract and data-migrations lenses, including design/plan reviews. Check explicit query budgets, read-model consistency, count semantics, batching/commit boundaries and recovery; no schema diff is required to trigger this review.
 For documents, always include coherence and feasibility, then add conditional lenses based on content.
 Add requirements-reviewer for requirements or PRDs.
 Add traceability-reviewer when multiple AE artifacts must agree.

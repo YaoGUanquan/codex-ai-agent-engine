@@ -7,6 +7,8 @@ description: Use when the user asks for AE ideation, /ae-ideate, idea generation
 
 Generate useful options before requirements are fixed.
 
+For large-data queries or persistence, compare options using the [data-access and scale contract](../ae-backend/references/data-access-contract.md): indexed/set-based direct access, maintained auxiliary/read models, and bounded synchronous or durable asynchronous batches as applicable. Include consistency, write amplification and recovery costs; do not recommend per-item queries, extra tables or async solely by habit.
+
 ## Workflow
 
 1. Identify the goal, constraints, audience, and known non-goals.
