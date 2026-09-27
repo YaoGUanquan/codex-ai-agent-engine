@@ -1,7 +1,8 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
+import fs, { cpSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
+import { syncBuiltinESMExports } from 'node:module'
 import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
@@ -205,6 +206,118 @@ test('global install does not purge a recovery-failed operation', () => {
     assert.throws(() => runGlobalInstall(['purge', '--home', home, '--operation', operation], { repoRoot }), /before recovery completes/)
     assert.equal(existsSync(journal), true)
   } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('global installer never recovers another active writer and preserves an expired owner lock', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-global-writer-lock-'))
+  try {
+    const home = join(tempRoot, 'home')
+    const runtime = join(home, '.agents', 'ai-agent-engine-codex')
+    mkdirSync(runtime, { recursive: true })
+    const preview = runGlobalInstall(['preview', '--home', home], { repoRoot })
+    const metadata = JSON.stringify({ owner: 'another installer', pid: 123, expiresAt: '2000-01-01T00:00:00Z' })
+    const lock = join(runtime, 'install.lock')
+    writeFileSync(lock, metadata)
+    assert.throws(() => runGlobalInstall(['apply', '--home', home, '--apply', '--operation', preview.operationId, '--confirm', preview.confirmation], { repoRoot, commandRunner: fakeCodexRunner }), /expired lease/)
+    assert.equal(readFileSync(lock, 'utf8'), metadata)
+    assert.equal(existsSync(join(runtime, 'runtime')), false)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('global preview confirmation is bound to actual source bytes, not only its directory', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-global-source-lock-'))
+  try {
+    const home = join(tempRoot, 'home')
+    const source = join(tempRoot, 'source')
+    mkdirSync(home)
+    cpSync(join(repoRoot, 'plugins'), join(source, 'plugins'), { recursive: true })
+    const preview = runGlobalInstall(['preview', '--home', home], { repoRoot: source })
+    writeFileSync(join(source, 'plugins', 'ai-agent-engine-codex', 'skills', 'ae-help', 'SKILL.md'), '# changed source after preview\n')
+    assert.throws(() => runGlobalInstall(['apply', '--home', home, '--apply', '--operation', preview.operationId, '--confirm', preview.confirmation], { repoRoot: source, commandRunner: fakeCodexRunner }), /preview confirmation does not match/)
+    assert.equal(existsSync(join(home, 'plugins', 'ai-agent-engine-codex')), false)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+for (const scenario of ['changed-source', 'failed-copy']) {
+  test(`global staging rejects ${scenario} without leaving unpublished staging behind`, (t) => {
+    const tempRoot = mkdtempSync(join(tmpdir(), 'ae-global-stage-failure-'))
+    try {
+      const home = join(tempRoot, 'home')
+      const source = join(tempRoot, 'source')
+      const sourcePlugin = join(source, 'plugins', 'ai-agent-engine-codex')
+      mkdirSync(home)
+      cpSync(join(repoRoot, 'plugins'), join(source, 'plugins'), { recursive: true })
+      const preview = runGlobalInstall(['preview', '--home', home], { repoRoot: source })
+      const stage = join(userPaths(home).runtimeRoot, 'staging', preview.operationId)
+      const copy = cpSync
+      t.mock.method(fs, 'cpSync', (from, to, options) => {
+        if (resolve(from) !== sourcePlugin || resolve(to) !== join(stage, 'plugin')) return copy(from, to, options)
+        if (scenario === 'changed-source') writeFileSync(join(sourcePlugin, 'skills', 'ae-help', 'SKILL.md'), '# changed while staging\n')
+        const result = copy(from, to, options)
+        if (scenario === 'failed-copy') throw new Error('simulated stage copy failure')
+        return result
+      })
+      syncBuiltinESMExports()
+      let failure
+      try {
+        runGlobalInstall(['apply', '--home', home, '--apply', '--operation', preview.operationId, '--confirm', preview.confirmation], {
+          repoRoot: source, commandRunner: () => assert.fail('registration must not run after staging failure'),
+        })
+      } catch (error) {
+        failure = error
+      }
+      assert.equal(failure?.operation?.status, 'rolled-back')
+      assert.match(failure.message, scenario === 'changed-source' ? /confirmed source fingerprint/ : /simulated stage copy failure/)
+      assert.equal(existsSync(stage), false)
+      assert.equal(existsSync(join(home, 'plugins', 'ai-agent-engine-codex')), false)
+      assert.equal(existsSync(join(userPaths(home).runtimeRoot, 'install.lock')), false)
+    } finally {
+      t.mock.restoreAll()
+      syncBuiltinESMExports()
+      rmSync(tempRoot, { recursive: true, force: true })
+    }
+  })
+}
+
+test('global publication uses the verified staged skill roster when source changes after staging', (t) => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-global-stage-roster-'))
+  try {
+    const home = join(tempRoot, 'home')
+    const source = join(tempRoot, 'source')
+    mkdirSync(home)
+    cpSync(join(repoRoot, 'plugins'), join(source, 'plugins'), { recursive: true })
+    const preview = runGlobalInstall(['preview', '--home', home], { repoRoot: source })
+    const paths = userPaths(home)
+    const stagedPlugin = join(paths.runtimeRoot, 'staging', preview.operationId, 'plugin')
+    const copy = cpSync
+    let changed = false
+    t.mock.method(fs, 'cpSync', (from, to, options) => {
+      if (resolve(from) === stagedPlugin && resolve(to) === join(paths.runtimeRoot, 'runtime', 'plugin')) {
+        const added = join(source, 'plugins', 'ai-agent-engine-codex', 'skills', 'ae-added-after-staging')
+        mkdirSync(added)
+        writeFileSync(join(added, 'SKILL.md'), '# not in the confirmed release\n')
+        changed = true
+      }
+      return copy(from, to, options)
+    })
+    syncBuiltinESMExports()
+    const applied = runGlobalInstall(['apply', '--home', home, '--apply', '--operation', preview.operationId, '--confirm', preview.confirmation], {
+      repoRoot: source, commandRunner: fakeCodexRunner,
+    })
+    assert.equal(changed, true)
+    assert.equal(applied.status, 'completed')
+    assert.equal(fingerprintPath(paths.personalPluginRoot).sha256, applied.source_fingerprint.sha256)
+    assert.equal(existsSync(join(paths.cursorSkillsRoot, 'ae-added-after-staging')), false)
+    assert.deepEqual(readdirSync(paths.cursorSkillsRoot).sort(), currentSkillNames)
+  } finally {
+    t.mock.restoreAll()
+    syncBuiltinESMExports()
     rmSync(tempRoot, { recursive: true, force: true })
   }
 })

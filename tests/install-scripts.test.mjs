@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from 'node:fs'
+import { randomUUID } from 'node:crypto'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { repoRoot, runGit } from './helpers/skill-test-utils.mjs'
@@ -171,6 +172,88 @@ test('install-project rejects unsupported languages', () => {
   }
 })
 
+test('invalid recovery and failure-injection arguments do not leave installation locks or journals', () => {
+  const targetRoot = makeTempDir('ae-install-invalid-args-')
+  try {
+    for (const args of [['--recover'], ['--recover', '--lang', 'en'], ['--fail-at']]) {
+      const result = runScript('scripts/install-project.mjs', ['--target', targetRoot, ...args], repoRoot)
+      assert.equal(result.status, 1)
+      assert.match(result.stderr, /requires a value/)
+      const operationRoot = join(targetRoot, '.agents', 'ai-agent-engine-codex')
+      assert.equal(existsSync(join(operationRoot, 'project-install.lock')), false)
+      assert.equal(existsSync(join(operationRoot, 'active-operation.json')), false)
+      assert.equal(existsSync(join(operationRoot, 'project-install-operations')), false)
+    }
+    const retry = runScript('scripts/install-project.mjs', ['--target', targetRoot], repoRoot)
+    assert.equal(retry.status, 0, retry.stderr)
+  } finally {
+    rmSync(targetRoot, { recursive: true, force: true })
+  }
+})
+
+test('project installation stages and validates before activation and rolls back a failed swap', () => {
+  const targetRoot = makeTempDir('ae-project-rollback-')
+  try {
+    const first = runScript('scripts/install-project.mjs', ['--target', targetRoot, '--lang', 'en'], repoRoot)
+    assert.equal(first.status, 0, first.stderr)
+    const installed = parseLastJson(first.stdout)
+    assert.equal(installed.source_fingerprint.length, 64)
+    assert.match(installed.source_revision, /^[a-f0-9]{40,64}$/)
+    const statePath = join(targetRoot, '.agents', 'ai-agent-engine-codex', 'project-install.json')
+    const before = readFileSync(statePath, 'utf8')
+    const failure = runScript('scripts/install-project.mjs', ['--target', targetRoot, '--lang', 'zh-CN', '--fail-at', 'moved-old:0'], repoRoot)
+    assert.equal(failure.status, 1)
+    assert.match(failure.stderr, /injected failure/)
+    assert.match(failure.stderr, /rollback completed \(rolled-back\); operation [a-f0-9-]{36}; journal/)
+    assert.equal(readFileSync(statePath, 'utf8'), before)
+    const help = runScript('scripts/ae-tools.mjs', ['help'], targetRoot)
+    assert.equal(help.status, 0, help.stderr)
+    const operationRoot = join(targetRoot, '.agents', 'ai-agent-engine-codex')
+    const journals = readdirSync(join(operationRoot, 'project-install-operations')).map((name) => JSON.parse(readFileSync(join(operationRoot, 'project-install-operations', name), 'utf8')))
+    assert.ok(journals.some((journal) => journal.phase === 'rolled-back'))
+    assert.equal(existsSync(join(operationRoot, 'active-operation.json')), false)
+    assert.equal(existsSync(join(operationRoot, 'project-install.lock')), false)
+  } finally {
+    rmSync(targetRoot, { recursive: true, force: true })
+  }
+})
+
+test('project recovery restores an interrupted rename and is idempotent without overwriting later changes', () => {
+  const targetRoot = makeTempDir('ae-project-recover-')
+  try {
+    const installed = runScript('scripts/install-project.mjs', ['--target', targetRoot, '--lang', 'en'], repoRoot)
+    assert.equal(installed.status, 0, installed.stderr)
+    const operationRoot = join(targetRoot, '.agents', 'ai-agent-engine-codex')
+    const state = JSON.parse(readFileSync(join(operationRoot, 'project-install.json'), 'utf8'))
+    const id = randomUUID()
+    const stage = resolve(operationRoot, 'project-install-staging', id)
+    const journal = resolve(operationRoot, 'project-install-operations', `${id}.json`)
+    const target = resolve(targetRoot, 'scripts', 'ae-tools.mjs')
+    const original = readFileSync(target, 'utf8')
+    const backup = resolve(stage, 'old', '0')
+    mkdirSync(join(stage, 'old'), { recursive: true })
+    renameSync(target, backup)
+    writeFileSync(journal, JSON.stringify({
+      schemaVersion: 1, id, stage, journal, targetRoot, phase: 'activating',
+      changes: [{ rel: 'scripts/ae-tools.mjs', before: state.components['scripts/ae-tools.mjs'], after: state.components['scripts/ae-tools.mjs'], backup, staged: resolve(stage, 'new', 'scripts', 'ae-tools.mjs'), phase: 'moving-old' }],
+    }))
+    writeFileSync(join(operationRoot, 'active-operation.json'), JSON.stringify({ id }))
+    const blocked = runScript('scripts/install-project.mjs', ['--target', targetRoot], repoRoot)
+    assert.equal(blocked.status, 1)
+    assert.match(blocked.stderr, /unfinished project install/)
+    const recovered = runScript('scripts/install-project.mjs', ['--target', targetRoot, '--recover', id], repoRoot)
+    assert.equal(recovered.status, 0, recovered.stderr)
+    assert.equal(parseLastJson(recovered.stdout).status, 'rolled-back')
+    assert.equal(readFileSync(target, 'utf8'), original)
+    writeFileSync(target, '// later user edit\n')
+    const repeated = runScript('scripts/install-project.mjs', ['--target', targetRoot, '--recover', id], repoRoot)
+    assert.equal(repeated.status, 0, repeated.stderr)
+    assert.equal(readFileSync(target, 'utf8'), '// later user edit\n')
+  } finally {
+    rmSync(targetRoot, { recursive: true, force: true })
+  }
+})
+
 test('update-project clones a local repository and delegates to its installer', () => {
   const remoteRoot = makeTempDir('ae-update-remote-')
   const targetRoot = makeTempDir('ae-update-target-')
@@ -197,11 +280,76 @@ test('update-project clones a local repository and delegates to its installer', 
     assert.match(result.stdout, /"lang": "en"/)
 
     const summary = parseLastJson(result.stdout)
+    assert.match(summary.source_revision, /^[a-f0-9]{40,64}$/)
+    assert.equal(summary.installer_fingerprint.length, 64)
     assert.equal(summary.maintenance.status, 'skipped', 'maintenance should degrade gracefully when the target has no ae-tools CLI')
 
     const marker = JSON.parse(readFileSync(join(targetRoot, 'install-args.json'), 'utf8'))
     assert.equal(marker.target, targetRoot)
     assert.equal(marker.lang, 'en')
+  } finally {
+    rmSync(remoteRoot, { recursive: true, force: true })
+    rmSync(targetRoot, { recursive: true, force: true })
+  }
+})
+
+test('update-project distinguishes committed installation from failed maintenance', () => {
+  const remoteRoot = makeTempDir('ae-update-maintenance-failure-')
+  const targetRoot = makeTempDir('ae-update-maintenance-target-')
+  try {
+    mkdirSync(join(remoteRoot, 'scripts'))
+    writeFileSync(join(remoteRoot, 'scripts', 'install-project.mjs'), [
+      "import { mkdirSync, writeFileSync } from 'node:fs'",
+      "import { join } from 'node:path'",
+      "const target = process.argv[process.argv.indexOf('--target') + 1]",
+      "mkdirSync(join(target, 'scripts'), { recursive: true })",
+      "writeFileSync(join(target, 'scripts', 'ae-tools.mjs'), 'process.exit(2)')",
+      "writeFileSync(join(target, 'installed.txt'), 'yes')",
+    ].join('\n'))
+    runGit(['init', '-b', 'main'], remoteRoot)
+    runGit(['add', '.'], remoteRoot)
+    runGit(['-c', 'user.email=fixture@example.com', '-c', 'user.name=Fixture', 'commit', '-m', 'fixture'], remoteRoot)
+    const result = runScript('scripts/update-project.mjs', ['--repo', remoteRoot, '--target', targetRoot], repoRoot)
+    assert.equal(result.status, 1)
+    const summary = parseLastJson(result.stdout)
+    assert.equal(summary.status, 'updated-maintenance-failed')
+    assert.equal(summary.installation, 'updated')
+    assert.equal(summary.maintenance.status, 'failed')
+    assert.equal(readFileSync(join(targetRoot, 'installed.txt'), 'utf8'), 'yes')
+    const mismatch = runScript('scripts/update-project.mjs', ['--repo', remoteRoot, '--target', targetRoot, '--revision', 'not-the-cloned-revision'], repoRoot)
+    assert.equal(mismatch.status, 1)
+    assert.match(mismatch.stderr, /revision does not match/)
+  } finally {
+    rmSync(remoteRoot, { recursive: true, force: true })
+    rmSync(targetRoot, { recursive: true, force: true })
+  }
+})
+
+test('update-project preserves bounded recovery diagnostics and redacts credentials on installer failure', () => {
+  const remoteRoot = makeTempDir('ae-update-diagnostics-')
+  const targetRoot = makeTempDir('ae-update-diagnostics-target-')
+  try {
+    const id = randomUUID()
+    mkdirSync(join(remoteRoot, 'scripts'))
+    writeFileSync(join(remoteRoot, 'scripts', 'install-project.mjs'), [
+      `console.log('source https://fixture-user:fixture-password@example.test/repo?token=fixture-query#fixture-fragment')`,
+      `console.log('Authorization: Bearer fixture-bearer')`,
+      `console.log('api_key=fixture-api-key')`,
+      `console.log('x'.repeat(20000))`,
+      `console.error(${JSON.stringify(`recovery-failed: rollback failed; inspect target/operations/${id}.json; use --recover ${id}`)})`,
+      'process.exitCode = 1',
+    ].join('\n'))
+    runGit(['init', '-b', 'main'], remoteRoot)
+    runGit(['add', '.'], remoteRoot)
+    runGit(['-c', 'user.email=fixture@example.com', '-c', 'user.name=Fixture', 'commit', '-m', 'fixture failure diagnostics'], remoteRoot)
+    const result = runScript('scripts/update-project.mjs', ['--repo', remoteRoot, '--target', targetRoot], repoRoot)
+    assert.equal(result.status, 1)
+    assert.match(result.stderr, /recovery-failed: rollback failed/)
+    assert.ok(result.stderr.includes(`target/operations/${id}.json`))
+    assert.ok(result.stderr.includes(`--recover ${id}`))
+    assert.match(result.stderr, /truncated/)
+    assert.ok(Buffer.byteLength(result.stderr) < 18000)
+    assert.doesNotMatch(result.stderr + result.stdout, /fixture-(?:user|password|query|fragment|bearer|api-key)/)
   } finally {
     rmSync(remoteRoot, { recursive: true, force: true })
     rmSync(targetRoot, { recursive: true, force: true })
