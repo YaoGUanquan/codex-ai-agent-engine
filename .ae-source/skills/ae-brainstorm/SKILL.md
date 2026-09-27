@@ -5,6 +5,8 @@ description: Use when the user asks for ae-brainstorm, /ae-brainstorm, $ae-brain
 
 # AE Brainstorm
 
+When scale or concurrency affects the requirement, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md) to identify workload, SLO and failure assumptions before selecting architecture. Missing capacity numbers remain open decisions, not invented defaults.
+
 Clarify what should be built. Produce a requirements artifact only when it will help downstream planning.
 
 For database-backed lists/search, large queries, bulk mutations/imports or asynchronous saving, use the [data-access and scale contract](../ae-backend/references/data-access-contract.md) to clarify scale, exact-total needs, freshness, atomicity/partial success and durable completion. Separate product decisions from implementation choices; do not assume that async, extra tables or removing count is acceptable.

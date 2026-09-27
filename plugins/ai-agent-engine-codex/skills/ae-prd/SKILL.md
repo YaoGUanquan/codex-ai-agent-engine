@@ -5,6 +5,8 @@ description: Use when the user asks for ae-prd, /ae-prd, $ae-prd, "use ae-prd", 
 
 # AE PRD
 
+For large-data or distributed requirements, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Define measurable workload, completion/freshness semantics and failure acceptance; do not prescribe a queue, cache or shard without the corresponding requirement.
+
 Capture what should be built before implementation planning. This skill answers WHAT; `ae-plan` answers HOW.
 
 For database-backed lists, large queries, bulk writes or asynchronous saving, apply the [data-access and scale contract](../ae-backend/references/data-access-contract.md) to capture applicable volume/concurrency, total/freshness, atomicity, acceptance/completion and recovery requirements. Keep unknown budgets explicit; do not prescribe auxiliary tables, queues or a fixed batch size as product requirements without a decision.

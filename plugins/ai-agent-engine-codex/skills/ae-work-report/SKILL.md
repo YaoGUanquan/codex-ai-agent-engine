@@ -5,6 +5,8 @@ description: Use when the user asks for AE work report, /ae-work-report, daily r
 
 # AE Work Report
 
+For large or multi-service reporting, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Scope inventory by branch/time/service and disclose truncation; report code, installation, runtime and production completion separately.
+
 Generate concise work reports from Git history, current changes, and existing report context.
 
 ## Operating Principles

@@ -5,6 +5,8 @@ description: Use when the user asks for AE doc humanize, /ae-doc-humanize, make 
 
 # AE Doc Humanize
 
+For large operational documents, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md) to preserve scope, consistency, recovery and evidence qualifiers. Rewrite bounded sections without erasing partial-result warnings or changing formal contracts.
+
 Rewrite documents for human readability while preserving facts.
 
 ## Workflow

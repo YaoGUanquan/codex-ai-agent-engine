@@ -12,5 +12,11 @@ Before final response:
 6. Run `node "$aeEntry" gate --workflow work --checkpoint final ...` or perform equivalent gate checks.
 7. Report completed work, validation, unverified areas, Git operations, gate status, and residual risks.
 
+When the task updates memory, development history, navigation or rolling logs,
+apply the [document lifecycle contract](../../ae-save-experience/references/document-lifecycle.md).
+Use controlled appends for managed sources and run `ae-docs-maintain --check`
+with the resolved external `--docs-root` when applicable. This does not authorize
+new memory content or changes to other contexts.
+
 Do not claim tests passed unless commands actually ran and succeeded.
 Do not claim a root cause, fix, or browser acceptance result without concrete evidence from the commands or tools you used.

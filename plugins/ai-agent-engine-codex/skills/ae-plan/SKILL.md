@@ -5,6 +5,8 @@ description: Use when the user asks for ae-plan, /ae-plan, $ae-plan, "use ae-pla
 
 # AE Plan
 
+For large or distributed changes, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Separate contract/migration dependencies from file ownership, budget each batch and worker, and plan checkpoints and rollback before implementation.
+
 Create a durable implementation plan. Planning answers how to build; it does not edit product code.
 
 ## Operating Principles

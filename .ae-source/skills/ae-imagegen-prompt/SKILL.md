@@ -5,6 +5,8 @@ description: Use when the user asks to optimize an image-generation prompt, gene
 
 # AE Imagegen Prompt
 
+For batch generation or many reference assets, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Bound asset bytes, batch size, provider concurrency and retry cost; distinguish prompt readiness, submitted jobs and observed generated results.
+
 Turn vague visual requests into controlled image-generation prompt specs. When no safe profile is provided, default to beginner-safe choices.
 
 ## Workflow

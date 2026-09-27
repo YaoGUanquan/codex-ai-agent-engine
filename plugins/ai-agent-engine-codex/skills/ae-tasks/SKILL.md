@@ -5,6 +5,8 @@ description: Use when the user asks for AE tasks, task breakdown, dependency-ord
 
 # AE Tasks
 
+For parallel or large-scale execution, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Tasks need dependency waves, bounded in-flight work and exclusive state ownership; disjoint files alone do not prove independent contracts or safe deployment.
+
 Turn an approved AE plan into a dependency-ordered task artifact for larger implementations.
 
 ## Workflow

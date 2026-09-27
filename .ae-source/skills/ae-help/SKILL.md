@@ -5,6 +5,8 @@ description: Use when the user asks what AI Agent Engine or AE capabilities are 
 
 # AE Help
 
+For large repositories, datasets, concurrency or distributed workflows, route through the [scale and distributed engineering contract](references/scale-and-distributed-engineering.md). Explain tool budgets and partial-result boundaries; help output does not certify target-system capacity.
+
 Before running helper commands, resolve `aeEntry` using the [runtime entry contract](references/runtime-entry.md).
 
 List and explain the Codex-native AI Agent Engine entrypoints in the local display language.

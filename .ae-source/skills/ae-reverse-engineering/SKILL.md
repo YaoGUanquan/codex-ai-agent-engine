@@ -5,6 +5,8 @@ description: Performs authorized reverse engineering and defensive artifact anal
 
 # AE Authorized Reverse Engineering
 
+For large authorized artifacts or distributed compatibility analysis, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Bound extraction and call-path sampling, retain hashes/provenance, and mark coverage gaps; this adds no execution, network or target authorization.
+
 Analyze only user-owned or explicitly authorized artifacts. This skill provides a defensive, evidence-driven workflow; it does not provide an offensive router, tool installer, MCP setup, or global configuration.
 
 ## Authorization Gate

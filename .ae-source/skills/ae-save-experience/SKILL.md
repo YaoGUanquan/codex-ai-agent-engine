@@ -5,12 +5,16 @@ description: Use when the user asks for AE save experience, /ae-save-experience,
 
 # AE Save Experience
 
+For scale-related lessons, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Retain only explicitly requested, sanitized invariants and measured context, with evidence links and bounded navigation; never turn one workload measurement into a universal capacity claim.
+
 Capture reusable project experience after work lands.
 
 ## Workflow
 
 1. Summarize the problem, context, root cause, decision, commands, validation, and final outcome.
 2. Separate durable lessons from incidental details.
+   Apply the [bounded memory navigation contract](references/memory-navigation.md) when project memory is read or updated; never append the experience body to `00-index.md`.
+   For development history, oversized topics or managed pages, apply the [document lifecycle contract](references/document-lifecycle.md); use the bounded writer and run its budget check after updates.
 3. Write under `docs/ae/experience/` when the user wants a project artifact.
 4. If the user explicitly asks to update Codex memory, write an ad-hoc memory note following the active memory rules.
 5. Keep secrets, tokens, and private credentials out of the artifact.

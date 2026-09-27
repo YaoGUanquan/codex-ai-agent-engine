@@ -5,6 +5,8 @@ description: Use when the user asks to convert, read, extract, or normalize a lo
 
 # AE Markitdown
 
+For large local inputs, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Inspect size before conversion, bound bytes and output excerpts, and report unsupported/truncated content; do not silently load a dataset or broaden this local-only format scope.
+
 Before running helper commands, resolve `aeEntry` using the [runtime entry contract](../ae-help/references/runtime-entry.md).
 
 Convert local workspace files into Markdown for review, planning, archival, or LLM input.
@@ -27,4 +29,3 @@ node "$aeEntry" markitdown <file> [--format html|csv|tsv|json|yaml|xml|text|mark
 - Supported lightweight formats: HTML, CSV, TSV, JSON, YAML/YML, XML, TXT, MD.
 - No OCR, binary document extraction, media transcription, or remote URL fetching.
 - The converter is intentionally lightweight. For complex HTML tables or quoted CSV edge cases, state residual parsing risk.
-

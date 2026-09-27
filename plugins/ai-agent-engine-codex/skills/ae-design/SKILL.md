@@ -5,6 +5,8 @@ description: Use when the user asks for AE design, /ae-design, design contract c
 
 # AE Design
 
+For scale-sensitive architecture, load the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Design ownership, partition and consistency boundaries, bounded resources, mixed-version rollout and recovery; map each invariant to a failure test.
+
 Create a design contract between PRD and implementation plan. This skill defines what must stay consistent across architecture, API, data, UI/UX, tests, security, observability, and non-functional constraints; it does not implement code.
 
 ## Input Routing

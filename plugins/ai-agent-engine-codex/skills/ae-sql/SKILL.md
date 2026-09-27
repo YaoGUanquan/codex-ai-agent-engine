@@ -5,6 +5,8 @@ description: Use when the user asks for AE SQL, /ae-sql, database query, schema 
 
 # AE SQL
 
+For large tables, backfills or concurrent writes, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md) with the existing data-access contract. Inspect plans, lock/transaction budgets, resumable ranges and mixed-version migrations; SQL preparation never authorizes execution.
+
 Generate, review, or execute SQL with explicit safety boundaries.
 
 For query/list/count/export or multi-row writes, apply the [data-access and scale contract](../ae-backend/references/data-access-contract.md). Compare set-based and bounded batch execution, distinguish flush from commit, and preserve atomicity instead of generating unjustified per-row submissions. For large joins/aggregates, compare indexes and maintained read models; verify data and count separately. This adds no database execution permission.

@@ -5,6 +5,8 @@ description: Use when the user asks for AE ideation, /ae-ideate, idea generation
 
 # AE Ideate
 
+When scale changes the feasible options, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Compare simpler bounded processing, read models and durable async designs using measured needs and consistency/operational costs, not assumed scale.
+
 Generate useful options before requirements are fixed.
 
 For large-data queries or persistence, compare options using the [data-access and scale contract](../ae-backend/references/data-access-contract.md): indexed/set-based direct access, maintained auxiliary/read models, and bounded synchronous or durable asynchronous batches as applicable. Include consistency, write amplification and recovery costs; do not recommend per-item queries, extra tables or async solely by habit.

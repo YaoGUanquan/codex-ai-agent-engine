@@ -5,6 +5,8 @@ description: Use for /ae-web-forge or $ae-web-forge, broad or mixed frontend req
 
 # AE Web Forge
 
+For scale-sensitive Web requests, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md) when selecting the owner. Keep visual, data-flow and acceptance responsibilities separate, and pass workload and resource constraints through the existing route.
+
 Route frontend and light web-app work through the smallest Codex-native AE workflow. This skill coordinates existing skills; it is not an OpenCode agent runtime.
 
 ## Target Check

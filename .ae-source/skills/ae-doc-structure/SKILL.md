@@ -5,6 +5,8 @@ description: Use when the user asks for AE doc structure, /ae-doc-structure, str
 
 # AE Doc Structure
 
+For large distributed-project notes, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Organize bounded artifacts by owner and invariant, preserve unresolved workload decisions, and separate requirements from implementation and measured evidence.
+
 Turn unstructured text into durable structured documents.
 
 ## Workflow

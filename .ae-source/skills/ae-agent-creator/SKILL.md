@@ -5,6 +5,8 @@ description: Use when the user asks for AE agent creator, /ae-agent-creator, cre
 
 # AE Agent Creator
 
+For concurrent worker profiles, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Specify bounded inputs/outputs, ownership, deadlines, cancellation, retry policy and conflict escalation; a prompt does not implement distributed coordination.
+
 Create Codex-compatible agent prompts and delegation templates.
 
 ## Workflow
