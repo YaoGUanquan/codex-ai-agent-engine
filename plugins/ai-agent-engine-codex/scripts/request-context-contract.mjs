@@ -111,6 +111,19 @@ function hasRunnerCoverageEvidence(projectRunner) {
     && isNonEmptyString(projectRunner?.assertionSource)
 }
 
+function hasDatasourceIsolationEvidence(carrier) {
+  return carrier?.isolatedDataSource === true && isNonEmptyString(carrier?.isolationEvidence)
+}
+
+function blockedForMissingIsolation(carrier) {
+  return {
+    status: 'blocked',
+    carrier: null,
+    category: 'request-context',
+    errors: [`${carrier} must prove a disposable test-only datasource or explicitly authorized isolated profile`],
+  }
+}
+
 export function canUseSingleRequestFallback(operation = {}) {
   const forbidden = Boolean(
     operation.stateChanging ||
@@ -139,6 +152,7 @@ export function resolveSmokeCarrier({ operation = {}, manifest = {}, projectRunn
         errors: ['project runner is missing method, path template, or assertion coverage evidence'],
       }
     }
+    if (!hasDatasourceIsolationEvidence(projectRunner)) return blockedForMissingIsolation('project runner')
     return { status: 'ready', carrier: 'project-runner', category: null, source: projectRunner.source }
   }
   if (projectRunner) {
@@ -152,6 +166,7 @@ export function resolveSmokeCarrier({ operation = {}, manifest = {}, projectRunn
   const hasDynamicContext = (manifest.inputs || []).some((input) => DERIVED_CLASSIFICATIONS.has(input?.classification))
   const fallbackDecision = canUseSingleRequestFallback({ ...operation, requiresDynamicValues: operation.requiresDynamicValues || hasDynamicContext })
   if (fallbackDecision.eligible && fallback?.validated === true) {
+    if (!hasDatasourceIsolationEvidence(fallback)) return blockedForMissingIsolation('single-request fallback')
     return { status: 'ready', carrier: 'single-request-curl', category: null, source: fallback.source || null }
   }
   return {
