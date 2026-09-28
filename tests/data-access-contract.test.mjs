@@ -102,6 +102,29 @@ test('data access decisions survive design and plan artifact creation', () => {
   }
 })
 
+test('scale contract makes token budgets and progressive disclosure executable', () => {
+  const path = 'ae-help/references/scale-and-distributed-engineering.md'
+  const body = read(path)
+  assert.equal(readFileSync(resolve(mirrorRoot, path), 'utf8'), body)
+  for (const invariant of [
+    /inputTokens/, /outputTokens/, /contextWindow/, /inputBudget/, /outputBudget/, /remainingBudget/,
+    /context and output caps/i, /progressive disclosure/i, /complete=false/, /stopReason/,
+    /budget.*deadline.*cancel.*complete.*blocked/s,
+  ]) assert.match(body, invariant)
+})
+
+test('scale contract prevents audit drift and repeated review after compaction', () => {
+  const body = read('ae-help/references/scale-and-distributed-engineering.md')
+  for (const invariant of [
+    /one objective.*owned paths.*acceptance checks.*review budget/is,
+    /evidence ledger.*status.*owner.*paths.*commands.*findings.*nextAction.*stopReason/is,
+    /context compaction.*reconcile.*worktree/is,
+    /do not restart a completed audit/i,
+    /stop when acceptance checks pass/i,
+    /unverified.*blocked/i,
+  ]) assert.match(body, invariant)
+})
+
 test('review helper selects requested performance lanes for code and design without forcing CRUD', () => {
   for (const kind of ['code', 'document']) {
     const plain = reviewContract(root, ['--kind', kind])

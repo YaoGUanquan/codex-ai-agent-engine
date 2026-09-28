@@ -277,6 +277,125 @@ test('Ponytail-inspired minimality guidance is present in source and mirror skil
   }
 })
 
+test('ae-review locks explicit scope and scales lanes to task size', () => {
+  const source = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-review')
+  const mirror = readSkillBody('.ae-source/skills', 'ae-review')
+  const scopeSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-review/references/scope-detection.md'), 'utf8')
+  const scopeMirror = readFileSync(resolve(repoRoot, '.ae-source/skills/ae-review/references/scope-detection.md'), 'utf8')
+  const personasSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-review/references/review-personas.md'), 'utf8')
+  const personasMirror = readFileSync(resolve(repoRoot, '.ae-source/skills/ae-review/references/review-personas.md'), 'utf8')
+
+  assert.equal(mirror, source, 'ae-review mirror should match source')
+  assert.equal(scopeMirror, scopeSource, 'ae-review scope mirror should match source')
+  assert.equal(personasMirror, personasSource, 'ae-review persona mirror should match source')
+  for (const expectation of [
+    /## Scope Lock and Review Budget/,
+    /explicit target behavior, named files, and constraints outrank generic checklists/i,
+    /S1 small/,
+    /S1 uses one read-only reviewer lane/i,
+    /skips `review-package`, `review-contract`, architect, complexity, claim-integrity, and cross-artifact lanes/i,
+    /Do not widen a locked scope/i,
+    /Stop when the scoped verdict and required evidence are supported/i,
+    /For S2\/S3 code or plan reviews.*explicitly requests layered review/is,
+    /the word `significant` alone is not a trigger/i,
+    /A document path alone is not a trigger/i,
+    /When the user explicitly asks for over-engineering, minimality, deletion, bloat, dependency, or simplification review/i,
+    /For S2\/S3 only, it may also be added when concrete evidence shows the implementation is materially larger than the stated requirement/i,
+    /Never add this lane to an S1 review by inference/i,
+    /claim-integrity lane only when the scoped artifact contains a material validation or capability claim and proof integrity is part of the request or delivery gate/i,
+  ]) {
+    assert.match(source, expectation)
+  }
+  for (const expectation of [
+    /explicit user target.*overrides the default Git-status scope/is,
+    /hard boundary/i,
+    /classify it as S1 small/i,
+    /Do not add architecture, complexity, claim-integrity, cross-artifact, or speculative test-design work/i,
+    /Once the requested behavior has a supported verdict, stop/i,
+  ]) {
+    assert.match(scopeSource, expectation)
+  }
+  assert.match(personasSource, /For S1 reviews, collapse the baseline into one read-only lane/i)
+  assert.match(source, /For an S2\/S3 branch or commit range.*S1 light-path reviews are exempt/is)
+  assert.match(source, /For S2\/S3 workspace or session review.*S1 light-path workspace\/session reviews.*skip `review-contract`/is)
+  assert.doesNotMatch(source, /For a branch or commit range, create a review package before drawing conclusions:/)
+  assert.doesNotMatch(source, /or when a significant implementation appears structurally larger than the requirement/i)
+  assert.doesNotMatch(source, /When reviewing documentation, skill instructions, installer docs, benchmark notes, external-audit reports, or delivery evidence, add a claim-integrity lane\./i)
+})
+
+test('ae-lfg routes narrow and mixed requests without bypassing workflow stages', () => {
+  const source = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-lfg')
+  const mirror = readSkillBody('.ae-source/skills', 'ae-lfg')
+  const pipelineSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-lfg/references/pipeline.md'), 'utf8')
+  const pipelineMirror = readFileSync(resolve(repoRoot, '.ae-source/skills/ae-lfg/references/pipeline.md'), 'utf8')
+
+  assert.equal(mirror, source, 'ae-lfg mirror should match plugin source')
+  assert.equal(pipelineMirror, pipelineSource, 'ae-lfg pipeline mirror should match plugin source')
+  for (const expectation of [
+    /S1 direct answer, S2 fuzzy idea, S3 small fix, S5 read-only review, and S6 Git-only request/,
+    /S7 mixed requests split into stages.*implementation, review, and validation.*Git\/review\/deploy/is,
+    /For S1\/S2\/S3\/S5\/S6, make the single narrower handoff and stop/,
+    /implementation stage of S7.*genuinely multi-step/is,
+    /An explicit `ae-lfg` invocation does not widen a request whose acceptance boundary is narrower/i,
+    /Once a route is selected, load only references required by that route/i,
+  ]) {
+    assert.match(source, expectation, `ae-lfg should include ${expectation}`)
+  }
+  for (const expectation of [
+    /single handoff for S1, S2, S3, S5, or S6/,
+    /For S7, split the work into two stages: Stage A.*Stage B/is,
+    /Stage B.*only after Stage A passes/is,
+    /ae-review mode:report-only.*every S4 implementation scope/is,
+  ]) {
+    assert.match(pipelineSource, expectation, `ae-lfg pipeline should include ${expectation}`)
+  }
+  assert.doesNotMatch(pipelineSource, /single handoff for S1, S3, S5, or S6/)
+  assert.doesNotMatch(pipelineSource, /Run ae-review on implementation scope when risk, changed contracts, or the user request requires it/)
+  assert.doesNotMatch(source, /S7 mixed requests.*single handoff/is)
+  assert.doesNotMatch(source, /S1\/S2\/S3\/S5\/S6.*enter the full LFG pipeline/is)
+})
+
+test('ae-plan lightweight lane preserves the minimum consumable artifact contract', () => {
+  const source = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-plan')
+  const mirror = readSkillBody('.ae-source/skills', 'ae-plan')
+
+  assert.equal(mirror, source, 'ae-plan mirror should match plugin source')
+  for (const expectation of [
+    /minimal plan that still satisfies the artifact contract/i,
+    /frontmatter, `AI Parse Contract`, `Scope`\/`Readiness`, one `U1` implementation unit, and `Consistency Check`/,
+    /goal, acceptance criteria, non-goals, affected\/owned files, validation, and rollback signal/,
+    /keep `Depends on`, file ownership, validation, and rollback explicit/i,
+    /Omit approach comparison, ADRs, pre-mortem, data-access contracts, and cross-layer claim records unless a trigger below applies/i,
+    /For implementation-heavy standard\/deep plans/,
+    /Stop after writing the requested plan\. Do not route automatically to `ae-review` or `ae-work`/i,
+  ]) {
+    assert.match(source, expectation, `ae-plan should include ${expectation}`)
+  }
+  assert.doesNotMatch(source, /produce only goal, non-goals, owned files, validation, and rollback signal/)
+  assert.doesNotMatch(source, /For tasks with multiple plausible designs, compare 2-3 approaches before selecting one\./)
+})
+
+test('ae-web-forge fast route and acceptance boundaries remain explicit', () => {
+  const source = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-web-forge')
+  const mirror = readSkillBody('.ae-source/skills', 'ae-web-forge')
+
+  assert.equal(mirror, source, 'ae-web-forge mirror should match plugin source')
+  for (const expectation of [
+    /Run a target existence check before routing/i,
+    /preserve and modify it by default/i,
+    /### Fast Route/,
+    /run only the target existence check and route directly/i,
+    /Do not repeat Q1-Q4 intake, load every frontend skill, or produce a full routing summary/i,
+    /Stop immediately after the first passing acceptance check for a low-risk change/i,
+    /otherwise run at most 3 rework loops/i,
+    /For a fast route, report only the selected owner, target check, acceptance boundary, and any residual risk/i,
+  ]) {
+    assert.match(source, expectation, `ae-web-forge should include ${expectation}`)
+  }
+  assert.doesNotMatch(source, /^If the request names one existing target and one concrete change, run the full four-question intake\.$/m)
+  assert.doesNotMatch(source, /Run max 3 rework loops\./)
+})
+
 test('task loop dual completion gate requires verification and non-blocking review', () => {
   const source = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-task-loop')
   const mirror = readSkillBody('.ae-source/skills', 'ae-task-loop')
@@ -289,9 +408,16 @@ test('task loop dual completion gate requires verification and non-blocking revi
     /blocking findings.*next fix hypothesis/is,
     /review.*unavailable.*blocked or unverified/is,
     /review status/,
+    /one-file low-risk fix.*review gate `not-applicable`/is,
+    /all applicable completion gates pass/i,
+    /When review applies, objective verification and review must both pass independently/i,
+    /Apply this gate only when the loop changed files.*non-trivial, contract-sensitive, or explicitly reviewed/is,
   ]) {
     assert.match(source, expectation, `ae-task-loop should include ${expectation}`)
   }
+  assert.doesNotMatch(source, /Continue until both completion gates pass/i)
+  assert.doesNotMatch(source, /When all success criteria pass after file changes, run the Candidate Success Review Gate before declaring success\./i)
+  assert.doesNotMatch(source, /^Apply this gate only when the loop changed files and objective verification reports that every success criterion passes\.$/m)
   assert.doesNotMatch(source, /mode=autofix/i)
   assert.doesNotMatch(source, /OpenCode/i)
 })
@@ -994,7 +1120,12 @@ test('design and web forge skill contracts are present in source, mirror, metada
     /ae-frontend-design/,
     /ae-web-app/,
     /ae-test-browser/,
-    /max 3 rework loops/i,
+    /### Fast Route/,
+    /one existing target and one concrete change.*route directly/is,
+    /Do not repeat Q1-Q4 intake.*produce a full routing summary/is,
+    /Stop immediately after the first passing acceptance check for a low-risk change/i,
+    /at most 3 rework loops/i,
+    /For a fast route, report only the selected owner, target check, acceptance boundary, and any residual risk/i,
     /Do not claim OpenCode sub-agent registry/i,
     /dynamic Chrome MCP/i,
     /slash command behavior/i,
@@ -1429,6 +1560,31 @@ test('core workflows share a model-neutral adaptation contract', () => {
   }
   const help = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-help')
   assert.match(help, /references\/model-adaptation-contract\.md/)
+})
+
+test('model adaptation contract gates task size, scope, budget, and stopping', () => {
+  const sourcePath = 'plugins/ai-agent-engine-codex/skills/ae-help/references/model-adaptation-contract.md'
+  const mirrorPath = '.ae-source/skills/ae-help/references/model-adaptation-contract.md'
+  const source = readFileSync(resolve(repoRoot, sourcePath), 'utf8')
+  const mirror = readFileSync(resolve(repoRoot, mirrorPath), 'utf8')
+
+  assert.equal(mirror, source, 'model adaptation contract mirror should match plugin source')
+  for (const expectation of [
+    /## Task-Size Gate/,
+    /`micro`/,
+    /`small`/,
+    /`standard`/,
+    /`high-risk`/,
+    /smallest applicable path by default/,
+    /Do not create a PRD\/plan\/design\/review package/,
+    /scope is a hard boundary/,
+    /bounded work budget/,
+    /one inspection pass/,
+    /one focused validation command/,
+    /Stop on acceptance, a real blocker, or budget exhaustion/,
+  ]) {
+    assert.match(source, expectation, `model adaptation contract should include ${expectation}`)
+  }
 })
 
 test('cross-artifact verification vocabulary is conditional and mirrored', () => {
