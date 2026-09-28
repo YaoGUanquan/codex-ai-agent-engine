@@ -2,6 +2,8 @@
 
 Use this gate only when the user explicitly asks to start, execute, automatically run, smoke test, bubble test, or locally integrate a changed local API or UI surface. It does not make a live request mandatory for documentation-only work, isolated unit-test work, or a target that has no runnable local surface.
 
+Before the first precondition, read the [test side-effect boundary](../../ae-help/references/test-side-effect-boundary.md). A local HTTP or browser smoke is blocked unless the target is proven to use a disposable test-only datasource or an isolated repository profile; never fall back to a user's configured MySQL or other datastore.
+
 ## Preconditions
 
 1. Confirm that the running target can contain the change. Follow a target project's restart or hot-reload rule; do not infer this from a completed build or passing unit tests.

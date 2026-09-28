@@ -7,6 +7,8 @@ description: Use when the user asks for AE API testing, /ae-test-api, API/interf
 
 For bulk or asynchronous APIs, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Verify pagination, duplicate requests, rate limits, acceptance-to-terminal transitions and persisted completion. Load generation needs explicit environment and traffic authorization beyond an API smoke request.
 
+Before any test or smoke step, read the [test side-effect boundary](../ae-help/references/test-side-effect-boundary.md). Never connect to a user-managed MySQL or other datastore for validation; use static, fixture, mock, or proven isolated evidence and report `blocked` when isolation is unavailable.
+
 Verify a changed backend API surface with the target repository's existing contracts, test harness, and HTTP client.
 
 For list/count, bulk mutation/import or async-job endpoints, use the [data-access and scale contract](../ae-backend/references/data-access-contract.md) to select page identity/total, scope, chunk failure/retry, progress and persisted-completion assertions. Accepted/enqueued is not saved/completed. API success does not establish query plans, batching or throughput; record those as separate proof and never initiate load tests or database writes without authorization.

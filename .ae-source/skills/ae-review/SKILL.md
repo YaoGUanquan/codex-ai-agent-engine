@@ -17,6 +17,14 @@ Apply the [model-adaptation contract](../ae-help/references/model-adaptation-con
 
 Read `references/scope-detection.md`. Determine exactly one scope and one domain before reviewing.
 
+## Scope Lock and Review Budget
+
+- The user's explicit target behavior, named files, and constraints outrank generic checklists, personas, and repository-wide conventions. Do not infer omitted business rules from a review checklist.
+- Classify the request before opening unrelated files: **S1 small** is one behavior or at most 3 named files with no cross-boundary change; **S2 bounded** is a small set of files crossing one relevant boundary; **S3 broad** is a repository/full scan, a cross-cutting change, or an explicit delivery gate.
+- Start at the lowest class supported by the request. S1 uses one read-only reviewer lane, inspects the target files plus only the minimum direct call path, and skips `review-package`, `review-contract`, architect, complexity, claim-integrity, and cross-artifact lanes unless the user explicitly requests them or a concrete trigger is present.
+- Do not widen a locked scope to adjacent mappings, models, candidate designs, test suites, or documentation merely because they are related. Read a related file only when the direct call path or a concrete finding cannot be verified without it; do not modify or report unrelated code.
+- Stop when the scoped verdict and required evidence are supported. Do not continue into redesign, speculative test planning, or unrelated fixes after the requested review is complete.
+
 Supported domain markers:
 
 - `domain:code` for diffs, files, session changes, or full code scans.
@@ -34,7 +42,7 @@ Use the light path only when all of these hold: the scope is diff-like and touch
 
 ## Deterministic Review Preparation
 
-For a branch or commit range, create a review package before drawing conclusions:
+For an S2/S3 branch or commit range, create a review package before drawing conclusions; S1 light-path reviews are exempt and inspect the locked target files directly:
 
 ```powershell
 node "$aeEntry" review-package --base <base-ref> --head <head-ref> --with-impact
@@ -44,11 +52,11 @@ Treat the returned `inventory.files` as the complete changed-file review set. Ev
 
 `--with-impact` adds a bounded, shallow static dependency context. Use it when changed source/configuration files may affect imports or mentioned local paths; inspect relevant related files or explain why they do not alter the finding. It is advisory only: dynamic imports, aliases, generated code, and framework resolution can be absent, so it never proves the impact set is complete.
 
-For workspace or session review, establish the same inventory from `git status --short` and the selected scope. Use `review-contract` after file inventory to select lenses; it selects reviewers, not files or findings.
+For S2/S3 workspace or session review, establish the same inventory from `git status --short` and the selected scope, then use `review-contract` after file inventory to select lenses; it selects reviewers, not files or findings. S1 light-path workspace/session reviews inspect the locked target files directly and skip `review-contract`.
 
 ## Diff Review Discipline
 
-For fixed-point branch or commit-range reviews, keep two distinguishable lenses: **Standards** (repository rules and maintainability baseline) and **Spec** (originating PRD, plan, task, or issue alignment). Pin the base and head before reading the diff, capture the commit list and complete changed-file inventory, then resolve the nearest originating specification from linked issues or `docs/ae` artifacts. A missing spec is a verification gap, not permission to invent requirements.
+For S2/S3 fixed-point branch or commit-range reviews, keep two distinguishable lenses: **Standards** (repository rules and maintainability baseline) and **Spec** (originating PRD, plan, task, or issue alignment). Pin the base and head before reading the diff, capture the commit list and complete changed-file inventory, then resolve the nearest originating specification from linked issues or `docs/ae` artifacts. A missing spec is a verification gap, not permission to invent requirements. S1 reviews remain on the light path unless the user explicitly asks for this comparison.
 
 Apply this section only when `domain:code` uses a diff-like scope: `from:<ref>`, `recent:<N>`, `session`, or the default Git status/diff review. `full` and `full:<path>` remain repository or path scans and must not be narrowed to changed lines only.
 
@@ -76,7 +84,7 @@ Use the returned reviewers and target coverage as the review routing baseline. T
 
 If `.codex/ae-skill-profiles.yaml` has `multi_agent.enabled: auto` or `multi_agent.enabled: true`, and `multi_agent.review_lanes_parallel: true`, read-only reviewer lanes may run in parallel when the scope is large enough and each lane has a distinct lens. When `task-analyze` is available, use `read_parallel_eligibility` and `parallel_waves` for read-only lane planning; do not treat write-worker blockers as blockers for read-only review. This does not authorize write workers. Keep reviewer outputs evidence-backed and merge them under the strictest verdict. `multi_agent.enabled: false` disables parallel reviewer lanes.
 
-For significant code or plan reviews, apply two lanes even when you are not spawning sub-agents:
+For S2/S3 code or plan reviews, or when the user explicitly requests layered review, apply two lanes even when you are not spawning sub-agents:
 
 - reviewer lane: correctness, testing, security, contracts, reliability, and concrete regression risk,
 - architect lane: boundary fit, coupling, long-term maintainability, alternatives, rollback, and whether the chosen shape matches the stated decision drivers.
@@ -85,7 +93,7 @@ The lanes may be evaluated by one agent, but their conclusions must stay disting
 
 ## Complexity Lane
 
-When the user asks for over-engineering, minimality, deletion, bloat, dependency, or simplification review, or when a significant implementation appears structurally larger than the requirement, add a complexity lane. This lane is secondary to correctness, security, data-loss, contract, and validation findings unless the user explicitly requested a complexity-only report.
+When the user explicitly asks for over-engineering, minimality, deletion, bloat, dependency, or simplification review, add a complexity lane. For S2/S3 only, it may also be added when concrete evidence shows the implementation is materially larger than the stated requirement; the word `significant` alone is not a trigger. Never add this lane to an S1 review by inference.
 
 Use these tags for concrete findings:
 
@@ -101,7 +109,7 @@ Before proposing a `delete` or `shrink` finding, establish the behavior baseline
 
 ## Claim-Integrity Lane
 
-When reviewing documentation, skill instructions, installer docs, benchmark notes, external-audit reports, or delivery evidence, add a claim-integrity lane. This lane checks whether each material claim has current evidence and whether unsupported runtime behavior is being presented as enforced behavior.
+When reviewing documentation, skill instructions, installer docs, benchmark notes, external-audit reports, or delivery evidence, add a claim-integrity lane only when the scoped artifact contains a material validation or capability claim and proof integrity is part of the request or delivery gate. A document path alone is not a trigger.
 
 Flag findings for:
 

@@ -8,6 +8,21 @@ Use this contract for AE orchestration and instruction design. It is model-neutr
 - Treat provider model catalogs and supported reasoning levels as runtime metadata. When they disagree with the outgoing request or backend response, report a provider/catalog defect instead of compensating in skill text.
 - Scale analysis, artifacts, and validation to task class, risk, acceptance criteria, and evidence boundary. Do not make a workflow heavier or lighter only because the selected model is newer, larger, or described as more capable.
 
+## Task-Size Gate
+
+Classify the request before loading references or choosing a workflow:
+
+- `micro`: one question, one command, one named file, or a deterministic text/config change;
+- `small`: a bounded bug or review touching a few named files with no new public contract, persistence, security boundary, or deployment requirement;
+- `standard`: multiple modules, a new contract, or a user-requested plan/design artifact;
+- `high-risk`: data migration, authorization, external side effect, distributed/async behavior, deployment, or an explicit production/evidence gate.
+
+For `micro` and `small` requests, use the smallest applicable path by default: inspect only the named entry points, make only the requested change, run one focused validation, and stop when the stated acceptance condition is met. Do not create a PRD/plan/design/review package, load unrelated references, scan the whole repository, spawn sub-agents, or write durable artifacts unless the user asks for them or the task crosses a higher-risk boundary.
+
+If the user names files, a defect, or an explicit scope, that scope is a hard boundary. Do not reinterpret a checklist, neighboring feature, or “complete” workflow as a new requirement. Expand only when current evidence proves the requested behavior cannot be handled within scope; state the trigger and the newly required files before expanding.
+
+Set a bounded work budget before execution. For `micro`/`small`, default to one inspection pass, one implementation/review pass, and one focused validation command (plus a single targeted retry when a new diagnostic changes the approach). For `standard`/`high-risk`, record the applicable time, token, tool, file, and validation budget or mark it as an explicit open constraint. Stop on acceptance, a real blocker, or budget exhaustion; do not continue searching or polishing for completeness.
+
 ## Instruction Economy
 
 - Apply system, developer, user, nearest `AGENTS.md`, and selected skill instructions in precedence order. Do not restate effective higher-priority rules in generated artifacts or chat unless the restatement resolves a concrete ambiguity.
