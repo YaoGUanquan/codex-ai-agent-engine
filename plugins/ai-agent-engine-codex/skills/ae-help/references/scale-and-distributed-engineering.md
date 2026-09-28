@@ -32,6 +32,19 @@ For every scale-sensitive change, record the smallest applicable values:
 - Use backpressure. A producer must not outrun the consumer, connection pool, heap, queue or downstream rate limit.
 - Keep exact totals, full scans and global sorts opt-in when they are expensive; state the freshness and approximation semantics.
 
+## Token And Output Budgets
+
+- Treat token use as an executable budget, not a note: track `inputTokens`, `outputTokens`, `contextWindow`, `inputBudget`, `outputBudget` and `remainingBudget` when the provider exposes them; otherwise label estimates and their evidence tier.
+- Enforce context and output caps before expanding a large result. Return a bounded, resumable envelope with `complete`, `stopReason` and evidence status; `stopReason` is one of `budget`, `deadline`, `cancel`, `complete` or `blocked`.
+- Use progressive disclosure for large inputs: first return scope, counts, risk and candidate paths; expand only the selected slice or next page. A truncation must preserve `complete=false`, the stop reason and the resume/scope signal instead of silently dropping context.
+
+## Bounded Review Loop
+
+- Start each audit with one objective, owned paths, decisive questions, acceptance checks and a review budget. Every finding must map to that objective or be recorded as deferred; do not widen scope because a nearby file is interesting.
+- Keep one evidence ledger per task with `status`, `owner`, `paths`, `commands`, `findings`, `nextAction` and `stopReason`. A second pass may re-check changed evidence or an unresolved finding, but must not repeat a completed check without a stated reason.
+- After interruption or context compaction, reload the smallest canonical artifact set and reconcile the ledger with the current worktree. Continue from `nextAction`; do not restart a completed audit from memory or relabel the same evidence as new work.
+- Stop when acceptance checks pass, the remaining items are explicitly `unverified`/`blocked`, or the review budget is exhausted. Report residual risk instead of opening another exploratory pass.
+
 ## Concurrency, Leases And Idempotency
 
 - Define the contention key and the ownership boundary before adding a lock. A local file lock is not a distributed lock.

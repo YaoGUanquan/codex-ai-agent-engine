@@ -30,6 +30,10 @@ Reuse answers already established by the request or repository. Keep one primary
 | Q3 backend or API interaction? | Does the task need state, forms, API calls, auth, persistence, or error handling? | Use `ae-web-app`; inspect `component-data-access-contract.md`, coordinate `ae-backend` or `ae-sql` when server or data contracts change, and hold both sides to the API contract checklist in `ae-backend`. |
 | Q4 visual baseline? | For Q1=yes, should current visuals be preserved or intentionally replaced? | Preserve by default; redesign only when requested or required by the goal. |
 
+### Fast Route
+
+If the request names one existing target and one concrete change, or explicitly selects an owner, run only the target existence check and route directly. Do not repeat Q1-Q4 intake, load every frontend skill, or produce a full routing summary. Use the four questions only when the request is mixed, ambiguous, or replacement versus modification could materially change behavior, data integrity, or acceptance.
+
 Typical outcomes:
 
 - New UI only: `ae-frontend-design` -> `ae-test-browser`.
@@ -48,7 +52,7 @@ Browser acceptance is required for web UI changes when a runnable app or static 
 - interaction, state, route, API, or data issue -> `ae-web-app`, plus `ae-backend` or `ae-sql` when the failing contract is server-side;
 - verification-only blocker -> stay in `ae-test-browser` and report the exact missing environment or command.
 
-Run max 3 rework loops. One loop is fix -> browser regression check. After the limit, report remaining issues as residual risk instead of claiming acceptance.
+Stop immediately after the first passing acceptance check for a low-risk change. Otherwise run at most 3 rework loops; one loop is fix -> browser regression check. After the limit, report remaining issues as residual risk instead of claiming acceptance.
 
 ## Report Format
 
@@ -70,6 +74,8 @@ Include this summary when the skill drives work:
 - Modified files:
 - Residual risks:
 ```
+
+For a fast route, report only the selected owner, target check, acceptance boundary, and any residual risk; omit empty intake fields.
 
 ## Runtime Boundaries
 

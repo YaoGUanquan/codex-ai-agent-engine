@@ -28,7 +28,7 @@ An outer Spring transaction can keep all chunks in one commit even when the batc
 
 ## Verification Boundary
 
-A mocked `Page` flag assertion proves configuration intent only. Verify actual generated data/count SQL, unique result IDs, total, interceptor scope, batch flush/commit behavior and failure recovery with the target database/driver before claiming correctness or speed at scale. Preserve parser/count errors as evidence rather than hiding them behind fabricated success.
+A mocked `Page` flag assertion proves configuration intent only. Apply the [test side-effect boundary](../../ae-help/references/test-side-effect-boundary.md) before runtime verification: use static repository metadata, synthetic fixtures, or a disposable test-only datasource / explicitly authorized isolated profile to verify generated data/count SQL, unique result IDs, total, interceptor scope, batch flush/commit behavior and failure recovery. If isolation cannot be proven, report runtime verification as `blocked`; never fall back to a user-managed database or driver. Preserve parser/count errors as evidence rather than hiding them behind fabricated success.
 
 Official reference locations to inspect for the target version:
 

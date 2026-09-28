@@ -31,14 +31,14 @@ Iterate on an exploratory task until fixed, verified, or clearly blocked.
 5. State the smallest plausible fix hypothesis, then apply only the change needed to test that hypothesis.
 6. Re-run verification and update loop state.
 7. Broaden scope only when the latest evidence invalidates the smaller fix.
-8. When all success criteria pass after file changes, run the Candidate Success Review Gate before declaring success.
-9. Continue until both completion gates pass, the task is blocked, or the iteration limit is reached.
+8. When all success criteria pass after file changes, run the Candidate Success Review Gate only for non-trivial, contract-sensitive, or explicitly reviewed work. A one-file low-risk fix that passes its objective check is complete without a second full review; mark the review gate `not-applicable` for this path.
+9. Continue until all applicable completion gates pass, the task is blocked, or the iteration limit is reached. When review applies, objective verification and review must both pass independently.
 
 When a loop changes a local API or UI surface and the user explicitly requests runtime smoke, read [the local runtime smoke gate](../ae-work/references/local-runtime-smoke-gate.md) before treating the loop as complete. A missing gate precondition is an explicit runtime-validation blocker, not a reason to silently omit the smoke.
 
 ## Candidate Success Review Gate
 
-Apply this gate only when the loop changed files and objective verification reports that every success criterion passes.
+Apply this gate only when the loop changed files, objective verification reports that every success criterion passes, and the change is non-trivial, contract-sensitive, or explicitly reviewed.
 
 1. Run `ae-review mode:report-only` on the files changed by this loop, using `domain:code` for code or mixed changes and `domain:document` for document-only changes.
 2. Require the success criteria to pass and the review to report no blocking findings. Treat both gates as independent: review cannot imply that verification passed, and passing commands cannot imply that review passed.

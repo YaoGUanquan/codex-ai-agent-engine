@@ -11,6 +11,8 @@ Implement or modify backend behavior using the repository's actual API, service,
 
 For database-backed lists/search/count/export, create/update/delete/import or batch/async persistence, apply the [data-access and scale contract](references/data-access-contract.md) before implementation, even without schema changes. Keep bounded single-row CRUD light; for scale-sensitive work record query/count budgets, read-model alternatives, batch/commit semantics and recovery evidence. Load its read-model, async and MyBatis-Plus references only when triggered.
 
+Validation follows the [test side-effect boundary](../ae-help/references/test-side-effect-boundary.md): never connect to a user-managed datastore merely to test backend behavior; use repository fixtures or a proven isolated profile and keep missing runtime proof `blocked`.
+
 ## Workflow
 
 1. Read `references/backend-workflow.md`.

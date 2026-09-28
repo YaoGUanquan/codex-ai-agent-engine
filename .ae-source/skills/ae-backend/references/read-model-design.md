@@ -42,4 +42,4 @@ For derived data, decide:
 
 ## Proof
 
-Verify query plans and realistic before/after cost on the target engine. Exercise update/delete/restore, duplicate/out-of-order delivery, tenant boundaries, concurrent backfill, interrupted rebuild and reader rollback. Mocks, an index declaration or the existence of a new table do not prove consistency or improved latency.
+Apply the [test side-effect boundary](../../ae-help/references/test-side-effect-boundary.md) before runtime proof. Use static plans, repository metadata and synthetic fixtures by default; run query-plan, cost, update/delete/restore, duplicate/out-of-order delivery, tenant-boundary, concurrent-backfill, interrupted-rebuild or reader-rollback checks only against a disposable test-only datasource or explicitly authorized isolated profile. If isolation cannot be proven, report runtime proof as `blocked`; mocks, an index declaration or the existence of a new table do not prove consistency or improved latency.

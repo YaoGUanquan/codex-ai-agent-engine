@@ -1,12 +1,12 @@
 # Data Access And Scale Contract
 
-Apply when designing, changing or reviewing database-backed lists/search/count/export, create/update/delete/import, batch jobs or high-volume persistence. Schema changes and an explicit "performance" request are not prerequisites. These are engineering decisions, not an automatic SQL optimizer or a guarantee of generated-code performance.
+Apply when designing, changing or reviewing database-backed lists/search/count/export, create/update/delete/import, batch jobs or high-volume persistence. Schema changes and an explicit "performance" request are not prerequisites. These are engineering decisions, not an automatic SQL optimizer or a guarantee of generated-code performance. For any runtime query, plan or metadata evidence, apply the [test side-effect boundary](../../ae-help/references/test-side-effect-boundary.md); static repository metadata, sanitized user-provided metadata, and isolated fixtures are the default.
 
 ## Scale The Work
 
 For bounded single-row CRUD, a short inline record of access path, uniqueness, transaction and validation is enough. Do not require an auxiliary table, queue, benchmark or large design document for every endpoint. Escalate when work scales with input size, table cardinality, relation fan-out or concurrency. An unknown volume is an assumption to resolve, not evidence that the table is small.
 
-Before selecting a design, inspect the actual database/version, ORM/driver, schema/indexes, queries, transaction owner, call sites and existing tests. Record only applicable decisions:
+Before selecting a design, inspect repository metadata, sanitized user-provided metadata, ORM/driver declarations, schema/index definitions, queries, transaction ownership, call sites and existing tests. Do not connect to a user-managed datasource merely to inspect its version, schema or indexes; use a disposable test-only datasource or explicitly authorized isolated profile only when runtime evidence is necessary. Record only applicable decisions:
 
 | Decision | Required evidence or explicit unknown |
 | --- | --- |
@@ -27,7 +27,7 @@ Reuse an already recorded decision rather than redoing intake. Do not invent lat
 - Establish the logical row: root entity, joined record or aggregate group. Measure relation fan-out and preserve all membership predicates before pagination. When paginating roots, compare `EXISTS`/semijoin or root-key-first pagination followed by bounded enrichment. Preserve the root order during hydration, apply the same tenant/authorization/deletion scope and define read consistency between phases.
 - Joins are not inherently wrong. Keep an efficient selective join when its plan and cardinality fit. Do not replace one join with N queries, apply `DISTINCT` blindly to hide fan-out, or page joined children and deduplicate roots afterward. Sort/filter expressions derived from child data must participate before the root page is chosen.
 - Require deterministic ordering with a unique tie-breaker. Assess offset cost on deep pages; use keyset/cursor traversal for sequential scans when the contract permits it. Keyset is not a transparent replacement for arbitrary page jumps. Define tie/null/direction behavior and concurrent insert/update effects.
-- Review predicates, composite/covering indexes, selectivity, sort/group/temp work and scanned versus returned rows. Index existence alone is not proof of use. Inspect plans for data and count separately; plain plan inspection is different from executing an analyze/profile command, which needs a safe environment and workload budget.
+- Review predicates, composite/covering indexes, selectivity, sort/group/temp work and scanned versus returned rows from static SQL/schema evidence first. Index existence alone is not proof of use. Runtime plans for data and count require a disposable test-only datasource or explicitly authorized isolated profile; `EXPLAIN`, analyze and profile commands are never safe merely because they are read-only.
 
 ## Total And Count Contract
 
@@ -60,6 +60,6 @@ Select cases from the actual path, not a mandatory full matrix for every CRUD ta
 - Query: empty/single/multiple roots, skewed high fan-out, missing children, duplicate sort values, child filters, tenant/authorization/deletion exclusions, first/last/deep pages and concurrent changes. Compare IDs and exact totals against an independent expected set; separately assert bounded query counts.
 - Writes: empty input, `batchSize - 1`, `batchSize`, `batchSize + 1`, several chunks and a final partial chunk; duplicate keys, invalid rows, failure during flush, failure after commit, retry and restart. Assert committed rows and side effects, not only task/HTTP success.
 - Derived data: concurrent backfill plus updates/deletes, duplicate/out-of-order delivery, stale/missing projections, reconciliation, rebuild and cutover. Async: duplicate delivery, worker crash/lease expiry, saturation, cancellation and durable terminal state.
-- Performance: use representative scale/skew, row width, warm/cold conditions and concurrency. Record data/count timings separately, query/round-trip count, rows examined, throughput, peak memory, pool/queue pressure and lock duration as relevant. State baseline, target, actual result and environment. Do not run load or analyze commands against live systems without authorization.
+- Performance: use representative scale/skew, row width, warm/cold conditions and concurrency only in an isolated environment. Record data/count timings separately, query/round-trip count, rows examined, throughput, peak memory, pool/queue pressure and lock duration as relevant. State baseline, target, actual result and environment. Do not run load, plan, metadata, `EXPLAIN`, analyze or profile commands against a user-managed system; if isolation is unavailable, report performance/runtime proof as `blocked`.
 
 Static inspection and focused tests do not prove throughput, production query plans, driver batching, crash recovery or model compliance. Flag unjustified unbounded/per-row work and missing count/atomicity/read-model decisions with concrete path and impact; keep unmeasured performance a risk, not a fabricated benchmark.

@@ -7,6 +7,8 @@ description: Use when the user asks for AE debug, /ae-debug, investigate a faili
 
 For saturation, concurrency or distributed incidents, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Correlate bounded samples across stages, separate timeout from terminal failure, and preserve existing job/checkpoint identity before any authorized recovery.
 
+Before reproducing a test or runtime failure, read the [test side-effect boundary](../ae-help/references/test-side-effect-boundary.md). Do not probe or connect to a user-managed MySQL or other datastore; use captured evidence, static inspection, fixtures, or a proven isolated profile and mark missing isolation `blocked`.
+
 Investigate a failure systematically before changing code.
 
 For slow lists/counts, N+1, bulk persistence or async-job failures, use the [data-access and scale contract](../ae-backend/references/data-access-contract.md) to trace generated SQL, count/data timings, call counts, transaction/flush boundaries, pool/queue pressure and committed progress. Read its framework reference only for the actual stack. Keep diagnosis read-only when a fix was not requested; do not invent a root cause or replace the architecture merely because data is large.

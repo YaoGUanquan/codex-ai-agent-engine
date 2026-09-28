@@ -39,7 +39,7 @@ Use these personas as review lenses. In Codex they are not automatically registe
 
 ## Selection Rules
 
-Start with correctness, testing, standards, maintainability for code diffs.
+For S1 reviews, collapse the baseline into one read-only lane covering correctness, testing, and convention fit. Do not dispatch or simulate additional personas unless a concrete trigger is present or the user explicitly requests layered review. For S2/S3 reviews, start with correctness, testing, standards, maintainability for code diffs.
 Add security for auth, public APIs, data handling, credentials, file upload, or third-party integration.
 Add api-contract for API surface changes.
 Add reliability for async, infra, queues, retries, jobs, or failure recovery.

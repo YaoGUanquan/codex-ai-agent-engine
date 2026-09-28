@@ -9,6 +9,12 @@ For large or distributed changes, use the [scale and distributed engineering con
 
 Create a durable implementation plan. Planning answers how to build; it does not edit product code.
 
+## Complexity Lanes
+
+- Lightweight lane: for a precise, low-risk change with at most two likely production files and a clear acceptance signal, produce a minimal plan that still satisfies the artifact contract: frontmatter, `AI Parse Contract`, `Scope`/`Readiness`, one `U1` implementation unit, and `Consistency Check`. Include the goal, acceptance criteria, non-goals, affected/owned files, validation, and rollback signal; keep `Depends on`, file ownership, validation, and rollback explicit so downstream work can consume it. Omit approach comparison, ADRs, pre-mortem, data-access contracts, and cross-layer claim records unless a trigger below applies.
+- Standard/deep lane: use the additional design, evidence, and decision sections only when the request is cross-module, high-risk, ambiguous, or crosses a public API, persisted data, external service, deployment, browser, or security boundary.
+- Stop after writing the requested plan. Do not route automatically to `ae-review` or `ae-work`; those are next steps only when requested or required by an explicit workflow.
+
 ## Operating Principles
 
 - Apply the [model-adaptation contract](../ae-help/references/model-adaptation-contract.md): plan from observed capability and evidence boundaries, not model labels, private reasoning assumptions, or hard-coded reasoning effort.
@@ -31,13 +37,13 @@ Before writing a plan, verify that these inputs are clear enough:
 
 If any item is materially unclear, ask one focused question or route to `ae-brainstorm`. Do not fill gaps with invented product behavior.
 
-When the plan crosses a public API, persisted data, external service, deployment, or browser boundary, load `references/validation-evidence-profile.md`. Select only the tiers that apply, record their preconditions and bounded claims, and make blocked or `unverified` proof visible. Do not infer a higher-tier result from a lower-tier check.
+When the plan crosses a public API, persisted data, external service, deployment, or browser boundary, load `references/validation-evidence-profile.md`. Select only the tiers that apply, record their preconditions and bounded claims, and make blocked or `unverified` proof visible. Do not infer a higher-tier result from a lower-tier check. Do not load this profile for a lightweight lane that stays within source-level validation.
 
 For database-backed query/list/count or bulk/async write work, load the [data-access and scale contract](../ae-backend/references/data-access-contract.md) and carry the applicable Data Access Budget into owned units and acceptance checks. Resolve logical row/total, freshness, batch/commit and recovery decisions before coding. Include auxiliary-table backfill/reconciliation/cutover and durable-job failure tests when chosen; do not reduce a structural data-access problem to a loop rewrite.
 
-For tasks with multiple plausible designs, compare 2-3 approaches before selecting one. Keep the comparison short: fit, trade-off, risk, and why the recommended approach wins. When only one viable approach exists, state why the alternatives collapse instead of pretending there was a meaningful choice.
+For tasks with multiple plausible designs in the standard/deep lane, compare 2-3 approaches before selecting one. Keep the comparison short: fit, trade-off, risk, and why the recommended approach wins. In the lightweight lane, state the single viable route and continue.
 
-For implementation-heavy plans, include the simplest viable route in that comparison: standard library, framework/native platform capability, existing dependency, deletion/configuration-only change, or the smallest new code path. New dependencies, abstractions, broad refactors, or extra files need a current requirement or repository pattern that justifies owning them now.
+For implementation-heavy standard/deep plans, include the simplest viable route in that comparison: standard library, framework/native platform capability, existing dependency, deletion/configuration-only change, or the smallest new code path. New dependencies, abstractions, broad refactors, or extra files need a current requirement or repository pattern that justifies owning them now.
 
 For high-risk plans, add a deliberate planning pass before implementation units:
 

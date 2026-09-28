@@ -1,10 +1,10 @@
 # SQL Safety Checklist
 
-Classify every statement before writing or reviewing it, then apply the safeguards for its tier.
+Classify every statement before writing or reviewing it, then apply the safeguards for its tier. Read the [test side-effect boundary](../../ae-help/references/test-side-effect-boundary.md) before any execution or validation; semantic read-only status does not make a user-managed connection safe. If isolation cannot be proven, report validation as `blocked`.
 
 ## Operation Risk Tiers
 
-1. Read-only (`SELECT`, `EXPLAIN`): safe by default; still bound result size on unfamiliar tables.
+1. Read-only (`SELECT`, `EXPLAIN`): semantically non-mutating, not connection-safe; use static analysis or isolated fixtures by default, and never execute against a user-managed database merely because the statement is read-only.
 2. Reversible write (`INSERT`, or `UPDATE`/`DELETE` with a verified predicate and captured before-state): requires explicit confirmation, a transaction, and a rollback statement.
 3. Hard-to-reverse write (mass `UPDATE`/`DELETE`, `TRUNCATE`, type narrowing, dropping columns or tables): requires explicit confirmation, a backup or captured snapshot, and a staged rollout.
 4. Locking or blocking DDL (table rewrites, index builds without a concurrent option, lock-heavy migrations): requires a lock-impact statement and a deployment-window decision.
@@ -22,7 +22,7 @@ For a new table or material persistence change, read `../../ae-backend/reference
 
 ## Review Checks
 
-1. Every `UPDATE` or `DELETE` has a `WHERE` clause reviewed against an expected row count (`SELECT COUNT(*)` with the same predicate first).
+1. Every `UPDATE` or `DELETE` has a `WHERE` clause reviewed against an expected row count; generate a matching `SELECT COUNT(*)` with the same predicate for review, but do not execute either against a user-managed database during validation.
 2. New indexes name the query they serve; removed indexes name the consumers that were checked.
 3. Constraint changes (`NOT NULL`, unique, foreign keys) are validated against existing data before applying.
 4. Dialect differences are checked before porting syntax: upsert (`ON CONFLICT` versus `ON DUPLICATE KEY` versus `MERGE`), returning clauses, identifier quoting and case sensitivity, and transactional DDL support differ across Postgres, MySQL, SQLite, and SQL Server.
