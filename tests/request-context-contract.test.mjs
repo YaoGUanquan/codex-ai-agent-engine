@@ -8,6 +8,11 @@ import {
   validateRequestContextManifest,
 } from '../plugins/ai-agent-engine-codex/scripts/request-context-contract.mjs'
 
+const isolatedCarrier = {
+  isolatedDataSource: true,
+  isolationEvidence: 'repository-owned disposable test profile',
+}
+
 const readyManifest = {
   inputs: [
     { name: 'authorization', location: 'header', required: true, source: 'auth contract', classification: 'user-controlled-opaque-secret', provider: 'credential reference', validation: 'opaque reference is present', lifetime: 'request', redaction: 'never record value', headerCategory: 'authentication' },
@@ -29,14 +34,24 @@ test('request context requires source, provider, validation, and redaction metad
 })
 
 test('project runner takes precedence and unsafe generic fallback is blocked', () => {
-  const result = resolveSmokeCarrier({ operation: { stateChanging: true, requiresReadBack: true }, manifest: readyManifest, projectRunner: { validated: true, coversContext: true, source: 'scripts/smoke.ps1', method: 'PUT', pathTemplate: '/api/items/{id}', assertionSource: 'tests/api-items.tests.ps1' }, fallback: { validated: true } })
+  const result = resolveSmokeCarrier({ operation: { stateChanging: true, requiresReadBack: true }, manifest: readyManifest, projectRunner: { ...isolatedCarrier, validated: true, coversContext: true, source: 'scripts/smoke.ps1', method: 'PUT', pathTemplate: '/api/items/{id}', assertionSource: 'tests/api-items.tests.ps1' }, fallback: { validated: true } })
   assert.equal(result.carrier, 'project-runner')
   assert.equal(canUseSingleRequestFallback({ stateChanging: true }).eligible, false)
 })
 
 test('single bounded read can use validated curl fallback', () => {
-  const result = resolveSmokeCarrier({ operation: { method: 'GET' }, manifest: readyManifest, fallback: { validated: true, source: 'temp request config' } })
+  const result = resolveSmokeCarrier({ operation: { method: 'GET' }, manifest: readyManifest, fallback: { ...isolatedCarrier, validated: true, source: 'temp request config' } })
   assert.equal(result.carrier, 'single-request-curl')
+})
+
+test('validated carriers without datasource isolation are blocked', () => {
+  const result = resolveSmokeCarrier({
+    operation: { method: 'GET' },
+    manifest: readyManifest,
+    fallback: { validated: true, source: 'temp request config' },
+  })
+  assert.equal(result.status, 'blocked')
+  assert.match(result.errors.join(' '), /disposable test-only datasource|isolated profile/i)
 })
 
 test('dynamic and prior-response inputs require a project runner', () => {
@@ -131,6 +146,7 @@ test('project runner selection requires method path and assertion coverage evide
     operation: { method: 'GET' },
     manifest: readyManifest,
     projectRunner: {
+      ...isolatedCarrier,
       validated: true,
       coversContext: true,
       source: 'scripts/smoke.ps1',
