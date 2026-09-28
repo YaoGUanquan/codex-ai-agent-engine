@@ -62,6 +62,12 @@ node scripts/ae-tools.mjs help
 
 ## 版本更新记录
 
+### 0.3.53（2026-09-28）
+- 新增 `micro`、`small`、`standard` 与 `high-risk` 任务规模门禁及有界工作预算：小任务默认走最小流程，显式范围优先，达到验收、真实阻塞或预算上限即停止。
+- 收紧 `ae-lfg`、`ae-review`、`ae-task-loop` 与 `ae-web-forge` 的快速路由、审查范围锁定和返工停止条件，减少无关扫描、重复仪式与无界返工；插件源和维护镜像保持同步并补充回归断言。
+- 新增测试副作用边界：默认禁止连接用户管理的 MySQL/其他数据源，`single-request-curl` 与项目 smoke carrier 必须证明 disposable/test-only 隔离；共享规模契约补充 token 计量、上下文/输出上限、渐进披露、停止原因及压缩后审查账本续接，缺少隔离时统一报告 `blocked`。
+- 验证命令：`node --test tests/skills-docs.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。
+
 ### 0.3.52（2026-09-27）
 - 修复审查发现的安装恢复问题：缺失参数在加锁前拒绝，更新失败保留有界脱敏诊断、操作 ID 和 journal 路径，明确区分已回滚与恢复失败。
 - 普通正文中的 `ae-doc-pages:v1` 格式名不再误判为损坏路由；外部文档维护在改写前建立报告和持久化逐文件日志，报告失败保留已应用清单、待核验文件和恢复信息并停止后续写入。
@@ -83,11 +89,6 @@ node scripts/ae-tools.mjs help
 - 将增长治理扩展到记忆专题、开发历史、导航和滚动台账：新增 `ae-docs-maintain` 分类审计/无损分页、`ae-docs-append` 自动分页写入与 `ae-docs-search` 有界续查，入口固定预算，历史原字节可恢复。
 - 新增已登记外部 docs 的显式批量维护工具，绑定 context manifest 和预览哈希，逐文件核验；更新中英文生成模板、收尾门禁和维护镜像。正式合同、SQL、结构化 registry、JSONL 证据链和归档不自动拆改，不创建后台任务或删除历史。
 - 验证命令：`node --test tests/docs-lifecycle.test.mjs tests/memory-navigation.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。证明本地分页/检索、字节恢复及隔离分发合同；实际外部应用以逐文件报告为准，不代表全局安装已更新、任意手工写入受阻或模型 token/延迟收益。
-
-### 0.3.48（2026-09-27）
-- 记忆入口改为最多 4096 UTF-8 字节/80 行的短导航，专题预算 15KiB；新增 `ae-memory-index` 审计/门禁及带源哈希校验的无损整理，历史分片保留原字节，不自动删除或蒸馏其他专题。
-- 新增 `ae-memory-search` 有界字面检索，默认返回 5 个短摘录及路径/行号；历史显式选择，扫描截断明确报告，外部 docs 由调用方先解析分支后显式传入。原声明式关系查询不变，读写模板禁止入口追加日期流水。
-- 验证命令：`node --test tests/memory-navigation.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。仅证明本地文件/CLI、镜像与隔离安装合同；Axon 隔离样本不代表原目录已迁移，全局安装和模型 token/延迟收益未验证。
 
 完整历史见 [CHANGELOG.md](CHANGELOG.md)；本节仅保留最近 5 个版本，发布时超出窗口的条目迁移到 CHANGELOG。
 

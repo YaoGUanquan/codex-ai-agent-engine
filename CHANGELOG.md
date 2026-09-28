@@ -4,6 +4,12 @@
 
 English: [CHANGELOG.en.md](CHANGELOG.en.md)
 
+### 0.3.53（2026-09-28）
+- 新增 `micro`、`small`、`standard` 与 `high-risk` 任务规模门禁及有界工作预算：小任务默认走最小流程，显式范围优先，达到验收、真实阻塞或预算上限即停止。
+- 收紧 `ae-lfg`、`ae-review`、`ae-task-loop` 与 `ae-web-forge` 的快速路由、审查范围锁定和返工停止条件，减少无关扫描、重复仪式与无界返工；插件源和维护镜像保持同步并补充回归断言。
+- 新增测试副作用边界：默认禁止连接用户管理的 MySQL/其他数据源，`single-request-curl` 与项目 smoke carrier 必须证明 disposable/test-only 隔离；共享规模契约补充 token 计量、上下文/输出上限、渐进披露、停止原因及压缩后审查账本续接，缺少隔离时统一报告 `blocked`。
+- 验证命令：`node --test tests/skills-docs.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。
+
 ### 0.3.52（2026-09-27）
 - 修复审查发现的安装恢复问题：缺失参数在加锁前拒绝，更新失败保留有界脱敏诊断、操作 ID 和 journal 路径，明确区分已回滚与恢复失败。
 - 普通正文中的 `ae-doc-pages:v1` 格式名不再误判为损坏路由；外部文档维护在改写前建立报告和持久化逐文件日志，报告失败保留已应用清单、待核验文件和恢复信息并停止后续写入。
