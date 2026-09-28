@@ -13,6 +13,12 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 
 中文文档: [README.md](README.md)
 
+### 0.3.53 (2026-09-28)
+- Add `micro`, `small`, `standard`, and `high-risk` task-size gates with bounded work budgets: small requests use the smallest applicable path by default, explicit scope wins, and work stops at acceptance, a real blocker, or budget exhaustion.
+- Tighten `ae-lfg`, `ae-review`, `ae-task-loop`, and `ae-web-forge` with fast routing, scope-locked review, and bounded rework stops to avoid unrelated scans, repeated ceremony, and unbounded retries; keep the plugin source and maintenance mirror synchronized with regression coverage.
+- Add a test side-effect boundary: never connect to user-managed MySQL or other datastores by default; `single-request-curl` and project smoke carriers must prove disposable/test-only isolation. Extend the shared scale contract with token accounting, context/output caps, progressive disclosure, explicit stop reasons, and ledger-based audit resumption after compaction; missing isolation is reported as `blocked`.
+- Validation commands: `node --test tests/skills-docs.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`.
+
 ### 0.3.52 (2026-09-27)
 - Fix reviewed installation recovery failures: reject missing arguments before locking and preserve bounded, redacted updater diagnostics, operation IDs and journal paths, distinguishing completed rollback from failed recovery.
 - Ordinary mentions of `ae-doc-pages:v1` no longer count as damaged routers. External document maintenance creates a durable report and per-file journal before mutation; reporting failures retain applied/pending recovery evidence and stop further writes.
@@ -34,11 +40,6 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 - Extend growth control to memory topics, development history, navigation and rolling logs with `ae-docs-maintain` audits/lossless pagination, `ae-docs-append` automatic bounded writes and resumable `ae-docs-search`. Routers have fixed budgets and original bytes remain recoverable.
 - Add explicit registered-external-docs batch maintenance bound to context manifests and preview hashes, with per-file verification. Update bilingual scaffolds, shipping gates and mirrors. Formal contracts, SQL, structured registries, JSONL chains and archives are not automatically rewritten; no background jobs or history deletion.
 - Validation commands: `node --test tests/docs-lifecycle.test.mjs tests/memory-navigation.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. Evidence covers local pagination/search, byte recovery and isolated distribution; live external application requires its per-file report, not a global installation, arbitrary-write protection or measured model token/latency gains.
-
-### 0.3.48 (2026-09-27)
-- Bound the memory router to 4096 UTF-8 bytes/80 lines and topics to 15KiB. Add `ae-memory-index` audit/check and source-hash-guarded lossless compaction; immutable pages preserve original bytes without deleting history or distilling other topics.
-- Add `ae-memory-search` bounded literal search: five short path/line excerpts by default, explicit historical scope, visible scan truncation and caller-resolved external docs roots. Declared relation queries remain unchanged; templates prohibit dated logs in the router.
-- Validation commands: `node --test tests/memory-navigation.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. Evidence covers local filesystem/CLI, mirrors and isolated installation contracts only; an isolated <WORK_PROJECT> sample is not live migration, global installation or measured model token/latency improvement.
 
 ## When To Use It
 

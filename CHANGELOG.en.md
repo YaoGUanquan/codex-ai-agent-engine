@@ -4,6 +4,12 @@ This file is the complete release history of AI Agent Engine for Codex (since 0.
 
 中文版本: [CHANGELOG.md](CHANGELOG.md)
 
+### 0.3.53 (2026-09-28)
+- Add `micro`, `small`, `standard`, and `high-risk` task-size gates with bounded work budgets: small requests use the smallest applicable path by default, explicit scope wins, and work stops at acceptance, a real blocker, or budget exhaustion.
+- Tighten `ae-lfg`, `ae-review`, `ae-task-loop`, and `ae-web-forge` with fast routing, scope-locked review, and bounded rework stops to avoid unrelated scans, repeated ceremony, and unbounded retries; keep the plugin source and maintenance mirror synchronized with regression coverage.
+- Add a test side-effect boundary: never connect to user-managed MySQL or other datastores by default; `single-request-curl` and project smoke carriers must prove disposable/test-only isolation. Extend the shared scale contract with token accounting, context/output caps, progressive disclosure, explicit stop reasons, and ledger-based audit resumption after compaction; missing isolation is reported as `blocked`.
+- Validation commands: `node --test tests/skills-docs.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`.
+
 ### 0.3.52 (2026-09-27)
 - Fix reviewed installation recovery failures: reject missing arguments before locking and preserve bounded, redacted updater diagnostics, operation IDs and journal paths, distinguishing completed rollback from failed recovery.
 - Ordinary mentions of `ae-doc-pages:v1` no longer count as damaged routers. External document maintenance creates a durable report and per-file journal before mutation; reporting failures retain applied/pending recovery evidence and stop further writes.
