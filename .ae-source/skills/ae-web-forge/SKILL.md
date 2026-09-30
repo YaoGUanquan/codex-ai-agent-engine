@@ -1,85 +1,34 @@
 ---
 name: ae-web-forge
-description: Use for /ae-web-forge or $ae-web-forge, broad or mixed frontend requests that need lane selection, or deciding between visual UI work and Web app behavior. Route to one primary implementation owner. Do not repeat intake for an already-scoped visual-only task, API or route change, or browser-only verification.
+description: Use for /ae-web-forge or $ae-web-forge, or explicitly requested AE routing of broad or mixed frontend/Web work.
 ---
 
 # AE Web Forge
 
-For scale-sensitive Web requests, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md) when selecting the owner. Keep visual, data-flow and acceptance responsibilities separate, and pass workload and resource constraints through the existing route.
+Route to one primary implementation owner; preserve existing targets and visual
+baselines unless replacement is requested.
 
-Route frontend and light web-app work through the smallest Codex-native AE workflow. This skill coordinates existing skills; it is not an OpenCode agent runtime.
+1. Inspect the named path/page/route/design and establish whether it exists.
+2. For one clear change or an explicitly selected owner, route directly:
+   visual-only -> `ae-frontend-design`; state/forms/API/auth -> `ae-web-app`;
+   verification-only -> `ae-test-browser`.
+3. For mixed or ambiguous work, use Q1 existing target, Q2 design input,
+   Q3 backend/API and Q4 preserve/replace baseline. Reuse established answers.
+4. Verify UI changes in a real browser when a runnable preview exists.
+   Fix -> regression check counts as one loop; stop at the first applicable
+   acceptance or after at most three loops with remaining risks reported.
 
-## Target Check
+## Task References
 
-Run a target existence check before routing:
+Read only the row triggered by the task, not the whole table.
 
-1. Extract explicit paths, routes, page names, screenshot paths, Figma/design links, or output hints from the user request.
-2. Inspect matching repository files when the target appears to exist.
-3. For an existing target, preserve and modify it by default when the requested change is clear. Ask one focused question only when replacement versus modification materially changes behavior, data integrity, or acceptance criteria.
+| Trigger | Reference |
+| --- | --- |
+| Mixed intake, visual refinement mode or full routing report | [Mixed routing](references/mixed-routing.md) |
 
-## Four-Question Routing
-
-Answer the questions in order and record the result in the work summary:
-
-Reuse answers already established by the request or repository. Keep one primary implementation owner; do not load all implementation skills for intake or send an unchanged task back through routing. An explicit skill request stays with that skill unless a concrete missing responsibility requires a handoff. See [routing examples](references/routing-examples.md) for positive and negative boundaries.
-
-| Question | Meaning | Codex-native route |
-| --- | --- | --- |
-| Q1 existing route or second-development? | Does the task modify an existing page, route, component, HTML file, or user-provided target? | Read the current implementation first and preserve structure unless replacement is requested. |
-| Q2 design input? | Is there no design input, a screenshot, a Figma URL, a written visual spec, or an existing visual baseline? | Use `ae-frontend-design` for focused UI creation or visual matching. Preserve design input as a constraint and inspect `component-data-access-contract.md` for reusable interaction shells. |
-| Q3 backend or API interaction? | Does the task need state, forms, API calls, auth, persistence, or error handling? | Use `ae-web-app`; inspect `component-data-access-contract.md`, coordinate `ae-backend` or `ae-sql` when server or data contracts change, and hold both sides to the API contract checklist in `ae-backend`. |
-| Q4 visual baseline? | For Q1=yes, should current visuals be preserved or intentionally replaced? | Preserve by default; redesign only when requested or required by the goal. |
-
-### Fast Route
-
-If the request names one existing target and one concrete change, or explicitly selects an owner, run only the target existence check and route directly. Do not repeat Q1-Q4 intake, load every frontend skill, or produce a full routing summary. Use the four questions only when the request is mixed, ambiguous, or replacement versus modification could materially change behavior, data integrity, or acceptance.
-
-Typical outcomes:
-
-- New UI only: `ae-frontend-design` -> `ae-test-browser`.
-- New UI plus interaction/API: `ae-web-app` -> `ae-test-browser`.
-- Existing route logic change: `ae-web-app`, preserving Q4 baseline -> `ae-test-browser`.
-- Visual implementation from screenshot/Figma: `ae-frontend-design` with the provided design input -> `ae-test-browser`.
-- Verification only: `ae-test-browser`.
-
-For visual audit, polish/refine, bolder/quieter/distill/clarify, adapt, or optimize requests, read `../ae-frontend-design/references/ui-direction-contract.md` and map the intent to its `audit`, `refine`, `adjust`, or `harden` mode. Preserve Q1-Q4; this vocabulary selects an existing owner and does not create another public skill. Record the resulting direction contract before implementation when the request changes visual direction.
-
-## Rework Loop
-
-Browser acceptance is required for web UI changes when a runnable app or static preview is available. Use `ae-test-browser` for final acceptance, then route failures back to the smallest owning skill:
-
-- visual/layout mismatch -> `ae-frontend-design`;
-- interaction, state, route, API, or data issue -> `ae-web-app`, plus `ae-backend` or `ae-sql` when the failing contract is server-side;
-- verification-only blocker -> stay in `ae-test-browser` and report the exact missing environment or command.
-
-Stop immediately after the first passing acceptance check for a low-risk change. Otherwise run at most 3 rework loops; one loop is fix -> browser regression check. After the limit, report remaining issues as residual risk instead of claiming acceptance.
-
-## Report Format
-
-Include this summary when the skill drives work:
-
-```markdown
-## Web Forge Routing
-
-- Q1 existing route:
-- Q2 design input:
-- Q3 backend/API:
-- Q4 visual baseline:
-- UI direction/refinement mode:
-- Motion decision:
-- Reduced-motion evidence:
-- Selected skills:
-- Browser acceptance:
-- Rework loops:
-- Modified files:
-- Residual risks:
-```
-
-For a fast route, report only the selected owner, target check, acceptance boundary, and any residual risk; omit empty intake fields.
-
-## Runtime Boundaries
-
-- Do not claim OpenCode sub-agent registry, `@ui-*` agents, dynamic Chrome MCP registration, or slash command behavior.
-- Do not require `ae:chrome-devtools`; route browser checks to `ae-test-browser`, Browser, Playwright, or available local tooling.
-- Do not bypass existing repository stack, component system, auth boundary, or validation commands.
-- Do not modify backend or database contracts without routing that portion through `ae-backend` or `ae-sql`.
+For visual audit/refine/adjust/harden, use [ui-direction-contract](../ae-frontend-design/references/ui-direction-contract.md).
+For reusable components/data access, use [component-data-access-contract](../ae-frontend-design/references/component-data-access-contract.md).
+For scale-sensitive Web flows, use the [scale contract](../ae-help/references/scale-and-distributed-engineering.md).
+Keep a fast-route report to owner, target, acceptance and residual risk. Do not
+load all implementation skills for intake, repeat routing, bypass auth/stack
+contracts or imply unavailable OpenCode agents/MCP behavior.

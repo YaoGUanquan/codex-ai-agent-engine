@@ -1,154 +1,40 @@
 ---
 name: ae-plan
-description: Use when the user asks for ae-plan, /ae-plan, $ae-plan, "use ae-plan", AE plan, technical plan, implementation plan, design plan, break down requirements, plan before coding, or convert a requirements artifact into implementation units. This skill writes plans and must not implement code.
+description: Use when the user requests ae-plan, /ae-plan, $ae-plan, or an implementation, technical, or design plan before coding.
 ---
 
 # AE Plan
 
-For large or distributed changes, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Separate contract/migration dependencies from file ownership, budget each batch and worker, and plan checkpoints and rollback before implementation.
+Create a repository-grounded plan; do not implement product code.
 
-Create a durable implementation plan. Planning answers how to build; it does not edit product code.
+1. Confirm the goal, acceptance signal, non-goals, affected area, and
+   validation surface.
+2. Use the lightweight lane for a precise low-risk change; use standard/deep
+   only for ambiguity, cross-module work, or public/data/security/deployment
+   boundaries.
+3. Keep units independently verifiable with explicit files, dependencies,
+   validation, rollback, and forbidden scope.
+4. For a lightweight plan, include frontmatter, `AI Parse Contract`,
+   `Scope`/`Readiness`, one `U1` unit, and `Consistency Check`; keep goal,
+   acceptance, non-goals, ownership, dependencies, validation and rollback.
+   Omit approach comparisons and pre-mortems for this lane.
+5. Stop after writing the requested plan; do not route automatically to review
+   or implementation.
 
-## Complexity Lanes
+## Task References
 
-- Lightweight lane: for a precise, low-risk change with at most two likely production files and a clear acceptance signal, produce a minimal plan that still satisfies the artifact contract: frontmatter, `AI Parse Contract`, `Scope`/`Readiness`, one `U1` implementation unit, and `Consistency Check`. Include the goal, acceptance criteria, non-goals, affected/owned files, validation, and rollback signal; keep `Depends on`, file ownership, validation, and rollback explicit so downstream work can consume it. Omit approach comparison, ADRs, pre-mortem, data-access contracts, and cross-layer claim records unless a trigger below applies.
-- Standard/deep lane: use the additional design, evidence, and decision sections only when the request is cross-module, high-risk, ambiguous, or crosses a public API, persisted data, external service, deployment, browser, or security boundary.
-- Stop after writing the requested plan. Do not route automatically to `ae-review` or `ae-work`; those are next steps only when requested or required by an explicit workflow.
+Read only the row triggered by the task, not the whole table.
 
-## Operating Principles
+| Trigger | Reference |
+| --- | --- |
+| Writing a durable plan | [Artifact fields](references/plan-artifact.md) |
+| Standard/deep plan, material choice or cross-artifact work | [Planning decisions and self-review](references/planning-decisions.md) |
 
-- Apply the [model-adaptation contract](../ae-help/references/model-adaptation-contract.md): plan from observed capability and evidence boundaries, not model labels, private reasoning assumptions, or hard-coded reasoning effort.
-- Keep the plan as small as the requested outcome allows.
-- Prefer repo-grounded facts over generic architecture advice.
-- Separate known facts, assumptions, open questions, and deferred work.
-- Make every implementation unit verifiable by a concrete command, file inspection, or user-flow check.
-- Treat planning as design compression: explore viable approaches, choose one, then turn it into executable units.
-- For non-trivial decisions, record the decision drivers, rejected alternatives, and consequences so downstream execution can preserve intent.
-
-## Plan Readiness Gate
-
-Before writing a plan, verify that these inputs are clear enough:
-
-- goal and user-visible outcome,
-- acceptance criteria or success signal,
-- known non-goals or scope boundary,
-- affected system area and likely file ownership,
-- validation surface.
-
-If any item is materially unclear, ask one focused question or route to `ae-brainstorm`. Do not fill gaps with invented product behavior.
-
-When the plan crosses a public API, persisted data, external service, deployment, or browser boundary, load `references/validation-evidence-profile.md`. Select only the tiers that apply, record their preconditions and bounded claims, and make blocked or `unverified` proof visible. Do not infer a higher-tier result from a lower-tier check. Do not load this profile for a lightweight lane that stays within source-level validation.
-
-For database-backed query/list/count or bulk/async write work, load the [data-access and scale contract](../ae-backend/references/data-access-contract.md) and carry the applicable Data Access Budget into owned units and acceptance checks. Resolve logical row/total, freshness, batch/commit and recovery decisions before coding. Include auxiliary-table backfill/reconciliation/cutover and durable-job failure tests when chosen; do not reduce a structural data-access problem to a loop rewrite.
-
-For tasks with multiple plausible designs in the standard/deep lane, compare 2-3 approaches before selecting one. Keep the comparison short: fit, trade-off, risk, and why the recommended approach wins. In the lightweight lane, state the single viable route and continue.
-
-For implementation-heavy standard/deep plans, include the simplest viable route in that comparison: standard library, framework/native platform capability, existing dependency, deletion/configuration-only change, or the smallest new code path. New dependencies, abstractions, broad refactors, or extra files need a current requirement or repository pattern that justifies owning them now.
-
-For high-risk plans, add a deliberate planning pass before implementation units:
-
-- list the top 3 decision drivers,
-- name 3 pre-mortem failure scenarios,
-- include validation across the relevant levels: unit, integration, user flow, data/ops, or observability,
-- record rollback or recovery signals that would prove the plan is unsafe to continue.
-
-High-risk includes auth, permissions, public API contracts, migrations, data deletion, billing, concurrency, background jobs, security-sensitive flows, cross-module refactors, or broad behavior changes.
-
-## Workflow
-
-1. If the input references a requirements file, read it fully and treat it as the source of truth. Carry its problem frame, stable requirement IDs, acceptance criteria, scope boundary, decisions, assumptions, and deferred questions into plan coverage.
-2. If no requirements file exists, gather enough context from the repo and user request to plan safely.
-3. Run the Plan Readiness Gate.
-4. For design-heavy work, compare 2-3 materially different approaches and record the chosen approach.
-5. Use `references/plan-template.md` for structure.
-6. Break the work into implementation units that are small enough to validate independently.
-7. Add ADR-style decision records for material choices: decision, drivers, alternatives, why chosen, consequences, and follow-ups.
-8. For each unit, name exact files, dependencies, tests, validation commands, risks, rollback signals, and deferred implementation notes.
-9. Run Plan Self-Review before presenting the plan.
-10. Write the plan to `docs/ae/plans/` before presenting next-step options.
-11. Recommend ae-review domain:document for significant plans, then ae-work when the user wants execution.
-
-## Artifact Contract
-
-Plan artifacts are implementation data documents for humans and downstream AI workflow. Use `references/plan-template.md` as the canonical structure.
-
-Required frontmatter for new plans:
-
-```yaml
----
-type: plan
-status: drafted
-date: YYYY-MM-DD
-title: kebab-case-title
-origin: docs/ae/prds/YYYY-MM-DD-topic-prd.md
-originFingerprint: YYYY-MM-DD-topic
-depth: standard
-format: human-readable-plan
-sharded: false
----
-```
-
-Rules:
-
-- Include `origin` and `originFingerprint` together when a source artifact exists; remove both when there is no source artifact.
-- Include `depth: standard` or `depth: deep` for non-lightweight plans; omit `depth` for lightweight plans.
-- Use `sharded: true` only when multiple modules require separate plan shards or the user explicitly asks for sharding.
-- Include an `AI Parse Contract` section with `canonicalKind: plan`, `humanEquivalent: true`, `stableIdsRequired: true`, and `noImplicitScope: true`.
-- Every implementation unit uses a stable `U*` ID, lists requirement IDs covered, acceptance criteria covered, dependencies, files, forbidden files, validation, rollback signals, and deferred implementation notes.
-- The plan must not introduce product behavior absent from the source requirements; record such gaps as open questions instead.
-- For an applicable evidence boundary, use `references/validation-evidence-profile.md` and map each high-risk acceptance criterion to a proof, owner, status, and recovery or rollback signal.
-
-When the task may benefit from multi-agent execution, make the plan dependency-aware even if multi-agent config is currently disabled:
-
-- Every implementation unit must include `Depends on:` with either `none` or explicit unit IDs such as `U1`.
-- Every implementation unit must list owned files clearly enough for `task-analyze` to detect overlap.
-- Do not design units only to reach a worker count. Split by real file ownership and dependency boundaries.
-- Shared config, public contracts, migrations, auth, lockfiles, and cross-cutting abstractions should usually stay serial unless a later plan proves disjoint ownership.
-
-## Five-Layer Ownership
-
-For cross-cutting AE skill, plugin, installation, documentation, or governance work, identify whether each implementation unit touches Memory, Knowledge, Guardrail, Delegation, or Distribution. Use `docs/ae/references/codex-five-layer-architecture.md` as the placement map.
-
-When a unit changes docs, README content, installation behavior, capability claims, benchmark claims, or runtime-support claims, include a claim-evidence note: the evidence path, validation command, or explicit assumption that will prove the changed claim. Do not claim hooks, global config, slash commands, MCP auto-loading, or automatic agents unless the current Codex runtime or local scripts actually provide that behavior.
-
-## Optional Cross-Model Lane
-
-Use a second-model planning lane only when risk, ambiguity, or external-repository comparison justifies the extra review. The lane is optional; Codex remains the orchestrator and owns the final plan.
-
-Before delegation, write a prompt contract that names:
-
-- scope and target files;
-- forbidden files and forbidden behavior;
-- expected output shape;
-- validation expectations;
-- assumptions and open questions.
-
-Treat the second model's output as untrusted advice until Codex checks it against repository facts, user requirements, validation commands, and local AE boundaries. Do not let second-model advice add scope, dependencies, runtime assumptions, or user decisions without recording and reviewing them in the plan.
-
-## Plan Self-Review
-
-Before finalizing, check and fix the plan inline:
-
-- no `TBD`, `TODO`, placeholder sections, or vague verbs such as "wire up" without file-level detail,
-- no contradiction between scope, decisions, implementation units, and validation,
-- assumptions are explicit and do not masquerade as requirements,
-- alternatives and decision records explain why the selected approach is preferable,
-- every acceptance criterion maps to at least one implementation unit or validation step,
-- every source requirement ID maps to at least one implementation unit or is explicitly deferred,
-- high-risk plans include pre-mortem failures and layered validation,
-- rollback and recovery signals are credible for the changed area,
-- proposed dependencies, abstractions, wrappers, and files are justified by current requirements rather than speculative future flexibility,
-- claim-evidence notes exist for changed public or workflow claims,
-- the plan is still focused enough for one execution pass; otherwise split it.
-
-## Rules
-
-- Do not write implementation code.
-- Do not run tests as part of planning unless needed for read-only discovery and explicitly safe.
-- Keep all file paths repository-relative.
-- Do not invent product behavior missing from the requirements; record open questions instead.
-- For refactors, include behavior-preservation requirements and rollback signals.
-- Replace vague tasks such as "implement", "wire up", or "handle edge cases" with concrete file-level work.
-- When validation is unclear, name the missing proof instead of pretending the plan is executable.
-- Do not expand a narrow request into platform redesign, migration, or process overhaul unless the user asked for that scope.
-- Do not route directly from an unclear request to implementation. Clarify, brainstorm, or record the blocker first.
+Use [plan-template](references/plan-template.md) for standard/deep artifacts.
+For data-backed queries/writes, use the [data-access contract](../ae-backend/references/data-access-contract.md).
+For large/distributed changes, use the [scale contract](../ae-help/references/scale-and-distributed-engineering.md).
+For workflow sizing, use the [model-adaptation contract](../ae-help/references/model-adaptation-contract.md).
+Use [validation-evidence-profile](references/validation-evidence-profile.md)
+only for API, persistence, external-service, browser or deployment boundaries.
+Write no product code, do not invent requirements, and keep artifact paths
+repository-relative or in the project's resolved external documentation space.

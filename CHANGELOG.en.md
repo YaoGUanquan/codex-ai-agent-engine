@@ -4,6 +4,11 @@ This file is the complete release history of AI Agent Engine for Codex (since 0.
 
 中文版本: [CHANGELOG.md](CHANGELOG.md)
 
+### 0.3.54 (2026-09-30)
+- Compress 12 high-frequency AE skill entrypoints to under 4 KiB and move detailed procedures into conditionally loaded references, reducing default context and repeated workflow text.
+- Keep the plugin source and `.ae-source` maintenance mirror aligned, with regression coverage for entry size and route selection.
+- Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These static and local checks do not prove real Codex host/model token consumption or behavioral gains.
+
 ### 0.3.53 (2026-09-28)
 - Add `micro`, `small`, `standard`, and `high-risk` task-size gates with bounded work budgets: small requests use the smallest applicable path by default, explicit scope wins, and work stops at acceptance, a real blocker, or budget exhaustion.
 - Tighten `ae-lfg`, `ae-review`, `ae-task-loop`, and `ae-web-forge` with fast routing, scope-locked review, and bounded rework stops to avoid unrelated scans, repeated ceremony, and unbounded retries; keep the plugin source and maintenance mirror synchronized with regression coverage.

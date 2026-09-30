@@ -1,141 +1,44 @@
 ---
 name: ae-work
-description: Use when the user asks for ae-work, /ae-work, $ae-work, "use ae-work", AE work, execute an AE plan, implement this plan, or perform a tightly scoped engineering change with validation and delivery evidence. This skill may edit files, but only after Git/worktree safety checks.
+description: Use when the user requests ae-work, /ae-work, $ae-work, execution of an approved AE plan, or a tightly scoped engineering change.
 ---
 
 # AE Work
 
-For large repositories, bulk writes or distributed execution, apply the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Implement bounded work and recovery in the assigned scope, then test contention and partial failure at the available evidence tier.
+Implement only the approved scope and preserve unrelated work.
 
-Before running helper commands, resolve `aeEntry` using the [runtime entry contract](../ae-help/references/runtime-entry.md).
+1. Inspect `git status --short`, `git branch --show-current`, and
+   `git log --oneline -1`. Preserve unrelated changes; resolve unsafe worktree
+   decisions before editing. Git writes require explicit authorization.
+2. Read the plan and direct references; use `task-analyze` only when a plan or
+   dependency boundary requires it.
+3. Choose the smallest behaviorally complete change. Add focused tests when
+   behavior changes.
+4. Validate from the narrowest meaningful check upward and record the exact
+   result. Do not claim runtime or deployment proof from static checks.
+5. Stop at acceptance, a real blocker, or the declared budget.
 
-Execute a plan or tightly scoped task with safety checks, validation, and delivery evidence.
+Before helper commands, resolve `aeEntry` with
+[runtime-entry](../ae-help/references/runtime-entry.md).
 
-## Operating Principles
+For a small task, inspect direct paths, implement, test, review the scoped diff,
+and report results inline. Do not create task scans or gate artifacts for
+ceremony. Delegation is serial by default and needs explicit user authorization.
+Safety controls and explicit requirements are not simplification targets.
 
-- Apply the [model-adaptation contract](../ae-help/references/model-adaptation-contract.md): use active tool schemas and repository evidence, preserve compact resumable state for long work, and stop at the requested acceptance boundary.
-- Read before editing and let the repository's existing structure decide the shape of the change.
-- Prefer the smallest behaviorally complete patch over broad cleanup.
-- Keep a clear chain from request, to changed files, to validation evidence.
-- Surface uncertainty early when it affects correctness, data safety, or public contracts.
+## Task References
 
-## Pre-Edit Gate
+Read only the row triggered by the task, not the whole table.
 
-Before modifying any project file, run and inspect:
+| Trigger | Reference |
+| --- | --- |
+| Approved multi-unit plan or non-trivial implementation | [Execution](references/task-execution.md) |
+| Explicitly authorized delegation | [Ownership and worker gates](references/task-delegation.md) |
+| Changed capability claims or explicit shipping gate | [Claim and shipping evidence](references/claim-and-shipping.md) |
 
-```powershell
-git status --short
-git branch --show-current
-git log --oneline -1
-```
-
-If the directory is not a Git repository, say so and use `worktree_decision: not_applicable`.
-
-Then decide with the user when needed:
-
-- default branch or dirty worktree: explain the risk and ask before continuing, creating a branch, or creating a worktree.
-- feature branch and clean worktree: continue unless the task is risky enough to need a worktree.
-- if the plan touches shared config, auth, public contracts, or a risky refactor, propose an isolated branch or worktree and a baseline validation pass before editing.
-- Git writes such as commit, reset, clean, rebase, push, or worktree add require explicit user approval and Codex escalation rules.
-
-## Task Analysis
-
-For a plan file, run:
-
-```powershell
-node "$aeEntry" task-analyze --mode plan --plan <path>
-```
-
-For a plain task, run:
-
-```powershell
-node "$aeEntry" task-analyze --mode scan --task "<description>"
-```
-
-Use the result to choose inline, serial, or parallel execution. Spawn sub-agents only when the user explicitly allowed parallel agent work and file ownership is disjoint. Use `references/work-subagent-template.md` for delegated prompts.
-
-If `.codex/ae-skill-profiles.yaml` contains `multi_agent.enabled: auto` or `multi_agent.enabled: true`, treat `task-analyze` as the source of truth for `execution_strategy`, `read_parallel_eligibility`, `write_parallel_eligibility`, `parallel_waves`, and each worker request's `owned_files`, `read_only_files` and `forbidden_files`. Unit `files` may include read-only evidence and must not be copied wholesale into write ownership. `parallel_eligibility` remains a compatibility summary and must not be used as the sole write-worker gate.
-
-- `auto` enabled state means automatically analyze whether parallel work is safe. It does not mean scripts spawn agents.
-- `suggest` mode may recommend waves, but the orchestrating agent must still decide whether to spawn sub-agents.
-- `review_only` mode allows `read_parallel_eligibility.can_parallelize` and parallel read-only review lanes, but keeps write workers disabled.
-- `auto` mode is eligible for write workers only when `write_parallel_eligibility.config_allows_write_agents` is true, `write_parallel_eligibility.blockers` is empty, the Pre-Edit Gate confirmed a clean safe branch, plan units declare dependencies, and file ownership is disjoint.
-- `write_parallel_eligibility.can_spawn_write_agents_now` is false until the orchestrating agent has independently completed the Pre-Edit Gate for the current worktree.
-- `multi_agent.enabled: false` is a hard off switch and must force serial execution.
-- Immutable document pages remain read-only in both scan and plan mode, including explicit `--include-document-pages`. Pass `read_only_files` and `forbidden_files` to workers; update the owning document through lifecycle commands, never old pages directly.
-- Never force a minimum of three workers. Use no more than the safe units in the current wave and no more than `multi_agent.max_workers`.
-- If `read_parallel_eligibility.blockers` or `write_parallel_eligibility.blockers` are non-empty for the lane you intend to use, fall back to serial execution or report the blocker instead of guessing.
-
-## Minimality Gate
-
-Before implementing a database-backed list/query/count or write path, apply the [data-access and scale contract](../ae-backend/references/data-access-contract.md). Reuse accepted design decisions; if scale, atomicity, totals, read-model freshness or async completion is materially unresolved, return to design before coding. Minimality does not justify N+1, per-row commits or in-memory async when the workload requires bounded set/batch or durable-job behavior.
-
-Before editing behavior, choose the smallest correct implementation that satisfies the request and repository constraints:
-
-- First ask whether the requested behavior needs new code at all; if configuration, documentation, deletion, or an existing path already satisfies it, use that route.
-- Prefer standard library, framework, database, browser, shell, or platform-native capabilities over custom code.
-- Prefer an already-installed dependency over a new dependency when it clearly fits the local stack.
-- Add a new dependency, abstraction, interface, wrapper, flag, or configuration point only when the current requirement or repository pattern justifies owning it now.
-- Keep the patch as small as behavior allows, but never remove trust-boundary validation, security controls, accessibility basics, data-loss prevention, explicit user requirements, or the narrow validation needed for non-trivial logic.
-- When deliberately choosing a simple implementation with a known ceiling, record the ceiling and the trigger for revisiting it in the plan, final response, or a scoped code comment. Do not leave open-ended "later" notes.
-
-## Execution Rules
-
-- Read the plan and referenced files first.
-- Before executing the first implementation unit from a plan, run one pre-flight conflict scan across the plan:
-  - compare units for shared files or contradictory ownership,
-  - compare unit intent against any explicit `Global Constraints`,
-  - flag plan instructions that would obviously fail later review gates.
-- If the plan references a constitution, checklist, or task artifact, read it before editing and treat unresolved blockers as pre-implementation blockers.
-- Execute one implementation unit or one small checkpoint at a time.
-- Keep changes scoped to the assigned unit or task.
-- Do not overwrite user-owned unrelated changes.
-- Establish a baseline when the task is a bug fix or behavior-sensitive refactor.
-- Add tests or update existing tests when behavior changes.
-- Stop and report blockers when the failure mode invalidates the current step or assumptions.
-- Run the narrowest meaningful validation, then broader validation when practical.
-- When a changed local API or UI surface has an explicit runtime smoke request, read [the local runtime smoke gate](references/local-runtime-smoke-gate.md) after focused validation. It defines the trigger synonyms, restart and request classification checks, safe secret-reference boundary, and evidence needed before a local call is claimed.
-- Track validation commands exactly for final reporting.
-- When using a task artifact, mark or report task completion only after the corresponding file change or validation evidence exists.
-- Prefer ae-debug for investigation-heavy failures and ae-tdd when the user wants or the change benefits from red-green-refactor discipline.
-- Do not bundle opportunistic refactors, formatting churn, dependency upgrades, or unrelated test rewrites into the task.
-- If verification cannot be run, name the exact blocker and the residual risk.
-- When resuming a multi-step task after interruption or context compaction, read the active task ledger under `docs/00-process/active/<task>/ledger.jsonl` when present and reconcile it with `git log` before deciding what still needs execution.
-
-## Cleanup Gate
-
-Before final validation, inspect the files changed in this task for AI-generated cleanup risks:
-
-- fallback-like code that silently swallows errors, returns fabricated defaults, or hides missing integration work,
-- dead code, duplicate helpers, unused flags, speculative abstractions, single-use wrappers, or placeholder branches,
-- avoidable new dependencies, hand-rolled standard-library behavior, or code replacing a native platform capability,
-- broad formatting churn unrelated to the task,
-- tests that assert implementation details without protecting the requested behavior,
-- comments or names that describe intent inaccurately after the edit.
-
-Fix only deterministic issues inside the current task scope. Do not expand cleanup into unrelated refactors. If a suspicious pattern may be intentional, record it as residual risk or route to ae-review instead of rewriting product behavior.
-
-## Claim-Evidence Mapping
-
-When a task changes docs, README, installation behavior, capability claims, or skill behavior, record what proves each changed claim before shipping:
-
-- evidence path, validation command, or explicit assumption; when useful, also cite the inspected file or observed external ref;
-- whether the claim affects Memory, Knowledge, Guardrail, Delegation, or Distribution;
-- whether unsupported runtime behavior was rejected or rewritten as a process contract;
-- whether any correction or retraction belongs under `docs/ae/integrity/`.
-
-If a changed claim cannot be tied to evidence, downgrade it to an assumption, remove it, or route it to ae-review. Do not claim success from a generated file alone.
-
-## Shipping
-
-Read `references/shipping-workflow.md` before final response.
-
-When ready, run a final gate, for example:
-
-```powershell
-node "$aeEntry" gate --workflow work --checkpoint final --plan <path> --validation "npm test" --validation-result '<execution-result-json>' --review-status <actual-status> --worktree-decision <actual-decision> --write-proof
-```
-
-`--validation` only declares a command. Each `--validation-result` is a JSON object with `command`, `status` (`declared`, `executed`, `successful`, `failed`, or `unverified`) and optional `tier`. Execution records also require actual `exitCode`, `startedAt`, `finishedAt` and a repository-relative `evidence` artifact path. The gate hashes the artifact without executing commands; declarations, missing evidence and unsuccessful results cannot pass final validation. Preserve failed/skipped results and never manufacture execution records to pass the gate.
-
-Final response sections: completed, verified, unverified/unable to verify, Git operations, gate result, residual risks.
+For data-backed queries/writes, use the [data-access contract](../ae-backend/references/data-access-contract.md).
+For large/concurrent/distributed work, use the [scale contract](../ae-help/references/scale-and-distributed-engineering.md).
+For workflow sizing or recovery, use the [model-adaptation contract](../ae-help/references/model-adaptation-contract.md).
+Load
+[local-runtime-smoke-gate](references/local-runtime-smoke-gate.md) only when a
+local runtime smoke is explicitly requested.

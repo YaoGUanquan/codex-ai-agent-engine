@@ -23,6 +23,10 @@ English: [README.en.md](README.en.md)
 - 把验证证据、交接说明和可复用经验保存在项目文档中；
 - 初始化项目说明、归档规则和长期 AI 记忆库。
 
+### AE 调用边界
+
+AE skill 默认是**关闭的**。只有明确使用 `AE`、`ae-*`、`/ae-*`、`$ae-*`，或要求继续已有 AE 流程时才启用；普通语义匹配、仓库名称、文件内容或历史上下文中的 “AE” 不会自动启动 AE。
+
 ## 快速开始
 
 把插件安装到目标 Codex 项目：
@@ -62,6 +66,11 @@ node scripts/ae-tools.mjs help
 
 ## 版本更新记录
 
+### 0.3.54（2026-09-30）
+- 精简 12 个高频 AE skill 入口至 4 KiB 以内，把详细流程拆为按触发条件加载的 references，减少默认上下文和重复流程。
+- 保留插件源与 `.ae-source` 镜像一致，并增加入口体积与路由回归测试。
+- 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。这些静态和本地检查不能证明真实 Codex host/model 的 token 消耗或行为收益。
+
 ### 0.3.53（2026-09-28）
 - 新增 `micro`、`small`、`standard` 与 `high-risk` 任务规模门禁及有界工作预算：小任务默认走最小流程，显式范围优先，达到验收、真实阻塞或预算上限即停止。
 - 收紧 `ae-lfg`、`ae-review`、`ae-task-loop` 与 `ae-web-forge` 的快速路由、审查范围锁定和返工停止条件，减少无关扫描、重复仪式与无界返工；插件源和维护镜像保持同步并补充回归断言。
@@ -84,11 +93,6 @@ node scripts/ae-tools.mjs help
 - 图、任务、恢复和 Issue 分析增加遍历/字节/时间预算及不完整诊断，依赖提取消除异常 import/export 文本的重复回溯；任务支持内容匹配，配置/YAML 失败显式阻断并行就绪，转换和 OpenAPI 不再静默截断。gate 区分命令声明与执行记录，阻断返回退出码 1。
 - 项目安装增加暂存校验、写入锁、指纹和 journal 恢复；全局安装增加写入锁、预览源内容绑定、失败暂存清理及已校验副本发布；更新区分安装完成与维护失败。逐组件交换不等于跨组件原子事务，也不是跨主机锁。
 - 验证命令：`node --test tests/scale-runtime.test.mjs tests/install-scripts.test.mjs tests/global-install.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。仅证明本地工具、隔离并发/恢复、静态技能和安装分发合同；权限不足的 Windows 文件链接用例明确跳过，不代表真实目标项目容量、跨主机可靠性、生产验收或当前用户安装已升级。
-
-### 0.3.49（2026-09-27）
-- 将增长治理扩展到记忆专题、开发历史、导航和滚动台账：新增 `ae-docs-maintain` 分类审计/无损分页、`ae-docs-append` 自动分页写入与 `ae-docs-search` 有界续查，入口固定预算，历史原字节可恢复。
-- 新增已登记外部 docs 的显式批量维护工具，绑定 context manifest 和预览哈希，逐文件核验；更新中英文生成模板、收尾门禁和维护镜像。正式合同、SQL、结构化 registry、JSONL 证据链和归档不自动拆改，不创建后台任务或删除历史。
-- 验证命令：`node --test tests/docs-lifecycle.test.mjs tests/memory-navigation.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。证明本地分页/检索、字节恢复及隔离分发合同；实际外部应用以逐文件报告为准，不代表全局安装已更新、任意手工写入受阻或模型 token/延迟收益。
 
 完整历史见 [CHANGELOG.md](CHANGELOG.md)；本节仅保留最近 5 个版本，发布时超出窗口的条目迁移到 CHANGELOG。
 

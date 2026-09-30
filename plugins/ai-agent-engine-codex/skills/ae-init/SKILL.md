@@ -1,87 +1,36 @@
 ---
 name: ae-init
-description: Use when the user asks for AE init, /ae-init, initialize a project for AI Agent Engine for Codex, create AGENTS.md, create docs/ae, docs/00-process, docs/08-ai-memory, archive rules, or UTF-8 Chinese documentation rules.
+description: Use when the user requests AE init, /ae-init, or explicit initialization of AE project guidance and documentation scaffolding.
 ---
 
 # AE Init
 
-For large repositories or multiple services, apply the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Inventory bounded scopes and existing ownership first; do not load every service or duplicate root instructions into every module.
+Initialize only AE-managed project files, not unrelated documentation.
 
-Before running helper commands, resolve `aeEntry` using the [runtime entry contract](../ae-help/references/runtime-entry.md).
+1. Confirm the target working directory and inspect existing instructions,
+   README/build metadata, documentation conventions and Git status.
+2. Resolve [runtime-entry](../ae-help/references/runtime-entry.md), then preview
+   `node "$aeEntry" init --dry-run`. Choose profile and language from the request
+   and project evidence.
+3. Use `ae-core` by default, `minimal` for only `AGENTS.md`, or `full` for legacy
+   numbered directories.
+4. Apply only when target/profile/language are clear; inspect command JSON,
+   conflicts and actual generated files.
+5. Preserve user content outside managed regions. `--force` requires explicit
+   regeneration intent; legacy marker-only conflicts are not overwriteable.
 
-Initialize the target project with AGENTS.md guidance and a selectable AE documentation scaffold. The command keeps the client-neutral AGENTS.md convention separate from Codex-specific instruction precedence.
+## Task References
 
-This skill is intentionally conservative. It turns "initialize this project" into a verified project setup, not a broad documentation rewrite.
+Read only the row triggered by the task, not the whole table.
 
-## Operating Principles
+| Trigger | Reference |
+| --- | --- |
+| Choosing invocation flags, nested preview or checking initialization results | [Initialization procedure](references/init-procedure.md) |
 
-- Apply the [model-adaptation contract](../ae-help/references/model-adaptation-contract.md): generated guidance must remain capability-driven, concise, and free of model-name or reasoning-effort assumptions.
-- State assumptions before acting when the target directory, language, or overwrite intent is unclear.
-- Prefer the smallest initialization that makes AE workflows usable; do not add speculative project process docs.
-- Touch only AE init-managed files and directories unless the user explicitly asks for broader cleanup.
-- Define success as generated paths plus verification evidence, not merely a completed command.
-
-## Workflow
-
-1. Confirm the current working directory is the target project.
-2. Read existing project guidance first: `AGENTS.md`, `README*`, package or build metadata, and existing `docs/` conventions when present.
-3. Inspect `git status --short` when the target is a Git repository and avoid overwriting user-owned files.
-4. Run a preview first. `ae-core` is the default profile; use `minimal` for only `AGENTS.md` or `full` for the legacy complete directory set:
-
-```powershell
-node "$aeEntry" init --dry-run
-node "$aeEntry" init --dry-run --profile minimal
-node "$aeEntry" init --dry-run --profile full
-```
-
-5. Choose language from the user request or existing project language:
-
-```powershell
-node "$aeEntry" init --lang zh-CN
-node "$aeEntry" init --lang bilingual
-```
-
-Use the default only when no project signal or user preference points to Chinese or bilingual templates.
-
-6. When the repository has subprojects or existing instruction files, preview the bounded candidates and Codex-specific precedence before writing:
-
-```powershell
-node "$aeEntry" init --dry-run --nested preview --explain-instructions
-```
-
-Nested candidates are advisory. Do not create nested `AGENTS.md` files without project-owner judgment.
-
-7. Run the real init only after the target project, profile, and language are clear:
-
-```powershell
-node "$aeEntry" init
-```
-
-8. Verify the command JSON and the selected profile boundary. `minimal` creates only `AGENTS.md`; `ae-core` also creates canonical `docs/ae`, `docs/00-process`, and `docs/08-ai-memory` paths; `full` adds the legacy numbered documentation directories. Init does not create the legacy `docs/ai-memory` compatibility pointer.
-9. Check `conflicted_files`. New files have a bounded AE-managed region; `--force` replaces only that region and preserves surrounding user content. Legacy marker-only files are preserved as conflicts because their user-authored changes cannot be distinguished safely.
-10. On Windows, verify Chinese Markdown with explicit UTF-8 reads or Git diff before treating mojibake as file corruption.
-
-## Success Criteria
-
-- The target project is unambiguous.
-- Existing non-managed files are preserved.
-- The init command reports created, skipped, and updated files clearly.
-- The generated `AGENTS.md` includes repository-derived package scripts when available.
-- Generated files contain one bounded AE-managed region where regeneration safety depends on it.
-- Instruction explanation labels Codex precedence as client-specific and nested discovery as bounded advice.
-- A minimal validation command ran, such as `node "$aeEntry" help` or a dry-run/init JSON inspection.
-
-## Rules
-
-- Do not run init from an installer temp directory.
-- Existing files are skipped by default.
-- Use `--force` only when the user explicitly wants bounded managed regions regenerated.
-- Do not convert a legacy marker-only conflict into a whole-file overwrite. Preserve the file and migrate its managed region manually.
-- `--nested preview` never authorizes creating nested instruction files.
-- Treat PowerShell mojibake as a display issue until UTF-8 reads or Git diff prove file corruption.
-- Do not add project-specific policies, architecture claims, or workflow obligations that were not discovered from the repository or requested by the user.
-- If the command is unavailable, stop and report the missing script path instead of hand-creating the full scaffold from memory.
-
-## Final Response
-
-Report the target directory, language, profile, created/updated/skipped/conflicted files, nested candidates when requested, validation command, and any files intentionally left untouched.
+For large/multi-service projects, use the [scale contract](../ae-help/references/scale-and-distributed-engineering.md).
+For generated guidance, use the [model-adaptation contract](../ae-help/references/model-adaptation-contract.md).
+Nested preview is advisory, not permission to create nested instruction files.
+Verify UTF-8 bytes before treating PowerShell mojibake as corruption.
+Do not run from installer temp directories or fabricate a scaffold when the
+command is unavailable. Report target/profile/language, created/updated/skipped/
+conflicted paths, validation and untouched files.

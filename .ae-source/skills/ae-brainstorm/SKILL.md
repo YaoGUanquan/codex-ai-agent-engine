@@ -1,78 +1,36 @@
 ---
 name: ae-brainstorm
-description: Use when the user asks for ae-brainstorm, /ae-brainstorm, $ae-brainstorm, "use ae-brainstorm", AE-style requirement clarification, feature brainstorming, multi-perspective option collision, scope definition, acceptance criteria, or a fuzzy software idea that should become a durable requirements artifact before planning.
+description: Use when the user requests ae-brainstorm, /ae-brainstorm, $ae-brainstorm, AE requirement clarification or perspective collision.
 ---
 
 # AE Brainstorm
 
-When scale or concurrency affects the requirement, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md) to identify workload, SLO and failure assumptions before selecting architecture. Missing capacity numbers remain open decisions, not invented defaults.
+Clarify WHAT should be built. Read relevant repository evidence before asking
+for discoverable facts. Small, already-clear work needs a confirmed inline
+scope, not a new requirements package.
 
-Clarify what should be built. Produce a requirements artifact only when it will help downstream planning.
+1. Identify the outcome, non-goals, acceptance, affected users/systems and
+   validation boundary. Decompose independent systems before refining details.
+2. Ask one focused question only when its answer changes a material decision.
+   After at most three clarification questions, record remaining assumptions;
+   unresolved safety/product decisions remain blockers, not invented defaults.
+3. Compare 2-3 approaches only for genuinely competing designs.
+4. Write durable requirements only when downstream planning benefits; use
+   [requirements-capture](../ae-prd/references/requirements-capture.md).
+5. Stop when the agreed scope is ready. Continue to plan/work only when
+   requested or part of an authorized workflow.
 
-For database-backed lists/search, large queries, bulk mutations/imports or asynchronous saving, use the [data-access and scale contract](../ae-backend/references/data-access-contract.md) to clarify scale, exact-total needs, freshness, atomicity/partial success and durable completion. Separate product decisions from implementation choices; do not assume that async, extra tables or removing count is acceptable.
+## Task References
 
-## Operating Principles
+Read only the row triggered by the task, not the whole table.
 
-- Apply the [model-adaptation contract](../ae-help/references/model-adaptation-contract.md): scale clarification to decision risk, use repository evidence before questions, and stop when requirements are ready for the next workflow stage.
-- Understand the current repository context before asking detailed questions.
-- Ask one focused question at a time when the answer changes scope, design, or acceptance.
-- Do not ask the user for facts that can be discovered from repository files, existing docs, or safe read-only commands.
-- Prefer 2-3 materially different approaches before converging on design-heavy work.
-- Keep the output behavior-focused so `ae-plan` can turn it into implementation units.
-- If the request is too large for one plan, decompose it before refining details.
-- Treat requirement quality like a pre-implementation test surface: WHAT/WHY, measurable success, assumptions, and non-goals must be inspectable before planning.
-- For ambiguous or design-heavy choices, use perspective collision to expose disagreements before compressing them into requirements.
+| Trigger | Reference |
+| --- | --- |
+| Ambiguous or durable requirements going to planning | [Readiness](references/requirement-readiness.md) |
+| Competing values, directions or design-heavy work | [Perspective collision](references/perspective-collision.md) |
 
-## Workflow
-
-1. Determine whether the request is software-related. For non-software brainstorming, use the same questioning discipline but do not force software sections.
-2. Scan the repository lightly for existing related behavior, docs, and conventions before making claims.
-3. If the request spans multiple independent systems, decompose it and brainstorm only the first coherent slice.
-4. Ask one question at a time when requirements are unclear; prefer multiple choice when the options are known.
-5. Identify goals, non-goals, users or systems affected, success criteria, edge cases, validation signals, and open questions. When behavior crosses a public API, persisted data, external service, deployment, or browser boundary, identify the smallest applicable validation-evidence tiers and what remains `unverified`. For a new durable table, read `../ae-backend/references/persistence-contract.md`; use repository evidence or ask the required primary-key question before allowing implementation. Tier definitions and status vocabulary live in `../ae-plan/references/validation-evidence-profile.md`.
-6. Track material ambiguity explicitly. Continue clarifying until the remaining ambiguity is low enough that a plan can name files, risks, validation, and rollback without inventing behavior.
-7. Ask at most three clarification questions before recording explicit assumptions; ask fewer when repository evidence is enough.
-8. For design-heavy work, compare 2-3 materially different approaches before converging.
-9. When a design needs validation, present the smallest useful design slices instead of a full speculative implementation.
-10. When the request benefits from multiple roles, run the Perspective Collision Pass before choosing or recording the scope.
-11. When durable decisions exist, write a requirements file under `docs/ae/prds/` using `../ae-prd/references/requirements-capture.md`.
-12. If the behavior is already clear, summarize the confirmed scope and route to ae-plan or ae-work.
-13. If the user wants to continue, route to ae-plan with the requirements path.
-
-## Perspective Collision Pass
-
-Run this pass when the request has competing value judgments, an unresolved direction choice, or an S3+/design-heavy shape. Skip it for S1-S2 tasks with a single viable direction. Keep it lightweight: at most four perspectives by default.
-
-- Build a perspective matrix with at least critic, pragmatist, innovator, and systems perspectives when the topic is broad enough.
-- Classify disagreements as fact disagreement, value disagreement, or assumption disagreement instead of flattening all conflict into pros and cons.
-- Extract collision insights: cases where one perspective's objection becomes another perspective's breakthrough condition.
-- Name blind spots that none of the perspectives covered well enough.
-- Preserve a thinking preservation zone: decisions where human taste, domain judgment, or long-term strategy should not be over-compressed into automation.
-- End with 1-2 deepening directions that can become PRD questions, design constraints, validation work, or plan risks.
-
-Do not let the collision pass replace requirements. It is evidence for choosing scope, assumptions, validation expectations, and open questions. Record durable outcomes in the requirements artifact's `## Perspective Collision (Conditional)` section instead of leaving them only in chat.
-
-## Requirements Readiness
-
-Before routing to `ae-plan`, make sure the downstream plan will have:
-
-- the problem frame and intended outcome,
-- acceptance criteria or an explicit success signal,
-- non-goals and boundaries,
-- chosen approach when alternatives were considered,
-- validation expectations,
-- applicable validation-evidence tiers and any proof that must remain `unverified` when a boundary requires it,
-- unresolved questions labeled as open rather than assumed.
-- a requirement-quality checklist when the work is S4, externally visible, or likely to be delegated.
-- collision insights, blind spots, and thinking preservation zone notes when those shaped the chosen approach.
-
-If any missing item would change architecture, data shape, public behavior, security posture, or validation strategy, do not route to implementation. Ask the next highest-leverage question or record the blocker.
-
-## Rules
-
-- Keep requirements behavior-focused.
-- Do not invent implementation details, stakeholders, business value, or narrative filler.
-- Use repository-relative paths in artifacts.
-- If the work is small and already well-scoped, do not force an oversized design artifact.
-- Record open questions explicitly instead of silently assuming them away.
-- Do not ask for user approval between every normal step; ask when a real decision affects scope, design, or risk.
+For data-backed queries/writes, use the [data-access contract](../ae-backend/references/data-access-contract.md).
+For new tables, use [persistence-contract](../ae-backend/references/persistence-contract.md).
+For scale/concurrency requirements, use the [scale contract](../ae-help/references/scale-and-distributed-engineering.md).
+For workflow sizing, use the [model-adaptation contract](../ae-help/references/model-adaptation-contract.md).
+Keep non-software brainstorming free of forced software sections.
