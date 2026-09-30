@@ -7,6 +7,7 @@ upstream-ai-agent-engine/
 
 # Temporary install smoke-test workspaces
 .tmp-install-smoke-checks/
+test-output.txt
 
 # Runtime artifacts created by AE workflows in target projects
 .ae/
