@@ -4,6 +4,11 @@
 
 English: [CHANGELOG.en.md](CHANGELOG.en.md)
 
+### 0.3.54（2026-09-30）
+- 精简 12 个高频 AE skill 入口至 4 KiB 以内，把详细流程拆为按触发条件加载的 references，减少默认上下文和重复流程。
+- 保留插件源与 `.ae-source` 镜像一致，并增加入口体积与路由回归测试。
+- 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。这些静态和本地检查不能证明真实 Codex host/model 的 token 消耗或行为收益。
+
 ### 0.3.53（2026-09-28）
 - 新增 `micro`、`small`、`standard` 与 `high-risk` 任务规模门禁及有界工作预算：小任务默认走最小流程，显式范围优先，达到验收、真实阻塞或预算上限即停止。
 - 收紧 `ae-lfg`、`ae-review`、`ae-task-loop` 与 `ae-web-forge` 的快速路由、审查范围锁定和返工停止条件，减少无关扫描、重复仪式与无界返工；插件源和维护镜像保持同步并补充回归断言。

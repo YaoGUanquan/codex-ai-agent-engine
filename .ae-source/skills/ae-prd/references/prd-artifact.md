@@ -1,0 +1,62 @@
+# Prd Artifact
+
+## Workflow
+
+1. Recover only an explicitly referenced PRD or one created in the current session; do not scan for similar files and accidentally resume stale work.
+2. Read existing project docs and nearby feature context before making claims.
+3. Classify the request as quick answer, lightweight requirement, standard PRD, or deep PRD.
+4. Ask one focused question only when the answer changes scope, success criteria, risk, or validation; use no more than three clarification questions before recording explicit assumptions.
+5. Pressure-test the request before writing: confirm the real problem, success signal, scope boundary, non-goals, and whether any product decision is still missing. For durable tables or persistence changes, read `../../ae-backend/references/persistence-contract.md` and record unresolved primary-key, lifecycle, deletion, concurrency, audit, enum, and error-contract decisions as open questions rather than defaults.
+6. Record goals, affected users or systems, requirements with stable IDs, acceptance criteria, non-goals, constraints, validation expectations, assumptions, and open questions.
+7. Keep implementation details out of the PRD unless the requirement itself is technical. Technical choices belong in `ae-plan`.
+8. When creating or updating a PRD artifact, use `requirements-capture.md` as the output contract and write it under `docs/ae/prds/` with frontmatter:
+
+```yaml
+---
+type: prd
+status: drafted
+date: YYYY-MM-DD
+topic: kebab-case-topic
+format: human-readable-requirements
+sharded: false
+---
+```
+
+9. Use repository-relative paths in all file references. If the PRD comes from an upstream AE artifact, include `origin` and `originFingerprint` together; never write only one of them.
+10. Recommend `ae-review domain:document` for significant PRDs, then route to `ae-plan` when ready or state the remaining blocker.
+
+## Artifact Contract
+
+PRD artifacts are requirement data documents for humans and downstream AI workflow. They must be self-contained and machine-extractable:
+
+- Include an `AI Parse Contract` section with `canonicalKind: requirements`, `humanEquivalent: true`, `stableIdsRequired: true`, and `noImplicitScope: true`.
+- Use stable requirement IDs such as `R1`, non-functional IDs such as `NFR1`, and decision IDs such as `D1`.
+- Each requirement must include a concrete acceptance condition using a consistent `Acceptance:` phrase.
+- Separate confirmed facts, assumptions, open questions, and deferred planning questions.
+- Include a consistency check with requirement, non-functional requirement, decision, and open-question counts.
+- Use `sharded: true` only when multiple modules require separate shard files or the user explicitly asks for sharding.
+
+## Evidence Expectations
+
+When a PRD includes capability, benchmark, installation, or behavior claims, separate assumptions from evidence:
+
+- state the evidence path, command, observed external ref, or inspected file that supports the claim;
+- mark stale, second-hand, or user-supplied claims as assumptions until verified;
+- name the expected validation surface for each claim that could affect public docs, skill behavior, install behavior, or runtime support;
+- do not promote inferred implementation details into requirements unless the user explicitly chooses them.
+
+When behavior crosses a public API, persisted data, external service, deployment, or browser boundary, record the smallest applicable validation-evidence tiers, expected signal, preconditions, and any credible proof that remains `unverified`. A lower tier must not imply runtime, browser, or deployment acceptance. Tier definitions and status vocabulary live in `../../ae-plan/references/validation-evidence-profile.md`.
+
+## Readiness Gate
+
+Before routing to planning, confirm:
+
+- intended outcome is clear,
+- acceptance criteria are testable or explicitly deferred,
+- non-goals and boundaries are named,
+- assumptions are separated from confirmed requirements,
+- WHAT/WHY are clear before HOW,
+- unresolved questions are visible,
+- validation expectations are known,
+- applicable validation-evidence tiers and unverified proof are visible when a boundary requires them,
+- stable IDs and the consistency check are present when a durable artifact is created.

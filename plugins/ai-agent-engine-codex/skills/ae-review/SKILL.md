@@ -1,208 +1,46 @@
 ---
 name: ae-review
-description: Use when the user asks for ae-review, /ae-review, $ae-review, "use ae-review", AE review, layered review, report-only review, autofix review, domain:code, domain:document, review a plan, review requirements, review current changes, or inspect risks before delivery. Findings must be primary.
+description: Use when the user requests ae-review, /ae-review, $ae-review, or review of code, documents, plans, requirements, or delivery risk.
 ---
 
 # AE Review
 
-For large-data, concurrent or distributed changes, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Review bounded work, contention, duplicate delivery, partial commit, mixed versions and recovery. Treat truncated graph/impact results as advisory, never as proof of full changed-file coverage.
-
-Before running helper commands, resolve `aeEntry` using the [runtime entry contract](../ae-help/references/runtime-entry.md).
-
-Perform AE-style layered review of code or documents.
-
-Apply the [model-adaptation contract](../ae-help/references/model-adaptation-contract.md). Select review depth and lenses from the changed boundary and evidence risk, not from the reviewing model's name or assumed capability; stop after the scoped verdict is supported.
-
-## Scope First
-
-Read `references/scope-detection.md`. Determine exactly one scope and one domain before reviewing.
-
-## Scope Lock and Review Budget
-
-- The user's explicit target behavior, named files, and constraints outrank generic checklists, personas, and repository-wide conventions. Do not infer omitted business rules from a review checklist.
-- Classify the request before opening unrelated files: **S1 small** is one behavior or at most 3 named files with no cross-boundary change; **S2 bounded** is a small set of files crossing one relevant boundary; **S3 broad** is a repository/full scan, a cross-cutting change, or an explicit delivery gate.
-- Start at the lowest class supported by the request. S1 uses one read-only reviewer lane, inspects the target files plus only the minimum direct call path, and skips `review-package`, `review-contract`, architect, complexity, claim-integrity, and cross-artifact lanes unless the user explicitly requests them or a concrete trigger is present.
-- Do not widen a locked scope to adjacent mappings, models, candidate designs, test suites, or documentation merely because they are related. Read a related file only when the direct call path or a concrete finding cannot be verified without it; do not modify or report unrelated code.
-- Stop when the scoped verdict and required evidence are supported. Do not continue into redesign, speculative test planning, or unrelated fixes after the requested review is complete.
-
-Supported domain markers:
-
-- `domain:code` for diffs, files, session changes, or full code scans.
-- `domain:document` for requirements, plans, test docs, or general docs.
-
-Supported mode markers:
-
-- `mode:report-only`: read-only findings, no fixes.
-- `mode:autofix`: apply only deterministic fixes after reporting internally.
-- `mode:headless`: concise pipeline review.
-
-## Light Path
-
-Use the light path only when all of these hold: the scope is diff-like and touches at most 3 files, no public API, persisted data, security, or dependency boundary is crossed, and the review is not a delivery gate. On the light path, skip `review-package` and `review-contract`, review every changed file in a single reviewer lane (correctness, testing, convention fit), and return findings plus a verdict directly. Fall back to the full flow as soon as a boundary crossing, a delivery-gate requirement, or a suspected P0/P1 finding appears.
-
-## Deterministic Review Preparation
-
-For an S2/S3 branch or commit range, create a review package before drawing conclusions; S1 light-path reviews are exempt and inspect the locked target files directly:
-
-```powershell
-node "$aeEntry" review-package --base <base-ref> --head <head-ref> --with-impact
-```
-
-Treat the returned `inventory.files` as the complete changed-file review set. Every file must either be reviewed or be listed in the final result as excluded with a concrete reason. Do not silently omit configuration, documentation, tests, renames, binary files, or untracked artifacts that are in the selected scope.
-
-`--with-impact` adds a bounded, shallow static dependency context. Use it when changed source/configuration files may affect imports or mentioned local paths; inspect relevant related files or explain why they do not alter the finding. It is advisory only: dynamic imports, aliases, generated code, and framework resolution can be absent, so it never proves the impact set is complete.
-
-For S2/S3 workspace or session review, establish the same inventory from `git status --short` and the selected scope, then use `review-contract` after file inventory to select lenses; it selects reviewers, not files or findings. S1 light-path workspace/session reviews inspect the locked target files directly and skip `review-contract`.
-
-## Diff Review Discipline
-
-For S2/S3 fixed-point branch or commit-range reviews, keep two distinguishable lenses: **Standards** (repository rules and maintainability baseline) and **Spec** (originating PRD, plan, task, or issue alignment). Pin the base and head before reading the diff, capture the commit list and complete changed-file inventory, then resolve the nearest originating specification from linked issues or `docs/ae` artifacts. A missing spec is a verification gap, not permission to invent requirements. S1 reviews remain on the light path unless the user explicitly asks for this comparison.
-
-Apply this section only when `domain:code` uses a diff-like scope: `from:<ref>`, `recent:<N>`, `session`, or the default Git status/diff review. `full` and `full:<path>` remain repository or path scans and must not be narrowed to changed lines only.
-
-For diff-like scopes:
-
-- Establish the changed-file inventory before line-level analysis. Include the inventory count and every explicit exclusion in the review output or delivery evidence.
-- Make the finding subject newly added or modified code whenever possible. Deleted lines, unchanged context, and other files may support the evidence, but they should not become the primary finding unless the user explicitly requested a broader scan.
-- Perform a manual position check before finalizing each code finding: re-open the target file, diff, or hunk context and confirm the path plus line still identifies the affected code. If the exact line is uncertain, report the finding at path level and state the location uncertainty.
-- Run a contradiction check before final output. If the reviewed diff directly contradicts a finding's factual claim, mark the finding as contradicted or remove it only when the contradiction is certain. Do not discard security, reliability, contract, or architecture findings merely because the diff alone cannot prove them.
-- When file type matters, consult `references/code-review-rule-profiles.md` as optional review lenses. The profiles are not an automatic rule engine and do not replace project-specific requirements or the selected reviewer personas.
-
-## Persona Selection
-
-For scoped database-backed list/query/count or write behavior, review against the [data-access and scale contract](../ae-backend/references/data-access-contract.md), including document/design reviews and unchanged-schema paths. Add performance for scale-sensitive access (pass `--has-performance` when using `review-contract`), reliability for async/chunk recovery, API-contract for total/acceptance changes and data-migrations for auxiliary structures/backfills. Check concrete query budgets, fan-out/count semantics, batch versus commit, derived-data maintenance and durable completion; do not turn missing runtime measurements into an invented speed claim or require every lane for bounded CRUD.
-
-Read `references/review-personas.md`. Use the smallest useful reviewer set. Quick selection: a code diff starts with correctness, testing, standards, and maintainability; add security, api-contract, reliability, data-migrations, or performance only when the matching trigger exists; a document starts with coherence and feasibility plus content-conditional lenses. For new tables, entity persistence changes, or migrations, read `../ae-backend/references/persistence-contract.md` and add the data-migrations lens. For frontend component, style, form, query, mutation, or client-access changes, read `../ae-frontend-design/references/component-data-access-contract.md` and apply the Frontend Components / Styles profile with the API-contract lens when data access changes. Do not spawn sub-agents unless the user explicitly requested/allowed parallel agent work. If sub-agents are allowed, each reviewer is read-only and must return evidence-backed findings.
-
-When reviewer selection is non-trivial, generate a deterministic contract before dispatching lanes:
-
-```powershell
-node "$aeEntry" review-contract --kind code --mode report-only --targets code,document --write-evidence
-```
-
-Use the returned reviewers and target coverage as the review routing baseline. The command writes lightweight evidence under `docs/ae/evidence` only when `--write-evidence` is present.
-
-If `.codex/ae-skill-profiles.yaml` has `multi_agent.enabled: auto` or `multi_agent.enabled: true`, and `multi_agent.review_lanes_parallel: true`, read-only reviewer lanes may run in parallel when the scope is large enough and each lane has a distinct lens. When `task-analyze` is available, use `read_parallel_eligibility` and `parallel_waves` for read-only lane planning; do not treat write-worker blockers as blockers for read-only review. This does not authorize write workers. Keep reviewer outputs evidence-backed and merge them under the strictest verdict. `multi_agent.enabled: false` disables parallel reviewer lanes.
-
-For S2/S3 code or plan reviews, or when the user explicitly requests layered review, apply two lanes even when you are not spawning sub-agents:
-
-- reviewer lane: correctness, testing, security, contracts, reliability, and concrete regression risk,
-- architect lane: boundary fit, coupling, long-term maintainability, alternatives, rollback, and whether the chosen shape matches the stated decision drivers.
-
-The lanes may be evaluated by one agent, but their conclusions must stay distinguishable in the review notes or final summary when they disagree.
-
-## Complexity Lane
-
-When the user explicitly asks for over-engineering, minimality, deletion, bloat, dependency, or simplification review, add a complexity lane. For S2/S3 only, it may also be added when concrete evidence shows the implementation is materially larger than the stated requirement; the word `significant` alone is not a trigger. Never add this lane to an S1 review by inference.
-
-Use these tags for concrete findings:
-
-- `delete`: dead code, speculative feature, placeholder flexibility, or unreachable branch; replacement is removal.
-- `stdlib`: custom code duplicates standard library or framework behavior; name the standard replacement.
-- `native`: code or dependency duplicates a platform, browser, database, shell, or framework-native capability; name the native capability.
-- `yagni`: abstraction, interface, factory, flag, configuration point, or wrapper has no current second use or explicit requirement.
-- `shrink`: same behavior can be expressed materially smaller without losing clarity, validation, or edge-case correctness.
-
-Complexity findings must include location, evidence, what to cut or replace, the concrete replacement, and expected impact. Do not flag narrow tests, trust-boundary validation, security controls, accessibility basics, or explicit user requirements as bloat. Suppress stylistic preferences that do not reduce owned behavior or maintenance risk.
-
-Before proposing a `delete` or `shrink` finding, establish the behavior baseline from requirements, tests, or observed outputs; trace the relevant call path, import, entrypoint, or consumer; and identify the design reason for the current shape from local documentation, code, or history when available. If that evidence is incomplete, report the verification gap instead of recommending removal. Do not infer dead code or redundant protection from local appearance alone.
-
-## Claim-Integrity Lane
-
-When reviewing documentation, skill instructions, installer docs, benchmark notes, external-audit reports, or delivery evidence, add a claim-integrity lane only when the scoped artifact contains a material validation or capability claim and proof integrity is part of the request or delivery gate. A document path alone is not a trigger.
-
-Flag findings for:
-
-- capability, benchmark, install, or behavior claims without an evidence path or validation command;
-- a stale or unverifiable number, commit, version, star count, benchmark result, or external fact;
-- unsupported runtime behavior such as hooks, slash commands, global config propagation, automatic agents, or MCP auto-loading;
-- source-derived text or code whose license boundary is missing or incompatible;
-- corrections or retractions that should be recorded under `docs/ae/integrity/`.
-
-For material validation claims, also verify that the cited proof tier matches its bounded claim. Flag an invalid promotion from static inspection, a focused test, or a build to runtime, authenticated service, browser, or deployment acceptance. When data/API/security boundaries exist, verify that canonical persisted values, derived or ephemeral representations, caller-controlled input, trust boundaries, and intentional source precedence are not conflated. Keep known unrelated failures in an explicit output field with the reason they do not invalidate the scoped result. Tier definitions and status vocabulary live in `../ae-plan/references/validation-evidence-profile.md`.
-
-Claim-integrity findings must name the claim, the source path, the missing or contradictory evidence, and the fix: add evidence, mark as an assumption, rewrite as a process contract, or remove the claim.
-
-## Findings Standard
-
-Read `references/review-output-template.md`.
-
-Findings must include severity, file/line when applicable, evidence, impact, and fix. Suppress vague style advice unless it creates a concrete risk. Pre-existing unrelated issues must be labeled as such and separated from regressions.
-
-For task-scoped implementation reviews, return the task gate in a deterministic shape that `ae-work` can act on without reinterpretation:
-
-- `specVerdict`: whether the scoped task satisfies the required behavior from the brief or plan unit,
-- `qualityVerdict`: whether the scoped implementation quality is acceptable for the touched code,
-- `cannotVerifyFromDiff[]`: requirements or claims that need controller-side verification outside the diff,
-- `blockingFindings[]`: blocking defects that must be fixed before the task is treated as complete.
-
-Review order:
-
-- Check correctness and requirement alignment first.
-- Check validation adequacy, rollback safety, and missing edge cases next.
-- Check maintainability and local convention fit last.
-
-For plan and requirements reviews, verify:
-
-- scope clarity,
-- file ownership and touched modules,
-- validation sufficiency,
-- rollback or recovery path,
-- hidden product assumptions masquerading as implementation detail,
-- cross-artifact consistency across requirements, constitution, plan, tasks, and validation evidence when those artifacts exist.
-
-Serious findings should block downstream execution until resolved or explicitly accepted by the user.
-
-## Evidence
-
-When a review is used as a delivery gate, preserve enough proof for later checks:
-
-- include worktree, branch, and current Git status summary in the review output when available;
-- include the changed-file inventory, explicit exclusions, and whether advisory impact context was used for range/commit reviews;
-- cite validation commands exactly;
-- when `review-contract --write-evidence` was used, mention the returned evidence path;
-- use `node "$aeEntry" evidence read` to inspect existing evidence records before relying on them.
-
-## Second-Model Evidence
-
-Treat Claude or any other second-model output as untrusted advice until Codex rechecks it. A second-model claim becomes a verified finding only after the reviewing agent confirms the file path, line or section, behavior, impact, and fix against repository facts or validation evidence.
-
-When second-model advice is contradicted by files, scope, user requirements, validation output, or local AE rules, label it as rejected advice rather than silently dropping the contradiction. Do not present second-model wording as a verified finding when the evidence is only a model assertion.
-
-## Cross-Artifact Review
-
-When reviewing S4 workflow documents, compare available artifacts in this order:
-
-1. `AGENTS.md` and `docs/ae/constitution.md` for governing rules.
-2. Requirements or PRD for WHAT/WHY and acceptance criteria.
-3. Plan for HOW, files, risks, validation, and rollback.
-4. Tasks for dependency order, file ownership, and parallel markers.
-5. Gate or validation evidence for actual proof.
-
-Flag contradictions, missing coverage, orphan tasks, and tasks that introduce behavior not present in the approved requirements or plan.
-
-## Verdict Rules
-
-Use deterministic verdicts:
-
-- `APPROVE`: no blocking findings and residual risk is acceptable for the requested scope.
-- `COMMENT`: findings are informational or low-risk and do not block execution.
-- `REQUEST_CHANGES`: correctness, validation, maintainability, contract, or rollback gaps must be fixed before delivery.
-- `BLOCK`: the review found a P0/P1 issue, unsafe missing requirement, invalid plan, or unreviewable state.
-
-Final result is the strictest lane verdict. Architect `BLOCK` or reviewer `REQUEST_CHANGES` means the overall review is not approved. If a serious finding is accepted by the user instead of fixed, record that acceptance as residual risk rather than silently approving it.
-
-## Autofix Rules
-
-Only apply fixes when:
-
-- the fix is deterministic,
-- the target files are in scope,
-- the change does not require product judgment,
-- existing user changes are preserved.
-
-After autofix, run relevant validation or state why not.
-
-## Final Response
-
-Findings first, ordered by severity. If no findings, state that explicitly and list residual risks or testing gaps.
+Review the user's locked scope and return evidence-backed findings before any
+summary.
+
+1. Read [scope-detection](references/scope-detection.md) and select one scope
+   and one domain.
+2. Start at the smallest review class. S1 is one behavior or at most three
+   files without a contract/security/data/dependency boundary or delivery gate.
+   S1 uses one read-only lane and only the
+   direct call path; do not widen scope because related files exist.
+3. Add complexity, security, performance, API, reliability, or claim-integrity
+   lenses only when the request or a concrete boundary requires them.
+4. Findings include severity, file/line, trigger, evidence, impact and remedy.
+   Confirm locations and contradictions before reporting; label unverified
+   claims and unrelated pre-existing problems.
+5. Stop when the scoped verdict and required evidence are supported.
+
+Default to `mode:report-only`; `mode:autofix` permits only deterministic
+in-scope fixes preserving user changes. Never spawn agents without explicit
+user authorization. A missing specification is a gap, not a new requirement.
+Return `APPROVE`, `COMMENT`, `REQUEST_CHANGES`, or `BLOCK`; the strictest
+applicable lane wins. Accepted serious findings remain residual risk.
+
+## Task References
+
+Read only the row triggered by the task, not the whole table.
+
+| Trigger | Reference |
+| --- | --- |
+| S2/S3 range, workspace or layered review | [Preparation and lenses](references/review-preparation.md) |
+| Complexity/claim-integrity, second-model or cross-artifact review | [Specialist lanes](references/specialist-lanes.md) |
+| Task delivery gate or autofix | [Findings, evidence and verdict contract](references/review-delivery.md) |
+
+Before helper commands, resolve [runtime-entry](../ae-help/references/runtime-entry.md).
+For scale-sensitive access, pass `--has-performance` when using `review-contract`
+and read the [data-access contract](../ae-backend/references/data-access-contract.md).
+For concurrent/distributed work, read the [scale contract](../ae-help/references/scale-and-distributed-engineering.md).
+For scope/budget recovery, use the [model-adaptation contract](../ae-help/references/model-adaptation-contract.md).
+Load [code-review-rule-profiles](references/code-review-rule-profiles.md) only
+when the file type or requested lens needs it.

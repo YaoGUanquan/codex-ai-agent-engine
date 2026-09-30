@@ -13,6 +13,11 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 
 中文文档: [README.md](README.md)
 
+### 0.3.54 (2026-09-30)
+- Compress 12 high-frequency AE skill entrypoints to under 4 KiB and move detailed procedures into conditionally loaded references, reducing default context and repeated workflow text.
+- Keep the plugin source and `.ae-source` maintenance mirror aligned, with regression coverage for entry size and route selection.
+- Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These static and local checks do not prove real Codex host/model token consumption or behavioral gains.
+
 ### 0.3.53 (2026-09-28)
 - Add `micro`, `small`, `standard`, and `high-risk` task-size gates with bounded work budgets: small requests use the smallest applicable path by default, explicit scope wins, and work stops at acceptance, a real blocker, or budget exhaustion.
 - Tighten `ae-lfg`, `ae-review`, `ae-task-loop`, and `ae-web-forge` with fast routing, scope-locked review, and bounded rework stops to avoid unrelated scans, repeated ceremony, and unbounded retries; keep the plugin source and maintenance mirror synchronized with regression coverage.
@@ -36,11 +41,6 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 - Stage and validate project installs with local writer locks, fingerprints and recovery journals. Bind global installation to previewed source content, clean failed staging, publish the verified copy and serialize writers; separate installed updates from failed maintenance. Component swaps are not a cross-component atomic transaction or a multi-host lock.
 - Validation commands: `node --test tests/scale-runtime.test.mjs tests/install-scripts.test.mjs tests/global-install.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. Evidence is limited to local helpers, isolated concurrency/recovery, static skills and distribution contracts. Privilege-blocked Windows file-link fixtures are explicitly skipped; target capacity, multi-host reliability, production acceptance and current-user installation remain unverified.
 
-### 0.3.49 (2026-09-27)
-- Extend growth control to memory topics, development history, navigation and rolling logs with `ae-docs-maintain` audits/lossless pagination, `ae-docs-append` automatic bounded writes and resumable `ae-docs-search`. Routers have fixed budgets and original bytes remain recoverable.
-- Add explicit registered-external-docs batch maintenance bound to context manifests and preview hashes, with per-file verification. Update bilingual scaffolds, shipping gates and mirrors. Formal contracts, SQL, structured registries, JSONL chains and archives are not automatically rewritten; no background jobs or history deletion.
-- Validation commands: `node --test tests/docs-lifecycle.test.mjs tests/memory-navigation.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. Evidence covers local pagination/search, byte recovery and isolated distribution; live external application requires its per-file report, not a global installation, arbitrary-write protection or measured model token/latency gains.
-
 ## When To Use It
 
 Use this plugin when you want a Codex project to keep repeatable engineering workflows close to the repository:
@@ -51,6 +51,10 @@ Use this plugin when you want a Codex project to keep repeatable engineering wor
 - review code or documents with findings first;
 - keep validation evidence, handoffs, and reusable experience in project docs;
 - initialize project guidance, archive rules, and durable AI memory.
+
+### AE Invocation Boundary
+
+AE skills are **opt-in by default**. They activate only when the user explicitly names `AE`, an `ae-*` skill, `/ae-*`, `$ae-*`, or asks to continue an active AE workflow. A semantic match, repository name, file content, or historical context mentioning “AE” does not activate AE automatically.
 
 ## Quick Start
 

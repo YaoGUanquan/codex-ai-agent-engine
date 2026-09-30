@@ -1,104 +1,39 @@
 ---
 name: ae-design
-description: Use when the user asks for AE design, /ae-design, design contract creation, PRD-to-plan design decisions, architecture/API/data/UI/test/security design, old design revision, or a design artifact before implementation planning.
+description: Use when the user requests AE design, /ae-design, a design contract, PRD-to-plan decisions or revision of an existing design.
 ---
 
 # AE Design
 
-For scale-sensitive architecture, load the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Design ownership, partition and consistency boundaries, bounded resources, mixed-version rollout and recovery; map each invariant to a failure test.
+Create the contract between requirements and an implementation plan, not code.
+Read the supplied PRD or old design; preserve stable IDs unless explicitly
+superseded. With only a description, resolve PRD-first versus lightweight design.
 
-Create a design contract between PRD and implementation plan. This skill defines what must stay consistent across architecture, API, data, UI/UX, tests, security, observability, and non-functional constraints; it does not implement code.
+Inspect relevant repository instructions, dependencies, source, tests and
+reusable assets before choosing architecture. A user-requested greenfield or
+no-context design may bypass this pass with a recorded reason. Do not inspect
+secret-bearing files. Mark conclusions verified, inferred or assumed.
 
-## Input Routing
+1. Select dimensions from actual API/data/UI/operational risks; justify omitted
+   dimensions explicitly.
+2. Use [design-contract-template](references/design-contract-template.md):
+   stable ADR/EP/T/TC/ST IDs, cross-dimension mappings and implementation
+   constraints. Shards belong in the Split Manifest.
+3. Link observable tests to covered IDs; review the design before planning.
+4. Store artifacts under the resolved documentation space; repository layouts
+   use `docs/ae/designs/<topic>-YYYY-MM-DD/`.
 
-Identify the source in this order:
+## Task References
 
-1. PRD input: read the supplied PRD path under `docs/ae/prds` or another repository-relative requirements path and carry its goal, scope, acceptance criteria, decisions, assumptions, and open questions.
-2. Old design input: read the prior `docs/ae/designs/<topic>-YYYY-MM-DD/design.md` and preserve stable IDs unless a decision is explicitly superseded.
-3. Bare-description fallback: if the user only gives a description, ask whether to create a PRD first or proceed with a lightweight design contract based on the description.
+Read only the row triggered by the task, not the whole table.
 
-Write new design artifacts under `docs/ae/designs/<topic>-YYYY-MM-DD/`. Use repository-relative paths only.
-
-## Existing-Project Evidence
-
-When the design applies to an existing repository, perform a lightweight, read-only evidence pass before choosing architecture, paths, dependencies, or reusable components. Skip this pass only when the user explicitly requests a greenfield design or asks not to use repository context; record that bypass and its reason in the design contract.
-
-Inspect only the material needed for the design:
-
-- dependency manifests, build/test configuration, and repository instructions for the established stack and commands;
-- relevant source, tests, and public contracts for module boundaries, naming, error handling, and existing reusable assets;
-- only repository-relative paths and sanitized summaries in the resulting design artifact.
-
-Do not read or record likely secret-bearing paths such as `.env*`, credential stores, private keys, or local authentication files. This is not a repository-wide audit: mark a conclusion `verified`, `inferred`, or `assumed`, preserve unverified gaps, and record a reuse decision or reason not to reuse the inspected asset. When the evidence conflicts with a requested direction, surface it as an explicit design decision instead of silently replacing the local convention.
-
-## Dimension Selection
-
-Use risk-based dimension triggers before writing content:
-
-| Trigger | Required dimensions |
+| Trigger | Reference |
 | --- | --- |
-| API signature, auth model, schema, or public contract change | overview, architecture, api, database, security, test-cases |
-| New module, cross-module dependency, shared configuration, or runtime boundary | overview, architecture, test-cases |
-| Page, workflow, interaction, visual baseline, or component change | overview, ui-ux, test-cases |
-| Table, field, migration, persistence, or data retention change | overview, database, test-cases |
-| Production deployment, operations, reliability, or performance sensitivity | overview, observability, non-functional, test-cases |
+| Selecting dimensions or writing a design contract | [Dimensions and contract](references/design-dimensions.md) |
+| Test design and readiness closure | [Tests and review](references/design-testing.md) |
 
-For dimensions that are not triggered, record explicit omitted dimensions in the overview as `<dimension>: explicitly-omitted` with a short reason. Required dimensions cannot be omitted without returning to the user or PRD for scope clarification.
-
-When the database dimension is triggered, read `../ae-backend/references/persistence-contract.md`. Each affected `T-XXX` must record lifecycle, primary-key decision and external exposure, audit ownership, deletion/retention semantics, concurrency policy, enum representation, constraints/indexes, migration ordering, rollback, and the error outcome for version conflicts. A project-specific convention may answer a decision; otherwise leave it open and ask the user instead of selecting a default.
-
-For database-backed list/query/count or write paths, apply the [data-access and scale contract](../ae-backend/references/data-access-contract.md) even if the schema is unchanged. Record the applicable Data Access Budget in the design. Large/hot queries require comparison of direct/indexed access and auxiliary/read-model options; large or async writes require batch, transaction, durable completion and recovery decisions. Include architecture, database, non-functional, observability and test dimensions where these decisions cross their boundaries; do not require every dimension for bounded single-row CRUD.
-
-## Contract Requirements
-
-Use `references/design-contract-template.md` when writing `design.md`.
-
-Every design contract must include:
-
-- stable IDs: `ADR-XXX` for decisions, `EP-XXX` for API endpoints, `T-XXX` for tables or durable data structures, `TC-XXX` for test cases, and `ST-XXX` for UI states;
-- cross-dimension mapping covering API fields to data, API errors to UI states, test cases to contract coverage, and UI components to API endpoints;
-- implementation constraints such as repository paths, build/runtime assumptions, environment variables, dependency boundaries, and feature flags when relevant;
-- conditional existing-project evidence, reuse decisions, and bypass reason when repository context informs the design;
-- acceptance and test-case contracts that downstream `ae-plan`, `ae-work`, and `ae-review` can verify;
-- explicit deferred decisions and explicit omitted dimensions rather than silent defaults.
-
-When the UI/UX dimension is triggered, read `../ae-frontend-design/references/ui-direction-contract.md` and `../ae-frontend-design/references/component-data-access-contract.md`. Include the compact UI Direction Contract and selected component/data-access reuse boundary under UI/UX. Existing project tokens and supplied designs outrank contextual inference; mark material choices `verified`, `inferred`, or `assumed`. A runnable static interaction specification may be design evidence, but it cannot replace requirements, security, concurrency, non-functional, or source-code verification contracts.
-
-Keep the contract compact. Include only dimensions that affect implementation, review, or validation. If the artifact becomes too large to scan, keep `design.md` as the overview and split dimension details into sibling Markdown files listed in the Split Manifest.
-
-## Risk-Scaled Test Design
-
-When `test-cases` is required, select the smallest set of methods that exposes the design's actual risks and record that choice in the Test Coverage Matrix:
-
-- use equivalence classes and boundary values for constrained inputs, ranges, lengths, collections, or pagination;
-- use decision tables for multi-condition business rules;
-- use state transitions for declared UI or workflow states;
-- use error guessing for failure, timeout, concurrency, encoding, and hostile-input risks that the other methods do not cover.
-
-For each critical scenario, record the selected design method, covered stable IDs, and an automatable verification signal. Use each coverage category only when its triggering structure exists: API errors, database constraints, authorization decisions, and UI interactions. For an absent category, use `N/A` with the explicit-omission reason. Do not require fixed scenario counts or invent coverage metrics that the design artifact cannot measure.
-
-## Test-Case Quality Guards
-
-For every designed test case, retain a stable `TC-XXX` ID, link it to the requirement or contract IDs it proves, and state an observable expected result. Do not treat "succeeds", "works", or an implementation detail as a sufficient assertion.
-
-Merge or remove semantically duplicate cases: changed fixture values alone do not justify a separate case when the input condition, expected behavior, and covered IDs are materially the same. Keep separate cases only when they cover a distinct risk, boundary, failure behavior, or contract element. These guards improve test-case signal; they do not impose scenario counts, measured coverage claims, or categories whose trigger is absent.
-
-## Review Closure
-
-Before treating a design as ready, run or request `ae-review domain:document` for the design artifact.
-
-The design is ready for `ae-plan` only when:
-
-- required dimensions are present or explicitly justified as omitted;
-- stable IDs are unique and referenced by the mapping tables;
-- every stable ID used by a mapping table is declared by a canonical `### ADR|EP|T|TC|ST-XXX` heading in `design.md` or a listed sibling Markdown shard;
-- every Split Manifest file is an existing Markdown file inside the current design directory;
-- cross-dimension mapping does not contradict the dimension sections;
-- no P0/P1 document review finding remains unresolved.
-
-## Boundaries
-
-- Do not write implementation code, tests, migrations, CSS, or runtime configuration.
-- Do not decompose implementation steps beyond the design constraints needed by `ae-plan`.
-- Do not claim OpenCode slash command behavior, dynamic MCP registration, or automatic agent routing.
-- Do not use upstream `ae/designs`; this Codex port stores design artifacts in `docs/ae/designs`.
+For data-backed queries/writes, use the [data-access contract](../ae-backend/references/data-access-contract.md).
+For persistence changes, use [persistence-contract](../ae-backend/references/persistence-contract.md).
+For scale-sensitive architecture, use the [scale contract](../ae-help/references/scale-and-distributed-engineering.md).
+Do not write code, tests, migrations, CSS or runtime configuration, or invent
+missing persistence decisions.
