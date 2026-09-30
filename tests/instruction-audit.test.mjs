@@ -21,11 +21,28 @@ test('audit source roles exclude consumer layouts and generated skills', () => {
   }
 })
 
+test('AE invocation is explicit and opt-in at project instruction boundaries', () => {
+  const agents = read('AGENTS.md')
+  const readme = read('README.md')
+  const readmeEn = read('README.en.md')
+
+  for (const [name, text] of [
+    ['AGENTS.md', agents],
+    ['README.md', readme],
+    ['README.en.md', readmeEn],
+  ]) {
+    assert.match(text, /explicit|显式/i, `${name} should require explicit AE invocation`)
+    assert.match(text, /not.*automatic|不要自动|不会自动|does not activate.*automatically|opt-in/i, `${name} should forbid automatic AE activation`)
+  }
+  assert.match(agents, /默认不要加载、调用、委派或套用/i)
+  assert.match(agents, /普通语义匹配.*不构成 AE 显式调用/i)
+})
+
 test('frontend entry metadata has positive and negative ownership boundaries', () => {
   const expected = {
     'ae-frontend-design': [/focused visual-only/, /Not the owner for API/],
     'ae-web-app': [/API integration/, /Not the owner for visual-only/],
-    'ae-web-forge': [/need lane selection/, /Do not repeat intake/],
+    'ae-web-forge': [/broad or mixed frontend\/Web work/, /explicitly requested/],
   }
   for (const [name, patterns] of Object.entries(expected)) {
     const body = read(`${source}/${name}/SKILL.md`)
@@ -59,7 +76,7 @@ test('routing fixtures preserve positive and negative cases without claiming mod
   }
   assert.match(text, /do not execute a model router/)
   assert.equal(read('.ae-source/skills/ae-web-forge/references/routing-examples.md'), text)
-  assert.match(read(`${source}/ae-web-forge/SKILL.md`), /preserve and modify it by default/)
+  assert.match(read(`${source}/ae-web-forge/SKILL.md`), /preserve existing targets/)
   assert.match(read(`${source}/ae-web-app/SKILL.md`), /Reuse an existing routing decision/)
   assert.match(read(`${source}/ae-frontend-design/SKILL.md`), /Do not reload an unchanged contract/)
 })
