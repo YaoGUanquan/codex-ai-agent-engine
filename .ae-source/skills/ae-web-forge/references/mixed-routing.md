@@ -32,3 +32,27 @@ For visual audit, polish/refine, bolder/quieter/distill/clarify, adapt, or optim
 Include this summary when the skill drives work:
 
 ```markdown
+## Web Forge Routing
+
+- Q1 existing route:
+- Q2 design input:
+- Q3 backend/API:
+- Q4 visual baseline:
+- UI direction/refinement mode:
+- Motion decision:
+- Reduced-motion evidence:
+- Selected skills:
+- Browser acceptance:
+- Rework loops:
+- Modified files:
+- Residual risks:
+```
+
+For a fast route, report only the selected owner, target check, acceptance boundary, and any residual risk; omit empty intake fields.
+
+## Runtime Boundaries
+
+- Do not claim OpenCode sub-agent registry, `@ui-*` agents, dynamic Chrome MCP registration, or slash command behavior.
+- Do not require `ae:chrome-devtools`; route browser checks to `ae-test-browser`, Browser, Playwright, or available local tooling.
+- Do not bypass existing repository stack, component system, auth boundary, or validation commands.
+- Do not modify backend or database contracts without routing that portion through `ae-backend` or `ae-sql`.
