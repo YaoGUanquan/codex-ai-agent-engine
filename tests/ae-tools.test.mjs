@@ -113,7 +113,12 @@ test('claude-delegate prompt mode skips safely when Claude is unavailable', () =
   }
 })
 
-test('claude-delegate supports Windows cmd shims', () => {
+// .cmd shims only execute through cmd.exe, so these cases are meaningful on Windows only.
+const windowsCmdShimOnly = {
+  skip: process.platform !== 'win32' && 'requires Windows cmd.exe to execute .cmd shims',
+}
+
+test('claude-delegate supports Windows cmd shims', windowsCmdShimOnly, () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-claude-shim-'))
   try {
     const shimPath = join(tempRoot, 'claude.cmd')
@@ -137,7 +142,7 @@ test('claude-delegate supports Windows cmd shims', () => {
   }
 })
 
-test('claude-delegate discovers Windows cmd shims on PATH', { skip: process.platform !== 'win32' }, () => {
+test('claude-delegate discovers Windows cmd shims on PATH', windowsCmdShimOnly, () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-claude-path-shim-'))
   try {
     const shimPath = join(tempRoot, 'claude.cmd')
@@ -164,7 +169,7 @@ test('claude-delegate discovers Windows cmd shims on PATH', { skip: process.plat
   }
 })
 
-test('claude-delegate sends default prompts through stdin', () => {
+test('claude-delegate sends default prompts through stdin', windowsCmdShimOnly, () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-claude-prompt-'))
   try {
     const shimPath = join(tempRoot, 'claude.cmd')
@@ -197,7 +202,7 @@ test('claude-delegate sends default prompts through stdin', () => {
   }
 })
 
-test('claude-delegate reports no-output diagnostics', () => {
+test('claude-delegate reports no-output diagnostics', windowsCmdShimOnly, () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-claude-no-output-'))
   try {
     const shimPath = join(tempRoot, 'claude.cmd')
