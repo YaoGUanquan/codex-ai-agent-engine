@@ -142,8 +142,8 @@ test('authorized reverse engineering skill is discoverable and keeps defensive b
 })
 
 test('API bubble testing skill keeps contract, evidence, and live-call boundaries explicit', () => {
-  const source = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-test-api')
-  const mirror = readSkillBody('.ae-source/skills', 'ae-test-api')
+  const source = readRoutedSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-test-api')
+  const mirror = readRoutedSkillBody('.ae-source/skills', 'ae-test-api')
   const referenceSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-test-api/references/api-verification-record.md'), 'utf8')
   const referenceMirror = readFileSync(resolve(repoRoot, '.ae-source/skills/ae-test-api/references/api-verification-record.md'), 'utf8')
   const metadata = skillMetadata['ae-test-api']
@@ -426,24 +426,25 @@ test('ae-plan lightweight lane preserves the minimum consumable artifact contrac
 })
 
 test('ae-web-forge fast route and acceptance boundaries remain explicit', () => {
-  const source = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-web-forge')
-  const mirror = readSkillBody('.ae-source/skills', 'ae-web-forge')
+  const source = readRoutedSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-web-forge')
+  const mirror = readRoutedSkillBody('.ae-source/skills', 'ae-web-forge')
 
   assert.equal(mirror, source, 'ae-web-forge mirror should match plugin source')
   for (const expectation of [
-    /Run a target existence check before routing/i,
-    /preserve and modify it by default/i,
+    /establish whether it exists/i,
+    /preserve existing targets and visual\s+baselines unless replacement is requested/i,
     /### Fast Route/,
     /run only the target existence check and route directly/i,
     /Do not repeat Q1-Q4 intake, load every frontend skill, or produce a full routing summary/i,
-    /Stop immediately after the first passing acceptance check for a low-risk change/i,
-    /otherwise run at most 3 rework loops/i,
+    /stop at the first applicable\s+acceptance/i,
+    /after at most three loops/i,
     /For a fast route, report only the selected owner, target check, acceptance boundary, and any residual risk/i,
   ]) {
     assert.match(source, expectation, `ae-web-forge should include ${expectation}`)
   }
   assert.doesNotMatch(source, /^If the request names one existing target and one concrete change, run the full four-question intake\.$/m)
   assert.doesNotMatch(source, /Run max 3 rework loops\./)
+  assert.match(source, /Fix -> regression check counts as one loop/i)
 })
 
 test('task loop dual completion gate requires verification and non-blocking review', () => {
@@ -532,8 +533,8 @@ test('local runtime smoke gate is shared by execution skills without secret tran
   assert.doesNotMatch(sourceReference, /Read-Host|write_stdin/i)
 
   for (const skillName of ['ae-work', 'ae-tdd', 'ae-debug', 'ae-task-loop', 'ae-test-api']) {
-    const source = readSkillBody('plugins/ai-agent-engine-codex/skills', skillName)
-    const mirror = readSkillBody('.ae-source/skills', skillName)
+    const source = readRoutedSkillBody('plugins/ai-agent-engine-codex/skills', skillName)
+    const mirror = readRoutedSkillBody('.ae-source/skills', skillName)
     assert.equal(mirror, source, `${skillName} mirror should match plugin source`)
     assert.match(source, /local runtime smoke gate/i, `${skillName} should route explicit runtime smoke to the shared gate`)
   }
@@ -716,8 +717,8 @@ test('agent skill audit optimization guidance is present in references and mirro
   }
 
   for (const [skillName, expectations] of Object.entries(expectedBySkill)) {
-    const sourceBody = readSkillBody('plugins/ai-agent-engine-codex/skills', skillName)
-    const mirrorBody = readSkillBody('.ae-source/skills', skillName)
+    const sourceBody = readRoutedSkillBody('plugins/ai-agent-engine-codex/skills', skillName)
+    const mirrorBody = readRoutedSkillBody('.ae-source/skills', skillName)
     assert.equal(mirrorBody, sourceBody, `${skillName} mirror should match plugin source`)
     for (const expectation of expectations) {
       assert.match(sourceBody, expectation, `${skillName} should include ${expectation}`)
@@ -1097,8 +1098,8 @@ test('upstream brainstorm and web workflow modernization is reflected in source 
 })
 
 test('frontend motion governance is reflected in source and mirror skills', () => {
-  const frontendSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-frontend-design')
-  const frontendMirror = readSkillBody('.ae-source/skills', 'ae-frontend-design')
+  const frontendSource = readRoutedSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-frontend-design')
+  const frontendMirror = readRoutedSkillBody('.ae-source/skills', 'ae-frontend-design')
   assert.equal(frontendMirror, frontendSource, 'ae-frontend-design mirror should match plugin source')
   assert.match(frontendSource, /Motion Decision Gate/i)
   assert.match(frontendSource, /Default to static UI or minimal CSS state feedback/i)
@@ -1111,8 +1112,8 @@ test('frontend motion governance is reflected in source and mirror skills', () =
   assert.match(qualitySource, /usable completion state/i)
   assert.match(qualitySource, /decorative particle backgrounds/i)
 
-  const browserSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-test-browser')
-  const browserMirror = readSkillBody('.ae-source/skills', 'ae-test-browser')
+  const browserSource = readRoutedSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-test-browser')
+  const browserMirror = readRoutedSkillBody('.ae-source/skills', 'ae-test-browser')
   assert.equal(browserMirror, browserSource, 'ae-test-browser mirror should match plugin source')
   const acceptanceSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-test-browser/references/browser-acceptance.md'), 'utf8')
   const acceptanceMirror = readFileSync(resolve(repoRoot, '.ae-source/skills/ae-test-browser/references/browser-acceptance.md'), 'utf8')
@@ -1128,22 +1129,22 @@ test('frontend motion governance is reflected in source and mirror skills', () =
   assert.match(acceptanceSource, /`networkidle`/)
   assert.match(acceptanceSource, /black box/)
 
-  const forgeSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-web-forge')
-  const forgeMirror = readSkillBody('.ae-source/skills', 'ae-web-forge')
+  const forgeSource = readRoutedSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-web-forge')
+  const forgeMirror = readRoutedSkillBody('.ae-source/skills', 'ae-web-forge')
   assert.equal(forgeMirror, forgeSource, 'ae-web-forge mirror should match plugin source')
   assert.match(forgeSource, /Motion decision/)
   assert.match(forgeSource, /Reduced-motion evidence/)
 })
 
 test('design and web forge skill contracts are present in source, mirror, metadata, and docs', () => {
-  const designSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-design')
-  const designMirror = readSkillBody('.ae-source/skills', 'ae-design')
+  const designSource = readRoutedSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-design')
+  const designMirror = readRoutedSkillBody('.ae-source/skills', 'ae-design')
   assert.equal(designMirror, designSource, 'ae-design mirror should match plugin source')
   for (const expectation of [
     /docs\/ae\/designs/,
-    /PRD input/i,
-    /old design input/i,
-    /bare-description fallback/i,
+    /Read the supplied PRD or old design/i,
+    /preserve stable IDs unless explicitly\s+superseded/i,
+    /With only a description, resolve PRD-first versus lightweight design/i,
     /risk-based dimension triggers/i,
     /explicit omitted dimensions/i,
     /ADR-XXX/,
@@ -1153,7 +1154,7 @@ test('design and web forge skill contracts are present in source, mirror, metada
     /ST-XXX/,
     /cross-dimension mapping/i,
     /ae-review domain:document/i,
-    /does not implement code/i,
+    /Do not write code, tests, migrations/i,
   ]) {
     assert.match(designSource, expectation, `ae-design should include ${expectation}`)
   }
@@ -1171,8 +1172,8 @@ test('design and web forge skill contracts are present in source, mirror, metada
     assert.match(designTemplateSource, expectation, `ae-design template should include ${expectation}`)
   }
 
-  const forgeSource = readSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-web-forge')
-  const forgeMirror = readSkillBody('.ae-source/skills', 'ae-web-forge')
+  const forgeSource = readRoutedSkillBody('plugins/ai-agent-engine-codex/skills', 'ae-web-forge')
+  const forgeMirror = readRoutedSkillBody('.ae-source/skills', 'ae-web-forge')
   assert.equal(forgeMirror, forgeSource, 'ae-web-forge mirror should match plugin source')
   for (const expectation of [
     /target existence check/i,
@@ -1186,8 +1187,8 @@ test('design and web forge skill contracts are present in source, mirror, metada
     /### Fast Route/,
     /one existing target and one concrete change.*route directly/is,
     /Do not repeat Q1-Q4 intake.*produce a full routing summary/is,
-    /Stop immediately after the first passing acceptance check for a low-risk change/i,
-    /at most 3 rework loops/i,
+    /stop at the first applicable\s+acceptance/i,
+    /after at most three loops/i,
     /For a fast route, report only the selected owner, target check, acceptance boundary, and any residual risk/i,
     /Do not claim OpenCode sub-agent registry/i,
     /dynamic Chrome MCP/i,
@@ -1253,8 +1254,8 @@ test('core AE workflow metadata carries stable skill trigger signals', () => {
     const item = skillMetadata[skillName]
     const englishYaml = renderYaml(item, 'en')
     const bilingualYaml = renderYaml(item, 'bilingual')
-    const sourceSkill = readSkillBody('plugins/ai-agent-engine-codex/skills', skillName)
-    const mirrorSkill = readSkillBody('.ae-source/skills', skillName)
+    const sourceSkill = readRoutedSkillBody('plugins/ai-agent-engine-codex/skills', skillName)
+    const mirrorSkill = readRoutedSkillBody('.ae-source/skills', skillName)
 
     assert.match(englishYaml, new RegExp(`display_name: ".*${skillName}`))
     assert.match(englishYaml, new RegExp(`short_description: ".*${skillName}`))
@@ -1263,7 +1264,7 @@ test('core AE workflow metadata carries stable skill trigger signals', () => {
     assert.equal(mirrorSkill, sourceSkill, `${skillName} mirror should match plugin source`)
     assert.match(sourceSkill, new RegExp(`/${skillName}`))
     assert.match(sourceSkill, new RegExp(`\\$${skillName}`))
-    assert.match(sourceSkill, new RegExp(`use ${skillName}`, 'i'))
+    assert.match(sourceSkill, new RegExp(`^description: Use when the user (explicitly )?requests ${skillName}, /${skillName}, \\$${skillName}\\b`, 'm'))
   }
 })
 
