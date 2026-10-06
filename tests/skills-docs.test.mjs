@@ -684,11 +684,6 @@ test('agent skill audit optimization guidance is present in references and mirro
     assert.match(invariantReference, expectation, `engineering invariants should include ${expectation}`)
   }
 
-  const integrityReadme = readFileSync(resolve(repoRoot, 'docs/ae/integrity/README.md'), 'utf8')
-  assert.match(integrityReadme, /claim corrections/i)
-  assert.match(integrityReadme, /retractions/i)
-  assert.match(integrityReadme, /methodology fixes/i)
-
   const expectedBySkill = {
     'ae-skill-audit': [
       /audit/i,

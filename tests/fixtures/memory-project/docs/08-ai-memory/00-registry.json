@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "documents": [
+    {
+      "id": "graph-memory",
+      "path": "docs/08-ai-memory/01-memory.md",
+      "kind": "memory",
+      "role": "graph fixture",
+      "topics": [
+        "graph",
+        "fixture"
+      ],
+      "reviewStatus": "current"
+    },
+    {
+      "id": "release-memory",
+      "path": "docs/08-ai-memory/02-release.md",
+      "kind": "memory",
+      "role": "release fixture",
+      "topics": [
+        "release"
+      ],
+      "reviewStatus": "reviewed"
+    }
+  ],
+  "relations": [
+    {
+      "from": "graph-memory",
+      "to": "docs/ae/references/graph.md",
+      "type": "supports",
+      "evidence": {
+        "path": "docs/08-ai-memory/01-memory.md",
+        "note": "Fixture relation is declared in canonical memory."
+      }
+    },
+    {
+      "from": "release-memory",
+      "to": "docs/ae/references/release.md",
+      "type": "documents",
+      "evidence": {
+        "path": "docs/08-ai-memory/02-release.md",
+        "note": "Fixture relation documents the release artifact."
+      }
+    }
+  ]
+}
