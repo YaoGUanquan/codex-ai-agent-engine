@@ -1,16 +1,15 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import fs, { cpSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
+import fs, { cpSync, existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { syncBuiltinESMExports } from 'node:module'
 import { join, resolve } from 'node:path'
-import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 
 import { runGlobalInstall } from '../plugins/ai-agent-engine-codex/scripts/global-install.mjs'
 import { fingerprintPath, normalizeManifest, userPaths } from '../plugins/ai-agent-engine-codex/scripts/global-install-contract.mjs'
 import { resolveProjectRoot } from '../plugins/ai-agent-engine-codex/scripts/project-root.mjs'
-import { runNodeScript } from './helpers/skill-test-utils.mjs'
+import { makeTempDir, runNodeScript } from './helpers/skill-test-utils.mjs'
 
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
 const currentSkillNames = readdirSync(join(repoRoot, 'plugins', 'ai-agent-engine-codex', 'skills'), { withFileTypes: true })
@@ -28,7 +27,7 @@ function applyPreview(home, extraArgs = [], commandRunner = fakeCodexRunner) {
 }
 
 test('global dispatcher resolves the nearest project marker and requires an explicit root for unmarked init', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-project-root-'))
+  const tempRoot = makeTempDir('ae-project-root-')
   try {
     const project = join(tempRoot, 'project')
     const nested = join(project, 'packages', 'nested')
@@ -44,11 +43,23 @@ test('global dispatcher resolves the nearest project marker and requires an expl
 })
 
 test('global manifest rejects another Windows user home', { skip: process.platform !== 'win32' }, () => {
-  assert.throws(() => normalizeManifest({ projects: [{ root: 'C:\\Users\\another-user\\project', role: 'consumer' }] }, { repoRoot, home: 'C:\\Users\\<user>', allowCustomConsumers: true }), /another user home/)
+  const base = makeTempDir('ae-users-')
+  try {
+    const home = join(base, 'Users', 'alice')
+    const foreign = join(base, 'Users', 'bob', 'project')
+    mkdirSync(home, { recursive: true })
+    mkdirSync(foreign, { recursive: true })
+    assert.throws(
+      () => normalizeManifest({ projects: [{ root: foreign, role: 'consumer' }] }, { repoRoot, home, allowCustomConsumers: true }),
+      /another user home/,
+    )
+  } finally {
+    rmSync(base, { recursive: true, force: true })
+  }
 })
 
 test('global install apply preserves project docs and retains operation backup until explicit purge', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-global-install-'))
+  const tempRoot = makeTempDir('ae-global-install-')
   try {
     const home = join(tempRoot, 'home')
     const project = join(tempRoot, 'consumer')
@@ -132,7 +143,7 @@ test('global install apply preserves project docs and retains operation backup u
 })
 
 test('global install rolls back personal plugin publication when Codex registration fails', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-global-plugin-failure-'))
+  const tempRoot = makeTempDir('ae-global-plugin-failure-')
   try {
     const home = join(tempRoot, 'home')
     mkdirSync(home, { recursive: true })
@@ -165,7 +176,7 @@ test('global install rolls back personal plugin publication when Codex registrat
 })
 
 test('global install rolls back when marketplace registration fails before plugin add', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-global-marketplace-failure-'))
+  const tempRoot = makeTempDir('ae-global-marketplace-failure-')
   try {
     const home = join(tempRoot, 'home')
     mkdirSync(home, { recursive: true })
@@ -196,7 +207,7 @@ test('global install rolls back when marketplace registration fails before plugi
 })
 
 test('global install does not purge a recovery-failed operation', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-global-recovery-purge-'))
+  const tempRoot = makeTempDir('ae-global-recovery-purge-')
   try {
     const home = join(tempRoot, 'home')
     const operation = '11111111-1111-4111-8111-111111111111'
@@ -211,7 +222,7 @@ test('global install does not purge a recovery-failed operation', () => {
 })
 
 test('global installer never recovers another active writer and preserves an expired owner lock', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-global-writer-lock-'))
+  const tempRoot = makeTempDir('ae-global-writer-lock-')
   try {
     const home = join(tempRoot, 'home')
     const runtime = join(home, '.agents', 'ai-agent-engine-codex')
@@ -229,7 +240,7 @@ test('global installer never recovers another active writer and preserves an exp
 })
 
 test('global preview confirmation is bound to actual source bytes, not only its directory', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-global-source-lock-'))
+  const tempRoot = makeTempDir('ae-global-source-lock-')
   try {
     const home = join(tempRoot, 'home')
     const source = join(tempRoot, 'source')
@@ -246,7 +257,7 @@ test('global preview confirmation is bound to actual source bytes, not only its 
 
 for (const scenario of ['changed-source', 'failed-copy']) {
   test(`global staging rejects ${scenario} without leaving unpublished staging behind`, (t) => {
-    const tempRoot = mkdtempSync(join(tmpdir(), 'ae-global-stage-failure-'))
+    const tempRoot = makeTempDir('ae-global-stage-failure-')
     try {
       const home = join(tempRoot, 'home')
       const source = join(tempRoot, 'source')
@@ -286,7 +297,7 @@ for (const scenario of ['changed-source', 'failed-copy']) {
 }
 
 test('global publication uses the verified staged skill roster when source changes after staging', (t) => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-global-stage-roster-'))
+  const tempRoot = makeTempDir('ae-global-stage-roster-')
   try {
     const home = join(tempRoot, 'home')
     const source = join(tempRoot, 'source')
@@ -323,7 +334,7 @@ test('global publication uses the verified staged skill roster when source chang
 })
 
 test('global install publishes Cursor skill copies for slash discovery', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-cursor-skills-'))
+  const tempRoot = makeTempDir('ae-cursor-skills-')
   try {
     const home = join(tempRoot, 'home')
     mkdirSync(home, { recursive: true })
@@ -363,7 +374,7 @@ test('global install publishes Cursor skill copies for slash discovery', () => {
 })
 
 test('global install blocks a modified Cursor ae skill without retire-modified', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-cursor-modified-'))
+  const tempRoot = makeTempDir('ae-cursor-modified-')
   try {
     const home = join(tempRoot, 'home')
     mkdirSync(join(home, '.cursor', 'skills', 'ae-help'), { recursive: true })
@@ -380,7 +391,7 @@ test('global install blocks a modified Cursor ae skill without retire-modified',
 })
 
 test('global install replaces legacy Cursor skill links with copies without retire-modified', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-cursor-legacy-link-'))
+  const tempRoot = makeTempDir('ae-cursor-legacy-link-')
   try {
     const home = join(tempRoot, 'home')
     mkdirSync(home, { recursive: true })
@@ -411,7 +422,7 @@ test('global install replaces legacy Cursor skill links with copies without reti
 })
 
 test('global install rolls back Cursor skill copies with the installer-owned batch', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-cursor-rollback-'))
+  const tempRoot = makeTempDir('ae-cursor-rollback-')
   try {
     const home = join(tempRoot, 'home')
     mkdirSync(home, { recursive: true })

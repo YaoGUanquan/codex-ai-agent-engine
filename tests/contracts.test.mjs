@@ -1,12 +1,11 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 
-import { runNodeScript, runNodeScriptJson, runAeArtifactCheck, runDesignContractCheck, writeAeArtifact, validDesignContractLines } from './helpers/skill-test-utils.mjs'
+import { makeTempDir, runAeArtifactCheck, runDesignContractCheck, runNodeScript, runNodeScriptJson, validDesignContractLines, writeAeArtifact } from './helpers/skill-test-utils.mjs'
 
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
 
@@ -25,7 +24,7 @@ test('root package and plugin manifest keep synchronized distribution versions',
 })
 
 test('check-release-notes requires READMEs and changelogs to share the release-note contract', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-release-notes-'))
+  const tempRoot = makeTempDir('ae-release-notes-')
   const zhEntry = (version, date = '2026-08-03') => `### ${version}（${date}）\n\n- 中文变更摘要 ${version}。\n\n`
   const enEntry = (version, date = '2026-08-03') => `### ${version} (${date})\n\n- English change summary ${version}.\n\n`
   const writeDoc = (name, content) => writeFileSync(join(tempRoot, name), content, 'utf8')
@@ -102,7 +101,7 @@ test('check-skill-contract reports ok without external dependencies', () => {
 })
 
 test('check-skill-contract rejects broken relative Markdown references', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-skill-links-'))
+  const tempRoot = makeTempDir('ae-skill-links-')
   try {
     for (const root of ['plugins/ai-agent-engine-codex/skills', '.ae-source/skills']) {
       const skillDir = join(tempRoot, root, 'ae-fixture')
@@ -178,7 +177,7 @@ test('package check layers keep required check steps without OfficeCLI', () => {
 })
 
 test('check-ae-artifacts rejects invalid managed frontmatter', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-artifacts-'))
+  const tempRoot = makeTempDir('ae-artifacts-')
   try {
     mkdirSync(join(tempRoot, 'docs', 'ae', 'prds'), { recursive: true })
     writeFileSync(join(tempRoot, 'docs', 'ae', 'prds', 'bad.md'), [
@@ -206,7 +205,7 @@ test('check-ae-artifacts rejects invalid managed frontmatter', () => {
 })
 
 test('check-ae-artifacts compatibility mode allows legacy pre-contract prd and plan', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-artifacts-'))
+  const tempRoot = makeTempDir('ae-artifacts-')
   try {
     writeAeArtifact(tempRoot, 'docs/ae/prds/legacy-prd.md', [
       '---',
@@ -238,7 +237,7 @@ test('check-ae-artifacts compatibility mode allows legacy pre-contract prd and p
 })
 
 test('check-ae-artifacts compatibility mode allows historical target-project statuses', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-artifacts-'))
+  const tempRoot = makeTempDir('ae-artifacts-')
   try {
     writeAeArtifact(tempRoot, 'docs/ae/prds/implemented-prd.md', [
       '---',
@@ -284,7 +283,7 @@ test('check-ae-artifacts compatibility mode allows historical target-project sta
 })
 
 test('check-ae-artifacts compatibility mode rejects new contract artifact missing fields', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-artifacts-'))
+  const tempRoot = makeTempDir('ae-artifacts-')
   try {
     writeAeArtifact(tempRoot, 'docs/ae/plans/new-plan.md', [
       '---',
@@ -307,7 +306,7 @@ test('check-ae-artifacts compatibility mode rejects new contract artifact missin
 })
 
 test('check-ae-artifacts strict mode rejects legacy artifact missing contract fields', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-artifacts-'))
+  const tempRoot = makeTempDir('ae-artifacts-')
   try {
     writeAeArtifact(tempRoot, 'docs/ae/prds/legacy-prd.md', [
       '---',
@@ -331,7 +330,7 @@ test('check-ae-artifacts strict mode rejects legacy artifact missing contract fi
 })
 
 test('check-ae-artifacts compatibility mode allows legacy partial origin lineage', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-artifacts-'))
+  const tempRoot = makeTempDir('ae-artifacts-')
   try {
     writeAeArtifact(tempRoot, 'docs/ae/prds/partial-origin.md', [
       '---',
@@ -368,7 +367,7 @@ test('check-ae-artifacts compatibility mode allows legacy partial origin lineage
 })
 
 test('check-ae-artifacts rejects new partial origin lineage in compatibility and strict modes', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-artifacts-'))
+  const tempRoot = makeTempDir('ae-artifacts-')
   try {
     writeAeArtifact(tempRoot, 'docs/ae/prds/partial-origin.md', [
       '---',
@@ -397,7 +396,7 @@ test('check-ae-artifacts rejects new partial origin lineage in compatibility and
 })
 
 test('check-ae-artifacts accepts valid new contract prd and plan artifacts', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-artifacts-'))
+  const tempRoot = makeTempDir('ae-artifacts-')
   try {
     writeAeArtifact(tempRoot, 'docs/ae/prds/new-prd.md', [
       '---',
@@ -437,7 +436,7 @@ test('check-ae-artifacts accepts valid new contract prd and plan artifacts', () 
 })
 
 test('check-design-contract passes when no design artifacts exist', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-design-contract-'))
+  const tempRoot = makeTempDir('ae-design-contract-')
   try {
     mkdirSync(join(tempRoot, 'docs', 'ae'), { recursive: true })
     const result = runDesignContractCheck(tempRoot)
@@ -451,7 +450,7 @@ test('check-design-contract passes when no design artifacts exist', () => {
 })
 
 test('check-design-contract accepts a valid design contract', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-design-contract-'))
+  const tempRoot = makeTempDir('ae-design-contract-')
   try {
     writeAeArtifact(tempRoot, 'docs/ae/designs/sample-2026-07-07/design.md', validDesignContractLines())
     const result = runDesignContractCheck(tempRoot)
@@ -465,7 +464,7 @@ test('check-design-contract accepts a valid design contract', () => {
 })
 
 test('check-design-contract rejects malformed design contracts with structured errors', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-design-contract-'))
+  const tempRoot = makeTempDir('ae-design-contract-')
   try {
     writeAeArtifact(tempRoot, 'docs/ae/designs/bad-2026-07-07/design.md', [
       '---',
@@ -501,7 +500,7 @@ test('check-design-contract rejects malformed design contracts with structured e
 })
 
 test('check-design-contract compat mode reports warnings without weakening strict mode', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-design-compat-'))
+  const tempRoot = makeTempDir('ae-design-compat-')
   try {
     writeAeArtifact(tempRoot, 'docs/ae/designs/partial-2026-07-07/design.md', [
       '---',
@@ -538,10 +537,10 @@ test('check-design-contract compat mode reports warnings without weakening stric
 })
 
 test('design contract semantic validation resolves mapping IDs and split files', () => {
-  const danglingRoot = mkdtempSync(join(tmpdir(), 'ae-design-semantic-'))
-  const traversalRoot = mkdtempSync(join(tmpdir(), 'ae-design-semantic-'))
-  const missingRoot = mkdtempSync(join(tmpdir(), 'ae-design-semantic-'))
-  const validSplitRoot = mkdtempSync(join(tmpdir(), 'ae-design-semantic-'))
+  const danglingRoot = makeTempDir('ae-design-semantic-')
+  const traversalRoot = makeTempDir('ae-design-semantic-')
+  const missingRoot = makeTempDir('ae-design-semantic-')
+  const validSplitRoot = makeTempDir('ae-design-semantic-')
   try {
     const danglingLines = validDesignContractLines().map((line) => line.replace('| EP-001 | n/a | T-001 |', '| EP-999 | n/a | T-001 |'))
     writeAeArtifact(danglingRoot, 'docs/ae/designs/sample-2026-07-07/design.md', danglingLines)
@@ -578,8 +577,8 @@ test('design contract semantic validation resolves mapping IDs and split files',
 })
 
 test('design contract semantic validation requires root manifest and owning declarations', () => {
-  const missingRootEntry = mkdtempSync(join(tmpdir(), 'ae-design-semantic-'))
-  const fakeDeclaration = mkdtempSync(join(tmpdir(), 'ae-design-semantic-'))
+  const missingRootEntry = makeTempDir('ae-design-semantic-')
+  const fakeDeclaration = makeTempDir('ae-design-semantic-')
   try {
     const missingRootLines = validDesignContractLines().map((line) => line === '  - design.md' ? '  - api.md' : line)
     writeAeArtifact(missingRootEntry, 'docs/ae/designs/sample-2026-07-07/design.md', missingRootLines)
@@ -604,10 +603,10 @@ test('design contract semantic validation requires root manifest and owning decl
 })
 
 test('symbolic links are excluded from artifact discovery and design manifests', () => {
-  const artifactRoot = mkdtempSync(join(tmpdir(), 'ae-artifact-link-'))
-  const designRoot = mkdtempSync(join(tmpdir(), 'ae-design-link-'))
-  const artifactOutside = mkdtempSync(join(tmpdir(), 'ae-artifact-outside-'))
-  const designOutside = mkdtempSync(join(tmpdir(), 'ae-design-outside-'))
+  const artifactRoot = makeTempDir('ae-artifact-link-')
+  const designRoot = makeTempDir('ae-design-link-')
+  const artifactOutside = makeTempDir('ae-artifact-outside-')
+  const designOutside = makeTempDir('ae-design-outside-')
   const linkType = process.platform === 'win32' ? 'junction' : 'dir'
   try {
     writeAeArtifact(artifactOutside, 'escaped.md', [
