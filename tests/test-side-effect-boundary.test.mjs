@@ -6,9 +6,8 @@ import { fileURLToPath } from 'node:url'
 
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
 const sourceRoot = resolve(repoRoot, 'plugins', 'ai-agent-engine-codex', 'skills')
-const mirrorRoot = resolve(repoRoot, '.ae-source', 'skills')
 
-const mirroredPaths = [
+const pluginPaths = [
   'ae-help/references/test-side-effect-boundary.md',
   'ae-test-api/SKILL.md',
   'ae-tdd/SKILL.md',
@@ -23,11 +22,9 @@ const mirroredPaths = [
   'ae-work/references/local-runtime-smoke-gate.md',
 ]
 
-test('test validation has a mirrored no-live-datasource boundary', () => {
-  for (const relativePath of mirroredPaths) {
-    const source = readFileSync(resolve(sourceRoot, relativePath), 'utf8')
-    const mirror = readFileSync(resolve(mirrorRoot, relativePath), 'utf8')
-    assert.equal(mirror, source, `${relativePath} mirror should match plugin source`)
+test('test validation has a plugin no-live-datasource boundary', () => {
+  for (const relativePath of pluginPaths) {
+    assert.ok(readFileSync(resolve(sourceRoot, relativePath), 'utf8').length > 0, `${relativePath} should exist in plugin skills`)
   }
 
   const boundary = readFileSync(resolve(sourceRoot, 'ae-help/references/test-side-effect-boundary.md'), 'utf8')

@@ -13,6 +13,11 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 
 中文文档: [README.md](README.md)
 
+### 0.3.55 (2026-10-13)
+- Remove the `.ae-source` maintenance mirror: plugin `plugins/ai-agent-engine-codex/skills` is the only skill source; delete `check-skill-mirror` and drop mirror roots from contract/language/audit scripts.
+- Rewrite regression tests to assert only the plugin `SKILL_ROOT`; scrub ae-source guidance from docs and the release checklist; bump to 0.3.55.
+- Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These static and local checks do not prove live Codex host/model behavior.
+
 ### 0.3.54 (2026-09-30)
 - Compress 12 high-frequency AE skill entrypoints to under 4 KiB and move detailed procedures into conditionally loaded references, reducing default context and repeated workflow text.
 - Keep the plugin source and `.ae-source` maintenance mirror aligned, with regression coverage for entry size and route selection.
@@ -34,12 +39,6 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 - Recovery accepts one absolute external docs root and artifact-type filtering with explicit path bases, scope and completeness. Invalid roots/options never fall back to repository docs, and location selection does not verify registered project/branch identity. Update LFG, worker guidance, the shared contract and help.
 - Coordinate with memory maintenance to unify Windows document case-alias identity and local locks while preserving legacy routers/pages; POSIX identities are not merged through blanket lowercasing.
 - Validation commands: `node --test tests/scale-memory-integration.test.mjs tests/docs-lifecycle.test.mjs tests/memory-navigation.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. Evidence covers isolated local integration, two-process exclusion, byte recovery and installation distribution, not live external migration, current-user installation, multi-host consistency or production throughput. See validation records for environment-specific skips.
-
-### 0.3.50 (2026-09-27)
-- Route all 40 skills through a role-specific shared scale/distributed contract for capacity, backpressure, idempotency, partitioning, recovery, mixed versions and evidence tiers; preserve specialized data-access and document-pagination ownership.
-- Bound graph/task/recovery/issue traversal, bytes and time with explicit incompleteness; avoid repeated backtracking on malformed import/export text. Add content-aware task candidates, fail-closed profile/YAML handling and visible conversion/OpenAPI truncation. Gate declarations are not execution evidence; blocked gates exit 1.
-- Stage and validate project installs with local writer locks, fingerprints and recovery journals. Bind global installation to previewed source content, clean failed staging, publish the verified copy and serialize writers; separate installed updates from failed maintenance. Component swaps are not a cross-component atomic transaction or a multi-host lock.
-- Validation commands: `node --test tests/scale-runtime.test.mjs tests/install-scripts.test.mjs tests/global-install.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. Evidence is limited to local helpers, isolated concurrency/recovery, static skills and distribution contracts. Privilege-blocked Windows file-link fixtures are explicitly skipped; target capacity, multi-host reliability, production acceptance and current-user installation remain unverified.
 
 ## When To Use It
 
@@ -220,7 +219,7 @@ The installer writes these paths inside the target project:
 - `scripts/update-ae-codex.mjs`
 - `scripts/set-ae-language.mjs`
 
-The distribution source itself is not an installation target. It uses the user-level personal plugin and keeps its maintenance mirror in `.ae-source/skills` to avoid duplicate discovery.
+The distribution source itself is not an installation target. It uses the user-level personal plugin, with `plugins/ai-agent-engine-codex/skills` as the only skill source.
 
 ## Migrate From Project-Level To Per-User Global Installation
 
@@ -265,7 +264,7 @@ node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" init --project-root (Get-L
 codex plugin list
 ```
 
-Each operating-system user has an independent `$HOME`, dispatcher, backup area, and personal marketplace. Codex discovers AE skills through the personal plugin; Cursor discovers the same skills through real `~/.cursor/skills/ae-*` copies (Cursor does not track skill-directory symlinks). The distribution source keeps its maintenance mirror in `.ae-source/skills` so Codex does not discover a duplicate beside the personal plugin; migrated consumer projects should use only the user-level distribution. The installer never edits `.codex/plugins/cache`. Already-open chats keep their startup skill catalog.
+Each operating-system user has an independent `$HOME`, dispatcher, backup area, and personal marketplace. Codex discovers AE skills through the personal plugin; Cursor discovers the same skills through real `~/.cursor/skills/ae-*` copies (Cursor does not track skill-directory symlinks). The distribution source keeps skills only under `plugins/ai-agent-engine-codex/skills`; migrated consumer projects should use only the user-level distribution. The installer never edits `.codex/plugins/cache`. Already-open chats keep their startup skill catalog.
 
 ## Initialize Project Docs And Memory
 
@@ -483,7 +482,6 @@ Copy-Item scripts\ae-tools.mjs <your-project-root>\scripts\ae-tools.mjs
 ## Repository Layout
 
 ```text
-.ae-source/skills/               # Maintenance mirror, not an independent discovery root
 .agents/                         # Consumer installation layout, not this repository's skill source
 plugins/ai-agent-engine-codex/   # Codex plugin package
 scripts/ae-tools.mjs             # Root helper wrapper

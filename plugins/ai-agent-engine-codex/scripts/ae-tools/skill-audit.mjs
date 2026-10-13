@@ -7,17 +7,15 @@ export function skillAuditCommand(worktree, args) {
   const opts = parseOptions(args)
   if (truthy(opts.watch)) return watchExternalSkills(worktree, opts)
   const sourceRoot = safeResolve(worktree, 'plugins/ai-agent-engine-codex/skills')
-  const mirrorRoot = safeResolve(worktree, '.ae-source/skills')
   const names = readdirSync(sourceRoot, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort()
-  const records = names.map((name) => auditSkill(worktree, sourceRoot, mirrorRoot, name))
+  const records = names.map((name) => auditSkill(worktree, sourceRoot, name))
   const result = {
     status: 'ok',
     tool: 'skill-audit',
     generatedAt: new Date().toISOString(),
     sourceCount: names.length,
-    mirrorCount: records.filter((record) => record.mirrorEqual).length,
     findingCount: records.reduce((count, record) => count + record.findings.length, 0),
-    auditedDimensions: ['trigger', 'scope', 'routing', 'runtimeBoundary', 'artifactContract', 'validation', 'metadataMirror', 'licenseProvenance'],
+    auditedDimensions: ['trigger', 'scope', 'routing', 'runtimeBoundary', 'artifactContract', 'validation', 'metadata', 'licenseProvenance'],
     records,
     limitations: [
       'static document inspection only; dimension signals indicate inspectable guidance, not semantic correctness',
@@ -36,13 +34,10 @@ export function skillAuditCommand(worktree, args) {
   return result
 }
 
-function auditSkill(worktree, sourceRoot, mirrorRoot, name) {
+function auditSkill(worktree, sourceRoot, name) {
   const sourcePath = join(sourceRoot, name, 'SKILL.md')
-  const mirrorPath = join(mirrorRoot, name, 'SKILL.md')
   const sourceExists = existsSync(sourcePath) && statSync(sourcePath).isFile()
-  const mirrorExists = existsSync(mirrorPath) && statSync(mirrorPath).isFile()
   const source = sourceExists ? readFileSync(sourcePath, 'utf8') : ''
-  const mirror = mirrorExists ? readFileSync(mirrorPath, 'utf8') : ''
   const frontmatter = source.match(/^---\n([\s\S]*?)\n---/)
   const hasName = Boolean(frontmatter && /^name:\s*\S+/m.test(frontmatter[1]))
   const hasDescription = Boolean(frontmatter && /^description:\s*.+/m.test(frontmatter[1]))
@@ -54,16 +49,15 @@ function auditSkill(worktree, sourceRoot, mirrorRoot, name) {
     runtimeBoundary: dimension(/\b(runtime|boundary|approval|permission|do not|must not|never)\b/i.test(source), 'runtime, authorization, or negative boundary guidance'),
     artifactContract: dimension(/docs\/|artifact|output|record|template/i.test(source), 'artifact, output, record, template, or docs path guidance'),
     validation: dimension(hasVerification, 'validation, verification, evidence, or test guidance'),
-    metadataMirror: dimension(hasName && hasDescription && sourceExists && mirrorExists && source === mirror, 'frontmatter and source/mirror equality'),
+    metadata: dimension(hasName && hasDescription && sourceExists, 'frontmatter name and description present on plugin source'),
     licenseProvenance: dimension(true, 'repository GPL-2.0-only distribution boundary; external adaptations require per-source audit evidence'),
   }
   const findings = []
   if (!sourceExists) findings.push({ severity: 'P1', code: 'missing-source', evidence: `plugins/ai-agent-engine-codex/skills/${name}/SKILL.md`, impact: 'Skill cannot be distributed.' })
-  if (!mirrorExists || source !== mirror) findings.push({ severity: 'P1', code: 'mirror-mismatch', evidence: `.ae-source/skills/${name}/SKILL.md`, impact: 'Maintenance mirror can drift from plugin source.' })
   if (!hasName || !hasDescription) findings.push({ severity: 'P1', code: 'frontmatter-contract', evidence: sourcePath, impact: 'Skill trigger metadata is incomplete.' })
   if (!hasVerification) findings.push({ severity: 'P2', code: 'verification-guidance-gap', evidence: sourcePath, impact: 'Static guidance does not state an observable verification signal.', disposition: 'defer until a real usage gap or targeted requirement exists.' })
   const hasDeferredDimension = Object.values(dimensions).some((item) => item.status === 'defer')
-  return { name, status: findings.some((finding) => finding.severity === 'P1') ? 'finding' : findings.length || hasDeferredDimension ? 'defer' : 'pass', sourcePath: `plugins/ai-agent-engine-codex/skills/${name}/SKILL.md`, mirrorPath: `.ae-source/skills/${name}/SKILL.md`, sourceExists, mirrorExists, mirrorEqual: sourceExists && mirrorExists && source === mirror, hasName, hasDescription, hasVerification, dimensions, findings }
+  return { name, status: findings.some((finding) => finding.severity === 'P1') ? 'finding' : findings.length || hasDeferredDimension ? 'defer' : 'pass', sourcePath: `plugins/ai-agent-engine-codex/skills/${name}/SKILL.md`, sourceExists, hasName, hasDescription, hasVerification, dimensions, findings }
 }
 
 function dimension(present, evidence) {

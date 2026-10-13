@@ -9,12 +9,6 @@ import { makeTempDir, runAeArtifactCheck, runDesignContractCheck, runNodeScript,
 
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
 
-test('check-skill-mirror reports ok', () => {
-  const result = runNodeScript('scripts/check-skill-mirror.mjs')
-  assert.equal(result.status, 'ok')
-  assert.ok(result.fileCount > 0)
-})
-
 test('root package and plugin manifest keep synchronized distribution versions', () => {
   const packageJson = JSON.parse(readFileSync(resolve(repoRoot, 'package.json'), 'utf8'))
   const pluginManifest = JSON.parse(readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/.codex-plugin/plugin.json'), 'utf8'))
@@ -103,7 +97,7 @@ test('check-skill-contract reports ok without external dependencies', () => {
 test('check-skill-contract rejects broken relative Markdown references', () => {
   const tempRoot = makeTempDir('ae-skill-links-')
   try {
-    for (const root of ['plugins/ai-agent-engine-codex/skills', '.ae-source/skills']) {
+    for (const root of ['plugins/ai-agent-engine-codex/skills']) {
       const skillDir = join(tempRoot, root, 'ae-fixture')
       mkdirSync(join(skillDir, 'agents'), { recursive: true })
       writeFileSync(join(skillDir, 'SKILL.md'), [
@@ -134,7 +128,7 @@ test('check-skill-contract rejects broken relative Markdown references', () => {
 })
 
 test('distribution skill roots contain only ae-* skill directories', () => {
-  for (const root of ['plugins/ai-agent-engine-codex/skills', '.ae-source/skills']) {
+  for (const root of ['plugins/ai-agent-engine-codex/skills']) {
     const invalidEntries = readdirSync(resolve(repoRoot, root), { withFileTypes: true })
       .filter((entry) => !entry.isDirectory() || !entry.name.startsWith('ae-'))
       .map((entry) => entry.name)
@@ -154,7 +148,6 @@ test('package check layers keep required check steps without OfficeCLI', () => {
   const hasStep = (pattern) => new RegExp(pattern).test(allLayers)
   const requiredSteps = [
     'scripts\\/check-syntax\\.mjs',
-    'scripts\\/check-skill-mirror\\.mjs',
     'scripts\\/check-skill-language-metadata\\.mjs',
     'scripts\\/check-skill-contract\\.mjs',
     'scripts\\/check-ae-artifacts\\.mjs',

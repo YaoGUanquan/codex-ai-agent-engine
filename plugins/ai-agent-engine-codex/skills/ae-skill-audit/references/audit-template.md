@@ -90,7 +90,7 @@ Include the target AE skill or proposed skill name.
 ## Implementation Impact
 
 - Plugin source files:
-- `.agents/skills` mirror files:
+- Consumer install copies (if present):
 - Help catalog:
 - Language metadata:
 - README or docs:

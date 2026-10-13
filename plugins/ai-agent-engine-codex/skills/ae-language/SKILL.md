@@ -14,7 +14,7 @@ Switch local AE skill display language.
 1. Choose `zh-CN`, `en`, or `bilingual`; default to the user's requested language.
 2. Run `node scripts/set-ae-language.mjs --lang <lang>` from the project root.
 3. Verify representative `agents/openai.yaml` files changed as expected.
-4. If a plugin source and installed `.agents/skills` copy both exist, keep both synchronized.
+4. Update the plugin skill source under `plugins/ai-agent-engine-codex/skills`; consumer installs refresh from that source via the installer.
 
 ## Rules
 

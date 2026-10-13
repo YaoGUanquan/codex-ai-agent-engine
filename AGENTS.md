@@ -18,7 +18,6 @@
 - README.md
 - README.en.md
 - plugins/ai-agent-engine-codex（可分发插件唯一源）
-- .ae-source/skills（维护镜像，不是独立技能入口）
 - plugins
 - scripts
 - docs
@@ -28,14 +27,14 @@
 - `npm run test` - node --test tests/*.test.mjs
 - `npm run check` - npm run check:syntax && npm run check:contracts
 - `npm run check:syntax` - node scripts/check-syntax.mjs
-- `npm run check:contracts` - node scripts/check-skill-mirror.mjs && node scripts/check-skill-language-metadata.mjs && node scripts/check-skill-contract.mjs && node scripts/check-ae-artifacts.mjs && node scripts/check-design-contract.mjs && node scripts/check-memory-knowledge-contract.mjs --root tests/fixtures/memory-project && node scripts/check-release-notes.mjs && node scripts/check-claims.mjs --dry-run && node scripts/ae-tools.mjs ae-memory-query --root tests/fixtures/memory-project --topic graph && node scripts/ae-tools.mjs ae-knowledge-map --root tests/fixtures/memory-project --limit 20 && node scripts/ae-tools.mjs ae-graph-build --root scripts --no-write && node scripts/ae-tools.mjs ae-graph-query --root scripts --path ae-tools.mjs --no-write
+- `npm run check:contracts` - node scripts/check-skill-language-metadata.mjs && node scripts/check-skill-contract.mjs && node scripts/check-ae-artifacts.mjs && node scripts/check-design-contract.mjs && node scripts/check-memory-knowledge-contract.mjs --root tests/fixtures/memory-project && node scripts/check-release-notes.mjs && node scripts/check-claims.mjs --dry-run && node scripts/ae-tools.mjs ae-memory-query --root tests/fixtures/memory-project --topic graph && node scripts/ae-tools.mjs ae-knowledge-map --root tests/fixtures/memory-project --limit 20 && node scripts/ae-tools.mjs ae-graph-build --root scripts --no-write && node scripts/ae-tools.mjs ae-graph-query --root scripts --path ae-tools.mjs --no-write
 - `npm run check:smoke` - node scripts/check-install-smoke.mjs && node scripts/check-global-install-smoke.mjs
 - `npm run check:all` - npm run check && npm run check:smoke
 - `npm run help` - node scripts/ae-tools.mjs help
 
 ## 项目规则
 
-- 本仓库的技能修改以 `plugins/ai-agent-engine-codex/skills` 为唯一源，随后同步 `.ae-source/skills`；不得分别维护两份行为。
+- 本仓库的技能修改以 `plugins/ai-agent-engine-codex/skills` 为唯一源；不要再维护第二份技能树。
 - `.agents/skills` 是 consumer 项目安装布局，不是本分发源仓库的技能源；不要把空的 `.agents` 骨架当成安装失败。
 - 当前能力盘点只扫描插件源；默认排除 `dist/`、`build/`、`coverage/`、`node_modules/` 和临时安装目录。生成物不得用于推断当前技能，不在审计任务中自动删除。
 

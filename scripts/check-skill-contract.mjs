@@ -7,7 +7,6 @@ const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
 const targetRoot = resolve(readArg('--target') || repoRoot)
 const skillRoots = [
   resolve(targetRoot, 'plugins', 'ai-agent-engine-codex', 'skills'),
-  resolve(targetRoot, '.ae-source', 'skills'),
 ]
 const maxDescriptionLength = 1024
 const errors = []

@@ -21,7 +21,7 @@ Before helper commands, resolve `aeEntry` using the [runtime entry contract](../
    - create a new narrowly scoped AE skill,
    - add a reference/template only,
    - reject or defer because the pattern does not fit Codex or AE.
-7. If the user asks to implement a recommendation, route to `ae-skill-creator` or `ae-work` and preserve the plugin source plus `.agents/skills` mirror.
+7. If the user asks to implement a recommendation, route to `ae-skill-creator` or `ae-work` and preserve the plugin skill source under `plugins/ai-agent-engine-codex/skills`.
 
 ## Runtime Boundary Filter
 

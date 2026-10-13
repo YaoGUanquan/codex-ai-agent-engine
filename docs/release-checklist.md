@@ -16,7 +16,7 @@ node scripts/ae-tools.mjs ae-graph-query --root scripts --path ae-tools.mjs
 2. Validate skills if your local Codex skill validator is available:
 
 ```powershell
-Get-ChildItem -Directory plugins\ai-agent-engine-codex\skills,.ae-source\skills | ForEach-Object { python "C:\Users\<user>\.codex\skills\.system\skill-creator\scripts\quick_validate.py" $_.FullName }
+Get-ChildItem -Directory plugins\ai-agent-engine-codex\skills | ForEach-Object { python "C:\Users\<user>\.codex\skills\.system\skill-creator\scripts\quick_validate.py" $_.FullName }
 ```
 
 3. Run install smoke test in a temporary project:
@@ -50,7 +50,6 @@ The installed template should include `multi_agent.enabled: auto`, `mode: sugges
 5. Verify skill governance and Spec Kit-inspired workflow entries:
 
 ```bash
-node scripts/check-skill-mirror.mjs
 node scripts/check-skill-language-metadata.mjs
 node scripts/check-design-contract.mjs
 node scripts/ae-tools.mjs help constitution

@@ -87,9 +87,9 @@ test('set-repository rejects non-GitHub repository URLs', () => {
   }
 })
 
-test('distribution source keeps its mirror outside Codex project discovery paths', () => {
-  assert.ok(existsSync(join(repoRoot, '.ae-source', 'skills', 'ae-help', 'SKILL.md')))
-  assert.ok(existsSync(join(repoRoot, '.ae-source', 'marketplace.json')))
+test('distribution source keeps plugin skills as the only skill root', () => {
+  assert.ok(existsSync(join(repoRoot, 'plugins', 'ai-agent-engine-codex', 'skills', 'ae-help', 'SKILL.md')))
+  assert.equal(existsSync(join(repoRoot, '.ae-source')), false)
   assert.equal(existsSync(join(repoRoot, '.agents', 'skills')), false)
   assert.equal(existsSync(join(repoRoot, '.agents', 'plugins', 'marketplace.json')), false)
 })

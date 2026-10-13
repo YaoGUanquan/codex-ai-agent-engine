@@ -7,7 +7,6 @@ import { reviewContract } from '../plugins/ai-agent-engine-codex/scripts/ae-tool
 
 const root = fileURLToPath(new URL('..', import.meta.url))
 const sourceRoot = resolve(root, 'plugins/ai-agent-engine-codex/skills')
-const mirrorRoot = resolve(root, '.ae-source/skills')
 const contractPath = 'ae-backend/references/data-access-contract.md'
 const read = (path) => readFileSync(resolve(sourceRoot, path), 'utf8')
 
@@ -24,7 +23,6 @@ test('data access contract is reachable from each backend workflow entrypoint', 
     const targets = [...body.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)]
       .map((match) => resolve(sourceRoot, dirname(path), match[1]))
     assert.ok(targets.includes(resolve(sourceRoot, contractPath)), `${skill} must link to the canonical contract`)
-    assert.equal(readFileSync(resolve(mirrorRoot, path), 'utf8'), body, `${skill} mirror`)
   }
 })
 
@@ -32,7 +30,6 @@ test('data access references are distributed together without a second source', 
   for (const name of ['data-access-contract', 'mybatis-plus-data-access', 'read-model-design', 'async-bulk-write']) {
     const path = `ae-backend/references/${name}.md`
     const body = read(path)
-    assert.equal(readFileSync(resolve(mirrorRoot, path), 'utf8'), body, `${name} mirror`)
     if (name !== 'data-access-contract') {
       assert.ok(read(contractPath).includes(`](${name}.md)`), `${name} conditional route`)
     }
@@ -98,14 +95,12 @@ test('data access decisions survive design and plan artifact creation', () => {
       'Data Access Budget', 'Cardinality', 'Query and count', 'Read model',
       'Batch and transaction', 'Async acceptance', 'Recovery', 'Evidence',
     ]) assert.ok(body.includes(field), `${path}: ${field}`)
-    assert.equal(readFileSync(resolve(mirrorRoot, path), 'utf8'), body)
   }
 })
 
 test('scale contract makes token budgets and progressive disclosure executable', () => {
   const path = 'ae-help/references/scale-and-distributed-engineering.md'
   const body = read(path)
-  assert.equal(readFileSync(resolve(mirrorRoot, path), 'utf8'), body)
   for (const invariant of [
     /inputTokens/, /outputTokens/, /contextWindow/, /inputBudget/, /outputBudget/, /remainingBudget/,
     /context and output caps/i, /progressive disclosure/i, /complete=false/, /stopReason/,
