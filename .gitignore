@@ -51,3 +51,6 @@ Thumbs.db
 .env.*
 !.env.example
 !.env.template
+
+# Local language/implicit display settings written by set-language.mjs
+.agents/ai-agent-engine-codex/display-settings.json
