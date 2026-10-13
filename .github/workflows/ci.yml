@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  # Only cancel superseded PR runs; every push to main keeps its own result.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    name: ${{ matrix.os }} / Node ${{ matrix.node }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        # Keep in sync with "engines.node" in package.json.
+        node: [20, 22]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js ${{ matrix.node }}
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Toolchain versions
+        run: |
+          node --version
+          npm --version
+          git --version
+          pwsh -NoProfile -Command '$PSVersionTable.PSVersion.ToString()' || echo "pwsh not available; PowerShell runtime-entry tests will be skipped"
+
+      - name: npm test
+        run: npm test
+
+      - name: npm run check
+        run: npm run check
+
+      - name: npm run check:smoke
+        run: npm run check:smoke
+
+      - name: Whitespace check (PR diff)
+        if: github.event_name == 'pull_request' && runner.os == 'Linux'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          git diff --check "$BASE_SHA" HEAD
+
+      - name: Working tree unchanged
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::Tests or checks modified the working tree:"
+            git status --porcelain
+            exit 1
+          fi
+
+  # Single stable check name for branch protection; matrix job names change
+  # whenever the OS or Node list changes.
+  ci-result:
+    name: CI result
+    if: always()
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require every matrix job to pass
+        env:
+          RESULT: ${{ needs.test.result }}
+        run: |
+          echo "matrix result: $RESULT"
+          test "$RESULT" = "success"
