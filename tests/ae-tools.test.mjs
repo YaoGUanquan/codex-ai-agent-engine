@@ -113,7 +113,43 @@ test('claude-delegate prompt mode skips safely when Claude is unavailable', () =
   }
 })
 
-test('claude-delegate supports Windows cmd shims', () => {
+// Writes a fake `claude` executable for the current platform: a `claude.cmd` batch file on
+// Windows (run through cmd.exe) and an executable POSIX sh script elsewhere. `version` is
+// printed for `--version`; `windows` and `posix` are the remaining script lines.
+function writeClaudeShim(dir, { version, windows, posix }) {
+  if (process.platform === 'win32') {
+    const shimPath = join(dir, 'claude.cmd')
+    writeFileSync(shimPath, [
+      '@echo off',
+      'if "%1"=="--version" (',
+      `  echo ${version}`,
+      '  exit /b 0',
+      ')',
+      ...windows,
+      '',
+    ].join('\r\n'), 'utf8')
+    return shimPath
+  }
+  const shimPath = join(dir, 'claude')
+  writeFileSync(shimPath, [
+    '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then',
+    `  echo "${version}"`,
+    '  exit 0',
+    'fi',
+    ...posix,
+    '',
+  ].join('\n'), 'utf8')
+  chmodSync(shimPath, 0o755)
+  return shimPath
+}
+
+// .cmd shims only execute through cmd.exe, so these cases are meaningful on Windows only.
+const windowsCmdShimOnly = {
+  skip: process.platform !== 'win32' && 'requires Windows cmd.exe to execute .cmd shims',
+}
+
+test('claude-delegate supports Windows cmd shims', windowsCmdShimOnly, () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-claude-shim-'))
   try {
     const shimPath = join(tempRoot, 'claude.cmd')
@@ -137,7 +173,7 @@ test('claude-delegate supports Windows cmd shims', () => {
   }
 })
 
-test('claude-delegate discovers Windows cmd shims on PATH', { skip: process.platform !== 'win32' }, () => {
+test('claude-delegate discovers Windows cmd shims on PATH', windowsCmdShimOnly, () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-claude-path-shim-'))
   try {
     const shimPath = join(tempRoot, 'claude.cmd')
@@ -167,18 +203,11 @@ test('claude-delegate discovers Windows cmd shims on PATH', { skip: process.plat
 test('claude-delegate sends default prompts through stdin', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-claude-prompt-'))
   try {
-    const shimPath = join(tempRoot, 'claude.cmd')
-    writeFileSync(shimPath, [
-      '@echo off',
-      'if "%1"=="--version" (',
-      '  echo 9.9.9 test-shim',
-      '  exit /b 0',
-      ')',
-      'set /p PROMPT=',
-      'echo shim-prompt:%PROMPT%',
-      '',
-    ].join('\r\n'), 'utf8')
-    chmodSync(shimPath, 0o755)
+    const shimPath = writeClaudeShim(tempRoot, {
+      version: '9.9.9 test-shim',
+      windows: ['set /p PROMPT=', 'echo shim-prompt:%PROMPT%'],
+      posix: ['IFS= read -r PROMPT', 'echo "shim-prompt:$PROMPT"'],
+    })
 
     const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'claude-delegate', '--prompt', 'AE_CLAUDE_OK', '--command', shimPath])
     assert.equal(result.status, 'ok')
@@ -200,17 +229,11 @@ test('claude-delegate sends default prompts through stdin', () => {
 test('claude-delegate reports no-output diagnostics', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'ae-claude-no-output-'))
   try {
-    const shimPath = join(tempRoot, 'claude.cmd')
-    writeFileSync(shimPath, [
-      '@echo off',
-      'if "%1"=="--version" (',
-      '  echo 9.9.9 no-output-shim',
-      '  exit /b 0',
-      ')',
-      'exit /b 0',
-      '',
-    ].join('\r\n'), 'utf8')
-    chmodSync(shimPath, 0o755)
+    const shimPath = writeClaudeShim(tempRoot, {
+      version: '9.9.9 no-output-shim',
+      windows: ['exit /b 0'],
+      posix: ['exit 0'],
+    })
 
     const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'claude-delegate', '--prompt', 'NO_OUTPUT', '--command', shimPath])
     assert.equal(result.status, 'ok')
