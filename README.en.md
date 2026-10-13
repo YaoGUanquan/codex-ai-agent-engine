@@ -67,7 +67,7 @@ node scripts/install-project.mjs --target /path/to/your/codex-project
 Windows PowerShell:
 
 ```powershell
-node scripts\install-project.mjs --target D:\codes\your-project
+node scripts\install-project.mjs --target <your-project-root>
 ```
 
 Restart or reopen the Codex conversation for that target project, then initialize its AE docs, process archive, UTF-8 rules, and AI memory scaffold from the target project root:
@@ -457,8 +457,8 @@ cp scripts/ae-tools.mjs /path/to/project/scripts/ae-tools.mjs
 Windows PowerShell:
 
 ```powershell
-New-Item -ItemType Directory -Force -Path D:\codes\your-project\scripts | Out-Null
-Copy-Item scripts\ae-tools.mjs D:\codes\your-project\scripts\ae-tools.mjs
+New-Item -ItemType Directory -Force -Path <your-project-root>\scripts | Out-Null
+Copy-Item scripts\ae-tools.mjs <your-project-root>\scripts\ae-tools.mjs
 ```
 
 3. Copy `scripts/set-language.mjs` as `/path/to/project/scripts/set-ae-language.mjs` if you want metadata language switching after manual install.
