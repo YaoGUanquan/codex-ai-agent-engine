@@ -1,16 +1,16 @@
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
-import { mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import test from 'node:test'
 import { memoryIndex, memorySearch } from '../plugins/ai-agent-engine-codex/scripts/memory-navigation.mjs'
 import { initProject } from '../plugins/ai-agent-engine-codex/scripts/ae-tools/init.mjs'
 import { docsMaintain, pagePath, parseRouter } from '../plugins/ai-agent-engine-codex/scripts/docs-lifecycle.mjs'
+import { makeTempDir } from './helpers/skill-test-utils.mjs'
 
 function fixture(t, index = '# Index\n') {
-  const root = mkdtempSync(join(tmpdir(), 'ae-memory-navigation-'))
+  const root = makeTempDir('ae-memory-navigation-')
   const memory = join(root, 'docs', '08-ai-memory')
   mkdirSync(memory, { recursive: true })
   mkdirSync(join(root, 'docs', 'ae'), { recursive: true })

@@ -1,12 +1,11 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { existsSync, readdirSync, readFileSync, rmSync, statSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { renderYaml, skillMetadata } from '../plugins/ai-agent-engine-codex/scripts/skill-language-metadata.mjs'
-import { readSkillBody, runDesignContractCheck, validDesignContractLines, writeAeArtifact } from './helpers/skill-test-utils.mjs'
+import { makeTempDir, readSkillBody, runDesignContractCheck, validDesignContractLines, writeAeArtifact } from './helpers/skill-test-utils.mjs'
 
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
 const readReference = (skillName, fileName) => readFileSync(
@@ -1427,7 +1426,7 @@ test('frontend component and data-access governance is present in source and mir
 })
 
 test('design contract requires UI Direction Contract only when a UI dimension is triggered', () => {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-design-ui-direction-'))
+  const tempRoot = makeTempDir('ae-design-ui-direction-')
   const designPath = 'docs/ae/designs/sample-2026-07-07/design.md'
   try {
     const nonUi = validDesignContractLines()

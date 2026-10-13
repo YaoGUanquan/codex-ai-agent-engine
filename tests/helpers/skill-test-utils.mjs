@@ -1,10 +1,16 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 export const repoRoot = resolve(fileURLToPath(new URL('../..', import.meta.url)))
+
+/** Canonical temp root so macOS /var→/private/var and Windows 8.3 paths compare equal after realpath. */
+export function makeTempDir(prefix) {
+  return mkdtempSync(join(realpathSync.native(tmpdir()), prefix))
+}
 
 export function writeMemoryFixture(root) {
   mkdirSync(join(root, 'docs', '08-ai-memory'), { recursive: true })

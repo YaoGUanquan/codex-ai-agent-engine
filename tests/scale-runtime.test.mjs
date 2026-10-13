@@ -1,8 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { tmpdir } from 'node:os'
 import { spawn, spawnSync } from 'node:child_process'
 import { readdirSync } from 'node:fs'
 import { scanFiles } from '../plugins/ai-agent-engine-codex/scripts/ae-tools/utils.mjs'
@@ -16,9 +15,10 @@ import { withLocalOperationLock } from '../plugins/ai-agent-engine-codex/scripts
 import { markitdown } from '../plugins/ai-agent-engine-codex/scripts/ae-tools/markitdown.mjs'
 import { fingerprintManagedPath } from '../plugins/ai-agent-engine-codex/scripts/path-fingerprint.mjs'
 import { createHash } from 'node:crypto'
+import { makeTempDir } from './helpers/skill-test-utils.mjs'
 
 function fixture(t) {
-  const root = mkdtempSync(join(tmpdir(), 'ae-scale-runtime-'))
+  const root = makeTempDir('ae-scale-runtime-')
   t.after(() => rmSync(root, { recursive: true, force: true }))
   return root
 }

@@ -1,14 +1,14 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { randomUUID } from 'node:crypto'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { repoRoot, runGit } from './helpers/skill-test-utils.mjs'
 
 function makeTempDir(prefix) {
-  return mkdtempSync(join(tmpdir(), prefix))
+  return mkdtempSync(join(realpathSync.native(tmpdir()), prefix))
 }
 
 function runScript(relativePath, args, cwd) {

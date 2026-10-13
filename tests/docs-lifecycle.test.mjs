@@ -1,17 +1,17 @@
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
-import { mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync, symlinkSync } from 'node:fs'
+import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync, symlinkSync } from 'node:fs'
 import { syncBuiltinESMExports } from 'node:module'
-import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
 import test from 'node:test'
 import { docsAppend, docsMaintain, docsSearch, pagePath, parseRouter } from '../plugins/ai-agent-engine-codex/scripts/docs-lifecycle.mjs'
 import { hash } from '../plugins/ai-agent-engine-codex/scripts/bounded-documents.mjs'
 import { memoryIndex, memorySearch } from '../plugins/ai-agent-engine-codex/scripts/memory-navigation.mjs'
 import { maintainExternalDocs } from '../scripts/maintain-external-docs.mjs'
+import { makeTempDir } from './helpers/skill-test-utils.mjs'
 
 function fixture(t) {
-  const root = mkdtempSync(join(tmpdir(), 'ae-docs-lifecycle-'))
+  const root = makeTempDir('ae-docs-lifecycle-')
   const docs = join(root, 'docs')
   mkdirSync(docs)
   t.after(() => rmSync(root, { recursive: true, force: true }))

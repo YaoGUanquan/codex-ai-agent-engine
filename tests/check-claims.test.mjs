@@ -1,10 +1,10 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import { tmpdir } from 'node:os'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
+import { makeTempDir } from './helpers/skill-test-utils.mjs'
 
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
 const scriptPath = resolve(repoRoot, 'scripts', 'check-claims.mjs')
@@ -142,7 +142,7 @@ test('check-claims classifies command assumption and deferred evidence as unveri
 })
 
 function withTempRepo(callback) {
-  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-check-claims-'))
+  const tempRoot = makeTempDir('ae-check-claims-')
   try {
     callback(tempRoot)
   } finally {

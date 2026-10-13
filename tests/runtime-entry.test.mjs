@@ -1,12 +1,12 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { delimiter, dirname, join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { resolveRuntimeEntry } from '../plugins/ai-agent-engine-codex/skills/ae-help/scripts/resolve-runtime-entry.mjs'
 import { runGlobalInstall } from '../plugins/ai-agent-engine-codex/scripts/global-install.mjs'
+import { makeTempDir } from './helpers/skill-test-utils.mjs'
 
 const root = fileURLToPath(new URL('..', import.meta.url))
 const skills = join(root, 'plugins/ai-agent-engine-codex/skills')
@@ -19,7 +19,7 @@ const hasPosix = spawnSync(posixShell, ['-c', 'exit 0']).status === 0
 const hasPowerShell = spawnSync('pwsh', ['-NoProfile', '-NonInteractive', '-Command', 'exit 0']).status === 0
 
 function fixture(t) {
-  const base = mkdtempSync(join(tmpdir(), 'ae-entry-'))
+  const base = makeTempDir('ae-entry-')
   t.after(() => rmSync(base, { recursive: true, force: true }))
   const projectRoot = join(base, "project space $value 'quote [test]")
   const homeRoot = join(base, 'isolated home')
