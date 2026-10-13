@@ -551,7 +551,7 @@ node scripts/ae-tools.mjs ae-graph-build --root scripts
 
 ## 后续持续优化方向
 
-2026-08-11 的一轮全库扫描已经消除了根/插件 `update-project.mjs` 双份拷贝、把 `.tmp-install-smoke-checks/` 纳入 `.gitignore`、将 `scripts/check-claims.mjs --dry-run` 接入 `npm run check`，并把过期的三份 OPTIMIZATION 规划文档归档到 `docs/99-archive/2026-08/skill-optimization-roadmap/`。剩余的结构性债务按优先级持续推进：
+2026-08-11 的一轮全库扫描已经消除了根/插件 `update-project.mjs` 双份拷贝、把 `.tmp-install-smoke-checks/` 纳入 `.gitignore`、将 `scripts/check-claims.mjs --dry-run` 接入 `npm run check`，并把过期的三份 OPTIMIZATION 规划文档迁入私有仓库 `codex-ai-agent-engine-docs`（当时路径为过程归档目录）。剩余的结构性债务按优先级持续推进：
 
 1. ~~**拆分 `ae-tools.mjs` 单体**~~（**已完成 0.3.20**，`315db38`）：15 个命令模块 + 外置 init 模板；见 `docs/ae/experience/2026-08-11-structural-debt-refactor.md`。
 2. ~~**重组 `package.json` 的 `check` 命令串**~~（**已完成 0.3.20**）：`check:syntax` / `check:contracts` / `check:smoke` / `check:all`；测试断言改为分层存在性检查。
@@ -562,10 +562,10 @@ node scripts/ae-tools.mjs ae-graph-build --root scripts
 
 2026-08-11 **前后端技能对称优化（0.3.21）** 已落地：后端六语言指导、FE/BE 契约检查表、debug 边界速查、`ae-sql` 安全清单；见 `docs/ae/experience/2026-08-11-fullstack-skill-optimization.md`。2026-08-11 **前端技能优化（0.3.18 / 0.3.19）** 见 `docs/ae/experience/2026-08-11-frontend-skill-optimization.md`。剩余第 7、10 两项原为按需触发的挂起项；2026-08-11 复核触发未命中后，用户决定提前收尾，两项已随 **0.3.26** 完成：
 
-7. ~~**旧版本前端栈适配**~~（**已完成 0.3.26**）：`svelte-guidance.md`、`angular-guidance.md`、`vue-guidance.md` 各补最小旧栈对照节（Svelte 4 stores、NgModule 时代、Options API），与现代基线同文件并存，"匹配仓库既有风格"兜底与首行 stack-conditional 语句不变；回归用例锁定对照节与镜像。原按需触发策略由用户于 2026-08-11 决定提前执行（触发条件未命中），见 `docs/08-ai-memory/05-decision-log.md`。残余风险：对照条目为无真实缺陷驱动的预写，粒度是否够用待首个真实旧栈项目检验；不足时按决策日志仅为受影响框架扩展。
+7. ~~**旧版本前端栈适配**~~（**已完成 0.3.26**）：`svelte-guidance.md`、`angular-guidance.md`、`vue-guidance.md` 各补最小旧栈对照节（Svelte 4 stores、NgModule 时代、Options API），与现代基线同文件并存，"匹配仓库既有风格"兜底与首行 stack-conditional 语句不变；回归用例锁定对照节与镜像。原按需触发策略由用户于 2026-08-11 决定提前执行（触发条件未命中），决策记录保存在私有仓库的项目记忆中。残余风险：对照条目为无真实缺陷驱动的预写，粒度是否够用待首个真实旧栈项目检验；不足时按决策记录仅为受影响框架扩展。
 8. ~~**版本记录拆分**~~（**已完成，2026-08-11 本批**）：历史条目迁移至 `CHANGELOG.md` / `CHANGELOG.en.md`（完整历史），README 仅保留最近 5 条，`scripts/check-release-notes.mjs` 锁定窗口上限、CHANGELOG 链接与子集关系；见 `docs/ae/plans/2026-08-11-006-governance-batch-four-plan.md`。
-9. ~~**过程文档归档纪律**~~（**已完成，2026-08-11 本批**）：4 个已完成或指针任务目录并入 `docs/00-process/archive/2026-08/`，active 目录只保留真正进行中的工作；tidy 对 archived-pointer 的保守保留策略未变，本仓收尾为一次性手动归档。
-10. ~~**前端质量契约的交叉一致性**~~（**已完成 0.3.26 批，仓库侧**）：轻量映射说明落地 `docs/ae/references/frontend-quality-contract-map.md`，登记 `web-ui-quality.md`、`ae-review` Frontend Components / Styles 镜头、`browser-acceptance.md` 之间 5 组对应关系、两处空档与既有测试锁；映射为描述性文档，不构成第 4 份契约面，仍不建校验脚本。评估与提前收尾记录见 `docs/08-ai-memory/05-decision-log.md`。残余风险：映射依赖人工维护——编辑三份契约文件时须按图核对对应组，这是不建校验脚本决策的已接受成本。
+9. ~~**过程文档归档纪律**~~（**已完成，2026-08-11 本批**）：4 个已完成或指针任务目录已归档到私有仓库的过程文档中；tidy 对 archived-pointer 的保守保留策略未变，本仓收尾为一次性手动归档。
+10. ~~**前端质量契约的交叉一致性**~~（**已完成 0.3.26 批，仓库侧**）：轻量映射说明落地 `docs/ae/references/frontend-quality-contract-map.md`，登记 `web-ui-quality.md`、`ae-review` Frontend Components / Styles 镜头、`browser-acceptance.md` 之间 5 组对应关系、两处空档与既有测试锁；映射为描述性文档，不构成第 4 份契约面，仍不建校验脚本。评估与提前收尾记录保存在私有仓库的项目记忆中。残余风险：映射依赖人工维护——编辑三份契约文件时须按图核对对应组，这是不建校验脚本决策的已接受成本。
 11. ~~**知识库治理（下一批 0.3.22）**~~（**已完成 0.3.22**）：见 `docs/ae/prds/2026-08-11-knowledge-base-governance-prd.md` 与 `docs/ae/experience/`（维护者知识图谱见 `docs/ae/graphs/maintainer-artifact-graph.md`）。
 
 2026-08-11 **全量技能盘点（40 个 skill 逐一审查）** 完成：五层结构（工作流主链 10 / 实现车道 9 / 验证车道 2 / 独立工具 8 / 元治理 11）整体健康，路由边界、证据分层词汇与交接路由复核一致，既有治理项无回退；完整证据、发现与批次对比见 `docs/ae/solutions/2026-08-11-skill-portfolio-optimization-audit.md`。新增事项如下（12 先行、13-14 同批升版本、15 按需触发）：

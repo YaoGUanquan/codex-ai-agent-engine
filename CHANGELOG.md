@@ -165,7 +165,7 @@ English: [CHANGELOG.en.md](CHANGELOG.en.md)
 ### 0.3.22（2026-08-11）
 - 知识库治理第一批：`docs/ae/prds/` 为需求正典目录；`ae-brainstorm` 持久化需求时复用 `ae-prd` 捕获契约并写入 `docs/ae/prds/`，删除重复的 `requirements-capture.md`；`recovery` 扫描 PRD 产物；init 创建 `docs/ae/prds` 且不再创建 `docs/ai-memory` 兼容指针（存量项目不动）。
 - `review-package` 改为指纹产物（提交列表、diffstat、清单、base/head SHA 与 `git diff -U10` 重建命令），不再嵌入全量 diff 正文；init/archive 模板与 `docs/00-process/templates/archive-rules.md` 新增 gate/evidence 3 个月保留策略。
-- 新增 `docs/external-samples/README.md` 登记样本语料用途与保留条件。
+- 曾新增公开仓库内的外部样本语料说明；该语料现已迁出公开仓库，改由私有仓库 `codex-ai-agent-engine-docs` 管理。
 - 验证：`node scripts/check-skill-mirror.mjs`、`node scripts/check-release-notes.mjs`、`npm test`、`npm run check`、`npm run check:smoke`。这些检查只证明 CLI、技能文档与分发合同一致，不代表目标项目 init 或审查工作流的运行时验收。
 
 ### 0.3.21（2026-08-11）

@@ -165,7 +165,7 @@ This file is the complete release history of AI Agent Engine for Codex (since 0.
 ### 0.3.22 (2026-08-11)
 - Knowledge-base governance batch one: `docs/ae/prds/` is the canonical requirements directory; `ae-brainstorm` reuses the `ae-prd` capture contract and writes durable requirements to `docs/ae/prds/`, removing the duplicate `requirements-capture.md`; `recovery` scans PRD artifacts; init provisions `docs/ae/prds` and no longer creates the legacy `docs/ai-memory` compatibility pointer (existing projects are unchanged).
 - `review-package` now emits fingerprint artifacts (commit list, diffstat, inventory, base/head SHA, and a `git diff -U10` rebuild command) instead of embedding the full diff body; init/archive templates and `docs/00-process/templates/archive-rules.md` add a three-month gate/evidence retention policy.
-- Added `docs/external-samples/README.md` to register sample corpus purpose and retention rules.
+- Previously added an external sample-corpus note under the public tree; that corpus now lives in the private docs repo `codex-ai-agent-engine-docs` instead.
 - Validation: `node scripts/check-skill-mirror.mjs`, `node scripts/check-release-notes.mjs`, `npm test`, `npm run check`, and `npm run check:smoke`. These checks prove CLI, skill docs, and distribution contracts only, not target-project init or review workflow runtime acceptance.
 
 ### 0.3.21 (2026-08-11)
