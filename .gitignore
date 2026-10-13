@@ -46,6 +46,7 @@ Thumbs.db
 *.log
 
 # Secrets
+.ae-public-content.local.patterns
 .env
 .env.*
 !.env.example

@@ -38,7 +38,7 @@ node scripts/install-project.mjs --target /path/to/your/codex-project
 Windows PowerShell：
 
 ```powershell
-node scripts\install-project.mjs --target D:\codes\your-project
+node scripts\install-project.mjs --target <your-project-root>
 ```
 
 重启或重新打开目标项目的 Codex 对话，然后在目标项目根目录初始化 AE 文档、过程归档、UTF-8 规则和 AI 记忆库骨架：
@@ -478,8 +478,8 @@ cp scripts/ae-tools.mjs /path/to/project/scripts/ae-tools.mjs
 Windows PowerShell：
 
 ```powershell
-New-Item -ItemType Directory -Force -Path D:\codes\your-project\scripts | Out-Null
-Copy-Item scripts\ae-tools.mjs D:\codes\your-project\scripts\ae-tools.mjs
+New-Item -ItemType Directory -Force -Path <your-project-root>\scripts | Out-Null
+Copy-Item scripts\ae-tools.mjs <your-project-root>\scripts\ae-tools.mjs
 ```
 
 3. 如果需要手动安装后继续切换技能列表语言，将 `scripts/set-language.mjs` 复制为目标项目的 `scripts/set-ae-language.mjs`。
