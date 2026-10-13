@@ -18,6 +18,18 @@ docs/ae/brainstorms/
 docs/ae/reviews/
 docs/ae/handoffs/
 
+# Private project docs live in YaoGUanquan/codex-ai-agent-engine-docs, not in this public repo
+docs/00-process/
+docs/08-ai-memory/
+docs/99-archive/
+docs/ai-memory/
+docs/superpowers/
+docs/external-samples/
+docs/codex-port-analysis.md
+docs/ae/*
+!docs/ae/templates/
+!docs/ae/references/
+
 # Private security scan inputs, findings, and reports
 docs/ae/security-scans/
 

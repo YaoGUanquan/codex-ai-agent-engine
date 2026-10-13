@@ -51,10 +51,10 @@
 - 变更范围保持在当前任务内。
 - 优先沿用项目已有模式，不轻易新增抽象。
 - 不覆盖用户已有工作，不回退无关变更。
-- AE 工作流产物记录在 `docs/ae`。
-- 执行中的过程记录放在 `docs/00-process/active`。
-- 已完成的过程记录归档到 `docs/00-process/archive/YYYY-MM/<task-name>` 或 `docs/99-archive/YYYY-MM/<topic>`。
-- 长期 AI 记忆记录在 `docs/08-ai-memory`。
+- 本仓库是公开仓库，`docs/` 下只入库 `docs/ae/templates`、`docs/ae/references` 和 `docs/release-checklist.md`。
+- AE 工作流产物（plans、prds、evidence、reviews 等）、过程记录、交接和长期 AI 记忆都写入私有仓库 `YaoGUanquan/codex-ai-agent-engine-docs`，不要在本仓库重新创建 `docs/00-process`、`docs/08-ai-memory`、`docs/99-archive`、`docs/ai-memory`、`docs/superpowers` 或 `docs/ae` 下的其他目录。
+- 私有仓库的本地位置以下方 External Docs Context 解析出的 `docsRoot` 为准；拿不到 `docsRoot` 时停止写入并报告，不要退回写进本仓库，也不要在仓库文件里写个人绝对路径。
+- 私有仓库内沿用原目录布局：AE 产物在 `docs/ae`，执行中的过程记录在 `docs/00-process/active`，完成后归档到 `docs/00-process/archive/YYYY-MM/<task-name>` 或 `docs/99-archive/YYYY-MM/<topic>`，长期 AI 记忆在 `docs/08-ai-memory`。
 - 文档增长治理：导航最多 4096 UTF-8 字节/80 行，记忆专题、开发历史和滚动台账最多 15KiB；托管文档用 `ae-docs-append` 自动分页。相关写入后运行 `ae-docs-maintain --check`，外部文档显式传已解析的 `--docs-root`；不自动拆改正式合同、SQL 或证据链。
 
 ## 工程执行
