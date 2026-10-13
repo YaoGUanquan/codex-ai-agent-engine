@@ -1,6 +1,6 @@
 interface:
   display_name: "AE 初始化 / AE Init"
-  short_description: "初始化 AGENTS.md 与可选 AE 文档 / Initialize AGENTS.md with selectable AE docs"
-  default_prompt: "使用 $ae-init 预览并按合适 profile 初始化当前项目。 / Use $ae-init to preview and initialize this project with the appropriate profile."
+  short_description: "初始化 AGENTS.md、可选 AE 文档和安全再生成边界 / Initialize AGENTS.md with selectable AE docs and safe regeneration"
+  default_prompt: "使用 $ae-init 预览并按 minimal、ae-core 或 full profile 初始化 AGENTS.md 与 AE 文档。 / Use $ae-init to preview and initialize AGENTS.md with the appropriate minimal, ae-core, or full profile."
 policy:
   allow_implicit_invocation: true

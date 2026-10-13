@@ -37,6 +37,7 @@ export const skillMetadata = {
     promptZh: 'Use $ae-constitution to define project governance principles.',
   },
   'ae-debug': {
+    implicitTier: 'core',
     display: { en: 'AE Debug', zh: 'AE 调试排障' },
     en: 'Investigate failures systematically before changing code',
     zh: '在修改代码前系统化定位故障原因',
@@ -86,6 +87,7 @@ export const skillMetadata = {
     promptZh: '使用 $ae-handoff 为当前任务生成一个可继续的交接说明。',
   },
   'ae-help': {
+    implicitTier: 'core',
     display: { en: 'AE Help', zh: 'AE 帮助' },
     en: 'List AE workflow capabilities for Codex',
     zh: '查看 Codex 中可用的 AE 工作流能力',
@@ -128,6 +130,7 @@ export const skillMetadata = {
     promptZh: '使用 $ae-lfg 将这个软件需求推进到计划、实现、审查和验证。',
   },
   'ae-plan': {
+    implicitTier: 'core',
     display: { en: 'AE Plan (ae-plan)', zh: 'AE 计划生成 (ae-plan)' },
     en: 'ae-plan creates AE implementation plans before coding',
     zh: 'ae-plan 编码前创建 AE 实现计划',
@@ -156,6 +159,7 @@ export const skillMetadata = {
     promptZh: '使用 $ae-refactor 为这段代码生成一个安全的重构计划。',
   },
   'ae-review': {
+    implicitTier: 'core',
     display: { en: 'AE Review (ae-review)', zh: 'AE 审查 (ae-review)' },
     en: 'ae-review performs layered code and document review with findings first',
     zh: 'ae-review 分层审查代码和文档，优先输出问题',
@@ -261,6 +265,7 @@ export const skillMetadata = {
     promptZh: '使用 $ae-web-forge 路由并执行这个前端或 Web 任务。',
   },
   'ae-work': {
+    implicitTier: 'core',
     display: { en: 'AE Work (ae-work)', zh: 'AE 计划执行 (ae-work)' },
     en: 'ae-work executes plans with Git safety and validation evidence',
     zh: 'ae-work 带 Git 安全检查和验证证据执行计划',
@@ -283,7 +288,44 @@ export const skillMetadata = {
   },
 }
 
-export function renderYaml(item, selectedLang) {
+export const coreImplicitSkills = Object.freeze([
+  'ae-debug',
+  'ae-help',
+  'ae-plan',
+  'ae-review',
+  'ae-work',
+])
+
+export const supportedImplicitTiers = new Set(['core', 'all', 'none'])
+export const DEFAULT_IMPLICIT_TIER = 'all'
+
+/** Per-skill marker: core five are explicit; everything else is optional. */
+export function skillImplicitMarker(item) {
+  return item?.implicitTier === 'core' ? 'core' : 'optional'
+}
+
+/**
+ * Resolve allow_implicit_invocation for a skill under a global CLI/runtime tier.
+ * @param {object} item skill metadata entry
+ * @param {'core'|'all'|'none'} [globalTier=DEFAULT_IMPLICIT_TIER]
+ */
+export function allowImplicitInvocation(item, globalTier = DEFAULT_IMPLICIT_TIER) {
+  if (globalTier === 'none') return false
+  if (globalTier === 'all') return true
+  if (globalTier === 'core') return skillImplicitMarker(item) === 'core'
+  throw new Error(`unsupported implicit tier: ${globalTier}`)
+}
+
+/**
+ * @param {object} item
+ * @param {'en'|'zh-CN'|'bilingual'} selectedLang
+ * @param {{ implicitTier?: 'core'|'all'|'none' }} [options]
+ */
+export function renderYaml(item, selectedLang, options = {}) {
+  const globalTier = options.implicitTier ?? DEFAULT_IMPLICIT_TIER
+  if (!supportedImplicitTiers.has(globalTier)) {
+    throw new Error(`unsupported implicit tier: ${globalTier}`)
+  }
   const display = selectedLang === 'zh-CN'
     ? item.display.zh
     : selectedLang === 'bilingual'
@@ -299,13 +341,14 @@ export function renderYaml(item, selectedLang) {
     : selectedLang === 'bilingual'
       ? `${item.promptZh} / ${item.promptEn}`
       : item.promptEn
+  const allowImplicit = allowImplicitInvocation(item, globalTier)
   return [
     'interface:',
     `  display_name: "${escapeYaml(display)}"`,
     `  short_description: "${escapeYaml(description)}"`,
     `  default_prompt: "${escapeYaml(prompt)}"`,
     'policy:',
-    '  allow_implicit_invocation: true',
+    `  allow_implicit_invocation: ${allowImplicit}`,
     '',
   ].join('\n')
 }
