@@ -5,6 +5,9 @@
   "type": "module",
   "description": "Codex-native AE-style workflow skills referencing https://gitee.com/jiangqiang1996/ai-agent-engine.",
   "license": "GPL-2.0-only",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "test": "node --test tests/*.test.mjs",
     "check": "npm run check:syntax && npm run check:contracts",
