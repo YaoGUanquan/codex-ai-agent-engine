@@ -4,6 +4,11 @@
 
 English: [CHANGELOG.en.md](CHANGELOG.en.md)
 
+### 0.3.55（2026-10-13）
+- 移除 `.ae-source` 维护镜像：插件 `plugins/ai-agent-engine-codex/skills` 成为唯一技能源；删除 `check-skill-mirror` 并清理合同/语言/审计脚本中的镜像根。
+- 回归测试改为只断言插件 `SKILL_ROOT`；文档与发布清单去掉 ae-source 指引；版本升至 0.3.55。
+- 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。这些静态和本地检查不能证明真实 Codex host/model 行为。
+
 ### 0.3.54（2026-09-30）
 - 精简 12 个高频 AE skill 入口至 4 KiB 以内，把详细流程拆为按触发条件加载的 references，减少默认上下文和重复流程。
 - 保留插件源与 `.ae-source` 镜像一致，并增加入口体积与路由回归测试。
@@ -164,7 +169,7 @@ English: [CHANGELOG.en.md](CHANGELOG.en.md)
 
 ### 0.3.22（2026-08-11）
 - 知识库治理第一批：`docs/ae/prds/` 为需求正典目录；`ae-brainstorm` 持久化需求时复用 `ae-prd` 捕获契约并写入 `docs/ae/prds/`，删除重复的 `requirements-capture.md`；`recovery` 扫描 PRD 产物；init 创建 `docs/ae/prds` 且不再创建 `docs/ai-memory` 兼容指针（存量项目不动）。
-- `review-package` 改为指纹产物（提交列表、diffstat、清单、base/head SHA 与 `git diff -U10` 重建命令），不再嵌入全量 diff 正文；init/archive 模板与 `docs/00-process/templates/archive-rules.md` 新增 gate/evidence 3 个月保留策略。
+- `review-package` 改为指纹产物（提交列表、diffstat、清单、base/head SHA 与 `git diff -U10` 重建命令），不再嵌入全量 diff 正文；init/archive 模板新增 gate/evidence 3 个月保留策略。
 - 曾新增公开仓库内的外部样本语料说明；该语料现已迁出公开仓库，改由私有仓库 `codex-ai-agent-engine-docs` 管理。
 - 验证：`node scripts/check-skill-mirror.mjs`、`node scripts/check-release-notes.mjs`、`npm test`、`npm run check`、`npm run check:smoke`。这些检查只证明 CLI、技能文档与分发合同一致，不代表目标项目 init 或审查工作流的运行时验收。
 

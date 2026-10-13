@@ -66,6 +66,13 @@ node scripts/ae-tools.mjs help
 
 ## 版本更新记录
 
+完整历史见 [CHANGELOG.md](CHANGELOG.md)；本节仅保留最近 5 个版本，发布时超出窗口的条目迁移到 CHANGELOG。
+
+### 0.3.55（2026-10-13）
+- 移除 `.ae-source` 维护镜像：插件 `plugins/ai-agent-engine-codex/skills` 成为唯一技能源；删除 `check-skill-mirror` 并清理合同/语言/审计脚本中的镜像根。
+- 回归测试改为只断言插件 `SKILL_ROOT`；文档与发布清单去掉 ae-source 指引；版本升至 0.3.55。
+- 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。这些静态和本地检查不能证明真实 Codex host/model 行为。
+
 ### 0.3.54（2026-09-30）
 - 精简 12 个高频 AE skill 入口至 4 KiB 以内，把详细流程拆为按触发条件加载的 references，减少默认上下文和重复流程。
 - 保留插件源与 `.ae-source` 镜像一致，并增加入口体积与路由回归测试。
@@ -87,14 +94,6 @@ node scripts/ae-tools.mjs help
 - recovery 支持单一绝对外部文档根与类型筛选，明确路径基准、范围和不完整性；错误根/参数不回退到仓库 docs，目录选择不等于已验证项目/分支登记。同步 LFG、工作委派、共享契约和 help 指引。
 - 联合记忆任务修复 Windows 文档大小写别名的身份与本地锁一致性，保留旧路由/分片兼容性；POSIX 不以统一小写合并不同文件。
 - 验证命令：`node --test tests/scale-memory-integration.test.mjs tests/docs-lifecycle.test.mjs tests/memory-navigation.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。证据限于本地隔离集成、双进程互斥、字节恢复和安装分发；不代表外部原文已迁移、当前用户安装已升级、跨主机一致性或生产吞吐验收，环境相关跳过以验证记录为准。
-
-### 0.3.50（2026-09-27）
-- 全部 40 个技能按职责接入共享规模化/分布式工程契约，覆盖容量、背压、幂等、分区、恢复、混合版本与证据分层；保留既有数据库专项和文档分页契约。
-- 图、任务、恢复和 Issue 分析增加遍历/字节/时间预算及不完整诊断，依赖提取消除异常 import/export 文本的重复回溯；任务支持内容匹配，配置/YAML 失败显式阻断并行就绪，转换和 OpenAPI 不再静默截断。gate 区分命令声明与执行记录，阻断返回退出码 1。
-- 项目安装增加暂存校验、写入锁、指纹和 journal 恢复；全局安装增加写入锁、预览源内容绑定、失败暂存清理及已校验副本发布；更新区分安装完成与维护失败。逐组件交换不等于跨组件原子事务，也不是跨主机锁。
-- 验证命令：`node --test tests/scale-runtime.test.mjs tests/install-scripts.test.mjs tests/global-install.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。仅证明本地工具、隔离并发/恢复、静态技能和安装分发合同；权限不足的 Windows 文件链接用例明确跳过，不代表真实目标项目容量、跨主机可靠性、生产验收或当前用户安装已升级。
-
-完整历史见 [CHANGELOG.md](CHANGELOG.md)；本节仅保留最近 5 个版本，发布时超出窗口的条目迁移到 CHANGELOG。
 
 ## 能力清单
 
@@ -224,7 +223,7 @@ node scripts/install-project.mjs --target /path/to/your/codex-project --lang en
 - `scripts/update-ae-codex.mjs`
 - `scripts/set-ae-language.mjs`
 
-分发源仓库本身不支持作为安装目标；它使用用户级 personal 插件，并将维护镜像放在 `.ae-source/skills`，以避免重复发现。
+分发源仓库本身不支持作为安装目标；它使用用户级 personal 插件，技能唯一源为 `plugins/ai-agent-engine-codex/skills`。
 
 ## 从项目级安装迁移到用户级全局安装
 
@@ -271,7 +270,7 @@ node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" init --project-root (Get-L
 codex plugin list
 ```
 
-每个操作系统用户都有自己的 `$HOME`、dispatcher、备份和 personal marketplace；安装器不会扫描或修改其他用户的目录，也不会直接修改 `.codex/plugins/cache`。Codex 通过 personal 插件发现 AE 技能；Cursor 通过 `~/.cursor/skills/ae-*` 真实拷贝发现同一套技能（Cursor 不跟踪技能目录上的 symlink）。分发源仓库将维护镜像保存在 `.ae-source/skills`，避免与个人插件重复发现；consumer 项目迁移后只应使用用户级分发。已打开的对话不会自动刷新技能目录。
+每个操作系统用户都有自己的 `$HOME`、dispatcher、备份和 personal marketplace；安装器不会扫描或修改其他用户的目录，也不会直接修改 `.codex/plugins/cache`。Codex 通过 personal 插件发现 AE 技能；Cursor 通过 `~/.cursor/skills/ae-*` 真实拷贝发现同一套技能（Cursor 不跟踪技能目录上的 symlink）。分发源仓库仅以 `plugins/ai-agent-engine-codex/skills` 为技能源；consumer 项目迁移后只应使用用户级分发。已打开的对话不会自动刷新技能目录。
 
 ## 初始化项目文档和记忆库
 
@@ -504,7 +503,6 @@ Copy-Item scripts\ae-tools.mjs <your-project-root>\scripts\ae-tools.mjs
 ## 仓库结构
 
 ```text
-.ae-source/skills/               # 插件技能维护镜像，不是独立发现入口
 .agents/                         # consumer 项目安装布局；本仓库不以此为技能源
 plugins/ai-agent-engine-codex/   # Codex 插件主体
 scripts/ae-tools.mjs             # 根辅助命令入口
@@ -545,7 +543,7 @@ node scripts/ae-tools.mjs help
 node scripts/ae-tools.mjs ae-graph-build --root scripts
 ```
 
-如果本机有 Codex skill validator，也建议验证 `plugins/ai-agent-engine-codex/skills/*` 和 `.ae-source/skills/*`。
+如果本机有 Codex skill validator，也建议验证 `plugins/ai-agent-engine-codex/skills/*`。
 
 发布前可参考 [docs/release-checklist.md](docs/release-checklist.md)。
 

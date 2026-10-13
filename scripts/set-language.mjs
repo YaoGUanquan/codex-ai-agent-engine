@@ -13,7 +13,6 @@ if (!supportedLanguages.has(lang)) {
 
 const roots = [
   resolve('plugins', 'ai-agent-engine-codex', 'skills'),
-  resolve('.ae-source', 'skills'),
 ]
 
 let changed = 0

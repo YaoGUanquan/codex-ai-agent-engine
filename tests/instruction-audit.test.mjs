@@ -9,12 +9,12 @@ const source = 'plugins/ai-agent-engine-codex/skills'
 
 test('audit source roles exclude consumer layouts and generated skills', () => {
   const agents = read('AGENTS.md')
-  for (const path of ['plugins/ai-agent-engine-codex/skills', '.ae-source/skills', '.agents/skills', 'dist/', 'node_modules/']) {
+  for (const path of ['plugins/ai-agent-engine-codex/skills', '.agents/skills', 'dist/', 'node_modules/']) {
     assert.ok(agents.includes(path), path)
   }
+  assert.equal(agents.includes('.ae-source'), false)
   for (const file of ['README.md', 'README.en.md']) {
     const text = read(file)
-    assert.match(text, /\.ae-source\/skills/)
     assert.match(text, /\[CHANGELOG(?:\.en)?\.md\]\(CHANGELOG(?:\.en)?\.md\)/)
     assert.doesNotMatch(text, /当前仓库自用的项目级安装示例|Project-local self-install for this repo/)
     assert.doesNotMatch(text, /^####\s+0\.3\.(28|26)\b/m)
@@ -50,10 +50,8 @@ test('frontend entry metadata has positive and negative ownership boundaries', (
     assert.ok(description)
     for (const pattern of patterns) assert.match(description, pattern)
     assert.ok(description.includes(`$${name}`))
-    assert.equal(read(`.ae-source/skills/${name}/SKILL.md`), body)
     const yaml = renderYaml(skillMetadata[name], 'bilingual')
     assert.equal(read(`${source}/${name}/agents/openai.yaml`), yaml)
-    assert.equal(read(`.ae-source/skills/${name}/agents/openai.yaml`), yaml)
   }
 })
 
@@ -75,7 +73,6 @@ test('routing fixtures preserve positive and negative cases without claiming mod
     assert.equal(cells[4], excluded, id)
   }
   assert.match(text, /do not execute a model router/)
-  assert.equal(read('.ae-source/skills/ae-web-forge/references/routing-examples.md'), text)
   assert.match(read(`${source}/ae-web-forge/SKILL.md`), /preserve existing targets/)
   assert.match(read(`${source}/ae-web-app/SKILL.md`), /Reuse an existing routing decision/)
   assert.match(read(`${source}/ae-frontend-design/SKILL.md`), /Do not reload an unchanged contract/)

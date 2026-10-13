@@ -89,9 +89,9 @@ function adaptSkillAudit(value) {
     title: 'AE Skill Portfolio Audit',
     status: findings.some((finding) => finding.severity === 'P0' || finding.severity === 'P1') ? 'failed' : deferred > 0 ? 'partial' : 'passed',
     generatedAt: value.generatedAt,
-    summary: `Audited ${value.sourceCount || records.length} plugin skills and ${value.mirrorCount || 0} matching maintenance mirrors across ${(value.auditedDimensions || []).length} static dimensions.`,
+    summary: `Audited ${value.sourceCount || records.length} plugin skills across ${(value.auditedDimensions || []).length} static dimensions.`,
     findings,
-    artifacts: records.flatMap((record) => [record.sourcePath, record.mirrorPath]).filter(Boolean),
+    artifacts: records.map((record) => record.sourcePath).filter(Boolean),
     limitations: Array.isArray(value.limitations) ? value.limitations : [],
     unverified: ['Runtime skill behavior and user outcomes remain outside this static audit.'],
   }

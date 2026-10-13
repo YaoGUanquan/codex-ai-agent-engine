@@ -50,7 +50,7 @@ Metadata checklist:
 - arguments or expected inputs;
 - artifact outputs and storage path;
 - validation command;
-- plugin source plus `.agents/skills` mirror sync.
+- plugin skill source under `plugins/ai-agent-engine-codex/skills`.
 
 ## Rules
 

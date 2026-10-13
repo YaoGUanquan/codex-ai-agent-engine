@@ -271,9 +271,7 @@ test('help can find model compatibility guidance', () => {
 
 test('tiered capability help groups every skill and preserves filtered output', () => {
   const sourcePath = resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-help/references/capability-catalog.json')
-  const mirrorPath = resolve(repoRoot, '.ae-source/skills/ae-help/references/capability-catalog.json')
   const source = JSON.parse(readFileSync(sourcePath, 'utf8'))
-  const mirror = JSON.parse(readFileSync(mirrorPath, 'utf8'))
   const expectedByTier = {
     core: ['ae-ideate', 'ae-brainstorm', 'ae-prd', 'ae-design', 'ae-lfg', 'ae-plan', 'ae-constitution', 'ae-tasks', 'ae-work', 'ae-refactor', 'ae-review', 'ae-frontend-design', 'ae-web-app', 'ae-web-forge', 'ae-backend', 'ae-debug', 'ae-reverse-engineering', 'ae-task-loop', 'ae-tdd', 'ae-test-browser', 'ae-test-api', 'ae-handoff'],
     docs: ['ae-doc-humanize', 'ae-doc-structure', 'ae-markitdown', 'ae-work-report'],
@@ -281,7 +279,6 @@ test('tiered capability help groups every skill and preserves filtered output', 
     meta: ['ae-help', 'ae-init', 'ae-skill-creator', 'ae-skill-audit', 'ae-agent-creator', 'ae-update', 'ae-language'],
   }
 
-  assert.deepEqual(mirror, source, 'capability catalog mirror should match plugin source')
   assert.equal(source.source.observedCommit, '76d832c96a1c810410982bf28b425a3aedb461ab')
   assert.equal(source.source.license, 'GPL-3.0-or-later')
   assert.equal(source.skills.length, Object.values(expectedByTier).flat().length)

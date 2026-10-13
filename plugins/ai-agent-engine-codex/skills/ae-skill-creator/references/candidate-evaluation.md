@@ -15,10 +15,10 @@ Use this reference when a completed lesson, audit, or repeated task suggests cre
 ## Required Checks
 
 1. Read the source evidence and separate a repeatable pattern from a one-off incident.
-2. Run an overlap check against `plugins/ai-agent-engine-codex/skills/`, `.agents/skills/`, and relevant `AGENTS.md`, `docs/08-ai-memory/`, and `docs/ae/` guidance.
+2. Run an overlap check against `plugins/ai-agent-engine-codex/skills/` and relevant `AGENTS.md`, `docs/08-ai-memory/`, and `docs/ae/` guidance.
 3. Apply the Extension Routing Matrix before proposing a new skill; prefer improving an existing owner, a reference/template, or a deterministic helper script when those fit.
 4. Confirm the candidate does not require unsupported hooks, automatic session injection, automatic skill generation, unreviewed memory writes, or external runtime installation.
-5. Name the exact source/mirror files, metadata impact, and validation commands that adoption would require.
+5. Name the exact plugin skill files, metadata impact, and validation commands that adoption would require.
 
 ## Verdicts
 

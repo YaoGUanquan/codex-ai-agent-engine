@@ -6,7 +6,6 @@ import { skillMetadata } from '../plugins/ai-agent-engine-codex/scripts/skill-la
 
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
 const sourceRoot = resolve(repoRoot, 'plugins', 'ai-agent-engine-codex', 'skills')
-const mirrorRoot = resolve(repoRoot, '.ae-source', 'skills')
 
 const sourceSkills = listSkillDirs(sourceRoot)
 const metadataSkills = Object.keys(skillMetadata).sort()
@@ -16,13 +15,11 @@ const invalidMetadataSkills = metadataSkills.filter((name) => !/^[a-z0-9][a-z0-9
 const missingMetadata = sourceSkills.filter((name) => !metadataSkills.includes(name))
 const extraMetadata = metadataSkills.filter((name) => !sourceSkills.includes(name))
 const missingSourceYaml = sourceSkills.filter((name) => !existsSync(resolve(sourceRoot, name, 'agents', 'openai.yaml')))
-const missingMirrorYaml = sourceSkills.filter((name) => !existsSync(resolve(mirrorRoot, name, 'agents', 'openai.yaml')))
 
 if (
   missingMetadata.length === 0 &&
   extraMetadata.length === 0 &&
   missingSourceYaml.length === 0 &&
-  missingMirrorYaml.length === 0 &&
   invalidSourceSkills.length === 0 &&
   invalidMetadataSkills.length === 0
 ) {
@@ -39,7 +36,6 @@ console.error(JSON.stringify({
   missingMetadata,
   extraMetadata,
   missingSourceYaml,
-  missingMirrorYaml,
   invalidSourceSkills,
   invalidMetadataSkills,
 }, null, 2))

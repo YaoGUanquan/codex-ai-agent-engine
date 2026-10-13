@@ -15,7 +15,7 @@ User request
   -> Knowledge Layer: selected AE skill and references
   -> Guardrail Layer: validation, gates, templates, and evidence
   -> Delegation Layer: bounded external or subagent review when allowed
-  -> Distribution Layer: plugin manifest, install scripts, and skill mirror
+  -> Distribution Layer: plugin manifest, install scripts, and skill distribution
 ```
 
 ## Memory Layer
@@ -39,15 +39,13 @@ Validation:
 Owned paths:
 
 - `plugins/ai-agent-engine-codex/skills/*`
-- `.ae-source/skills/*`
 - skill-local `references/`
 - `docs/ae/references/`
 
-Purpose: workflow knowledge, routing rules, skill instructions, templates, schemas, and reusable context. Plugin source is canonical; `.ae-source/skills` is the source-repository maintenance mirror. Consumer installation writes a separate `.agents/skills` copy.
+Purpose: workflow knowledge, routing rules, skill instructions, templates, schemas, and reusable context. Plugin source under `plugins/ai-agent-engine-codex/skills` is the only skill source. Consumer installation may write a separate `.agents/skills` copy.
 
 Validation:
 
-- `node scripts/check-skill-mirror.mjs`
 - `node scripts/check-skill-language-metadata.mjs`
 - `node scripts/check-skill-contract.mjs`
 

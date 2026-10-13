@@ -4,6 +4,11 @@ This file is the complete release history of AI Agent Engine for Codex (since 0.
 
 中文版本: [CHANGELOG.md](CHANGELOG.md)
 
+### 0.3.55 (2026-10-13)
+- Remove the `.ae-source` maintenance mirror: plugin `plugins/ai-agent-engine-codex/skills` is the only skill source; delete `check-skill-mirror` and drop mirror roots from contract/language/audit scripts.
+- Rewrite regression tests to assert only the plugin `SKILL_ROOT`; scrub ae-source guidance from docs and the release checklist; bump to 0.3.55.
+- Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These static and local checks do not prove live Codex host/model behavior.
+
 ### 0.3.54 (2026-09-30)
 - Compress 12 high-frequency AE skill entrypoints to under 4 KiB and move detailed procedures into conditionally loaded references, reducing default context and repeated workflow text.
 - Keep the plugin source and `.ae-source` maintenance mirror aligned, with regression coverage for entry size and route selection.
@@ -164,7 +169,7 @@ This file is the complete release history of AI Agent Engine for Codex (since 0.
 
 ### 0.3.22 (2026-08-11)
 - Knowledge-base governance batch one: `docs/ae/prds/` is the canonical requirements directory; `ae-brainstorm` reuses the `ae-prd` capture contract and writes durable requirements to `docs/ae/prds/`, removing the duplicate `requirements-capture.md`; `recovery` scans PRD artifacts; init provisions `docs/ae/prds` and no longer creates the legacy `docs/ai-memory` compatibility pointer (existing projects are unchanged).
-- `review-package` now emits fingerprint artifacts (commit list, diffstat, inventory, base/head SHA, and a `git diff -U10` rebuild command) instead of embedding the full diff body; init/archive templates and `docs/00-process/templates/archive-rules.md` add a three-month gate/evidence retention policy.
+- `review-package` now emits fingerprint artifacts (commit list, diffstat, inventory, base/head SHA, and a `git diff -U10` rebuild command) instead of embedding the full diff body; init/archive templates add a three-month gate/evidence retention policy.
 - Previously added an external sample-corpus note under the public tree; that corpus now lives in the private docs repo `codex-ai-agent-engine-docs` instead.
 - Validation: `node scripts/check-skill-mirror.mjs`, `node scripts/check-release-notes.mjs`, `npm test`, `npm run check`, and `npm run check:smoke`. These checks prove CLI, skill docs, and distribution contracts only, not target-project init or review workflow runtime acceptance.
 
