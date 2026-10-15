@@ -422,7 +422,7 @@ test('task loop dual completion gate requires verification and non-blocking revi
     /review status/,
     /one-file low-risk fix.*review gate `not-applicable`/is,
     /all applicable completion gates pass/i,
-    /When review applies, objective verification and review must both pass independently/i,
+    /Review and objective verification must both pass when required/i,
     /Apply this gate only when the loop changed files.*non-trivial, contract-sensitive, or explicitly reviewed/is,
   ]) {
     assert.match(source, expectation, `ae-task-loop should include ${expectation}`)
@@ -1456,10 +1456,10 @@ test('model adaptation contract gates task size, scope, budget, and stopping', (
     /smallest applicable path by default/,
     /Do not create a PRD\/plan\/design\/review package/,
     /scope is a hard boundary/,
-    /bounded work budget/,
-    /one inspection pass/,
-    /one focused validation command/,
-    /Stop on acceptance, a real blocker, or budget exhaustion/,
+    /user'?s? explicit budget/i,
+    /do not invent fixed inspection/i,
+    /Continue authorized work until acceptance/i,
+    /validation contract/i,
   ]) {
     assert.match(source, expectation, `model adaptation contract should include ${expectation}`)
   }

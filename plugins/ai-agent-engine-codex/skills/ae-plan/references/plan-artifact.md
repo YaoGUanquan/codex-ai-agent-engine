@@ -34,5 +34,7 @@ When the task may benefit from multi-agent execution, make the plan dependency-a
 
 - Every implementation unit must include `Depends on:` with either `none` or explicit unit IDs such as `U1`.
 - Every implementation unit must list owned files clearly enough for `task-analyze` to detect overlap.
+- Carry Role, Read-only files, Shared resources, Acceptance and Data Access Budget from the [plan template](plan-template.md). Use the canonical role catalog from the [adaptive team contract](../../ae-help/references/team-execution.md); do not define a second role/model catalog.
 - Do not design units only to reach a worker count. Split by real file ownership and dependency boundaries.
-- Shared config, public contracts, migrations, auth, lockfiles, and cross-cutting abstractions should usually stay serial unless a later plan proves disjoint ownership.
+- Inspect shared API, state-machine, schema and config resources even when units own different files. Shared reads may overlap; a shared resource with any writer or a file with any writer must be serialized.
+- Legacy plans remain usable; missing new fields are manual checks, not evidence of independent business contracts.

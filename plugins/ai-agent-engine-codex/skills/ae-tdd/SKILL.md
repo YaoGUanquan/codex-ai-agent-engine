@@ -20,7 +20,7 @@ For database-backed lists/counts or bulk/async persistence, select regression ca
 3. Write or update a failing test first.
 4. Run the target test and confirm it fails for the expected reason.
 5. Implement the smallest production change needed to make that test pass.
-6. Re-run the target test, then run broader validation if the change touches shared behavior.
+6. Validate the changed behavior using the [validation contract](../ae-help/references/validation-contract.md); reuse unaffected passing evidence.
 7. Refactor only after the behavior is protected by passing tests.
 8. Report the failing test, the fix, and the final validation commands.
 

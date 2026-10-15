@@ -13,7 +13,7 @@ test('root package and plugin manifest keep synchronized distribution versions',
   const packageJson = JSON.parse(readFileSync(resolve(repoRoot, 'package.json'), 'utf8'))
   const pluginManifest = JSON.parse(readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/.codex-plugin/plugin.json'), 'utf8'))
 
-  assert.match(packageJson.version, /^\d+\.\d+\.\d+$/)
+  assert.match(packageJson.version, /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/)
   assert.equal(pluginManifest.version, packageJson.version)
 })
 

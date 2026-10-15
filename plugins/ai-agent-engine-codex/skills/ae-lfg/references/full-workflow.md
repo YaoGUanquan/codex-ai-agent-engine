@@ -13,18 +13,24 @@ Before helper commands, resolve `aeEntry` using the [runtime entry contract](../
 
 Follow `pipeline.md`.
 
+For complex or delegated work, apply the
+[adaptive team contract](../../ae-help/references/team-execution.md). The parent
+owns integration and acceptance; use the central role catalog without inventing
+a second registry or scheduler. Requirements and architecture produce one
+proposal for user approval before implementation; reuse an approved plan.
+
 Default chain:
 
 1. ae-brainstorm if requirements are unclear or durable decisions are needed. When durable data is created or materially changed, require the decisions in `../../ae-backend/references/persistence-contract.md` before implementation. When frontend component, style, form, query, mutation, or API-access work is in scope, require the reuse and ownership decisions in `../../ae-frontend-design/references/component-data-access-contract.md` before implementation.
 2. Confirm requirements readiness: outcome, acceptance criteria, non-goals, chosen approach, validation expectations, and open questions.
-3. ae-review domain:document for any created requirements artifact.
+3. Review requirements when unresolved decisions or material risk need it; reuse an applicable existing review.
 4. ae-plan for S4 work, including plan readiness and self-review.
-5. ae-review domain:document for the plan.
+5. Check plan readiness and blocking findings; use a separate document review only when requested or required by risk or project rules.
 6. Confirm the consensus gate before implementation: requirements and plan artifacts exist when needed, document review has no blocking findings, assumptions are explicit, and the user has accepted or delegated any open product decisions.
 7. ae-work after Git/worktree safety checks.
-8. Maintain execution evidence with checkpoint notes or a lightweight ledger under `docs/00-process/active/<task>/` for S4 work.
-9. Run validation commands.
-10. ae-review for code changes.
+8. Maintain concise checkpoint state when needed for continuation; use an authorized documentation location only when durable evidence is required.
+9. Select and reuse validation using the shared validation contract linked from `pipeline.md`.
+10. Review the scoped diff; use ae-review for explicitly requested or risk-required specialist review.
 11. Browser verification when UI changed and browser tools are available.
 12. Final gate with proof path or blocked reasons.
 
@@ -34,6 +40,9 @@ Default chain:
 - Never start implementation while requirements or acceptance criteria are materially unclear.
 - Never treat a generated plan as ready until assumptions, alternatives, acceptance coverage, validation, and rollback signals have been checked.
 - Never treat "a file was generated" as consensus. The gate is only ready when the artifact content, review status, open decisions, and validation path are all known.
+- Candidate waves do not release dependencies. The parent accepts actual changes
+  and acceptance evidence before a unit passes; failures block affected work
+  while independent ready units may continue.
 - Do not repeatedly ask whether to continue between normal phases; ask only when a decision, credential, permission, or P0/P1 risk requires the user.
 - Use Codex approval/escalation rules for Git writes, destructive actions, network fetches, dependency installs, database writes, and browser setup.
 - If a worktree transfer is chosen, stop after writing the handoff and tell the user where to continue.
@@ -43,12 +52,14 @@ Default chain:
 Before ae-work starts on S4 tasks, record or confirm:
 
 - requirements status: none needed, confirmed inline, or artifact path,
-- plan status: artifact path and self-review result,
+- plan status: approved inline plan or artifact path and readiness result,
+- proposal approval: accepted requirements and architecture, reusing existing
+  approval when still applicable,
 - document review status: pass, findings accepted, or blocked,
 - open decisions: none, explicitly deferred, or user decision required,
 - validation contract: exact commands or checks expected before delivery.
 
-If any item is blocked or unknown, pause implementation and resolve the missing decision instead of assuming it.
+Resolve material unknown decisions before dependent implementation. A missing optional artifact does not block work whose requirements and acceptance are already clear.
 
 ## Execution Evidence
 

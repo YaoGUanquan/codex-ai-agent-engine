@@ -38,7 +38,7 @@ node scripts/install-project.mjs --target /path/to/your/codex-project
 Windows PowerShell：
 
 ```powershell
-node scripts\install-project.mjs --target <your-project-root>
+node scripts\install-project.mjs --target D:\codes\your-project
 ```
 
 重启或重新打开目标项目的 Codex 对话，然后在目标项目根目录初始化 AE 文档、过程归档、UTF-8 规则和 AI 记忆库骨架：
@@ -66,12 +66,17 @@ node scripts/ae-tools.mjs help
 
 ## 版本更新记录
 
-完整历史见 [CHANGELOG.md](CHANGELOG.md)；本节仅保留最近 5 个版本，发布时超出窗口的条目迁移到 CHANGELOG。
+### 0.4.0-beta.1（2026-10-15）
+- 新增按任务选择角色的团队合同与角色模板：复杂任务先确认方案，主代理负责原生调度、集成和实际验收，小任务继续直接执行。
+- 并行分析区分文件与业务资源的读写冲突，局部冲突按波次串行；新增宿主名额、执行状态和自动并发配置，保留显式关闭及只读选择，无关脏改动不再一律阻塞委派。
+- 强化从数据来源到输出的内存、查询与并发边界，补充隔离数据夹具及五类真实模型对照规范；首轮明确偏好 `gpt-6.1-sol`，不静默替换模型。
+- 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。静态与隔离安装仅证明辅助工具、规则和分发合同；真实模型对照尚未完成，不宣称质量、耗时或生产容量已提升。
 
-### 0.3.55（2026-10-13）
-- 移除 `.ae-source` 维护镜像：插件 `plugins/ai-agent-engine-codex/skills` 成为唯一技能源；删除 `check-skill-mirror` 并清理合同/语言/审计脚本中的镜像根。
-- 回归测试改为只断言插件 `SKILL_ROOT`；文档与发布清单去掉 ae-source 指引；版本升至 0.3.55。
-- 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。这些静态和本地检查不能证明真实 Codex host/model 行为。
+### 0.3.55（2026-10-15）
+- 全部 AE 技能关闭默认隐式调用，收紧入口触发条件；普通开发沿用直接执行路径，按具体风险或明确请求加载计划、文档和专项门禁。
+- 统一测试范围、通过结果复用和失效规则：单点失败先聚焦验证，扩大到全量前说明依据，审查、交付和上下文恢复不自动重跑；移除固定执行次数及脏工作区一律确认。
+- GPT-6.1 为首要行为验收目标，提供后续模型可复用的八类评测场景及三组对照、每组两次的执行规范；尚未完成真实模型行为评测，不宣称性能或质量提升已获证明。
+- 验证命令：`node --test tests/model-adaptation.test.mjs tests/instruction-audit.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。静态及隔离安装检查仅证明规则、元数据与分发合同，实际结果和未通过项以交付记录为准。
 
 ### 0.3.54（2026-09-30）
 - 精简 12 个高频 AE skill 入口至 4 KiB 以内，把详细流程拆为按触发条件加载的 references，减少默认上下文和重复流程。
@@ -89,11 +94,7 @@ node scripts/ae-tools.mjs help
 - 普通正文中的 `ae-doc-pages:v1` 格式名不再误判为损坏路由；外部文档维护在改写前建立报告和持久化逐文件日志，报告失败保留已应用清单、待核验文件和恢复信息并停止后续写入。
 - 验证命令：`node --test tests/install-scripts.test.mjs tests/docs-lifecycle.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。证据限于本地回归、故障注入和隔离安装；全局更新须另核验安装 journal、Codex 注册和 Cursor 副本，不代表当前会话已重新加载或生产验收。
 
-### 0.3.51（2026-09-27）
-- 打通规模化扫描与记忆分页：图、任务和审查影响分析默认排除不可变分片，显式纳入后仍只授予只读证据权限；计划模式也不能把分片变为 worker 写入所有权，审查改动清单始终保留真实变更。
-- recovery 支持单一绝对外部文档根与类型筛选，明确路径基准、范围和不完整性；错误根/参数不回退到仓库 docs，目录选择不等于已验证项目/分支登记。同步 LFG、工作委派、共享契约和 help 指引。
-- 联合记忆任务修复 Windows 文档大小写别名的身份与本地锁一致性，保留旧路由/分片兼容性；POSIX 不以统一小写合并不同文件。
-- 验证命令：`node --test tests/scale-memory-integration.test.mjs tests/docs-lifecycle.test.mjs tests/memory-navigation.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。证据限于本地隔离集成、双进程互斥、字节恢复和安装分发；不代表外部原文已迁移、当前用户安装已升级、跨主机一致性或生产吞吐验收，环境相关跳过以验证记录为准。
+完整历史见 [CHANGELOG.md](CHANGELOG.md)；本节仅保留最近 5 个版本，发布时超出窗口的条目迁移到 CHANGELOG。
 
 ## 能力清单
 
@@ -187,7 +188,7 @@ node scripts/ae-tools.mjs issue list
 node scripts/ae-tools.mjs skill-audit --out docs/ae/reports/skill-audit.json
 ```
 
-`task-analyze` 只生成供 Codex 父代理判断的 worker request 和并行波次，不会自行启动后台代理；写入 worker 仍要求显式授权、干净 Git、完整依赖和不重叠的文件所有权。`report` 默认生成无外部依赖的转义 HTML，只有同时提供 `--cdn --cdn-url https://...` 才启用 CDN。Issue 只跟踪状态、优先级、依赖和工件引用，不替代 PRD、plan、task、review、gate 或 evidence。
+`task-analyze` 只生成供 Codex 主代理判断的 worker request、就绪状态和候选波次，不会自行启动后台代理；写入 worker 要求授权、可安全共存的工作区、已核验依赖和独占写入所有权。`report` 默认生成无外部依赖的转义 HTML，只有同时提供 `--cdn --cdn-url https://...` 才启用 CDN。Issue 只跟踪状态、优先级、依赖和工件引用，不替代 PRD、plan、task、review、gate 或 evidence。
 
 ## 项目级安装
 
@@ -223,7 +224,7 @@ node scripts/install-project.mjs --target /path/to/your/codex-project --lang en
 - `scripts/update-ae-codex.mjs`
 - `scripts/set-ae-language.mjs`
 
-分发源仓库本身不支持作为安装目标；它使用用户级 personal 插件，技能唯一源为 `plugins/ai-agent-engine-codex/skills`。
+分发源仓库本身不支持作为安装目标；它使用用户级 personal 插件，并将维护镜像放在 `.ae-source/skills`，以避免重复发现。
 
 ## 从项目级安装迁移到用户级全局安装
 
@@ -232,7 +233,7 @@ node scripts/install-project.mjs --target /path/to/your/codex-project --lang en
 在分发仓库中先生成只读预览。该命令不会写入、删除或移动任何文件：
 
 ```powershell
-Set-Location '<AE_SOURCE_REPO>'
+Set-Location 'D:\codes\your-project'
 $preview = node scripts\install-global.mjs preview | ConvertFrom-Json
 $preview.projects | Format-Table root, role, components
 ```
@@ -243,12 +244,12 @@ $preview.projects | Format-Table root, role, components
 node scripts\install-global.mjs apply --apply --operation $preview.operationId --confirm $preview.confirmation
 ```
 
-默认 preview 只安装当前用户的全局插件，不会扫描或删除项目级副本。若要把项目级安装切换为全局安装，先创建显式 manifest；manifest 可以指向任意当前用户有权访问的项目根，不依赖本机 `<CODE_HOME>` 或固定项目名。确认 preview 中目标项目的每个组件都标记为 `owned: true` 后，才执行同一份 manifest 的 apply：
+默认 preview 只安装当前用户的全局插件，不会扫描或删除项目级副本。若要把项目级安装切换为全局安装，先创建显式 manifest；manifest 可以指向任意当前用户有权访问的项目根，不依赖本机 `D:\codes` 或固定项目名。确认 preview 中目标项目的每个组件都标记为 `owned: true` 后，才执行同一份 manifest 的 apply：
 
 ```json
 {
   "projects": [
-    { "root": "<WORK_PROJECT_ROOT>", "role": "consumer" }
+    { "root": "D:\\codes\\your-project", "role": "consumer" }
   ]
 }
 ```
@@ -270,7 +271,7 @@ node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" init --project-root (Get-L
 codex plugin list
 ```
 
-每个操作系统用户都有自己的 `$HOME`、dispatcher、备份和 personal marketplace；安装器不会扫描或修改其他用户的目录，也不会直接修改 `.codex/plugins/cache`。Codex 通过 personal 插件发现 AE 技能；Cursor 通过 `~/.cursor/skills/ae-*` 真实拷贝发现同一套技能（Cursor 不跟踪技能目录上的 symlink）。分发源仓库仅以 `plugins/ai-agent-engine-codex/skills` 为技能源；consumer 项目迁移后只应使用用户级分发。已打开的对话不会自动刷新技能目录。
+每个操作系统用户都有自己的 `$HOME`、dispatcher、备份和 personal marketplace；安装器不会扫描或修改其他用户的目录，也不会直接修改 `.codex/plugins/cache`。Codex 通过 personal 插件发现 AE 技能；Cursor 通过 `~/.cursor/skills/ae-*` 真实拷贝发现同一套技能（Cursor 不跟踪技能目录上的 symlink）。分发源仓库将维护镜像保存在 `.ae-source/skills`，避免与个人插件重复发现；consumer 项目迁移后只应使用用户级分发。已打开的对话不会自动刷新技能目录。
 
 ## 初始化项目文档和记忆库
 
@@ -427,18 +428,20 @@ Fetch and follow the update instructions from https://raw.githubusercontent.com/
 - `true`：显式开启多 agent 分析，行为与 `auto` 一样仍需满足安全门禁。
 - `false`：硬关闭，强制串行。
 
-推荐先使用安全默认配置：
+新安装的团队默认配置如下。只在显式调用 AE 后使用，复杂任务先确认方案；原有本地配置保留：
 
 ```yaml
 multi_agent:
   enabled: auto
-  mode: suggest
-  max_workers: 3
+  mode: auto
+  max_workers: auto
+  fallback_max_workers: 3
+  preferred_model: gpt-6.1-sol
   min_parallel_units: 2
-  require_clean_git: true
+  require_clean_git: false
   require_plan_dependencies: true
   require_disjoint_files: true
-  allow_write_agents: false
+  allow_write_agents: true
   review_lanes_parallel: true
 ```
 
@@ -456,7 +459,9 @@ New-Item -ItemType Directory -Force -Path .codex | Out-Null
 Copy-Item docs\ae\templates\ae-skill-profiles.example.yaml .codex\ae-skill-profiles.yaml
 ```
 
-如需允许写入型子代理自动并行，必须额外显式设置 `mode: auto` 和 `allow_write_agents: true`。即便如此，`task-analyze` 仍会要求计划依赖清晰、文件不冲突、并满足 Git 清洁状态等前置条件。合并到主分支后，其他项目应先运行更新命令，再复制或编辑 `.codex/ae-skill-profiles.yaml`，最后用实际计划验证：
+`false` 硬关闭、`suggest`、`review_only` 与显式 `allow_write_agents: false` 继续生效。更新不覆盖现有 `.codex/ae-skill-profiles.yaml`；已有文件时只编辑所需字段，不用模板覆盖自定义内容。主代理按角色模板调用当前可用原生工具；没有工具时说明采用串行执行，不声称实际运行了团队。
+
+分析器按独占写入、共同读取、共享业务资源与依赖安排候选波次；主代理核对改动和验收证据后才能释放后继任务。`--host-slots 3` 表示实际观察到的空闲 worker 名额，不包含主代理；未知时使用并披露 `fallback_max_workers`。`--execution-state <relative.json>` 可提供 `{"units":{"U1":"passed","U2":"failed"}}`，候选波次不代表任务已经通过。实际计划验证：
 
 ```bash
 node scripts/ae-tools.mjs task-analyze --mode plan --plan docs/ae/plans/<your-plan>.md
@@ -477,8 +482,8 @@ cp scripts/ae-tools.mjs /path/to/project/scripts/ae-tools.mjs
 Windows PowerShell：
 
 ```powershell
-New-Item -ItemType Directory -Force -Path <your-project-root>\scripts | Out-Null
-Copy-Item scripts\ae-tools.mjs <your-project-root>\scripts\ae-tools.mjs
+New-Item -ItemType Directory -Force -Path D:\codes\your-project\scripts | Out-Null
+Copy-Item scripts\ae-tools.mjs D:\codes\your-project\scripts\ae-tools.mjs
 ```
 
 3. 如果需要手动安装后继续切换技能列表语言，将 `scripts/set-language.mjs` 复制为目标项目的 `scripts/set-ae-language.mjs`。
@@ -503,6 +508,7 @@ Copy-Item scripts\ae-tools.mjs <your-project-root>\scripts\ae-tools.mjs
 ## 仓库结构
 
 ```text
+.ae-source/skills/               # 插件技能维护镜像，不是独立发现入口
 .agents/                         # consumer 项目安装布局；本仓库不以此为技能源
 plugins/ai-agent-engine-codex/   # Codex 插件主体
 scripts/ae-tools.mjs             # 根辅助命令入口
@@ -543,13 +549,13 @@ node scripts/ae-tools.mjs help
 node scripts/ae-tools.mjs ae-graph-build --root scripts
 ```
 
-如果本机有 Codex skill validator，也建议验证 `plugins/ai-agent-engine-codex/skills/*`。
+如果本机有 Codex skill validator，也建议验证 `plugins/ai-agent-engine-codex/skills/*` 和 `.ae-source/skills/*`。
 
 发布前可参考 [docs/release-checklist.md](docs/release-checklist.md)。
 
 ## 后续持续优化方向
 
-2026-08-11 的一轮全库扫描已经消除了根/插件 `update-project.mjs` 双份拷贝、把 `.tmp-install-smoke-checks/` 纳入 `.gitignore`、将 `scripts/check-claims.mjs --dry-run` 接入 `npm run check`，并把过期的三份 OPTIMIZATION 规划文档迁入私有仓库 `codex-ai-agent-engine-docs`（当时路径为过程归档目录）。剩余的结构性债务按优先级持续推进：
+2026-08-11 的一轮全库扫描已经消除了根/插件 `update-project.mjs` 双份拷贝、把 `.tmp-install-smoke-checks/` 纳入 `.gitignore`、将 `scripts/check-claims.mjs --dry-run` 接入 `npm run check`，并把过期的三份 OPTIMIZATION 规划文档归档到 `docs/99-archive/2026-08/skill-optimization-roadmap/`。剩余的结构性债务按优先级持续推进：
 
 1. ~~**拆分 `ae-tools.mjs` 单体**~~（**已完成 0.3.20**，`315db38`）：15 个命令模块 + 外置 init 模板；见 `docs/ae/experience/2026-08-11-structural-debt-refactor.md`。
 2. ~~**重组 `package.json` 的 `check` 命令串**~~（**已完成 0.3.20**）：`check:syntax` / `check:contracts` / `check:smoke` / `check:all`；测试断言改为分层存在性检查。
@@ -560,10 +566,10 @@ node scripts/ae-tools.mjs ae-graph-build --root scripts
 
 2026-08-11 **前后端技能对称优化（0.3.21）** 已落地：后端六语言指导、FE/BE 契约检查表、debug 边界速查、`ae-sql` 安全清单；见 `docs/ae/experience/2026-08-11-fullstack-skill-optimization.md`。2026-08-11 **前端技能优化（0.3.18 / 0.3.19）** 见 `docs/ae/experience/2026-08-11-frontend-skill-optimization.md`。剩余第 7、10 两项原为按需触发的挂起项；2026-08-11 复核触发未命中后，用户决定提前收尾，两项已随 **0.3.26** 完成：
 
-7. ~~**旧版本前端栈适配**~~（**已完成 0.3.26**）：`svelte-guidance.md`、`angular-guidance.md`、`vue-guidance.md` 各补最小旧栈对照节（Svelte 4 stores、NgModule 时代、Options API），与现代基线同文件并存，"匹配仓库既有风格"兜底与首行 stack-conditional 语句不变；回归用例锁定对照节与镜像。原按需触发策略由用户于 2026-08-11 决定提前执行（触发条件未命中），决策记录保存在私有仓库的项目记忆中。残余风险：对照条目为无真实缺陷驱动的预写，粒度是否够用待首个真实旧栈项目检验；不足时按决策记录仅为受影响框架扩展。
+7. ~~**旧版本前端栈适配**~~（**已完成 0.3.26**）：`svelte-guidance.md`、`angular-guidance.md`、`vue-guidance.md` 各补最小旧栈对照节（Svelte 4 stores、NgModule 时代、Options API），与现代基线同文件并存，"匹配仓库既有风格"兜底与首行 stack-conditional 语句不变；回归用例锁定对照节与镜像。原按需触发策略由用户于 2026-08-11 决定提前执行（触发条件未命中），见 `docs/08-ai-memory/05-decision-log.md`。残余风险：对照条目为无真实缺陷驱动的预写，粒度是否够用待首个真实旧栈项目检验；不足时按决策日志仅为受影响框架扩展。
 8. ~~**版本记录拆分**~~（**已完成，2026-08-11 本批**）：历史条目迁移至 `CHANGELOG.md` / `CHANGELOG.en.md`（完整历史），README 仅保留最近 5 条，`scripts/check-release-notes.mjs` 锁定窗口上限、CHANGELOG 链接与子集关系；见 `docs/ae/plans/2026-08-11-006-governance-batch-four-plan.md`。
-9. ~~**过程文档归档纪律**~~（**已完成，2026-08-11 本批**）：4 个已完成或指针任务目录已归档到私有仓库的过程文档中；tidy 对 archived-pointer 的保守保留策略未变，本仓收尾为一次性手动归档。
-10. ~~**前端质量契约的交叉一致性**~~（**已完成 0.3.26 批，仓库侧**）：轻量映射说明落地 `docs/ae/references/frontend-quality-contract-map.md`，登记 `web-ui-quality.md`、`ae-review` Frontend Components / Styles 镜头、`browser-acceptance.md` 之间 5 组对应关系、两处空档与既有测试锁；映射为描述性文档，不构成第 4 份契约面，仍不建校验脚本。评估与提前收尾记录保存在私有仓库的项目记忆中。残余风险：映射依赖人工维护——编辑三份契约文件时须按图核对对应组，这是不建校验脚本决策的已接受成本。
+9. ~~**过程文档归档纪律**~~（**已完成，2026-08-11 本批**）：4 个已完成或指针任务目录并入 `docs/00-process/archive/2026-08/`，active 目录只保留真正进行中的工作；tidy 对 archived-pointer 的保守保留策略未变，本仓收尾为一次性手动归档。
+10. ~~**前端质量契约的交叉一致性**~~（**已完成 0.3.26 批，仓库侧**）：轻量映射说明落地 `docs/ae/references/frontend-quality-contract-map.md`，登记 `web-ui-quality.md`、`ae-review` Frontend Components / Styles 镜头、`browser-acceptance.md` 之间 5 组对应关系、两处空档与既有测试锁；映射为描述性文档，不构成第 4 份契约面，仍不建校验脚本。评估与提前收尾记录见 `docs/08-ai-memory/05-decision-log.md`。残余风险：映射依赖人工维护——编辑三份契约文件时须按图核对对应组，这是不建校验脚本决策的已接受成本。
 11. ~~**知识库治理（下一批 0.3.22）**~~（**已完成 0.3.22**）：见 `docs/ae/prds/2026-08-11-knowledge-base-governance-prd.md` 与 `docs/ae/experience/`（维护者知识图谱见 `docs/ae/graphs/maintainer-artifact-graph.md`）。
 
 2026-08-11 **全量技能盘点（40 个 skill 逐一审查）** 完成：五层结构（工作流主链 10 / 实现车道 9 / 验证车道 2 / 独立工具 8 / 元治理 11）整体健康，路由边界、证据分层词汇与交接路由复核一致，既有治理项无回退；完整证据、发现与批次对比见 `docs/ae/solutions/2026-08-11-skill-portfolio-optimization-audit.md`。新增事项如下（12 先行、13-14 同批升版本、15 按需触发）：

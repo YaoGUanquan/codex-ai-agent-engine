@@ -1,16 +1,17 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { spawn, spawnSync } from 'node:child_process'
-import { chmodSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, symlinkSync, utimesSync, writeFileSync } from 'node:fs'
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, utimesSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
+import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 
-import { makeTempDir, runGit, runNodeScriptJson, runNodeScriptRaw, writeMemoryFixture } from './helpers/skill-test-utils.mjs'
+import { writeMemoryFixture, runNodeScriptJson, runGit, runNodeScriptRaw } from './helpers/skill-test-utils.mjs'
 
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
 
 test('global dispatcher exposes maintenance checkers without project wrappers', () => {
-  const tempRoot = makeTempDir('ae-dispatcher-maintenance-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-dispatcher-maintenance-'))
   try {
     mkdirSync(join(tempRoot, 'docs', 'ae'), { recursive: true })
     const script = resolve(repoRoot, 'plugins', 'ai-agent-engine-codex', 'scripts', 'ae-tools.mjs')
@@ -23,7 +24,7 @@ test('global dispatcher exposes maintenance checkers without project wrappers', 
 })
 
 test('global updater clones a release and completes preview/apply with the cloned installer', () => {
-  const fixtureRoot = makeTempDir('ae-global-update-success-')
+  const fixtureRoot = mkdtempSync(join(tmpdir(), 'ae-global-update-success-'))
   try {
     const sourceRoot = join(fixtureRoot, 'source')
     const updaterTemp = join(fixtureRoot, 'tmp')
@@ -58,7 +59,7 @@ test('global updater clones a release and completes preview/apply with the clone
 })
 
 test('global updater preserves the child exit code and cleans its clone after installer failure', () => {
-  const fixtureRoot = makeTempDir('ae-global-update-failure-')
+  const fixtureRoot = mkdtempSync(join(tmpdir(), 'ae-global-update-failure-'))
   try {
     const sourceRoot = join(fixtureRoot, 'source')
     const updaterTemp = join(fixtureRoot, 'tmp')
@@ -112,44 +113,8 @@ test('claude-delegate prompt mode skips safely when Claude is unavailable', () =
   }
 })
 
-// Writes a fake `claude` executable for the current platform: a `claude.cmd` batch file on
-// Windows (run through cmd.exe) and an executable POSIX sh script elsewhere. `version` is
-// printed for `--version`; `windows` and `posix` are the remaining script lines.
-function writeClaudeShim(dir, { version, windows, posix }) {
-  if (process.platform === 'win32') {
-    const shimPath = join(dir, 'claude.cmd')
-    writeFileSync(shimPath, [
-      '@echo off',
-      'if "%1"=="--version" (',
-      `  echo ${version}`,
-      '  exit /b 0',
-      ')',
-      ...windows,
-      '',
-    ].join('\r\n'), 'utf8')
-    return shimPath
-  }
-  const shimPath = join(dir, 'claude')
-  writeFileSync(shimPath, [
-    '#!/bin/sh',
-    'if [ "$1" = "--version" ]; then',
-    `  echo "${version}"`,
-    '  exit 0',
-    'fi',
-    ...posix,
-    '',
-  ].join('\n'), 'utf8')
-  chmodSync(shimPath, 0o755)
-  return shimPath
-}
-
-// .cmd shims only execute through cmd.exe, so these cases are meaningful on Windows only.
-const windowsCmdShimOnly = {
-  skip: process.platform !== 'win32' && 'requires Windows cmd.exe to execute .cmd shims',
-}
-
-test('claude-delegate supports Windows cmd shims', windowsCmdShimOnly, () => {
-  const tempRoot = makeTempDir('ae-claude-shim-')
+test('claude-delegate supports Windows cmd shims', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-claude-shim-'))
   try {
     const shimPath = join(tempRoot, 'claude.cmd')
     writeFileSync(shimPath, [
@@ -172,8 +137,8 @@ test('claude-delegate supports Windows cmd shims', windowsCmdShimOnly, () => {
   }
 })
 
-test('claude-delegate discovers Windows cmd shims on PATH', windowsCmdShimOnly, () => {
-  const tempRoot = makeTempDir('ae-claude-path-shim-')
+test('claude-delegate discovers Windows cmd shims on PATH', { skip: process.platform !== 'win32' }, () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-claude-path-shim-'))
   try {
     const shimPath = join(tempRoot, 'claude.cmd')
     writeFileSync(shimPath, [
@@ -200,13 +165,20 @@ test('claude-delegate discovers Windows cmd shims on PATH', windowsCmdShimOnly, 
 })
 
 test('claude-delegate sends default prompts through stdin', () => {
-  const tempRoot = makeTempDir('ae-claude-prompt-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-claude-prompt-'))
   try {
-    const shimPath = writeClaudeShim(tempRoot, {
-      version: '9.9.9 test-shim',
-      windows: ['set /p PROMPT=', 'echo shim-prompt:%PROMPT%'],
-      posix: ['IFS= read -r PROMPT', 'echo "shim-prompt:$PROMPT"'],
-    })
+    const shimPath = join(tempRoot, 'claude.cmd')
+    writeFileSync(shimPath, [
+      '@echo off',
+      'if "%1"=="--version" (',
+      '  echo 9.9.9 test-shim',
+      '  exit /b 0',
+      ')',
+      'set /p PROMPT=',
+      'echo shim-prompt:%PROMPT%',
+      '',
+    ].join('\r\n'), 'utf8')
+    chmodSync(shimPath, 0o755)
 
     const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'claude-delegate', '--prompt', 'AE_CLAUDE_OK', '--command', shimPath])
     assert.equal(result.status, 'ok')
@@ -226,13 +198,19 @@ test('claude-delegate sends default prompts through stdin', () => {
 })
 
 test('claude-delegate reports no-output diagnostics', () => {
-  const tempRoot = makeTempDir('ae-claude-no-output-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-claude-no-output-'))
   try {
-    const shimPath = writeClaudeShim(tempRoot, {
-      version: '9.9.9 no-output-shim',
-      windows: ['exit /b 0'],
-      posix: ['exit 0'],
-    })
+    const shimPath = join(tempRoot, 'claude.cmd')
+    writeFileSync(shimPath, [
+      '@echo off',
+      'if "%1"=="--version" (',
+      '  echo 9.9.9 no-output-shim',
+      '  exit /b 0',
+      ')',
+      'exit /b 0',
+      '',
+    ].join('\r\n'), 'utf8')
+    chmodSync(shimPath, 0o755)
 
     const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'claude-delegate', '--prompt', 'NO_OUTPUT', '--command', shimPath])
     assert.equal(result.status, 'ok')
@@ -271,7 +249,9 @@ test('help can find model compatibility guidance', () => {
 
 test('tiered capability help groups every skill and preserves filtered output', () => {
   const sourcePath = resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-help/references/capability-catalog.json')
+  const mirrorPath = resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-help/references/capability-catalog.json')
   const source = JSON.parse(readFileSync(sourcePath, 'utf8'))
+  const mirror = JSON.parse(readFileSync(mirrorPath, 'utf8'))
   const expectedByTier = {
     core: ['ae-ideate', 'ae-brainstorm', 'ae-prd', 'ae-design', 'ae-lfg', 'ae-plan', 'ae-constitution', 'ae-tasks', 'ae-work', 'ae-refactor', 'ae-review', 'ae-frontend-design', 'ae-web-app', 'ae-web-forge', 'ae-backend', 'ae-debug', 'ae-reverse-engineering', 'ae-task-loop', 'ae-tdd', 'ae-test-browser', 'ae-test-api', 'ae-handoff'],
     docs: ['ae-doc-humanize', 'ae-doc-structure', 'ae-markitdown', 'ae-work-report'],
@@ -279,6 +259,7 @@ test('tiered capability help groups every skill and preserves filtered output', 
     meta: ['ae-help', 'ae-init', 'ae-skill-creator', 'ae-skill-audit', 'ae-agent-creator', 'ae-update', 'ae-language'],
   }
 
+  assert.deepEqual(mirror, source, 'capability catalog mirror should match plugin source')
   assert.equal(source.source.observedCommit, '76d832c96a1c810410982bf28b425a3aedb461ab')
   assert.equal(source.source.license, 'GPL-3.0-or-later')
   assert.equal(source.skills.length, Object.values(expectedByTier).flat().length)
@@ -304,7 +285,7 @@ test('tiered capability help groups every skill and preserves filtered output', 
 })
 
 test('swagger parses local YAML and resolves local schema refs', () => {
-  const tempRoot = makeTempDir('ae-swagger-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-swagger-'))
   try {
     writeFileSync(join(tempRoot, 'openapi.yaml'), [
       'openapi: 3.0.0',
@@ -346,7 +327,7 @@ test('swagger parses local YAML and resolves local schema refs', () => {
 })
 
 test('swagger parses YAML sequence objects used by parameters', () => {
-  const tempRoot = makeTempDir('ae-swagger-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-swagger-'))
   try {
     writeFileSync(join(tempRoot, 'openapi.yaml'), [
       'openapi: 3.0.0',
@@ -390,7 +371,7 @@ test('swagger parses YAML sequence objects used by parameters', () => {
 })
 
 test('memory registry queries return only declared, bounded metadata and relations', () => {
-  const tempRoot = makeTempDir('ae-memory-registry-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-memory-registry-'))
   try {
     writeMemoryFixture(tempRoot)
     const before = readdirSync(tempRoot).sort()
@@ -423,8 +404,8 @@ test('memory registry queries return only declared, bounded metadata and relatio
 })
 
 test('memory registry rejects malformed data and reports no declared match separately', () => {
-  const tempRoot = makeTempDir('ae-memory-registry-')
-  const invalidRoot = makeTempDir('ae-memory-invalid-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-memory-registry-'))
+  const invalidRoot = mkdtempSync(join(tmpdir(), 'ae-memory-invalid-'))
   try {
     writeMemoryFixture(tempRoot)
     const noMatch = runNodeScriptJson(['scripts/ae-tools.mjs', 'ae-memory-query', '--topic', 'absent'], tempRoot)
@@ -463,7 +444,7 @@ test('memory registry rejects duplicate, unsafe, dangling, and unsupported decla
   ]
 
   for (const [label, mutate] of cases) {
-    const tempRoot = makeTempDir('ae-memory-invalid-')
+    const tempRoot = mkdtempSync(join(tmpdir(), 'ae-memory-invalid-'))
     try {
       writeMemoryFixture(tempRoot)
       const registryPath = join(tempRoot, 'docs', '08-ai-memory', '00-registry.json')
@@ -484,9 +465,9 @@ test('memory registry rejects duplicate, unsafe, dangling, and unsupported decla
 })
 
 test('memory registry preserves UTF-8 and rejects oversized registry or document reads', () => {
-  const utf8Root = makeTempDir('ae-memory-utf8-')
-  const registryRoot = makeTempDir('ae-memory-large-registry-')
-  const documentRoot = makeTempDir('ae-memory-large-document-')
+  const utf8Root = mkdtempSync(join(tmpdir(), 'ae-memory-utf8-'))
+  const registryRoot = mkdtempSync(join(tmpdir(), 'ae-memory-large-registry-'))
+  const documentRoot = mkdtempSync(join(tmpdir(), 'ae-memory-large-document-'))
   try {
     writeMemoryFixture(utf8Root)
     const utf8MemoryPath = join(utf8Root, 'docs', '08-ai-memory', '01-memory.md')
@@ -522,8 +503,8 @@ test('memory registry preserves UTF-8 and rejects oversized registry or document
 })
 
 test('memory registry rejects link path components before reading targets', () => {
-  const tempRoot = makeTempDir('ae-memory-link-')
-  const outsideRoot = makeTempDir('ae-memory-link-outside-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-memory-link-'))
+  const outsideRoot = mkdtempSync(join(tmpdir(), 'ae-memory-link-outside-'))
   const linkType = process.platform === 'win32' ? 'junction' : 'dir'
   try {
     mkdirSync(join(tempRoot, 'docs', '08-ai-memory'), { recursive: true })
@@ -558,8 +539,8 @@ test('memory registry rejects link path components before reading targets', () =
 })
 
 test('memory registry rejects linked --root ancestors before reading a registry', () => {
-  const tempRoot = makeTempDir('ae-memory-root-link-')
-  const outsideRoot = makeTempDir('ae-memory-root-link-outside-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-memory-root-link-'))
+  const outsideRoot = mkdtempSync(join(tmpdir(), 'ae-memory-root-link-outside-'))
   const linkType = process.platform === 'win32' ? 'junction' : 'dir'
   try {
     writeMemoryFixture(join(outsideRoot, 'scoped'))
@@ -580,7 +561,7 @@ test('memory registry rejects linked --root ancestors before reading a registry'
 })
 
 test('memory and graph commands reject missing values for value-taking options', () => {
-  const tempRoot = makeTempDir('ae-memory-missing-option-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-memory-missing-option-'))
   try {
     writeMemoryFixture(tempRoot)
     const contractCases = [
@@ -621,7 +602,7 @@ test('memory and graph commands reject missing values for value-taking options',
 })
 
 test('graph helpers report additive file and explicit edge limits without writing state', () => {
-  const tempRoot = makeTempDir('ae-graph-limits-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-graph-limits-'))
   try {
     mkdirSync(join(tempRoot, 'src'), { recursive: true })
     writeFileSync(join(tempRoot, 'src', 'main.js'), "import './first.js'\nimport './second.js'\n", 'utf8')
@@ -647,7 +628,7 @@ test('graph helpers report additive file and explicit edge limits without writin
 })
 
 test('graph-build reports shallow local dependencies', () => {
-  const tempRoot = makeTempDir('ae-graph-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-graph-'))
   try {
     mkdirSync(join(tempRoot, 'src'), { recursive: true })
     writeFileSync(join(tempRoot, 'src', 'main.js'), [
@@ -683,7 +664,7 @@ test('graph-build reports shallow local dependencies', () => {
 })
 
 test('graph-query filters shallow graph by path', () => {
-  const tempRoot = makeTempDir('ae-graph-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-graph-'))
   try {
     mkdirSync(join(tempRoot, 'src'), { recursive: true })
     writeFileSync(join(tempRoot, 'src', 'main.js'), "import './helper.js'\n", 'utf8')
@@ -712,7 +693,7 @@ test('graph helper documentation states that graph snapshots are not persisted',
 })
 
 test('review-contract selects reviewers and writes evidence ledger records', () => {
-  const tempRoot = makeTempDir('ae-review-contract-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-review-contract-'))
   try {
     mkdirSync(join(tempRoot, 'docs', 'ae'), { recursive: true })
     const result = runNodeScriptJson([
@@ -747,7 +728,7 @@ test('review-contract selects reviewers and writes evidence ledger records', () 
 })
 
 test('review-contract rejects unsupported selectors before writing evidence', () => {
-  const tempRoot = makeTempDir('ae-review-contract-invalid-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-review-contract-invalid-'))
   try {
     mkdirSync(join(tempRoot, 'docs', 'ae'), { recursive: true })
     for (const args of [
@@ -766,7 +747,7 @@ test('review-contract rejects unsupported selectors before writing evidence', ()
 })
 
 test('evidence ledger preserves all concurrent writer events', async () => {
-  const tempRoot = makeTempDir('ae-evidence-concurrent-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-evidence-concurrent-'))
   try {
     mkdirSync(join(tempRoot, 'docs', 'ae'), { recursive: true })
     const writer = (index) => new Promise((resolvePromise, rejectPromise) => {
@@ -786,7 +767,7 @@ test('evidence ledger preserves all concurrent writer events', async () => {
 })
 
 test('task-brief extracts a single AE implementation unit into an evidence artifact', () => {
-  const tempRoot = makeTempDir('ae-task-brief-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-brief-'))
   try {
     mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
     writeFileSync(join(tempRoot, 'docs', 'ae', 'plans', 'plan.md'), [
@@ -829,7 +810,7 @@ test('task-brief extracts a single AE implementation unit into an evidence artif
 })
 
 test('task-brief accepts Unit-style headings that task-analyze already supports', () => {
-  const tempRoot = makeTempDir('ae-task-brief-unit-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-brief-unit-'))
   try {
     mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
     writeFileSync(join(tempRoot, 'docs', 'ae', 'plans', 'plan.md'), [
@@ -869,7 +850,7 @@ test('task-brief accepts Unit-style headings that task-analyze already supports'
 })
 
 test('task-brief accepts localized 单元 headings that task-analyze already supports', () => {
-  const tempRoot = makeTempDir('ae-task-brief-cn-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-brief-cn-'))
   try {
     mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
     writeFileSync(join(tempRoot, 'docs', 'ae', 'plans', 'plan.md'), [
@@ -909,7 +890,7 @@ test('task-brief accepts localized 单元 headings that task-analyze already sup
 })
 
 test('review-package writes a fingerprint artifact without the full diff body', () => {
-  const tempRoot = makeTempDir('ae-review-package-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-review-package-'))
   try {
     runGit(['init'], tempRoot)
     runGit(['config', 'user.name', 'Codex Test'], tempRoot)
@@ -972,7 +953,7 @@ test('review-package writes a fingerprint artifact without the full diff body', 
 })
 
 test('review-package retains renamed file identity in its review inventory', () => {
-  const tempRoot = makeTempDir('ae-review-package-rename-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-review-package-rename-'))
   try {
     runGit(['init'], tempRoot)
     runGit(['config', 'user.name', 'Codex Test'], tempRoot)
@@ -1008,7 +989,7 @@ test('review-package retains renamed file identity in its review inventory', () 
 })
 
 test('review-package marks binary files without invented line counts', () => {
-  const tempRoot = makeTempDir('ae-review-package-binary-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-review-package-binary-'))
   try {
     runGit(['init'], tempRoot)
     runGit(['config', 'user.name', 'Codex Test'], tempRoot)
@@ -1042,7 +1023,7 @@ test('review-package marks binary files without invented line counts', () => {
 })
 
 test('recovery lists canonical PRD artifacts alongside legacy brainstorm requirements', () => {
-  const tempRoot = makeTempDir('ae-recovery-prds-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-recovery-prds-'))
   try {
     mkdirSync(join(tempRoot, 'docs', 'ae', 'prds'), { recursive: true })
     mkdirSync(join(tempRoot, 'docs', 'ae', 'brainstorms'), { recursive: true })
@@ -1059,7 +1040,7 @@ test('recovery lists canonical PRD artifacts alongside legacy brainstorm require
 })
 
 test('init provisions the canonical prds directory and stops creating the legacy ai-memory pointer', () => {
-  const tempRoot = makeTempDir('ae-init-scaffold-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-init-scaffold-'))
   try {
     writeFileSync(join(tempRoot, 'package.json'), JSON.stringify({ name: 'init-fixture', type: 'module' }), 'utf8')
     const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'init', '--dry-run', '--project-root', tempRoot], tempRoot)
@@ -1073,10 +1054,10 @@ test('init provisions the canonical prds directory and stops creating the legacy
 })
 
 test('init profiles bound the scaffold and generated AGENTS.md includes real package scripts', () => {
-  const minimalRoot = makeTempDir('ae-init-minimal-')
-  const coreRoot = makeTempDir('ae-init-core-')
-  const fullRoot = makeTempDir('ae-init-full-')
-  const guidanceRoot = makeTempDir('ae-init-guidance-')
+  const minimalRoot = mkdtempSync(join(tmpdir(), 'ae-init-minimal-'))
+  const coreRoot = mkdtempSync(join(tmpdir(), 'ae-init-core-'))
+  const fullRoot = mkdtempSync(join(tmpdir(), 'ae-init-full-'))
+  const guidanceRoot = mkdtempSync(join(tmpdir(), 'ae-init-guidance-'))
   try {
     writeFileSync(join(minimalRoot, 'package.json'), JSON.stringify({
       name: 'profile-fixture',
@@ -1156,7 +1137,7 @@ test('init profiles bound the scaffold and generated AGENTS.md includes real pac
 })
 
 test('init explains Codex overrides and previews bounded nested instruction candidates without writing them', () => {
-  const tempRoot = makeTempDir('ae-init-instructions-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-init-instructions-'))
   try {
     writeFileSync(join(tempRoot, 'package.json'), JSON.stringify({ name: 'instruction-fixture' }), 'utf8')
     writeFileSync(join(tempRoot, 'AGENTS.md'), '# standard\n', 'utf8')
@@ -1180,8 +1161,8 @@ test('init explains Codex overrides and previews bounded nested instruction cand
 })
 
 test('init force replaces only bounded managed regions and reports legacy marker conflicts', () => {
-  const boundedRoot = makeTempDir('ae-init-bounded-')
-  const legacyRoot = makeTempDir('ae-init-legacy-')
+  const boundedRoot = mkdtempSync(join(tmpdir(), 'ae-init-bounded-'))
+  const legacyRoot = mkdtempSync(join(tmpdir(), 'ae-init-legacy-'))
   try {
     writeFileSync(join(boundedRoot, 'package.json'), JSON.stringify({ name: 'bounded', scripts: { test: 'old-test' } }), 'utf8')
     runNodeScriptJson(['scripts/ae-tools.mjs', 'init', '--profile', 'minimal', '--project-root', boundedRoot], boundedRoot)
@@ -1207,7 +1188,7 @@ test('init force replaces only bounded managed regions and reports legacy marker
 })
 
 test('gate records each repeated validation flag separately', () => {
-  const tempRoot = makeTempDir('ae-gate-validation-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-gate-validation-'))
   try {
     mkdirSync(join(tempRoot, 'docs', 'ae'), { recursive: true })
     const execution = spawnSync(process.execPath, [
@@ -1230,7 +1211,7 @@ test('gate records each repeated validation flag separately', () => {
 })
 
 function buildTidyFixture() {
-  const tempRoot = makeTempDir('ae-tidy-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-tidy-'))
   const activeRoot = join(tempRoot, 'docs', '00-process', 'active')
   const oldDate = new Date(Date.now() - 100 * 24 * 60 * 60 * 1000)
 
@@ -1318,7 +1299,7 @@ test('tidy apply archives done notes, removes empty dirs, moves expired evidence
 })
 
 test('tidy merges a done note into an existing archive target file by file', () => {
-  const tempRoot = makeTempDir('ae-tidy-merge-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-tidy-merge-'))
   try {
     mkdirSync(join(tempRoot, 'docs', 'ae'), { recursive: true })
     const activeDir = join(tempRoot, 'docs', '00-process', 'active', 'merge-task')
@@ -1349,7 +1330,7 @@ test('tidy merges a done note into an existing archive target file by file', () 
 })
 
 test('tidy reports memory files that exceed the size budget', () => {
-  const tempRoot = makeTempDir('ae-tidy-memory-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-tidy-memory-'))
   try {
     mkdirSync(join(tempRoot, 'docs', 'ae'), { recursive: true })
     mkdirSync(join(tempRoot, 'docs', '08-ai-memory'), { recursive: true })
@@ -1378,7 +1359,7 @@ test('tidy archives stale notes only when --archive-stale is set', () => {
 })
 
 test('markitdown converts JSON arrays and CSV files to Markdown tables', () => {
-  const tempRoot = makeTempDir('ae-markitdown-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-markitdown-'))
   try {
     writeFileSync(join(tempRoot, 'items.json'), JSON.stringify([{ name: 'Ada', score: 2 }, { name: 'Lin', score: 3 }]), 'utf8')
     writeFileSync(join(tempRoot, 'items.csv'), 'name,score\nAda,2\nLin,3\n', 'utf8')
@@ -1400,7 +1381,7 @@ test('markitdown converts JSON arrays and CSV files to Markdown tables', () => {
 })
 
 test('markitdown parses quoted CSV and TSV fields and rejects malformed quotes', () => {
-  const tempRoot = makeTempDir('ae-markitdown-quoted-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-markitdown-quoted-'))
   try {
     writeFileSync(join(tempRoot, 'items.csv'), 'name,note\r\nAda,"one, two"\r\nLin,"said ""hi""\nand more"\r\n', 'utf8')
     writeFileSync(join(tempRoot, 'items.tsv'), 'name\tnote\nAda\t"one\ttwo"\n', 'utf8')
@@ -1419,7 +1400,7 @@ test('markitdown parses quoted CSV and TSV fields and rejects malformed quotes',
 })
 
 test('static-server dry run returns a local preview URL without starting a process', () => {
-  const tempRoot = makeTempDir('ae-static-server-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-static-server-'))
   try {
     writeFileSync(join(tempRoot, 'index.html'), '<!doctype html><title>AE</title>', 'utf8')
     const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'static-server', 'index.html', '--port', '43123', '--dry-run'], tempRoot)
@@ -1433,7 +1414,7 @@ test('static-server dry run returns a local preview URL without starting a proce
 })
 
 test('report generates an offline self-contained HTML artifact and escapes evidence', () => {
-  const tempRoot = makeTempDir('ae-report-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-report-'))
   try {
     mkdirSync(join(tempRoot, 'docs', 'ae', 'evidence'), { recursive: true })
     const input = join(tempRoot, 'docs', 'ae', 'evidence', 'report.json')
@@ -1465,7 +1446,7 @@ test('report generates an offline self-contained HTML artifact and escapes evide
 })
 
 test('issue tracker creates, links, transitions, and lists local issues', () => {
-  const tempRoot = makeTempDir('ae-issue-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-issue-'))
   try {
     writeFileSync(join(tempRoot, 'AGENTS.md'), '# fixture\n', 'utf8')
     mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
@@ -1504,8 +1485,8 @@ test('issue tracker creates, links, transitions, and lists local issues', () => 
 })
 
 test('report and issue tracker reject canonical link escapes', async (t) => {
-  const tempRoot = makeTempDir('ae-local-tools-guard-')
-  const outsideRoot = makeTempDir('ae-local-tools-outside-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-local-tools-guard-'))
+  const outsideRoot = mkdtempSync(join(tmpdir(), 'ae-local-tools-outside-'))
   try {
     mkdirSync(join(tempRoot, 'docs', 'ae', 'evidence'), { recursive: true })
     writeFileSync(join(outsideRoot, 'report.json'), JSON.stringify({ title: 'outside' }), 'utf8')
@@ -1545,8 +1526,8 @@ test('report and issue tracker reject canonical link escapes', async (t) => {
 })
 
 test('static-server rejects non-loopback hosts and canonical path escapes', async (t) => {
-  const tempRoot = makeTempDir('ae-static-server-guard-')
-  const outsideRoot = makeTempDir('ae-static-server-outside-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-static-server-guard-'))
+  const outsideRoot = mkdtempSync(join(tmpdir(), 'ae-static-server-outside-'))
   try {
     writeFileSync(join(tempRoot, 'index.html'), '<!doctype html><title>AE</title>', 'utf8')
     writeFileSync(join(outsideRoot, 'secret.html'), 'not in workspace', 'utf8')
@@ -1586,8 +1567,8 @@ test('static-server rejects non-loopback hosts and canonical path escapes', asyn
   }
 })
 
-test('task-analyze reports multi-agent defaults as auto suggest', () => {
-  const tempRoot = makeTempDir('ae-task-')
+test('task-analyze reports automatic defaults while keeping dispatch parent-gated', () => {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-'))
   try {
     mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
     writeFileSync(join(tempRoot, 'docs', 'ae', 'plans', 'plan.md'), [
@@ -1608,8 +1589,8 @@ test('task-analyze reports multi-agent defaults as auto suggest', () => {
     const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'task-analyze', '--mode', 'plan', '--plan', 'docs/ae/plans/plan.md'], tempRoot)
     assert.equal(result.multi_agent_config.source, 'default')
     assert.equal(result.multi_agent_config.effective.enabled, 'auto')
-    assert.equal(result.multi_agent_config.effective.mode, 'suggest')
-    assert.equal(result.execution_strategy, 'suggest_parallel')
+    assert.equal(result.multi_agent_config.effective.mode, 'auto')
+    assert.equal(result.execution_strategy, 'auto_parallel_ready')
     assert.equal(result.parallel_eligibility.can_parallelize, true)
     assert.equal(result.parallel_eligibility.can_spawn_write_agents, false)
     assert.deepEqual(result.parallel_eligibility.blockers, [])
@@ -1620,7 +1601,7 @@ test('task-analyze reports multi-agent defaults as auto suggest', () => {
 })
 
 test('task-analyze keeps multi-agent disabled when enabled is false', () => {
-  const tempRoot = makeTempDir('ae-task-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-'))
   try {
     mkdirSync(join(tempRoot, '.codex'), { recursive: true })
     mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
@@ -1667,7 +1648,7 @@ test('task-analyze keeps multi-agent disabled when enabled is false', () => {
 })
 
 test('task-analyze treats enabled auto as automatic safe suggestion', () => {
-  const tempRoot = makeTempDir('ae-task-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-'))
   try {
     mkdirSync(join(tempRoot, '.codex'), { recursive: true })
     mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
@@ -1712,7 +1693,7 @@ test('task-analyze treats enabled auto as automatic safe suggestion', () => {
 })
 
 test('task-analyze disables parallelism for invalid explicit multi-agent enabled values', () => {
-  const tempRoot = makeTempDir('ae-task-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-'))
   try {
     mkdirSync(join(tempRoot, '.codex'), { recursive: true })
     mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
@@ -1756,7 +1737,7 @@ test('task-analyze disables parallelism for invalid explicit multi-agent enabled
 })
 
 test('task-analyze uses opt-in multi-agent suggest config for dependency waves', () => {
-  const tempRoot = makeTempDir('ae-task-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-'))
   try {
     mkdirSync(join(tempRoot, '.codex'), { recursive: true })
     mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
@@ -1811,7 +1792,7 @@ test('task-analyze uses opt-in multi-agent suggest config for dependency waves',
 })
 
 test('task-analyze blocks auto write agents unless allow_write_agents is true', () => {
-  const tempRoot = makeTempDir('ae-task-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-'))
   try {
     mkdirSync(join(tempRoot, '.codex'), { recursive: true })
     mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
@@ -1859,7 +1840,7 @@ test('task-analyze blocks auto write agents unless allow_write_agents is true', 
 })
 
 test('task-analyze reports auto parallel readiness only with write-agent opt-in', () => {
-  const tempRoot = makeTempDir('ae-task-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-'))
   try {
     mkdirSync(join(tempRoot, '.codex'), { recursive: true })
     mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
@@ -1914,7 +1895,7 @@ test('task-analyze reports auto parallel readiness only with write-agent opt-in'
 })
 
 test('task-analyze keeps review_only as read-only parallel strategy without write agents', () => {
-  const tempRoot = makeTempDir('ae-task-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-'))
   try {
     mkdirSync(join(tempRoot, '.codex'), { recursive: true })
     mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
@@ -1963,7 +1944,7 @@ test('task-analyze keeps review_only as read-only parallel strategy without writ
 })
 
 test('task-analyze separates write config readiness from pre-edit spawn readiness', () => {
-  const tempRoot = makeTempDir('ae-task-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-'))
   try {
     mkdirSync(join(tempRoot, '.codex'), { recursive: true })
     mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
@@ -2000,7 +1981,10 @@ test('task-analyze separates write config readiness from pre-edit spawn readines
     assert.equal(result.write_parallel_eligibility.can_parallelize, true)
     assert.equal(result.write_parallel_eligibility.config_allows_write_agents, true)
     assert.equal(result.write_parallel_eligibility.can_spawn_write_agents_now, false)
-    assert.deepEqual(result.write_parallel_eligibility.pre_spawn_requirements, ['ae-work pre-edit gate must confirm a clean Git state before write delegation'])
+    assert.deepEqual(result.write_parallel_eligibility.pre_spawn_requirements, [
+      'ae-work pre-edit gate must confirm a clean Git state before write delegation',
+      'parent must manually review missing business independence, acceptance and data budget declarations before write delegation',
+    ])
     assert.equal(result.parallel_eligibility.can_spawn_write_agents, false)
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
@@ -2008,7 +1992,7 @@ test('task-analyze separates write config readiness from pre-edit spawn readines
 })
 
 test('task-analyze parses forbidden files separately from owned files', () => {
-  const tempRoot = makeTempDir('ae-task-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-'))
   try {
     mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
     writeFileSync(join(tempRoot, 'docs', 'ae', 'plans', 'plan.md'), [
@@ -2040,7 +2024,7 @@ test('task-analyze parses forbidden files separately from owned files', () => {
 })
 
 test('task-analyze keeps comma-separated dependency ids with trailing punctuation', () => {
-  const tempRoot = makeTempDir('ae-task-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-task-'))
   try {
     mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
     writeFileSync(join(tempRoot, 'docs', 'ae', 'plans', 'plan.md'), [
@@ -2106,7 +2090,7 @@ test('ae-tools command modules stay an acyclic layered import graph', () => {
 })
 
 test('skill-audit --watch compares pinned commits without writing skills', () => {
-  const tempRoot = makeTempDir('ae-skill-watch-')
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-skill-watch-'))
   const pinned = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
   const watchlist = {
     schemaVersion: 1,

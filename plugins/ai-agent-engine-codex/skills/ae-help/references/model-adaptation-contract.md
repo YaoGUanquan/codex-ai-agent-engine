@@ -7,6 +7,10 @@ Use this contract for AE orchestration and instruction design. It is model-neutr
 - Read the active tool schema and current repository state before choosing an execution path. Never infer that a tool, lifecycle hook, sub-agent mode, browser feature, or approval behavior exists from a model label or documentation for another host.
 - Treat provider model catalogs and supported reasoning levels as runtime metadata. When they disagree with the outgoing request or backend response, report a provider/catalog defect instead of compensating in skill text.
 - Scale analysis, artifacts, and validation to task class, risk, acceptance criteria, and evidence boundary. Do not make a workflow heavier or lighter only because the selected model is newer, larger, or described as more capable.
+- Use the [adaptive team contract](team-execution.md) for approved multi-unit work.
+  Keep authorization, privacy, user work, business invariants and evidence hard;
+  choose roles, concurrency, process depth and supported effort from the task.
+  Unrelated dirty work is not a blanket delegation blocker.
 
 ## Task-Size Gate
 
@@ -21,7 +25,9 @@ For `micro` and `small` requests, use the smallest applicable path by default: i
 
 If the user names files, a defect, or an explicit scope, that scope is a hard boundary. Do not reinterpret a checklist, neighboring feature, or “complete” workflow as a new requirement. Expand only when current evidence proves the requested behavior cannot be handled within scope; state the trigger and the newly required files before expanding.
 
-Set a bounded work budget before execution. For `micro`/`small`, default to one inspection pass, one implementation/review pass, and one focused validation command (plus a single targeted retry when a new diagnostic changes the approach). For `standard`/`high-risk`, record the applicable time, token, tool, file, and validation budget or mark it as an explicit open constraint. Stop on acceptance, a real blocker, or budget exhaustion; do not continue searching or polishing for completeness.
+Use the user's explicit budget when provided; do not invent fixed inspection, tool-call, test or retry limits. Continue authorized work until acceptance, a real blocker, or that explicit budget is reached. After failure, use new diagnostic evidence to change the next step rather than repeat an unchanged failing path.
+
+For ordinary development, inspect relevant evidence, implement, validate and review the scoped diff. Multiple files or modules alone do not require a full pipeline. Load planning, documentation and specialist gates only for a concrete risk, applicable project rule or explicit request; reuse an approved plan rather than planning again. Apply the [validation contract](validation-contract.md) for test selection and evidence reuse.
 
 ## Instruction Economy
 
@@ -32,6 +38,7 @@ Set a bounded work budget before execution. For `micro`/`small`, default to one 
 ## Autonomy And Clarification
 
 - Proceed with a stated low-risk assumption when repository evidence makes one path materially more likely and rollback is straightforward.
+- Existing unrelated work or the default branch alone is not a reason to interrupt authorized reversible edits. Inspect overlapping changes, preserve the user's work, and ask only when safe coexistence or an actual decision cannot be resolved. Git writes and other protected actions retain their authorization requirements.
 - Ask one focused question only when the answer changes product behavior, architecture, data shape, security posture, irreversible action, or the required validation tier.
 - Do not repeatedly ask whether to continue through an already-approved workflow. Pause only for an actual decision, missing credential, external side effect, blocking contradiction, or P0/P1 risk.
 

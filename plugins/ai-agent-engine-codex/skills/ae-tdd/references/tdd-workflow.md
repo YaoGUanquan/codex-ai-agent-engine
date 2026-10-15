@@ -8,7 +8,7 @@ Use this loop:
 2. Run it and confirm the failure reason matches the target behavior.
 3. Make the smallest implementation change needed to pass.
 4. Re-run the target test.
-5. Run nearby tests when the change touches shared behavior.
+5. Select affected checks and reuse valid evidence using the [validation contract](../../ae-help/references/validation-contract.md).
 6. Refactor only with passing tests.
 
 Work vertically: one behavior test, the smallest implementation, then the next behavior. Do not write a horizontal batch of imagined tests before the implementation teaches you the actual interface.
