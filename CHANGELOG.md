@@ -4,10 +4,17 @@
 
 English: [CHANGELOG.en.md](CHANGELOG.en.md)
 
-### 0.3.55（2026-10-13）
-- 移除 `.ae-source` 维护镜像：插件 `plugins/ai-agent-engine-codex/skills` 成为唯一技能源；删除 `check-skill-mirror` 并清理合同/语言/审计脚本中的镜像根。
-- 回归测试改为只断言插件 `SKILL_ROOT`；文档与发布清单去掉 ae-source 指引；版本升至 0.3.55。
-- 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。这些静态和本地检查不能证明真实 Codex host/model 行为。
+### 0.4.0-beta.1（2026-10-15）
+- 新增按任务选择角色的团队合同与角色模板：复杂任务先确认方案，主代理负责原生调度、集成和实际验收，小任务继续直接执行。
+- 并行分析区分文件与业务资源的读写冲突，局部冲突按波次串行；新增宿主名额、执行状态和自动并发配置，保留显式关闭及只读选择，无关脏改动不再一律阻塞委派。
+- 强化从数据来源到输出的内存、查询与并发边界，补充隔离数据夹具及五类真实模型对照规范；首轮明确偏好 `gpt-6.1-sol`，不静默替换模型。
+- 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。静态与隔离安装仅证明辅助工具、规则和分发合同；真实模型对照尚未完成，不宣称质量、耗时或生产容量已提升。
+
+### 0.3.55（2026-10-15）
+- 全部 AE 技能关闭默认隐式调用，收紧入口触发条件；普通开发沿用直接执行路径，按具体风险或明确请求加载计划、文档和专项门禁。
+- 统一测试范围、通过结果复用和失效规则：单点失败先聚焦验证，扩大到全量前说明依据，审查、交付和上下文恢复不自动重跑；移除固定执行次数及脏工作区一律确认。
+- GPT-6.1 为首要行为验收目标，提供后续模型可复用的八类评测场景及三组对照、每组两次的执行规范；尚未完成真实模型行为评测，不宣称性能或质量提升已获证明。
+- 验证命令：`node --test tests/model-adaptation.test.mjs tests/instruction-audit.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。静态及隔离安装检查仅证明规则、元数据与分发合同，实际结果和未通过项以交付记录为准。
 
 ### 0.3.54（2026-09-30）
 - 精简 12 个高频 AE skill 入口至 4 KiB 以内，把详细流程拆为按触发条件加载的 references，减少默认上下文和重复流程。
@@ -45,7 +52,7 @@ English: [CHANGELOG.en.md](CHANGELOG.en.md)
 ### 0.3.48（2026-09-27）
 - 记忆入口改为最多 4096 UTF-8 字节/80 行的短导航，专题预算 15KiB；新增 `ae-memory-index` 审计/门禁及带源哈希校验的无损整理，历史分片保留原字节，不自动删除或蒸馏其他专题。
 - 新增 `ae-memory-search` 有界字面检索，默认返回 5 个短摘录及路径/行号；历史显式选择，扫描截断明确报告，外部 docs 由调用方先解析分支后显式传入。原声明式关系查询不变，读写模板禁止入口追加日期流水。
-- 验证命令：`node --test tests/memory-navigation.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。仅证明本地文件/CLI、镜像与隔离安装合同；<WORK_PROJECT> 隔离样本不代表原目录已迁移，全局安装和模型 token/延迟收益未验证。
+- 验证命令：`node --test tests/memory-navigation.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。仅证明本地文件/CLI、镜像与隔离安装合同；Axon 隔离样本不代表原目录已迁移，全局安装和模型 token/延迟收益未验证。
 
 ### 0.3.47（2026-09-24）
 - 后端大数据量设计新增按需加载的数据访问契约，贯穿 14 个需求、设计、实现、重构、诊断与验收技能：明确查询预算、逻辑分页对象、独立 count 验收、批量执行与事务提交边界，避免无依据的逐条查询/提交。
@@ -169,8 +176,8 @@ English: [CHANGELOG.en.md](CHANGELOG.en.md)
 
 ### 0.3.22（2026-08-11）
 - 知识库治理第一批：`docs/ae/prds/` 为需求正典目录；`ae-brainstorm` 持久化需求时复用 `ae-prd` 捕获契约并写入 `docs/ae/prds/`，删除重复的 `requirements-capture.md`；`recovery` 扫描 PRD 产物；init 创建 `docs/ae/prds` 且不再创建 `docs/ai-memory` 兼容指针（存量项目不动）。
-- `review-package` 改为指纹产物（提交列表、diffstat、清单、base/head SHA 与 `git diff -U10` 重建命令），不再嵌入全量 diff 正文；init/archive 模板新增 gate/evidence 3 个月保留策略。
-- 曾新增公开仓库内的外部样本语料说明；该语料现已迁出公开仓库，改由私有仓库 `codex-ai-agent-engine-docs` 管理。
+- `review-package` 改为指纹产物（提交列表、diffstat、清单、base/head SHA 与 `git diff -U10` 重建命令），不再嵌入全量 diff 正文；init/archive 模板与 `docs/00-process/templates/archive-rules.md` 新增 gate/evidence 3 个月保留策略。
+- 新增 `docs/external-samples/README.md` 登记样本语料用途与保留条件。
 - 验证：`node scripts/check-skill-mirror.mjs`、`node scripts/check-release-notes.mjs`、`npm test`、`npm run check`、`npm run check:smoke`。这些检查只证明 CLI、技能文档与分发合同一致，不代表目标项目 init 或审查工作流的运行时验收。
 
 ### 0.3.21（2026-08-11）

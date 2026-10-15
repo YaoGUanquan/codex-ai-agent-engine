@@ -1,5 +1,7 @@
 # Debugging Workflow
 
+Use the [validation contract](../../ae-help/references/validation-contract.md) to select checks and reuse passing results across investigation and delivery.
+
 ## Feedback Loop Gate
 
 Do not move from exploration to a root-cause story until one red-capable loop has been run. Record one command or harness that reaches the user's exact symptom, is deterministic, and completes quickly enough to repeat. If no such loop can be built, stop and report the missing environment or artifact instead of guessing.
@@ -12,7 +14,7 @@ Debug in this order:
 4. Form 3-5 ranked, falsifiable hypotheses and state the prediction for each before probing.
 5. Test one prediction at a time with commands, code inspection, or browser tools.
 6. Change the smallest thing that explains the failure.
-7. Re-run the failing case and one nearby healthy case.
+7. Run the repaired case and any directly affected checks selected by the validation contract.
 
 Useful evidence to capture (redact secrets before recording):
 
@@ -22,7 +24,7 @@ Useful evidence to capture (redact secrets before recording):
 - relevant request or response data,
 - recent code path touched by the failure.
 
-Tag temporary diagnostics with a unique marker such as `[DEBUG-<id>]`. Before completion, rerun the original loop, remove tagged diagnostics and throwaway harnesses, and verify the marker no longer exists. Never persist credentials, authorization headers, cookies, or raw private payloads in an evidence artifact.
+Tag temporary diagnostics with a unique marker such as `[DEBUG-<id>]`. Before completion, remove tagged diagnostics and throwaway harnesses and verify the marker no longer exists. Reuse valid evidence for the original symptom; rerun only checks affected by cleanup or other relevant changes. Never persist credentials, authorization headers, cookies, or raw private payloads in an evidence artifact.
 
 ## Frontend Failure Quick Map
 

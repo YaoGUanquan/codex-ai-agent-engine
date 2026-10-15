@@ -4,10 +4,17 @@ This file is the complete release history of AI Agent Engine for Codex (since 0.
 
 中文版本: [CHANGELOG.md](CHANGELOG.md)
 
-### 0.3.55 (2026-10-13)
-- Remove the `.ae-source` maintenance mirror: plugin `plugins/ai-agent-engine-codex/skills` is the only skill source; delete `check-skill-mirror` and drop mirror roots from contract/language/audit scripts.
-- Rewrite regression tests to assert only the plugin `SKILL_ROOT`; scrub ae-source guidance from docs and the release checklist; bump to 0.3.55.
-- Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These static and local checks do not prove live Codex host/model behavior.
+### 0.4.0-beta.1 (2026-10-15)
+- Add reusable team roles and a task-sensitive execution contract: approve complex plans first, keep small tasks inline, and let the parent own native dispatch, integration and evidence-backed acceptance.
+- Analyze file and business-resource read/write conflicts per wave, with host slots, execution state and automatic concurrency. Preserve explicit off/read-only choices and allow unrelated dirty work.
+- Strengthen source-to-output memory, query and concurrency budgets with isolated data fixtures and a five-case real-model comparison specification. Explicitly prefer `gpt-6.1-sol` for the trial without silent model substitution.
+- Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, `git diff --check`. Static and isolated-install checks establish helper, instruction and distribution contracts only. Real-model comparison is pending; quality, speed and production capacity gains are unproven.
+
+### 0.3.55 (2026-10-15)
+- Disable implicit invocation for all AE skills and narrow entry triggers. Ordinary development follows direct execution; planning, documentation and specialist gates load for concrete risks or explicit requests.
+- Share test selection, evidence reuse and invalidation rules: isolate single failures, explain full-suite escalation, and avoid reruns merely for review, shipping or context recovery. Remove fixed execution counts and blanket dirty-worktree confirmations.
+- Make GPT-6.1 the primary behavior acceptance target with eight reusable scenarios and three comparison variants, each repeated twice. Real model evaluation is pending; performance and quality improvements are not yet proven.
+- Validation commands: `node --test tests/model-adaptation.test.mjs tests/instruction-audit.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, `git diff --check`. Static and isolated-install checks establish written rules, metadata and distribution contracts only; delivery records report actual outcomes and failures.
 
 ### 0.3.54 (2026-09-30)
 - Compress 12 high-frequency AE skill entrypoints to under 4 KiB and move detailed procedures into conditionally loaded references, reducing default context and repeated workflow text.
@@ -45,7 +52,7 @@ This file is the complete release history of AI Agent Engine for Codex (since 0.
 ### 0.3.48 (2026-09-27)
 - Bound the memory router to 4096 UTF-8 bytes/80 lines and topics to 15KiB. Add `ae-memory-index` audit/check and source-hash-guarded lossless compaction; immutable pages preserve original bytes without deleting history or distilling other topics.
 - Add `ae-memory-search` bounded literal search: five short path/line excerpts by default, explicit historical scope, visible scan truncation and caller-resolved external docs roots. Declared relation queries remain unchanged; templates prohibit dated logs in the router.
-- Validation commands: `node --test tests/memory-navigation.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. Evidence covers local filesystem/CLI, mirrors and isolated installation contracts only; an isolated <WORK_PROJECT> sample is not live migration, global installation or measured model token/latency improvement.
+- Validation commands: `node --test tests/memory-navigation.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. Evidence covers local filesystem/CLI, mirrors and isolated installation contracts only; an isolated Axon sample is not live migration, global installation or measured model token/latency improvement.
 
 ### 0.3.47 (2026-09-24)
 - Add a conditional data-access contract across 14 requirement, design, implementation, refactoring, diagnosis and acceptance skills: query budgets, logical pagination units, separate count validation, and execution-batch versus transaction-commit boundaries.
@@ -169,8 +176,8 @@ This file is the complete release history of AI Agent Engine for Codex (since 0.
 
 ### 0.3.22 (2026-08-11)
 - Knowledge-base governance batch one: `docs/ae/prds/` is the canonical requirements directory; `ae-brainstorm` reuses the `ae-prd` capture contract and writes durable requirements to `docs/ae/prds/`, removing the duplicate `requirements-capture.md`; `recovery` scans PRD artifacts; init provisions `docs/ae/prds` and no longer creates the legacy `docs/ai-memory` compatibility pointer (existing projects are unchanged).
-- `review-package` now emits fingerprint artifacts (commit list, diffstat, inventory, base/head SHA, and a `git diff -U10` rebuild command) instead of embedding the full diff body; init/archive templates add a three-month gate/evidence retention policy.
-- Previously added an external sample-corpus note under the public tree; that corpus now lives in the private docs repo `codex-ai-agent-engine-docs` instead.
+- `review-package` now emits fingerprint artifacts (commit list, diffstat, inventory, base/head SHA, and a `git diff -U10` rebuild command) instead of embedding the full diff body; init/archive templates and `docs/00-process/templates/archive-rules.md` add a three-month gate/evidence retention policy.
+- Added `docs/external-samples/README.md` to register sample corpus purpose and retention rules.
 - Validation: `node scripts/check-skill-mirror.mjs`, `node scripts/check-release-notes.mjs`, `npm test`, `npm run check`, and `npm run check:smoke`. These checks prove CLI, skill docs, and distribution contracts only, not target-project init or review workflow runtime acceptance.
 
 ### 0.3.21 (2026-08-11)

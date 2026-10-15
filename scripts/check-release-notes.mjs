@@ -15,12 +15,13 @@ const releaseNotePairs = [
   { readme: 'README.en.md', changelog: 'CHANGELOG.en.md' },
 ]
 const MAX_README_ENTRIES = 5
+const semver = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
 
 const packageJson = readJson(packagePath, 'package.json')
 const manifest = readJson(manifestPath, 'plugin manifest')
 const version = packageJson?.version
 
-if (version && !/^\d+\.\d+\.\d+$/.test(version)) {
+if (version && !semver.test(version)) {
   errors.push(`package version must be SemVer: ${version}`)
 }
 
@@ -104,8 +105,8 @@ function readReleaseNotes(label) {
 }
 
 function listVersionEntries(content) {
-  const matches = content.matchAll(/^###\s+(\d+\.\d+\.\d+)\s*[（(]/gm)
-  return Array.from(matches, (match) => match[1])
+  const matches = content.matchAll(/^###\s+([^\s（(]+)\s*[（(]/gm)
+  return Array.from(matches, (match) => match[1]).filter((value) => semver.test(value))
 }
 
 function validateReleaseNote(content, label, version) {

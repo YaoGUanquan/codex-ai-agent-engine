@@ -11,6 +11,8 @@ Before reproducing a test or runtime failure, read the [test side-effect boundar
 
 Investigate a failure systematically before changing code.
 
+Use the [validation contract](../ae-help/references/validation-contract.md) for targeted reproduction, evidence reuse and test stopping.
+
 For slow lists/counts, N+1, bulk persistence or async-job failures, use the [data-access and scale contract](../ae-backend/references/data-access-contract.md) to trace generated SQL, count/data timings, call counts, transaction/flush boundaries, pool/queue pressure and committed progress. Read its framework reference only for the actual stack. Keep diagnosis read-only when a fix was not requested; do not invent a root cause or replace the architecture merely because data is large.
 
 ## Operating Principles

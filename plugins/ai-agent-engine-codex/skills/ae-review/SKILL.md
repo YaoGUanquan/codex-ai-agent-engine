@@ -8,6 +8,9 @@ description: Use when the user requests ae-review, /ae-review, $ae-review, or re
 Review the user's locked scope and return evidence-backed findings before any
 summary.
 
+Apply the [validation contract](../ae-help/references/validation-contract.md):
+assess existing evidence and request only missing or invalid checks.
+
 1. Read [scope-detection](references/scope-detection.md) and select one scope
    and one domain.
 2. Start at the smallest review class. S1 is one behavior or at most three
@@ -22,8 +25,10 @@ summary.
 5. Stop when the scoped verdict and required evidence are supported.
 
 Default to `mode:report-only`; `mode:autofix` permits only deterministic
-in-scope fixes preserving user changes. Never spawn agents without explicit
-user authorization. A missing specification is a gap, not a new requirement.
+in-scope fixes preserving user changes. For independent review lanes, load the
+[adaptive team contract](../ae-help/references/team-execution.md); keep small
+reviews inline, respect runtime/config controls and dispatch read-only roles.
+A missing specification is a gap, not a new requirement.
 Return `APPROVE`, `COMMENT`, `REQUEST_CHANGES`, or `BLOCK`; the strictest
 applicable lane wins. Accepted serious findings remain residual risk.
 

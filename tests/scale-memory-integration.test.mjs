@@ -1,7 +1,8 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { existsSync, mkdirSync, readFileSync, rmSync, symlinkSync, utimesSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, utimesSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
+import { tmpdir } from 'node:os'
 import { spawnSync } from 'node:child_process'
 import { graphBuild, graphQuery, collectSourceFiles } from '../plugins/ai-agent-engine-codex/scripts/ae-tools/graph.mjs'
 import { taskAnalyze } from '../plugins/ai-agent-engine-codex/scripts/ae-tools/tasks.mjs'
@@ -9,10 +10,9 @@ import { recovery } from '../plugins/ai-agent-engine-codex/scripts/ae-tools/reco
 import { docsMaintain, docsSearch, isDocumentPage } from '../plugins/ai-agent-engine-codex/scripts/docs-lifecycle.mjs'
 import { memoryIndex, memorySearch } from '../plugins/ai-agent-engine-codex/scripts/memory-navigation.mjs'
 import { reviewPackage } from '../plugins/ai-agent-engine-codex/scripts/ae-tools/review.mjs'
-import { makeTempDir } from './helpers/skill-test-utils.mjs'
 
 function fixture(t) {
-  const root = makeTempDir('ae-scale-memory-')
+  const root = mkdtempSync(join(tmpdir(), 'ae-scale-memory-'))
   const docs = join(root, 'docs')
   mkdirSync(docs)
   t.after(() => rmSync(root, { recursive: true, force: true }))
@@ -162,7 +162,8 @@ test('plan-declared immutable pages cannot become writable worker ownership', (t
   assert.deepEqual(result.worker_requests[0].read_only_files, [page])
   assert.ok(result.worker_requests[0].forbidden_files.includes(page))
   assert.equal(result.worker_requests[0].authorization, 'read-only-review')
-  assert.equal(result.write_parallel_eligibility.can_parallelize, false)
+  assert.equal(result.write_parallel_eligibility.can_parallelize, true)
+  assert.deepEqual(result.worker_requests[1].owned_files, ['src/current.js'])
   assert.ok(result.warnings.some((warning) => /immutable document pages/i.test(warning)))
 })
 

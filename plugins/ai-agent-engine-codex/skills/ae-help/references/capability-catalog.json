@@ -156,7 +156,7 @@
       "tier": "core",
       "entry": "/ae-web-forge",
       "target": "统一前端/Web 路由",
-      "purpose": "作为统一入口执行前端/Web 四问题路由，选择 ae-frontend-design、ae-web-app 和 ae-test-browser 等 Codex-native skills，并限制最多 3 轮返工。"
+      "purpose": "作为统一入口按需执行前端/Web 四问题路由，选择 ae-frontend-design、ae-web-app 和 ae-test-browser 等 Codex-native skills；达到验收、真实阻塞或用户明确预算时停止，复用有效验证。"
     },
     {
       "name": "ae-backend",
@@ -314,8 +314,8 @@
     },
     {
       "name": "task-analyze",
-      "purpose": "Suggest bounded source candidates or plan units with dependency and parallel-readiness checks; immutable document pages are read-only evidence, never writable worker ownership.",
-      "script": "node \"$aeEntry\" task-analyze (--mode plan --plan <path>|--mode scan --task <text> [--root <repo-relative-dir>] [--include-document-pages])"
+      "purpose": "Suggest bounded candidates or conflict-aware team waves with roles, file/resource ownership, host capacity and acceptance-based readiness; immutable pages remain read-only and the parent owns actual dispatch.",
+      "script": "node \"$aeEntry\" task-analyze (--mode plan --plan <path> [--host-slots <nonnegative-integer>] [--execution-state <relative-json>]|--mode scan --task <text> [--root <repo-relative-dir>] [--include-document-pages])"
     },
     {
       "name": "init",

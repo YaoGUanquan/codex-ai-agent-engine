@@ -1,6 +1,10 @@
 # Review Personas
 
-Use these personas as review lenses. In Codex they are not automatically registered agents. The orchestrating skill can either apply them directly or spawn sub-agents when the user explicitly allows parallel agent work.
+Use these personas as review lenses, not a second role catalog or automatically
+registered agents. Apply them inline for small reviews. For independent native
+lanes, follow the [adaptive team contract](../../ae-help/references/team-execution.md)
+and its canonical reviewer/architect roles. The parent owns integration and
+acceptance; every dispatched review instance remains read-only.
 
 ## Code Domain
 
