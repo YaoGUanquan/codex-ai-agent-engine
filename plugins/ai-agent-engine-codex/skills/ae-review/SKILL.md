@@ -1,12 +1,15 @@
 ---
 name: ae-review
-description: Use when the user requests ae-review, /ae-review, $ae-review, or review of code, documents, plans, requirements, or delivery risk.
+description: Use only when explicitly requested as $ae-review or its named AE capability. Scope includes the user requests ae-review, /ae-review, $ae-review, or review of code, documents, plans, requirements, or delivery risk.
 ---
 
 # AE Review
 
 Review the user's locked scope and return evidence-backed findings before any
 summary.
+
+Apply the [validation contract](../ae-help/references/validation-contract.md):
+assess existing evidence and request only missing or invalid checks.
 
 1. Read [scope-detection](references/scope-detection.md) and select one scope
    and one domain.

@@ -1,6 +1,6 @@
 ---
 name: ae-lfg
-description: Use when the user explicitly requests ae-lfg, /ae-lfg, $ae-lfg, or the full AE workflow for genuinely multi-step engineering work.
+description: Use only when explicitly requested as $ae-lfg or its named AE capability. Scope includes the user explicitly requests ae-lfg, /ae-lfg, $ae-lfg, or the full AE workflow for genuinely multi-step engineering work.
 ---
 
 # AE LFG
@@ -33,5 +33,5 @@ For data-backed queries/writes, use the [data-access contract](../ae-backend/ref
 For scale-sensitive work, use the [scale contract](../ae-help/references/scale-and-distributed-engineering.md).
 For workflow sizing and recovery, use the [model-adaptation contract](../ae-help/references/model-adaptation-contract.md).
 
-Stop at acceptance, a real blocker, or the declared work budget. Never claim a
+Stop at acceptance, a real blocker, or a user-specified budget. Never claim a
 higher validation tier from a lower one.

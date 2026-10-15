@@ -1,6 +1,6 @@
 ---
 name: ae-tasks
-description: Use when the user asks for AE tasks, task breakdown, dependency-ordered implementation tasks, task IDs, parallel markers, file-level task lists, or turning an approved AE plan into executable task artifacts.
+description: Use only when explicitly requested as $ae-tasks or its named AE capability. Scope includes the user asks for AE tasks, task breakdown, dependency-ordered implementation tasks, task IDs, parallel markers, file-level task lists, or turning an approved AE plan into executable task artifacts.
 ---
 
 # AE Tasks

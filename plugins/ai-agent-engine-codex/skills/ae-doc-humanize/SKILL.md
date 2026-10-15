@@ -1,6 +1,6 @@
 ---
 name: ae-doc-humanize
-description: Use when the user asks for AE doc humanize, /ae-doc-humanize, make a document easier to read, rewrite structured notes into human-readable prose, polish docs, or improve readability without changing facts.
+description: Use only when explicitly requested as $ae-doc-humanize or its named AE capability. Scope includes the user asks for AE doc humanize, /ae-doc-humanize, make a document easier to read, rewrite structured notes into human-readable prose, polish docs, or improve readability without changing facts.
 ---
 
 # AE Doc Humanize

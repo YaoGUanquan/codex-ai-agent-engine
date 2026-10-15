@@ -6,7 +6,7 @@ Before final response:
 
 1. Inspect `git status --short`.
 2. Summarize changed files, completed units, and any intentionally deferred work.
-3. Run the narrowest meaningful validation commands, then broader validation if appropriate.
+3. Apply the [validation contract](../../ae-help/references/validation-contract.md): inspect existing results and run only required checks whose evidence is missing or invalid.
 4. Record exact evidence for pass, fail, or blocked results.
 5. Run review or explain why review was not run.
 6. Run `node "$aeEntry" gate --workflow work --checkpoint final ...` or perform equivalent gate checks.
