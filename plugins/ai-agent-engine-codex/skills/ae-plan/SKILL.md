@@ -1,6 +1,6 @@
 ---
 name: ae-plan
-description: Use when the user requests ae-plan, /ae-plan, $ae-plan, or an implementation, technical, or design plan before coding.
+description: Use only when explicitly requested as $ae-plan or its named AE capability. Scope includes the user requests ae-plan, /ae-plan, $ae-plan, or an implementation, technical, or design plan before coding.
 ---
 
 # AE Plan

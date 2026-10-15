@@ -12,11 +12,11 @@ git log --oneline -1
 
 If the directory is not a Git repository, say so and use `worktree_decision: not_applicable`.
 
-Then decide with the user when needed:
+Then choose the safe path from the actual diff and applicable project rules:
 
-- default branch or dirty worktree: explain the risk and ask before continuing, creating a branch, or creating a worktree.
-- feature branch and clean worktree: continue unless the task is risky enough to need a worktree.
-- if the plan touches shared config, auth, public contracts, or a risky refactor, propose an isolated branch or worktree and a baseline validation pass before editing.
+- Preserve unrelated existing changes and continue authorized reversible edits, including on a default branch or dirty worktree.
+- Inspect overlapping edits and work with them. Ask only if safe coexistence is unresolved, authorization is missing, or a material product/security/data decision is required.
+- Use isolation when a concrete conflict or applicable project rule requires it; do not create a branch or worktree merely because a workflow phase began.
 - Git writes such as commit, reset, clean, rebase, push, or worktree add require explicit user approval and Codex escalation rules.
 
 ## Minimality Gate
@@ -46,7 +46,7 @@ Before editing behavior, choose the smallest correct implementation that satisfi
 - Establish a baseline when the task is a bug fix or behavior-sensitive refactor.
 - Add tests or update existing tests when behavior changes.
 - Stop and report blockers when the failure mode invalidates the current step or assumptions.
-- Run the narrowest meaningful validation, then broader validation when practical.
+- Apply the [validation contract](../../ae-help/references/validation-contract.md); reuse valid results and run only missing or invalid checks.
 - When a changed local API or UI surface has an explicit runtime smoke request, read [the local runtime smoke gate](local-runtime-smoke-gate.md) after focused validation. It defines the trigger synonyms, restart and request classification checks, safe secret-reference boundary, and evidence needed before a local call is claimed.
 - Track validation commands exactly for final reporting.
 - When using a task artifact, mark or report task completion only after the corresponding file change or validation evidence exists.

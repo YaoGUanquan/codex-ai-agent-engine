@@ -1,6 +1,6 @@
 ---
 name: ae-agent-creator
-description: Use when the user asks for AE agent creator, /ae-agent-creator, create an agent prompt, subagent template, reviewer persona, delegated worker profile, or Codex-compatible agent guidance.
+description: Use only when explicitly requested as $ae-agent-creator or its named AE capability. Scope includes the user asks for AE agent creator, /ae-agent-creator, create an agent prompt, subagent template, reviewer persona, delegated worker profile, or Codex-compatible agent guidance.
 ---
 
 # AE Agent Creator

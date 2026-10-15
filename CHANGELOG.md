@@ -4,6 +4,11 @@
 
 English: [CHANGELOG.en.md](CHANGELOG.en.md)
 
+### 0.3.56（2026-10-15）
+- 统一测试范围、通过结果复用和失效规则：单点失败先聚焦验证，扩大到全量前说明依据，审查、交付和上下文恢复不自动重跑；移除固定执行次数及脏工作区一律确认。收紧技能入口触发文案，强调明确请求后再加载专项门禁（默认 `implicit` 档位仍为 `all`，与 I 中期约定一致）。
+- GPT-6.1 为首要行为验收目标，提供后续模型可复用的八类评测场景及三组对照、每组两次的执行规范；尚未完成真实模型行为评测，不宣称性能或质量提升已获证明。
+- 验证命令：`node --test tests/model-adaptation.test.mjs tests/instruction-audit.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。静态及隔离安装检查仅证明规则、元数据与分发合同，实际结果和未通过项以交付记录为准。
+
 ### 0.3.55（2026-10-13）
 - 移除 `.ae-source` 维护镜像：插件 `plugins/ai-agent-engine-codex/skills` 成为唯一技能源；删除 `check-skill-mirror` 并清理合同/语言/审计脚本中的镜像根。
 - 回归测试改为只断言插件 `SKILL_ROOT`；文档与发布清单去掉 ae-source 指引；版本升至 0.3.55。

@@ -13,6 +13,11 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 
 中文文档: [README.md](README.md)
 
+### 0.3.56 (2026-10-15)
+- Share test selection, evidence reuse and invalidation rules: isolate single failures, explain full-suite escalation, and avoid reruns merely for review, shipping or context recovery. Remove fixed execution counts and blanket dirty-worktree confirmations. Narrow skill entry trigger copy to emphasize explicit requests before specialist gates (default `implicit` tier remains `all`, matching the mid-I series plan).
+- Make GPT-6.1 the primary behavior acceptance target with eight reusable scenarios and three comparison variants, each repeated twice. Real model evaluation is pending; performance and quality improvements are not yet proven.
+- Validation commands: `node --test tests/model-adaptation.test.mjs tests/instruction-audit.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, `git diff --check`. Static and isolated-install checks establish written rules, metadata and distribution contracts only; delivery records report actual outcomes and failures.
+
 ### 0.3.55 (2026-10-13)
 - Remove the `.ae-source` maintenance mirror: plugin `plugins/ai-agent-engine-codex/skills` is the only skill source; delete `check-skill-mirror` and drop mirror roots from contract/language/audit scripts.
 - Rewrite regression tests to assert only the plugin `SKILL_ROOT`; scrub ae-source guidance from docs and the release checklist; bump to 0.3.55.
@@ -33,12 +38,6 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 - Fix reviewed installation recovery failures: reject missing arguments before locking and preserve bounded, redacted updater diagnostics, operation IDs and journal paths, distinguishing completed rollback from failed recovery.
 - Ordinary mentions of `ae-doc-pages:v1` no longer count as damaged routers. External document maintenance creates a durable report and per-file journal before mutation; reporting failures retain applied/pending recovery evidence and stop further writes.
 - Validation commands: `node --test tests/install-scripts.test.mjs tests/docs-lifecycle.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. Evidence covers local regressions, fault injection and isolated installation. Global updates require separate journal, Codex registration and Cursor-copy verification, not current-chat reload or production acceptance.
-
-### 0.3.51 (2026-09-27)
-- Integrate bounded scanning with memory pagination: graph, task and review-impact scans exclude immutable pages by default. Explicit inclusion remains read-only evidence, including plan-declared pages; workers never acquire page write ownership, while changed-file review inventories remain intact.
-- Recovery accepts one absolute external docs root and artifact-type filtering with explicit path bases, scope and completeness. Invalid roots/options never fall back to repository docs, and location selection does not verify registered project/branch identity. Update LFG, worker guidance, the shared contract and help.
-- Coordinate with memory maintenance to unify Windows document case-alias identity and local locks while preserving legacy routers/pages; POSIX identities are not merged through blanket lowercasing.
-- Validation commands: `node --test tests/scale-memory-integration.test.mjs tests/docs-lifecycle.test.mjs tests/memory-navigation.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. Evidence covers isolated local integration, two-process exclusion, byte recovery and installation distribution, not live external migration, current-user installation, multi-host consistency or production throughput. See validation records for environment-specific skips.
 
 ## When To Use It
 

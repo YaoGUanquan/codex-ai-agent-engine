@@ -1,6 +1,6 @@
 ---
 name: ae-prompt-optimize
-description: Use when the user asks for AE prompt optimize, /ae-prompt-optimize, improve a prompt, make a task prompt clearer for Codex, turn vague instructions into executable prompts, or create reusable agent prompts.
+description: Use only when explicitly requested as $ae-prompt-optimize or its named AE capability. Scope includes the user asks for AE prompt optimize, /ae-prompt-optimize, improve a prompt, make a task prompt clearer for Codex, turn vague instructions into executable prompts, or create reusable agent prompts.
 ---
 
 # AE Prompt Optimize

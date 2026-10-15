@@ -4,6 +4,11 @@ This file is the complete release history of AI Agent Engine for Codex (since 0.
 
 中文版本: [CHANGELOG.md](CHANGELOG.md)
 
+### 0.3.56 (2026-10-15)
+- Share test selection, evidence reuse and invalidation rules: isolate single failures, explain full-suite escalation, and avoid reruns merely for review, shipping or context recovery. Remove fixed execution counts and blanket dirty-worktree confirmations. Narrow skill entry trigger copy to emphasize explicit requests before specialist gates (default `implicit` tier remains `all`, matching the mid-I series plan).
+- Make GPT-6.1 the primary behavior acceptance target with eight reusable scenarios and three comparison variants, each repeated twice. Real model evaluation is pending; performance and quality improvements are not yet proven.
+- Validation commands: `node --test tests/model-adaptation.test.mjs tests/instruction-audit.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, `git diff --check`. Static and isolated-install checks establish written rules, metadata and distribution contracts only; delivery records report actual outcomes and failures.
+
 ### 0.3.55 (2026-10-13)
 - Remove the `.ae-source` maintenance mirror: plugin `plugins/ai-agent-engine-codex/skills` is the only skill source; delete `check-skill-mirror` and drop mirror roots from contract/language/audit scripts.
 - Rewrite regression tests to assert only the plugin `SKILL_ROOT`; scrub ae-source guidance from docs and the release checklist; bump to 0.3.55.

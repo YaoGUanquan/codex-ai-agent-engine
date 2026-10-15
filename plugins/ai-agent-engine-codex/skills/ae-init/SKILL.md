@@ -1,6 +1,6 @@
 ---
 name: ae-init
-description: Use when the user requests AE init, /ae-init, or explicit initialization of AE project guidance and documentation scaffolding.
+description: Use only when explicitly requested as $ae-init or its named AE capability. Scope includes the user requests AE init, /ae-init, or explicit initialization of AE project guidance and documentation scaffolding.
 ---
 
 # AE Init

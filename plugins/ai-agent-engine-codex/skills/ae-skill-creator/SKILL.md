@@ -1,6 +1,6 @@
 ---
 name: ae-skill-creator
-description: Use when the user asks for AE skill creator, /ae-skill-creator, create a Codex skill, update a skill, scaffold a workflow skill, or convert a repeated workflow into a reusable Codex skill.
+description: Use only when explicitly requested as $ae-skill-creator or its named AE capability. Scope includes the user asks for AE skill creator, /ae-skill-creator, create a Codex skill, update a skill, scaffold a workflow skill, or convert a repeated workflow into a reusable Codex skill.
 ---
 
 # AE Skill Creator

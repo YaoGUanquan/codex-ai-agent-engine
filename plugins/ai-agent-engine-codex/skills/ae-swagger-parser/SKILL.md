@@ -1,6 +1,6 @@
 ---
 name: ae-swagger-parser
-description: Use when the user asks to inspect, summarize, filter, or explain Swagger/OpenAPI JSON or YAML, or uses /ae-swagger-parser, Swagger, OpenAPI, interface summary, API contract summary, method:, path:, tag:, keyword:, or mode:detail.
+description: Use only when explicitly requested as $ae-swagger-parser or its named AE capability. Scope includes the user asks to inspect, summarize, filter, or explain Swagger/OpenAPI JSON or YAML, or uses /ae-swagger-parser, Swagger, OpenAPI, interface summary, API contract summary, method:, path:, tag:, keyword:, or mode:detail.
 ---
 
 # AE Swagger Parser

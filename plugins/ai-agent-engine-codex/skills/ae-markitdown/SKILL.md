@@ -1,6 +1,6 @@
 ---
 name: ae-markitdown
-description: Use when the user asks to convert, read, extract, or normalize a local file as Markdown, especially HTML, CSV, TSV, JSON, YAML, XML, text, or Markdown files. Lightweight local-only conversion; no remote URLs or binary document parsing.
+description: Use only when explicitly requested as $ae-markitdown or its named AE capability. Scope includes the user asks to convert, read, extract, or normalize a local file as Markdown, especially HTML, CSV, TSV, JSON, YAML, XML, text, or Markdown files. Lightweight local-only conversion; no remote URLs or binary document parsing.
 ---
 
 # AE Markitdown

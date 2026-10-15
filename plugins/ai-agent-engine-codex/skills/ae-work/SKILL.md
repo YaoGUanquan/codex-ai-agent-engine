@@ -1,6 +1,6 @@
 ---
 name: ae-work
-description: Use when the user requests ae-work, /ae-work, $ae-work, execution of an approved AE plan, or a tightly scoped engineering change.
+description: Use only when explicitly requested as $ae-work or its named AE capability. Scope includes the user requests ae-work, /ae-work, $ae-work, execution of an approved AE plan, or a tightly scoped engineering change.
 ---
 
 # AE Work
@@ -14,9 +14,9 @@ Implement only the approved scope and preserve unrelated work.
    dependency boundary requires it.
 3. Choose the smallest behaviorally complete change. Add focused tests when
    behavior changes.
-4. Validate from the narrowest meaningful check upward and record the exact
-   result. Do not claim runtime or deployment proof from static checks.
-5. Stop at acceptance, a real blocker, or the declared budget.
+4. Apply the [validation contract](../ae-help/references/validation-contract.md)
+   for test scope, reuse and stopping. Record the actual proof boundary.
+5. Stop at acceptance, a real blocker, or a user-specified budget.
 
 Before helper commands, resolve `aeEntry` with
 [runtime-entry](../ae-help/references/runtime-entry.md).

@@ -1,6 +1,6 @@
 ---
 name: ae-language
-description: Use when the user asks for AE language, /ae-language, switch AE display language, make AE local skills Chinese, English, or bilingual, or update local AE skill UI metadata language.
+description: Use only when explicitly requested as $ae-language or its named AE capability. Scope includes the user asks for AE language, /ae-language, switch AE display language, make AE local skills Chinese, English, or bilingual, or update local AE skill UI metadata language.
 ---
 
 # AE Language
