@@ -16,6 +16,7 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 ### 0.3.55 (2026-10-13)
 - Remove the `.ae-source` maintenance mirror: plugin `plugins/ai-agent-engine-codex/skills` is the only skill source; delete `check-skill-mirror` and drop mirror roots from contract/language/audit scripts.
 - Rewrite regression tests to assert only the plugin `SKILL_ROOT`; scrub ae-source guidance from docs and the release checklist; bump to 0.3.55.
+- Install/update/language switch support `--implicit core|all|none`; **plugin default tier is now `core`** (only ae-help / ae-plan / ae-work / ae-review / ae-debug allow natural-language implicit invocation). Non-core skills go through ae-help routing or `$ae-*`; `--implicit all` restores the previous behavior.
 - Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These static and local checks do not prove live Codex host/model behavior.
 
 ### 0.3.54 (2026-09-30)
@@ -209,6 +210,25 @@ node scripts/install-project.mjs --target /path/to/your/codex-project --lang en
 ```
 
 The default metadata language is `bilingual`. Supported metadata languages are `en`, `zh-CN`, and `bilingual`.
+
+## Implicit Invocation Tier (`--implicit`)
+
+Install and update support three tiers: `core` | `all` | `none`.
+
+| Tier | Meaning |
+|---|---|
+| `core` (**plugin default**) | Only five core skills allow natural-language implicit invocation: `ae-help`, `ae-plan`, `ae-work`, `ae-review`, `ae-debug` |
+| `all` | Every skill allows implicit invocation (previous default) |
+| `none` | Disable all implicit invocation; use explicit `$ae-*` / `/ae-*` |
+
+Installing without `--implicit` writes `core` (exactly five `allow_implicit_invocation: true`). For non-core capabilities, route through natural-language `ae-help` or call `$ae-*` explicitly. To restore the previous behavior:
+
+```bash
+node scripts/install-project.mjs --target /path/to/your/codex-project --implicit all
+node scripts/set-ae-language.mjs --lang bilingual --implicit all
+```
+
+Global install accepts the same `--implicit core|all|none` (passed through `install-global` / `update-global`).
 
 The installer writes these paths inside the target project:
 

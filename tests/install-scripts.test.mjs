@@ -503,15 +503,15 @@ test('install-project --implicit core|all|none writes project-install.json and o
   }
 })
 
-test('install-project default implicit tier remains all', () => {
+test('install-project default implicit tier is core', () => {
   const targetRoot = makeTempDir('ae-install-implicit-default-')
   try {
     const result = runScript('scripts/install-project.mjs', ['--target', targetRoot, '--lang', 'bilingual'], repoRoot)
     assert.equal(result.status, 0, result.stderr)
     const summary = parseLastJson(result.stdout)
-    assert.equal(summary.implicitTier, 'all')
-    assert.equal(readProjectInstallState(targetRoot).implicitTier, 'all')
-    assert.equal(countAllowImplicitTrue(join(targetRoot, '.agents', 'skills')), 40)
+    assert.equal(summary.implicitTier, 'core')
+    assert.equal(readProjectInstallState(targetRoot).implicitTier, 'core')
+    assert.equal(countAllowImplicitTrue(join(targetRoot, '.agents', 'skills')), 5)
   } finally {
     rmSync(targetRoot, { recursive: true, force: true })
   }

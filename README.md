@@ -71,6 +71,7 @@ node scripts/ae-tools.mjs help
 ### 0.3.55（2026-10-13）
 - 移除 `.ae-source` 维护镜像：插件 `plugins/ai-agent-engine-codex/skills` 成为唯一技能源；删除 `check-skill-mirror` 并清理合同/语言/审计脚本中的镜像根。
 - 回归测试改为只断言插件 `SKILL_ROOT`；文档与发布清单去掉 ae-source 指引；版本升至 0.3.55。
+- 安装/更新/语言切换支持 `--implicit core|all|none`；**插件默认档位改为 `core`**（仅 ae-help / ae-plan / ae-work / ae-review / ae-debug 可自然语言隐式触发）。非 core 请走 ae-help 路由或 `$ae-*`；`--implicit all` 可恢复旧行为。
 - 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。这些静态和本地检查不能证明真实 Codex host/model 行为。
 
 ### 0.3.54（2026-09-30）
@@ -213,6 +214,25 @@ node scripts/install-project.mjs --target /path/to/your/codex-project --lang en
 ```
 
 默认元数据语言为 `bilingual`。支持的元数据语言：`en`、`zh-CN`、`bilingual`。
+
+## 隐式调用档位（`--implicit`）
+
+安装与更新支持三档：`core` | `all` | `none`。
+
+| 档位 | 含义 |
+|---|---|
+| `core`（**插件默认**） | 仅 5 个核心技能允许自然语言隐式触发：`ae-help`、`ae-plan`、`ae-work`、`ae-review`、`ae-debug` |
+| `all` | 全部技能允许隐式触发（旧默认行为） |
+| `none` | 全部关闭隐式触发，需显式 `$ae-*` / `/ae-*` |
+
+不带 `--implicit` 安装时默认写入 `core`（安装后 `allow_implicit_invocation: true` 恰好 5 个）。非 core 能力请用自然语言走 `ae-help` 路由，或直接 `$ae-*` 显式调用。若需恢复旧行为：
+
+```bash
+node scripts/install-project.mjs --target /path/to/your/codex-project --implicit all
+node scripts/set-ae-language.mjs --lang bilingual --implicit all
+```
+
+全局安装同样支持 `--implicit core|all|none`（`install-global` / `update-global` 透传）。
 
 安装脚本只会写入目标项目内的这些路径：
 
