@@ -32,8 +32,19 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 - Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These static and local checks do not prove live Codex host/model behavior.
 ### 0.3.54 (2026-09-30)
 - Compress 12 high-frequency AE skill entrypoints to under 4 KiB and move detailed procedures into conditionally loaded references, reducing default context and repeated workflow text.
-- Keep the plugin source and `.ae-source` maintenance mirror aligned, with regression coverage for entry size and route selection.
+- Keep high-frequency entrypoints and detailed references separate, with regression coverage for entry size and route selection.
 - Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These static and local checks do not prove real Codex host/model token consumption or behavioral gains.
+
+## Current Mainline Facts
+
+- The current release line is `0.4.0-beta.2`; the root `package.json` and plugin manifest stay on the same version.
+- The only distributable skill source is `plugins/ai-agent-engine-codex/skills`. `.agents/skills` is a consumer-project installation layout, not a second source tree in this repository.
+- Project-level installation writes into the target project. Global installation publishes the current user's personal plugin and dispatcher. Both modes keep each project's `AGENTS.md`, `docs/**`, AI memory, graph, and archive in the project root.
+- Install, update, and language switching support `--implicit core|all|none`. The default is `core`: only `ae-help`, `ae-plan`, `ae-work`, `ae-review`, and `ae-debug` allow natural-language implicit invocation.
+- `task-analyze` emits candidate worker requests, readiness, and parallel waves. It does not start background agents or treat candidate waves as completion evidence; the parent agent owns authorization, integration, and final acceptance.
+- Repository checks prove scripts, contracts, installation distribution, and isolated fixtures. They do not prove live Codex host/model behavior, target-project runtime behavior, deployment, or production capacity.
+
+Mainline changes are recorded in [CHANGELOG.en.md](CHANGELOG.en.md) and [CHANGELOG.md](CHANGELOG.md); the README keeps only the current release window.
 
 ## When To Use It
 
@@ -242,7 +253,7 @@ Global installation publishes the AE skills as one current-user personal Codex p
 Generate a read-only preview from the distribution repository. It does not write, delete, or move files:
 
 ```powershell
-Set-Location 'D:\codes\your-project'
+Set-Location '<path-to-cloned-repository>'
 $preview = node scripts\install-global.mjs preview | ConvertFrom-Json
 $preview.projects | Format-Table root, role, components
 ```

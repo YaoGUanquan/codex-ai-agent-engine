@@ -85,10 +85,21 @@ node scripts/ae-tools.mjs help
 - 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。这些静态和本地检查不能证明真实 Codex host/model 行为。
 ### 0.3.54（2026-09-30）
 - 精简 12 个高频 AE skill 入口至 4 KiB 以内，把详细流程拆为按触发条件加载的 references，减少默认上下文和重复流程。
-- 保留插件源与 `.ae-source` 镜像一致，并增加入口体积与路由回归测试。
+- 将高频入口与详细 references 分离，并增加入口体积与路由回归测试。
 - 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。这些静态和本地检查不能证明真实 Codex host/model 的 token 消耗或行为收益。
 
 完整历史见 [CHANGELOG.md](CHANGELOG.md)；本节仅保留最近 5 个版本，发布时超出窗口的条目迁移到 CHANGELOG。
+
+## 当前主线事实
+
+- 当前发布线是 `0.4.0-beta.2`；根 `package.json` 与插件 manifest 的版本保持一致。
+- 可分发技能的唯一源是 `plugins/ai-agent-engine-codex/skills`。`.agents/skills` 只属于 consumer 项目的安装布局，不是本仓库的第二份技能树。
+- 项目级安装写入目标项目；全局安装发布当前用户的 personal plugin 和 dispatcher。两种安装都保留项目自己的 `AGENTS.md`、`docs/**`、AI memory、图谱和归档。
+- 安装、更新和语言切换支持 `--implicit core|all|none`，默认是 `core`：只有 `ae-help`、`ae-plan`、`ae-work`、`ae-review`、`ae-debug` 允许自然语言隐式触发。
+- `task-analyze` 只生成候选 worker request、就绪状态和并行波次；它不会自行启动后台代理，也不把候选波次当作完成证据。父代理负责授权、集成和最终验收。
+- 本仓库的检查证明脚本、契约、安装分发和隔离 fixture；它们不等同于真实 Codex host/model 行为、目标项目运行时、部署或生产容量验收。
+
+主线变更以 [CHANGELOG.md](CHANGELOG.md) 和 [CHANGELOG.en.md](CHANGELOG.en.md) 为完整记录；README 只保留当前版本窗口。
 
 ## 能力清单
 
@@ -246,7 +257,7 @@ node scripts/set-ae-language.mjs --lang bilingual --implicit all
 在分发仓库中先生成只读预览。该命令不会写入、删除或移动任何文件：
 
 ```powershell
-Set-Location 'D:\codes\your-project'
+Set-Location '<path-to-cloned-repository>'
 $preview = node scripts\install-global.mjs preview | ConvertFrom-Json
 $preview.projects | Format-Table root, role, components
 ```
@@ -565,47 +576,12 @@ node scripts/ae-tools.mjs ae-graph-build --root scripts
 
 发布前可参考 [docs/release-checklist.md](docs/release-checklist.md)。
 
-## 后续持续优化方向
+## 维护与发布边界
 
-2026-08-11 的一轮全库扫描已经消除了根/插件 `update-project.mjs` 双份拷贝、把 `.tmp-install-smoke-checks/` 纳入 `.gitignore`、将 `scripts/check-claims.mjs --dry-run` 接入 `npm run check`，并把过期的三份 OPTIMIZATION 规划文档归档到 `docs/99-archive/2026-08/skill-optimization-roadmap/`。剩余的结构性债务按优先级持续推进：
-
-1. ~~**拆分 `ae-tools.mjs` 单体**~~（**已完成 0.3.20**，`315db38`）：15 个命令模块 + 外置 init 模板；见 `docs/ae/experience/2026-08-11-structural-debt-refactor.md`。
-2. ~~**重组 `package.json` 的 `check` 命令串**~~（**已完成 0.3.20**）：`check:syntax` / `check:contracts` / `check:smoke` / `check:all`；测试断言改为分层存在性检查。
-3. ~~**按域拆分巨型测试文件**~~（**已完成 0.3.20**）：`tests/global-install.test.mjs`、`contracts.test.mjs`、`ae-tools.test.mjs`、`skills-docs.test.mjs`、`install-scripts.test.mjs`。
-4. ~~**抽取共享 path 校验工具**~~（**已完成 0.3.20**）：`artifact-check-utils.mjs`；install-smoke 跨盘符拒绝已加强。
-5. ~~**补齐弱覆盖脚本的测试**~~（**已完成 0.3.20**）：`tests/install-scripts.test.mjs`（6 例，覆盖 set-repository / install-project / update-project）。
-6. ~~**控制默认 check 的耗时**~~（**已完成 0.3.20**）：install-smoke 移入 `check:smoke`，日常 `npm run check` 为轻量层。
-
-2026-08-11 **前后端技能对称优化（0.3.21）** 已落地：后端六语言指导、FE/BE 契约检查表、debug 边界速查、`ae-sql` 安全清单；见 `docs/ae/experience/2026-08-11-fullstack-skill-optimization.md`。2026-08-11 **前端技能优化（0.3.18 / 0.3.19）** 见 `docs/ae/experience/2026-08-11-frontend-skill-optimization.md`。剩余第 7、10 两项原为按需触发的挂起项；2026-08-11 复核触发未命中后，用户决定提前收尾，两项已随 **0.3.26** 完成：
-
-7. ~~**旧版本前端栈适配**~~（**已完成 0.3.26**）：`svelte-guidance.md`、`angular-guidance.md`、`vue-guidance.md` 各补最小旧栈对照节（Svelte 4 stores、NgModule 时代、Options API），与现代基线同文件并存，"匹配仓库既有风格"兜底与首行 stack-conditional 语句不变；回归用例锁定对照节与镜像。原按需触发策略由用户于 2026-08-11 决定提前执行（触发条件未命中），见 `docs/08-ai-memory/05-decision-log.md`。残余风险：对照条目为无真实缺陷驱动的预写，粒度是否够用待首个真实旧栈项目检验；不足时按决策日志仅为受影响框架扩展。
-8. ~~**版本记录拆分**~~（**已完成，2026-08-11 本批**）：历史条目迁移至 `CHANGELOG.md` / `CHANGELOG.en.md`（完整历史），README 仅保留最近 5 条，`scripts/check-release-notes.mjs` 锁定窗口上限、CHANGELOG 链接与子集关系；见 `docs/ae/plans/2026-08-11-006-governance-batch-four-plan.md`。
-9. ~~**过程文档归档纪律**~~（**已完成，2026-08-11 本批**）：4 个已完成或指针任务目录并入 `docs/00-process/archive/2026-08/`，active 目录只保留真正进行中的工作；tidy 对 archived-pointer 的保守保留策略未变，本仓收尾为一次性手动归档。
-10. ~~**前端质量契约的交叉一致性**~~（**已完成 0.3.26 批，仓库侧**）：轻量映射说明落地 `docs/ae/references/frontend-quality-contract-map.md`，登记 `web-ui-quality.md`、`ae-review` Frontend Components / Styles 镜头、`browser-acceptance.md` 之间 5 组对应关系、两处空档与既有测试锁；映射为描述性文档，不构成第 4 份契约面，仍不建校验脚本。评估与提前收尾记录见 `docs/08-ai-memory/05-decision-log.md`。残余风险：映射依赖人工维护——编辑三份契约文件时须按图核对对应组，这是不建校验脚本决策的已接受成本。
-11. ~~**知识库治理（下一批 0.3.22）**~~（**已完成 0.3.22**）：见 `docs/ae/prds/2026-08-11-knowledge-base-governance-prd.md` 与 `docs/ae/experience/`（维护者知识图谱见 `docs/ae/graphs/maintainer-artifact-graph.md`）。
-
-2026-08-11 **全量技能盘点（40 个 skill 逐一审查）** 完成：五层结构（工作流主链 10 / 实现车道 9 / 验证车道 2 / 独立工具 8 / 元治理 11）整体健康，路由边界、证据分层词汇与交接路由复核一致，既有治理项无回退；完整证据、发现与批次对比见 `docs/ae/solutions/2026-08-11-skill-portfolio-optimization-audit.md`。新增事项如下（12 先行、13-14 同批升版本、15 按需触发）：
-
-12. **跨技能引用链接校验扩展**（仓库侧，不升版本，建议先行）：`scripts/check-skill-contract.mjs` 目前只校验指向 `SKILL.md` 的链接；`local-runtime-smoke-gate.md`、`api-contract-checklist.md`、`validation-evidence-profile.md` 等被 8+ 个技能跨目录引用的 references 无链接守护，重命名或移动即静默断链。扩展校验到 SKILL.md 与 references 中全部相对 `.md` 链接（可选覆盖反引号引用路径），并补 README 能力清单 ↔ capability-catalog ↔ 技能目录的名称集合级断言，TDD 覆盖正反例。
-13. ~~**运行时入口口径统一**~~（已实现，0.3.46）：活跃命令示例统一为 `node "$aeEntry"`，通过[共享解析合同](plugins/ai-agent-engine-codex/skills/ae-help/references/runtime-entry.md)及只读解析器选择入口。项目 wrapper 优先，只有缺失才使用当前用户全局 dispatcher；损坏安装和执行失败不触发第二入口。专项测试验证双 shell、consumer 与隔离全局安装；不同安装版本的能力差异仍须按实际 help 判断，不声称全版本 CLI 完全相同。
-14. **ae-help 工件契约表补全**（插件内容，与 13 同批）：`artifact-contract.md` 路径表缺 `docs/ae/designs`、`docs/ae/tasks`、`docs/ae/evidence`、`docs/ae/integrity`、`docs/ae/experience`、`docs/ae/work-reports`、`docs/ae/constitution.md` 七类实际在用产物的行；补全并写明 `solutions`（外部审计/方案研究）与 `experience`（自身工作复盘）的目录边界，纳入 0.3.25 已建立的目录声明回归断言。
-15. **按需触发项**（策略已定，命中前无主动待办）：`ae-review` 七段 lane 细则外移 references（触发：再新增 lane 或出现一次 lane 指引被跳过的实际缺陷）；`ae-refactor` 补重构方法论 reference——行为基线、特征化测试、接缝分析、增量策略（触发：真实重构任务出现一次可归因的方法论缺口，届时属插件内容变更须升版本）；工作流主链技能各 1 张「场景卡」最小回放清单落 `docs/ae/templates/`（触发：0.4.x 大版本前，或出现一次技能指引被跳过导致的交付缺陷）。
-
-推进原则：涉及可分发插件内容（`plugins/ai-agent-engine-codex/`）的改动必须同步递增双份 SemVer 版本，并在 README 与 CHANGELOG 各追加版本条目（README 仅保留最近 5 条，超出窗口的条目迁移到 CHANGELOG）；纯仓库侧（根 `scripts/`、`tests/`、文档）的重构不升版本，但必须以 `npm run check` 加 `npm test` 全绿为交付门槛。
-
-## 发布到 GitHub
-
-先在 GitHub 创建一个空仓库，然后在当前目录执行：
-
-```bash
-node scripts/set-repository.mjs --repo https://github.com/YaoGUanquan/codex-ai-agent-engine
-git init
-git add .
-git commit -m "feat: add Codex AI Agent Engine plugin"
-git branch -M main
-git remote add origin https://github.com/YaoGUanquan/codex-ai-agent-engine.git
-git push -u origin main
-```
+- 任何触及 `plugins/ai-agent-engine-codex/` 的可分发变更，都必须同步更新根 `package.json`、插件 manifest、README 和 CHANGELOG，并通过发布检查。
+- 根 `scripts/`、`tests/` 和公共文档的仓库侧修复不自动升版本，但必须通过受影响的测试、`npm run check`、`npm run check:smoke` 和 `git diff --check`。
+- Git 提交、推送、分支合并、外部文档归并、真实 API/数据库写入和部署验收是独立授权与证据层，不由 README 中的本地检查替代。
+- 贡献前请先阅读仓库 `AGENTS.md`；完整版本历史见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 许可和致谢
 
