@@ -19,11 +19,9 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 - Strengthen source-to-output memory, query and concurrency budgets with isolated data fixtures and a five-case real-model comparison specification. Explicitly prefer `gpt-6.1-sol` for the trial without silent model substitution.
 - Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, `git diff --check`. Static and isolated-install checks establish helper, instruction and distribution contracts only. Real-model comparison is pending; quality, speed and production capacity gains are unproven.
 
-### 0.3.55 (2026-10-15)
-- Disable implicit invocation for all AE skills and narrow entry triggers. Ordinary development follows direct execution; planning, documentation and specialist gates load for concrete risks or explicit requests.
-- Share test selection, evidence reuse and invalidation rules: isolate single failures, explain full-suite escalation, and avoid reruns merely for review, shipping or context recovery. Remove fixed execution counts and blanket dirty-worktree confirmations.
-- Make GPT-6.1 the primary behavior acceptance target with eight reusable scenarios and three comparison variants, each repeated twice. Real model evaluation is pending; performance and quality improvements are not yet proven.
-- Validation commands: `node --test tests/model-adaptation.test.mjs tests/instruction-audit.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, `git diff --check`. Static and isolated-install checks establish written rules, metadata and distribution contracts only; delivery records report actual outcomes and failures.
+### 0.3.55 (2026-10-13)
+- Remove the `.ae-source` maintenance mirror: plugin `plugins/ai-agent-engine-codex/skills` is the only skill source; delete `check-skill-mirror` and drop mirror roots from contract/language/audit scripts.
+- Rewrite regression tests to assert only the plugin `SKILL_ROOT`; scrub ae-source guidance from docs and the release checklist; bump to 0.3.55.
 
 ### 0.3.54 (2026-09-30)
 - Compress 12 high-frequency AE skill entrypoints to under 4 KiB and move detailed procedures into conditionally loaded references, reducing default context and repeated workflow text.
@@ -220,7 +218,7 @@ The installer writes these paths inside the target project:
 - `scripts/update-ae-codex.mjs`
 - `scripts/set-ae-language.mjs`
 
-The distribution source itself is not an installation target. It uses the user-level personal plugin and keeps its maintenance mirror in `.ae-source/skills` to avoid duplicate discovery.
+The distribution source itself is not an installation target. It uses the user-level personal plugin; the only skill source is `plugins/ai-agent-engine-codex/skills`.
 
 ## Migrate From Project-Level To Per-User Global Installation
 
@@ -265,7 +263,7 @@ node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" init --project-root (Get-L
 codex plugin list
 ```
 
-Each operating-system user has an independent `$HOME`, dispatcher, backup area, and personal marketplace. Codex discovers AE skills through the personal plugin; Cursor discovers the same skills through real `~/.cursor/skills/ae-*` copies (Cursor does not track skill-directory symlinks). The distribution source keeps its maintenance mirror in `.ae-source/skills` so Codex does not discover a duplicate beside the personal plugin; migrated consumer projects should use only the user-level distribution. The installer never edits `.codex/plugins/cache`. Already-open chats keep their startup skill catalog.
+Each operating-system user has an independent `$HOME`, dispatcher, backup area, and personal marketplace. Codex discovers AE skills through the personal plugin; Cursor discovers the same skills through real `~/.cursor/skills/ae-*` copies (Cursor does not track skill-directory symlinks). The distribution source uses only `plugins/ai-agent-engine-codex/skills` as the skill source; migrated consumer projects should use only the user-level distribution. The installer never edits `.codex/plugins/cache`. Already-open chats keep their startup skill catalog.
 
 ## Initialize Project Docs And Memory
 
@@ -487,7 +485,6 @@ Copy-Item scripts\ae-tools.mjs D:\codes\your-project\scripts\ae-tools.mjs
 ## Repository Layout
 
 ```text
-.ae-source/skills/               # Maintenance mirror, not an independent discovery root
 .agents/                         # Consumer installation layout, not this repository's skill source
 plugins/ai-agent-engine-codex/   # Codex plugin package
 scripts/ae-tools.mjs             # Root helper wrapper

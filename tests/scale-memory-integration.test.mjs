@@ -1,8 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, utimesSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, rmSync, symlinkSync, utimesSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { tmpdir } from 'node:os'
 import { spawnSync } from 'node:child_process'
 import { graphBuild, graphQuery, collectSourceFiles } from '../plugins/ai-agent-engine-codex/scripts/ae-tools/graph.mjs'
 import { taskAnalyze } from '../plugins/ai-agent-engine-codex/scripts/ae-tools/tasks.mjs'
@@ -10,9 +9,10 @@ import { recovery } from '../plugins/ai-agent-engine-codex/scripts/ae-tools/reco
 import { docsMaintain, docsSearch, isDocumentPage } from '../plugins/ai-agent-engine-codex/scripts/docs-lifecycle.mjs'
 import { memoryIndex, memorySearch } from '../plugins/ai-agent-engine-codex/scripts/memory-navigation.mjs'
 import { reviewPackage } from '../plugins/ai-agent-engine-codex/scripts/ae-tools/review.mjs'
+import { makeTempDir } from './helpers/skill-test-utils.mjs'
 
 function fixture(t) {
-  const root = mkdtempSync(join(tmpdir(), 'ae-scale-memory-'))
+  const root = makeTempDir('ae-scale-memory-')
   const docs = join(root, 'docs')
   mkdirSync(docs)
   t.after(() => rmSync(root, { recursive: true, force: true }))

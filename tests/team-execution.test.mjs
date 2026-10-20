@@ -1,12 +1,12 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
+import { mkdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { tmpdir } from 'node:os'
 import { taskAnalyze } from '../plugins/ai-agent-engine-codex/scripts/ae-tools/tasks.mjs'
+import { makeTempDir } from './helpers/skill-test-utils.mjs'
 
 function fixture(t, units, profile) {
-  const root = mkdtempSync(join(tmpdir(), 'ae-team-execution-'))
+  const root = makeTempDir('ae-team-execution-')
   t.after(() => rmSync(root, { recursive: true, force: true }))
   writeFileSync(join(root, 'plan.md'), units.join('\n'))
   if (profile) {
@@ -239,7 +239,7 @@ test('canonical ownership detects Windows case aliases and refuses linked paths 
   const { root, analyze } = fixture(t, [
     unit('U1', '`src/shared.js`'), unit('U2', '`src/SHARED.js`'), unit('U3', '`linked/escape.js`'),
   ])
-  const outside = mkdtempSync(join(tmpdir(), 'ae-team-outside-'))
+  const outside = makeTempDir('ae-team-outside-')
   t.after(() => rmSync(outside, { recursive: true, force: true }))
   symlinkSync(outside, join(root, 'linked'), process.platform === 'win32' ? 'junction' : 'dir')
   const result = analyze()

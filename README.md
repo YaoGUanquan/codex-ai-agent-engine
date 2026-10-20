@@ -72,11 +72,9 @@ node scripts/ae-tools.mjs help
 - 强化从数据来源到输出的内存、查询与并发边界，补充隔离数据夹具及五类真实模型对照规范；首轮明确偏好 `gpt-6.1-sol`，不静默替换模型。
 - 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。静态与隔离安装仅证明辅助工具、规则和分发合同；真实模型对照尚未完成，不宣称质量、耗时或生产容量已提升。
 
-### 0.3.55（2026-10-15）
-- 全部 AE 技能关闭默认隐式调用，收紧入口触发条件；普通开发沿用直接执行路径，按具体风险或明确请求加载计划、文档和专项门禁。
-- 统一测试范围、通过结果复用和失效规则：单点失败先聚焦验证，扩大到全量前说明依据，审查、交付和上下文恢复不自动重跑；移除固定执行次数及脏工作区一律确认。
-- GPT-6.1 为首要行为验收目标，提供后续模型可复用的八类评测场景及三组对照、每组两次的执行规范；尚未完成真实模型行为评测，不宣称性能或质量提升已获证明。
-- 验证命令：`node --test tests/model-adaptation.test.mjs tests/instruction-audit.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。静态及隔离安装检查仅证明规则、元数据与分发合同，实际结果和未通过项以交付记录为准。
+### 0.3.55（2026-10-13）
+- 移除 `.ae-source` 维护镜像：插件 `plugins/ai-agent-engine-codex/skills` 成为唯一技能源；删除 `check-skill-mirror` 并清理合同/语言/审计脚本中的镜像根。
+- 回归测试改为只断言插件 `SKILL_ROOT`；文档与发布清单去掉 ae-source 指引；版本升至 0.3.55。
 
 ### 0.3.54（2026-09-30）
 - 精简 12 个高频 AE skill 入口至 4 KiB 以内，把详细流程拆为按触发条件加载的 references，减少默认上下文和重复流程。
@@ -224,7 +222,7 @@ node scripts/install-project.mjs --target /path/to/your/codex-project --lang en
 - `scripts/update-ae-codex.mjs`
 - `scripts/set-ae-language.mjs`
 
-分发源仓库本身不支持作为安装目标；它使用用户级 personal 插件，并将维护镜像放在 `.ae-source/skills`，以避免重复发现。
+分发源仓库本身不支持作为安装目标；它使用用户级 personal 插件，技能唯一源为 `plugins/ai-agent-engine-codex/skills`。
 
 ## 从项目级安装迁移到用户级全局安装
 
@@ -271,7 +269,7 @@ node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" init --project-root (Get-L
 codex plugin list
 ```
 
-每个操作系统用户都有自己的 `$HOME`、dispatcher、备份和 personal marketplace；安装器不会扫描或修改其他用户的目录，也不会直接修改 `.codex/plugins/cache`。Codex 通过 personal 插件发现 AE 技能；Cursor 通过 `~/.cursor/skills/ae-*` 真实拷贝发现同一套技能（Cursor 不跟踪技能目录上的 symlink）。分发源仓库将维护镜像保存在 `.ae-source/skills`，避免与个人插件重复发现；consumer 项目迁移后只应使用用户级分发。已打开的对话不会自动刷新技能目录。
+每个操作系统用户都有自己的 `$HOME`、dispatcher、备份和 personal marketplace；安装器不会扫描或修改其他用户的目录，也不会直接修改 `.codex/plugins/cache`。Codex 通过 personal 插件发现 AE 技能；Cursor 通过 `~/.cursor/skills/ae-*` 真实拷贝发现同一套技能（Cursor 不跟踪技能目录上的 symlink）。分发源仓库仅以 `plugins/ai-agent-engine-codex/skills` 为技能源；consumer 项目迁移后只应使用用户级分发。已打开的对话不会自动刷新技能目录。
 
 ## 初始化项目文档和记忆库
 
@@ -508,7 +506,6 @@ Copy-Item scripts\ae-tools.mjs D:\codes\your-project\scripts\ae-tools.mjs
 ## 仓库结构
 
 ```text
-.ae-source/skills/               # 插件技能维护镜像，不是独立发现入口
 .agents/                         # consumer 项目安装布局；本仓库不以此为技能源
 plugins/ai-agent-engine-codex/   # Codex 插件主体
 scripts/ae-tools.mjs             # 根辅助命令入口
@@ -549,7 +546,7 @@ node scripts/ae-tools.mjs help
 node scripts/ae-tools.mjs ae-graph-build --root scripts
 ```
 
-如果本机有 Codex skill validator，也建议验证 `plugins/ai-agent-engine-codex/skills/*` 和 `.ae-source/skills/*`。
+如果本机有 Codex skill validator，也建议验证 `plugins/ai-agent-engine-codex/skills/*`。
 
 发布前可参考 [docs/release-checklist.md](docs/release-checklist.md)。
 

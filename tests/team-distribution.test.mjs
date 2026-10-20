@@ -1,17 +1,17 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawnSync } from 'node:child_process'
+import { makeTempDir } from './helpers/skill-test-utils.mjs'
 
 const root = fileURLToPath(new URL('..', import.meta.url))
 const plugin = 'plugins/ai-agent-engine-codex'
 const references = 'skills/ae-help/references'
 
 function fixture(t) {
-  const path = mkdtempSync(join(tmpdir(), 'ae-team-distribution-'))
+  const path = makeTempDir('ae-team-distribution-')
   t.after(() => rmSync(path, { recursive: true, force: true }))
   return path
 }
