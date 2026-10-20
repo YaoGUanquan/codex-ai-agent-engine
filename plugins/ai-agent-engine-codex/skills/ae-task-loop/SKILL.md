@@ -18,6 +18,15 @@ Iterate on an exploratory task until fixed, verified, or clearly blocked.
 - Do not ask new scope questions during the loop unless the original goal is invalid or unsafe.
 - Stop after a clear pass, three consecutive no-progress rounds, or an agreed iteration limit.
 
+## Related Skills
+
+When another owner is a better fit, open its skill and follow it:
+
+- [ae-brainstorm](../ae-brainstorm/SKILL.md) or [ae-prd](../ae-prd/SKILL.md) for unclear requirements
+- [ae-work](../ae-work/SKILL.md) for an approved written plan
+- [ae-debug](../ae-debug/SKILL.md) for focused failure investigation
+- [ae-tdd](../ae-tdd/SKILL.md) for test-first behavior change
+
 ## Workflow
 
 1. Parse the goal and identify whether another skill is a better fit:

@@ -246,6 +246,13 @@ test('claude-delegate reports no-output diagnostics', () => {
   }
 })
 
+test('help lfg prints target ae-lfg/SKILL.md path for routing', () => {
+  const output = runNodeScriptRaw('node scripts/ae-tools.mjs help lfg')
+  assert.match(output, /ae-lfg/)
+  assert.match(output, /ae-lfg\/SKILL\.md/)
+  assert.match(output, /SKILL\.md:/)
+})
+
 test('help can find Claude Code delegation capability', () => {
   const output = runNodeScriptRaw('node scripts/ae-tools.mjs help claude')
   assert.match(output, /ae-claude-code/)

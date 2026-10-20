@@ -1,6 +1,6 @@
 ---
 name: ae-review
-description: Use when the user requests ae-review, /ae-review, $ae-review, or review of code, documents, plans, requirements, or delivery risk.
+description: Use when the user names AE review (ae-review, /ae-review, $ae-review, "AE 审查", "use AE to review") for code, docs, plans, requirements, or delivery risk.
 ---
 
 # AE Review

@@ -32,3 +32,11 @@ For scale-sensitive Web flows, use the [scale contract](../ae-help/references/sc
 Keep a fast-route report to owner, target, acceptance and residual risk. Do not
 load all implementation skills for intake, repeat routing, bypass auth/stack
 contracts or imply unavailable OpenCode agents/MCP behavior.
+
+## Related Skills
+
+Open the sibling skill that owns the selected route:
+
+- [ae-frontend-design](../ae-frontend-design/SKILL.md) for visual-only UI work
+- [ae-web-app](../ae-web-app/SKILL.md) for state, forms, API, or auth flows
+- [ae-test-browser](../ae-test-browser/SKILL.md) for browser verification

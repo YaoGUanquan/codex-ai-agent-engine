@@ -1,6 +1,6 @@
 ---
 name: ae-work
-description: Use when the user requests ae-work, /ae-work, $ae-work, execution of an approved AE plan, or a tightly scoped engineering change.
+description: Use when the user names AE work (ae-work, /ae-work, $ae-work, "AE 执行") to execute an approved AE plan within its scope.
 ---
 
 # AE Work

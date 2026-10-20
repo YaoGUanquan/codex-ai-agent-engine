@@ -1,6 +1,6 @@
 ---
 name: ae-plan
-description: Use when the user requests ae-plan, /ae-plan, $ae-plan, or an implementation, technical, or design plan before coding.
+description: Use when the user names AE planning (ae-plan, /ae-plan, $ae-plan, "AE 计划", "use AE to plan") for an implementation plan before coding. Writes a plan only; no product code.
 ---
 
 # AE Plan
