@@ -1116,6 +1116,7 @@ test('renderYaml supports PRD, work report, and task loop metadata', () => {
 })
 
 test('core AE workflow metadata carries stable skill trigger signals', () => {
+  const namedAeSkills = new Set(['ae-plan', 'ae-review', 'ae-work', 'ae-debug'])
   const coreSkills = [
     'ae-brainstorm',
     'ae-lfg',
@@ -1137,7 +1138,17 @@ test('core AE workflow metadata carries stable skill trigger signals', () => {
     assert.match(bilingualYaml, new RegExp(`default_prompt: ".*\\$${skillName}`))
     assert.match(sourceSkill, new RegExp(`/${skillName}`))
     assert.match(sourceSkill, new RegExp(`\\$${skillName}`))
-    assert.match(sourceSkill, new RegExp(`^description: Use only when explicitly requested as \\$${skillName}\\b`, 'm'))
+    if (namedAeSkills.has(skillName)) {
+      assert.match(
+        sourceSkill,
+        new RegExp(`^description: Use when the user names AE .+\\(${skillName}, /${skillName}, \\$${skillName}\\b`, 'm'),
+      )
+    } else {
+      assert.match(
+        sourceSkill,
+        new RegExp(`^description: Use only when explicitly requested as \\$${skillName}\\b`, 'm'),
+      )
+    }
   }
 })
 
@@ -1507,4 +1518,114 @@ test('cross-artifact verification vocabulary is conditional in plugin skills', (
       assert.match(source, expectation, `${sourcePath} should include ${expectation}`)
     }
   }
+})
+
+test('implicit core five Codex listing stays within 2000-char budget', () => {
+  const coreFive = ['ae-help', 'ae-plan', 'ae-work', 'ae-review', 'ae-debug']
+  const pluginVersion = JSON.parse(
+    readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/.codex-plugin/plugin.json'), 'utf8'),
+  ).version
+  const namespace = 'ai-agent-engine-codex'
+  // Full Windows path form from optimization plan A.2 (no shared-root alias).
+  const winRoot = `C:/Users/abcdef/.codex/plugins/cache/personal/${namespace}/${pluginVersion}/skills`
+
+  let total = 0
+  for (const skillName of coreFive) {
+    const source = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills', skillName, 'SKILL.md'), 'utf8')
+    const match = source.match(/^description:\s*(.+)$/m)
+    assert.ok(match, `${skillName} must have a description`)
+    const description = match[1].trim()
+    const listingName = `${namespace}:${skillName}`
+    const path = `${winRoot}/${skillName}/SKILL.md`
+    const line = `- ${listingName}: ${description} (file: ${path})`
+    total += line.length
+  }
+  assert.ok(total <= 2000, `core five Codex listing is ${total} chars (limit 2000)`)
+})
+
+test('implicit core descriptions ban generic trigger phrases', () => {
+  const banned = [
+    'tightly scoped engineering change',
+    'investigate a failing build',
+    'broken UI, runtime error, failing test',
+    'or an implementation, technical, or design plan before coding',
+    'or review of code, documents, plans, requirements, or delivery risk',
+  ]
+  for (const skillName of ['ae-plan', 'ae-work', 'ae-review', 'ae-debug']) {
+    const source = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills', skillName, 'SKILL.md'), 'utf8')
+    const match = source.match(/^description:\s*(.+)$/m)
+    assert.ok(match, skillName)
+    const description = match[1]
+    for (const phrase of banned) {
+      assert.equal(
+        description.toLowerCase().includes(phrase.toLowerCase()),
+        false,
+        `${skillName} description must not contain generic trigger: ${phrase}`,
+      )
+    }
+    assert.match(description, /\bAE\b/)
+  }
+})
+
+test('ae-help routes non-core skills via help and no longer claims universal NL triggers', () => {
+  const helpSource = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-help/SKILL.md'), 'utf8')
+  assert.match(helpSource, /node "\$aeEntry" help <query>/)
+  assert.match(helpSource, /SKILL\.md/)
+  assert.match(helpSource, /Non-core skills need `\$ae-\*` or routing through ae-help/i)
+  assert.doesNotMatch(
+    helpSource,
+    /natural-language requests such as "use ae-work" \/ "使用 ae-work" are reliable triggers/i,
+  )
+})
+
+test('routing skills link to sibling SKILL.md owners', () => {
+  const expectations = [
+    ['ae-web-forge', [
+      '../ae-web-app/SKILL.md',
+      '../ae-frontend-design/SKILL.md',
+      '../ae-test-browser/SKILL.md',
+    ]],
+    ['ae-debug', [
+      '../ae-backend/SKILL.md',
+      '../ae-sql/SKILL.md',
+      '../ae-test-browser/SKILL.md',
+    ]],
+    ['ae-task-loop', [
+      '../ae-tdd/SKILL.md',
+      '../ae-brainstorm/SKILL.md',
+    ]],
+  ]
+  for (const [skillName, links] of expectations) {
+    const source = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills', skillName, 'SKILL.md'), 'utf8')
+    for (const link of links) {
+            assert.ok(source.includes(`](${link})`), `${skillName} should link ${link}`)
+      const target = resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills', skillName, link)
+      assert.ok(existsSync(target), `${skillName} sibling link must resolve: ${link}`)
+    }
+  }
+})
+
+test('plugin defaultPrompt entries are core-named or explicit $ae-*', () => {
+  const plugin = JSON.parse(
+    readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/.codex-plugin/plugin.json'), 'utf8'),
+  )
+  const prompts = plugin.interface.defaultPrompt
+  assert.ok(Array.isArray(prompts) && prompts.length > 0)
+  const coreNatural = [
+    /使用 AE 审查/,
+    /使用 AE 计划/,
+    /使用 AE 调试/,
+    /使用 AE 执行/,
+    /使用 AE 帮助/,
+    /使用 AE 工作/,
+  ]
+  for (const prompt of prompts) {
+    const hasExplicit = /\$ae-[a-z0-9-]+/.test(prompt)
+    const targetsCore = coreNatural.some((re) => re.test(prompt)) || /\$ae-(help|plan|work|review|debug)\b/.test(prompt)
+    assert.ok(hasExplicit || targetsCore, `defaultPrompt must be core or $ae-*: ${prompt}`)
+  }
+  assert.ok(prompts.some((prompt) => prompt.includes('$ae-lfg')))
+  assert.ok(prompts.some((prompt) => prompt.includes('$ae-init')))
+  assert.ok(prompts.some((prompt) => prompt.includes('$ae-web-app')))
+  assert.ok(prompts.some((prompt) => prompt.includes('$ae-backend')))
 })

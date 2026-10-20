@@ -1,6 +1,6 @@
 ---
 name: ae-debug
-description: Use only when explicitly requested as $ae-debug or its named AE capability. Scope includes the user asks for AE debug, /ae-debug, investigate a failing build, broken UI, runtime error, failing test, API incident, or reproduce-and-fix troubleshooting workflow.
+description: Use when the user names AE debug (ae-debug, /ae-debug, $ae-debug, "AE 调试") to investigate a failure with AE reproduce-and-fix workflow.
 ---
 
 # AE Debug
@@ -39,8 +39,9 @@ When the user explicitly requests a local runtime smoke for a changed API or UI 
 
 - Do not claim a root cause without evidence from code, logs, commands, or browser behavior.
 - Do not hide a reproduction gap; state it explicitly if you cannot reproduce.
-- Prefer `ae-test-browser` for UI investigations that require a real browser.
-- Prefer `ae-sql` when the failure is tied to schema, data shape, or query behavior.
+- Prefer [ae-test-browser](../ae-test-browser/SKILL.md) for UI investigations that require a real browser.
+- Prefer [ae-sql](../ae-sql/SKILL.md) when the failure is tied to schema, data shape, or query behavior.
+- Prefer [ae-backend](../ae-backend/SKILL.md) when the failure is in service, API, auth, or repository behavior.
 - Avoid speculative rewrites when the failing path is narrow.
 - If the symptom disappears during investigation, report the last known evidence and what remains unproven.
 - If no red-capable loop can be built, stop and report the missing environment or artifact instead of guessing.

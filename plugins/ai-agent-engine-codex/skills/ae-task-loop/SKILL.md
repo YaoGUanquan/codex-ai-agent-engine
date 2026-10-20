@@ -20,6 +20,15 @@ Apply the [validation contract](../ae-help/references/validation-contract.md) fo
 - Do not ask new scope questions during the loop unless the original goal is invalid or unsafe.
 - Stop after acceptance, a real blocker, or a user-specified budget. If progress stalls, use new evidence to change the hypothesis; do not keep retrying an unchanged failing path.
 
+## Related Skills
+
+When another owner is a better fit, open its skill and follow it:
+
+- [ae-brainstorm](../ae-brainstorm/SKILL.md) or [ae-prd](../ae-prd/SKILL.md) for unclear requirements
+- [ae-work](../ae-work/SKILL.md) for an approved written plan
+- [ae-debug](../ae-debug/SKILL.md) for focused failure investigation
+- [ae-tdd](../ae-tdd/SKILL.md) for test-first behavior change
+
 ## Workflow
 
 1. Parse the goal and identify whether another skill is a better fit:

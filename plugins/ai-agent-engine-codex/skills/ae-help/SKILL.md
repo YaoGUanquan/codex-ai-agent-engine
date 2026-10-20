@@ -9,20 +9,21 @@ For large repositories, datasets, concurrency or distributed workflows, route th
 
 Before running helper commands, resolve `aeEntry` using the [runtime entry contract](references/runtime-entry.md).
 
-List and explain the Codex-native AI Agent Engine entrypoints in the local display language.
+List and explain the Codex-native AI Agent Engine entrypoints in the local display language. When the user names a non-core AE capability without `$ae-*`, route them to that skill via help output and then follow its SKILL.md.
 
 ## Workflow
 
 1. Run `node "$aeEntry" help` from the target project root. If the user gave a query, append it as plain arguments. Use the current shell's `aeEntry` assignment printed by help; command examples remain templates, not executable strings to evaluate.
-2. Return the script output directly unless the user asked for a tailored recommendation.
-3. If the script is unavailable, read `references/capability-catalog.json` and summarize the matching capability in Chinese when the local metadata is Chinese.
+2. When the user names a non-core AE capability without an explicit `$ae-*` mention, run `node "$aeEntry" help <query>` and use the printed `SKILL.md` path. Read that skill file and follow it; do not invent a parallel workflow.
+3. Return the script output directly unless the user asked for a tailored recommendation or a routed skill execution.
+4. If the script is unavailable, read `references/capability-catalog.json`, resolve the matching skill name, open `../<skill>/SKILL.md` when present, and summarize or follow it in Chinese when the local metadata is Chinese.
 
 ## Boundaries
 
 - For model compatibility or instruction behavior, read `references/model-adaptation-contract.md`. Explain capability-driven AE behavior separately from provider model catalogs, reasoning-level metadata, and host-specific tool availability.
 - For test selection and evidence reuse, read [validation-contract](references/validation-contract.md). For GPT-6.1 or later-model behavior acceptance, use [model-evaluation](references/model-evaluation.md); its fixtures are not executed model results.
 - Do not claim OpenCode `config.command` slash commands are installed in Codex.
-- Explain that `/ae-*` names are compatibility labels. In Codex, reliable triggers are installed skill names, explicit `$ae-*` invocation, natural-language requests such as "use ae-work" / "使用 ae-work", and any enabled-skill search surfaces exposed by the active Codex App.
+- Explain that `/ae-*` names are compatibility labels. In Codex, reliable triggers are installed skill names, explicit `$ae-*` invocation, and any enabled-skill search surfaces exposed by the active Codex App. Non-core skills need `$ae-*` or routing through ae-help; natural-language phrases alone are not a reliable trigger for every skill.
 - When mentioning `/` visibility, phrase it as Codex skill-backed discoverability that must be verified in the active app, not as command registration implemented by this project.
 - For migration questions, read `references/codex-port-notes.md`.
 - For artifact path questions, read `references/artifact-contract.md`.

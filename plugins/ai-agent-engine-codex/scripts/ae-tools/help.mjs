@@ -5,6 +5,7 @@ import { readJson } from './utils.mjs'
 
 const pluginRoot = resolve(fileURLToPath(new URL('../..', import.meta.url)))
 const catalogPath = join(pluginRoot, 'skills', 'ae-help', 'references', 'capability-catalog.json')
+const skillsRoot = join(pluginRoot, 'skills')
 
 export function printHelp(query) {
   const catalog = readJson(catalogPath)
@@ -49,8 +50,10 @@ export function printHelp(query) {
       for (const skill of tierSkills) {
         const entry = skill.entry || `/${skill.name}`
         const target = skill.target ? `${skill.target}: ` : ''
+        const skillPath = join(skillsRoot, skill.name, 'SKILL.md')
         lines.push(`- ${target}${entry} (${skill.name})`)
         lines.push(`  说明: ${skill.purpose}`)
+        lines.push(`  SKILL.md: ${skillPath}`)
         if (skill.script) lines.push(`  脚本: ${skill.script}`)
         if (skill.artifactPath) lines.push(`  产物路径: ${skill.artifactPath}`)
       }

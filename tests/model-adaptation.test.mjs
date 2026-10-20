@@ -23,7 +23,7 @@ test('every distributed skill and language regeneration requires explicit invoca
       const entry = read(`${base}/${name}/SKILL.md`)
       const frontmatter = parseSimpleYaml(entry.split('---')[1])
       assert.ok(frontmatter.description && frontmatter.description.length > 10, name)
-      assert.match(frontmatter.description, /explicit|明确/i, name)
+      assert.match(frontmatter.description, /explicit|明确|names AE/i, name)
     }
   }
 })
