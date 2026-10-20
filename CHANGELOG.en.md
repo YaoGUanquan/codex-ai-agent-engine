@@ -6,6 +6,7 @@ This file is the complete release history of AI Agent Engine for Codex (since 0.
 
 ### 0.4.0-beta.1 (2026-10-15)
 - Add reusable team roles and a task-sensitive execution contract: approve complex plans first, keep small tasks inline, and let the parent own native dispatch, integration and evidence-backed acceptance.
+- Team-execution write authorization moves from explicit opt-in to a parent-agent gate (`write_requires_explicit_opt_in: false` + `write_requires_parent_gate: true`); write workers still need explicit parent approval, and `can_spawn_write_agents*` stays false.
 - Analyze file and business-resource read/write conflicts per wave, with host slots, execution state and automatic concurrency. Preserve explicit off/read-only choices and allow unrelated dirty work.
 - Strengthen source-to-output memory, query and concurrency budgets with isolated data fixtures and a five-case real-model comparison specification. Explicitly prefer `gpt-6.1-sol` for the trial without silent model substitution.
 - Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, `git diff --check`. Static and isolated-install checks establish helper, instruction and distribution contracts only. Real-model comparison is pending; quality, speed and production capacity gains are unproven.

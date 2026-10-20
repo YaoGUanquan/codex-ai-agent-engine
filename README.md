@@ -68,6 +68,7 @@ node scripts/ae-tools.mjs help
 
 ### 0.4.0-beta.1（2026-10-15）
 - 新增按任务选择角色的团队合同与角色模板：复杂任务先确认方案，主代理负责原生调度、集成和实际验收，小任务继续直接执行。
+- 团队执行写权限由「显式 opt-in」改为「父代理门禁」（`write_requires_explicit_opt_in: false` + `write_requires_parent_gate: true`）；写 worker 仍需父代理显式批准，`can_spawn_write_agents*` 保持 false。
 - 并行分析区分文件与业务资源的读写冲突，局部冲突按波次串行；新增宿主名额、执行状态和自动并发配置，保留显式关闭及只读选择，无关脏改动不再一律阻塞委派。
 - 强化从数据来源到输出的内存、查询与并发边界，补充隔离数据夹具及五类真实模型对照规范；首轮明确偏好 `gpt-6.1-sol`，不静默替换模型。
 - 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。静态与隔离安装仅证明辅助工具、规则和分发合同；真实模型对照尚未完成，不宣称质量、耗时或生产容量已提升。
