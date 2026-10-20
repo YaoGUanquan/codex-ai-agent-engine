@@ -25,7 +25,16 @@ import {
   operationId,
   pluginName,
   userPaths,
+  applyCursorDisableModelInvocation,
+  DEFAULT_IMPLICIT_TIER,
 } from './global-install-contract.mjs'
+import {
+  displaySettingsPath,
+  persistImplicitTier,
+  readPersistedImplicitTier,
+  resolveImplicitTier,
+  supportedImplicitTiers,
+} from './skill-language-metadata.mjs'
 
 const scriptRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const defaultSourceRoot = resolve(scriptRoot, '..', '..')
@@ -49,23 +58,25 @@ export function runGlobalInstall(argv = process.argv.slice(2), { repoRoot = defa
       return purge({ opts, paths })
     }, { owner: 'global installer', leaseMs: 300000 })
   }
-  throw new Error('Usage: global-install <preview|apply|recover|purge> [--manifest <path>] [--home <path>]')
+  throw new Error('Usage: global-install <preview|apply|recover|purge> [--implicit core|all|none] [--manifest <path>] [--home <path>]')
 }
 
 function preview({ opts, repoRoot, paths }) {
   const manifest = loadManifest(opts.manifest, repoRoot)
   const normalized = normalizeManifest(manifest, { repoRoot, home: paths.homeRoot, allowCustomConsumers: Boolean(opts.manifest) })
+  const implicitTier = resolveGlobalImplicitTier(opts, paths)
   const operation = operationId()
   return {
     status: 'preview',
     operationId: operation,
-    confirmation: confirmationFor(normalized, opts, paths, repoRoot),
+    confirmation: confirmationFor(normalized, opts, paths, repoRoot, null, implicitTier),
     homeRoot: paths.homeRoot,
     runtimeRoot: paths.runtimeRoot,
     personalPluginRoot: paths.personalPluginRoot,
     personalMarketplace: paths.personalMarketplace,
     cursorSkillsRoot: paths.cursorSkillsRoot,
-    cursorSkills: classifyCursorSkills(paths, repoRoot),
+    implicitTier,
+    cursorSkills: classifyCursorSkills(paths, repoRoot, implicitTier),
     projects: normalized.projects.map((project) => ({
       root: project.root,
       role: project.role,
@@ -89,9 +100,10 @@ function apply({ opts, repoRoot, paths, commandRunner }) {
   const manifest = loadManifest(opts.manifest, repoRoot)
   const normalized = normalizeManifest(manifest, { repoRoot, home: paths.homeRoot, allowCustomConsumers: Boolean(opts.manifest) })
   const sourceFingerprint = fingerprintPath(resolve(repoRoot, 'plugins', pluginName))
-  if (opts.confirm !== confirmationFor(normalized, opts, paths, repoRoot, sourceFingerprint)) throw new Error('preview confirmation does not match the current manifest, source root, or retirement authorization')
+  const implicitTier = resolveGlobalImplicitTier(opts, paths)
+  if (opts.confirm !== confirmationFor(normalized, opts, paths, repoRoot, sourceFingerprint, implicitTier)) throw new Error('preview confirmation does not match the current manifest, source root, or retirement authorization')
   const revision = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: repoRoot, encoding: 'utf8', timeout: 10000, maxBuffer: 65536, shell: false })
-  const operation = { id: opts.operation, status: 'in-progress', phase: 'preflight', createdAt: new Date().toISOString(), paths, sourceRoot: normalized.sourceRoot, sourceRevision: revision.status === 0 ? revision.stdout.trim() : null, sourceFingerprint, manifest: normalized, changes: [], failAt: opts['fail-at'] || null }
+  const operation = { id: opts.operation, status: 'in-progress', phase: 'preflight', createdAt: new Date().toISOString(), paths, sourceRoot: normalized.sourceRoot, sourceRevision: revision.status === 0 ? revision.stdout.trim() : null, sourceFingerprint, manifest: normalized, changes: [], failAt: opts['fail-at'] || null, implicitTier }
   const journal = journalPath(paths, operation.id)
   if (existsSync(journal)) throw new Error(`operation journal already exists: ${operation.id}`)
   operation.journal = journal
@@ -102,6 +114,7 @@ function apply({ opts, repoRoot, paths, commandRunner }) {
     writeJournal(journal, operation)
     operation.phase = 'stage-runtime'
     stageRuntime(operation, repoRoot)
+    applyStagedImplicitTier(operation)
     writeJournal(journal, operation)
     injectFailure(operation, 'stage-runtime')
     operation.phase = 'backup-user-skills'
@@ -128,6 +141,7 @@ function apply({ opts, repoRoot, paths, commandRunner }) {
     registerCodexPlugin(operation, commandRunner)
     removeStage(operation)
     injectFailure(operation, 'register-codex-plugin')
+    persistImplicitTier(resolve(paths.agentsRoot, pluginName, 'display-settings.json'), implicitTier)
     operation.status = 'completed'
     operation.phase = 'completed'
     writeJournal(journal, operation)
@@ -195,7 +209,7 @@ function recoverInterrupted(paths) {
 function ensureUserTargetsAreSafe(paths, repoRoot, opts) {
   if (!isInside(paths.homeRoot, paths.agentsRoot) || !isInside(paths.homeRoot, paths.runtimeRoot) || !isInside(paths.homeRoot, paths.personalPluginsRoot) || !isInside(paths.homeRoot, paths.personalPluginRoot) || !isInside(paths.homeRoot, paths.personalMarketplace) || !isInside(paths.homeRoot, paths.cursorSkillsRoot) || !isInside(paths.homeRoot, paths.cursorReservedSkillsRoot)) throw new Error('global paths escape the current user home')
   if (resolve(repoRoot) === paths.runtimeRoot || isInside(paths.runtimeRoot, resolve(repoRoot)) || resolve(repoRoot) === paths.personalPluginRoot || isInside(paths.personalPluginRoot, resolve(repoRoot))) throw new Error('distribution source must not overlap a user runtime or plugin root')
-  const expectedRuntimeEntries = new Set(['operations', 'backups', 'staging', 'runtime', 'bin', 'install.lock'])
+  const expectedRuntimeEntries = new Set(['operations', 'backups', 'staging', 'runtime', 'bin', 'install.lock', 'display-settings.json'])
   const unexpectedRuntimeEntries = existsSync(paths.runtimeRoot)
     ? readDirectory(paths.runtimeRoot).filter((name) => !expectedRuntimeEntries.has(name))
     : []
@@ -216,7 +230,8 @@ function ensureUserTargetsAreSafe(paths, repoRoot, opts) {
       throw new Error(`existing user skill is unknown or modified: ${target}`)
     }
   }
-  for (const item of classifyCursorSkills(paths, repoRoot)) {
+  const implicitTier = resolveGlobalImplicitTier(opts, paths)
+  for (const item of classifyCursorSkills(paths, repoRoot, implicitTier)) {
     if (item.status === 'missing' || item.status === 'current-release verified' || item.status === 'historical-release verified') continue
     const dest = resolve(paths.cursorSkillsRoot, item.name)
     if (item.kind === 'directory' && wasCreatedByCompletedOperation(paths, dest)) continue
@@ -383,21 +398,22 @@ function writePersonalMarketplace(operation) {
 
 function publishCursorSkills(operation) {
   const names = currentSkillNames(operation.paths.homeRoot)
+  const implicitTier = operation.implicitTier || DEFAULT_IMPLICIT_TIER
   mkdirSync(operation.paths.cursorSkillsRoot, { recursive: true })
   for (const dest of aeSkillComponents(operation.paths.cursorSkillsRoot)) {
     const name = basename(dest)
     const source = expectedCursorSkillTarget(operation.paths.personalPluginRoot, name)
     const entry = inspectCursorSkillEntry(dest)
-    if (names.includes(name) && isOwnedCursorSkillCopy(entry, source)) continue
+    if (names.includes(name) && isOwnedCursorSkillCopy(entry, source, { skillName: name, implicitTier })) continue
     backupCursorSkillEntry(operation, dest, entry)
   }
   for (const name of names) {
     const dest = resolve(operation.paths.cursorSkillsRoot, name)
     const source = expectedCursorSkillTarget(operation.paths.personalPluginRoot, name)
     const entry = inspectCursorSkillEntry(dest)
-    if (isOwnedCursorSkillCopy(entry, source)) continue
+    if (isOwnedCursorSkillCopy(entry, source, { skillName: name, implicitTier })) continue
     if (entry.kind !== 'missing') backupCursorSkillEntry(operation, dest, entry)
-    createCursorSkillCopy(operation, dest, source)
+    createCursorSkillCopy(operation, dest, source, implicitTier)
   }
 }
 
@@ -423,14 +439,18 @@ function backupCursorSkillEntry(operation, dest, entry) {
   moveToBackup(operation, dest, `cursor-skills/${basename(dest)}`)
 }
 
-function createCursorSkillCopy(operation, dest, source) {
+function createCursorSkillCopy(operation, dest, source, implicitTier = DEFAULT_IMPLICIT_TIER) {
   assertCursorLinkTargetAllowed(operation.paths.personalPluginRoot, source)
   if (!existsSync(source)) throw new Error(`cursor skill copy source is missing: ${source}`)
   mkdirSync(dirname(dest), { recursive: true })
   operation.changes.push({ source: null, target: dest, backup: null, kind: 'created' })
   writeJournal(operation.journal, operation)
   cpSync(source, dest, { recursive: true, errorOnExist: true })
-  if (fingerprintPath(dest).sha256 !== fingerprintPath(source).sha256) throw new Error(`cursor skill copy fingerprint mismatch: ${dest}`)
+  applyCursorDisableModelInvocation(dest, basename(dest), implicitTier)
+  const entry = inspectCursorSkillEntry(dest)
+  if (!isOwnedCursorSkillCopy(entry, source, { skillName: basename(dest), implicitTier })) {
+    throw new Error(`cursor skill copy fingerprint mismatch: ${dest}`)
+  }
 }
 
 function unlinkCursorSkill(path) {
@@ -583,12 +603,13 @@ function loadManifest(path, repoRoot) {
   return path ? readJson(resolve(path)) : buildFirstBatchManifest(repoRoot)
 }
 
-function confirmationFor(manifest, opts = {}, paths = null, repoRoot = null, sourceFingerprint = null) {
+function confirmationFor(manifest, opts = {}, paths = null, repoRoot = null, sourceFingerprint = null, implicitTier = DEFAULT_IMPLICIT_TIER) {
   return createHash('sha256').update(JSON.stringify({
     manifest,
     sourceFingerprint: sourceFingerprint ?? (repoRoot ? fingerprintPath(resolve(repoRoot, 'plugins', pluginName)) : null),
     retireModified: opts['retire-modified'] === true,
-    cursorSkills: paths && repoRoot ? classifyCursorSkills(paths, repoRoot) : [],
+    implicitTier,
+    cursorSkills: paths && repoRoot ? classifyCursorSkills(paths, repoRoot, implicitTier) : [],
   })).digest('hex')
 }
 
@@ -620,7 +641,46 @@ function serializable(operation) {
 }
 
 function report(operation) {
-  return { status: operation.status, operationId: operation.id, phase: operation.phase, source_revision: operation.sourceRevision ?? null, source_fingerprint: operation.sourceFingerprint ?? null, journal: journalPath(operation.paths, operation.id), backupRoot: backupPath(operation.paths, operation.id), changes: operation.changes?.length || 0, error: operation.error || null }
+  return { status: operation.status, operationId: operation.id, phase: operation.phase, source_revision: operation.sourceRevision ?? null, source_fingerprint: operation.sourceFingerprint ?? null, implicitTier: operation.implicitTier || null, journal: journalPath(operation.paths, operation.id), backupRoot: backupPath(operation.paths, operation.id), changes: operation.changes?.length || 0, error: operation.error || null }
+}
+
+
+function resolveGlobalImplicitTier(opts, paths) {
+  if (opts.implicit && !supportedImplicitTiers.has(opts.implicit)) {
+    throw new Error('Usage: global-install <preview|apply|recover|purge> [--implicit core|all|none] [--manifest <path>] [--home <path>]')
+  }
+  return resolveImplicitTier({
+    explicit: opts.implicit || null,
+    settingsPath: resolve(paths.agentsRoot, pluginName, 'display-settings.json'),
+  })
+}
+
+function applyStagedImplicitTier(operation) {
+  const tier = operation.implicitTier || DEFAULT_IMPLICIT_TIER
+  const stagedPlugin = resolve(operation.stage, 'plugin')
+  const script = resolve(stagedPlugin, 'scripts', 'set-language.mjs')
+  if (!existsSync(script)) throw new Error(`staged set-language missing: ${script}`)
+  const helpYaml = resolve(stagedPlugin, 'skills', 'ae-help', 'agents', 'openai.yaml')
+  let lang = 'bilingual'
+  if (existsSync(helpYaml)) {
+    const content = readFileSync(helpYaml, 'utf8')
+    if (content.includes('查看 Codex 中可用的 AE 工作流能力 / List AE workflow capabilities for Codex')) lang = 'bilingual'
+    else if (content.includes('查看 Codex 中可用的 AE 工作流能力')) lang = 'zh-CN'
+    else if (content.includes('List AE workflow capabilities for Codex')) lang = 'en'
+  }
+  const targetRoot = resolve(operation.stage, 'language-target')
+  const pluginDest = resolve(targetRoot, 'plugins', pluginName)
+  mkdirSync(dirname(pluginDest), { recursive: true })
+  renameSync(stagedPlugin, pluginDest)
+  try {
+    const result = spawnSync(process.execPath, [resolve(pluginDest, 'scripts', 'set-language.mjs'), '--target', targetRoot, '--lang', lang, '--implicit', tier], {
+      encoding: 'utf8', stdio: 'pipe', timeout: 60000, maxBuffer: 4 * 1024 * 1024, shell: false,
+    })
+    if (result.error) throw result.error
+    if (result.status !== 0) throw new Error(`staged implicit tier render failed: ${result.stderr || result.stdout || result.status}`)
+  } finally {
+    renameSync(pluginDest, stagedPlugin)
+  }
 }
 
 function parseOptions(args) {
