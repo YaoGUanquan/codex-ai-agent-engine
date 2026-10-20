@@ -13,7 +13,8 @@ Create a repository-grounded plan; do not implement product code.
    only for ambiguity, cross-module work, or public/data/security/deployment
    boundaries.
 3. Keep units independently verifiable with explicit files, dependencies,
-   validation, rollback, and forbidden scope.
+   validation, rollback, and forbidden scope. Name business resources and
+   observable acceptance.
 4. For a lightweight plan, include frontmatter, `AI Parse Contract`,
    `Scope`/`Readiness`, one `U1` unit, and `Consistency Check`; keep goal,
    acceptance, non-goals, ownership, dependencies, validation and rollback.
@@ -31,6 +32,10 @@ Read only the row triggered by the task, not the whole table.
 | Standard/deep plan, material choice or cross-artifact work | [Planning decisions and self-review](references/planning-decisions.md) |
 
 Use [plan-template](references/plan-template.md) for standard/deep artifacts.
+For complex requirements/architecture or multi-unit team planning, load the
+[adaptive team contract](../ae-help/references/team-execution.md). Produce a
+requirements and architecture proposal for user approval before implementation;
+reuse approved decisions. A planning-only request stops at the plan.
 For data-backed queries/writes, use the [data-access contract](../ae-backend/references/data-access-contract.md).
 For large/distributed changes, use the [scale contract](../ae-help/references/scale-and-distributed-engineering.md).
 For workflow sizing, use the [model-adaptation contract](../ae-help/references/model-adaptation-contract.md).

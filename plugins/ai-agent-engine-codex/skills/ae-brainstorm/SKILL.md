@@ -1,6 +1,6 @@
 ---
 name: ae-brainstorm
-description: Use when the user requests ae-brainstorm, /ae-brainstorm, $ae-brainstorm, AE requirement clarification or perspective collision.
+description: Use only when explicitly requested as $ae-brainstorm or its named AE capability. Scope includes the user requests ae-brainstorm, /ae-brainstorm, $ae-brainstorm, AE requirement clarification or perspective collision.
 ---
 
 # AE Brainstorm

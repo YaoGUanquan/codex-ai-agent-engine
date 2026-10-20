@@ -131,10 +131,15 @@ Carry accepted backend data-access decisions into units and validation. Keep bou
 ### U1 - <unit name>
 
 - Goal:
+- Role:
 - Requirements covered:
 - Acceptance criteria covered:
 - Depends on:
 - Files:
+- Read-only files:
+- Shared resources:
+- Acceptance:
+- Data Access Budget:
 - Forbidden files:
 - Approach:
 - Tests:
@@ -176,4 +181,10 @@ All paths must be repository-relative. Do not write code in the plan.
 
 Remove `origin` and `originFingerprint` together when there is no source artifact. If either field is present, both must be present and `origin` must be repository-relative. Omit `depth` for lightweight plans; use `standard` or `deep` for larger plans. Use `sharded: true` only when multiple modules require separate plan shards or the user explicitly asks for sharding.
 
-For multi-agent readiness, every implementation unit must keep `Depends on:` explicit. Use `none` for independent units or comma-separated unit IDs such as `U1, U2`. Use `Forbidden files:` to name shared files, lockfiles, generated outputs, or public contracts that a delegated worker must not edit. `task-analyze` parses `Files:` as owned files and `Forbidden files:` as a separate forbidden boundary, so do not duplicate forbidden paths under `Files:`.
+For multi-agent readiness, use the [adaptive team contract](../../ae-help/references/team-execution.md) and its canonical role catalog. Keep `Depends on:` explicit: `none` or comma-separated IDs such as `U1, U2`. `Role:` selects a reusable job; multiple instances may use the same role.
+
+`Files:` grants exclusive writable ownership. `Read-only files:` grants reads only. `Forbidden files:` names paths a worker must not edit, including lockfiles, generated outputs or public contracts outside its assignment. Do not duplicate forbidden paths under `Files:`.
+
+`Shared resources:` lists inspected API, state-machine, schema and config keys as `key=read` or `key=write`, comma-separated, or `none` when no resources are shared. File separation alone does not establish business independence. `Acceptance:` names an observable signal; `Data Access Budget:` carries applicable bounded queries, fan-out, transactions or async completion decisions, or an explicit not-applicable reason.
+
+Legacy plans missing the new fields remain compatible but require manual checks before dispatch. Candidate waves never establish completion; the parent must accept actual changes and acceptance evidence before releasing dependents.

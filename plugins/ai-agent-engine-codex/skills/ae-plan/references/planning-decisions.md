@@ -12,6 +12,8 @@ Before writing a plan, verify that these inputs are clear enough:
 
 If any item is materially unclear, ask one focused question or route to `ae-brainstorm`. Do not fill gaps with invented product behavior.
 
+For complex work, use the [adaptive team contract](../../ae-help/references/team-execution.md): requirements and architecture analysis produce one proposal for user approval before implementation. Reuse an approved plan without repeated phase confirmations. The parent remains senior project manager/technical lead, owns integration and acceptance, and may use multiple instances of the canonical roles for independent analysis. Analysis grants no implementation permission.
+
 When the plan crosses a public API, persisted data, external service, deployment, or browser boundary, load `validation-evidence-profile.md`. Select only the tiers that apply, record their preconditions and bounded claims, and make blocked or `unverified` proof visible. Do not infer a higher-tier result from a lower-tier check. Do not load this profile for a lightweight lane that stays within source-level validation.
 
 For database-backed query/list/count or bulk/async write work, load the [data-access and scale contract](../../ae-backend/references/data-access-contract.md) and carry the applicable Data Access Budget into owned units and acceptance checks. Resolve logical row/total, freshness, batch/commit and recovery decisions before coding. Include auxiliary-table backfill/reconciliation/cutover and durable-job failure tests when chosen; do not reduce a structural data-access problem to a loop rewrite.

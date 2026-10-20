@@ -1,6 +1,6 @@
 ---
 name: ae-refactor
-description: Use when the user asks for AE refactor, /ae-refactor, refactoring plan, behavior-preserving redesign, cleanup plan, module split, migration plan, or wants refactor risk and validation before coding.
+description: Use only when explicitly requested as $ae-refactor or its named AE capability. Scope includes the user asks for AE refactor, /ae-refactor, refactoring plan, behavior-preserving redesign, cleanup plan, module split, migration plan, or wants refactor risk and validation before coding.
 ---
 
 # AE Refactor

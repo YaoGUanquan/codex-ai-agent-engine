@@ -1,5 +1,7 @@
 # Review Delivery
 
+Use the [validation contract](../../ae-help/references/validation-contract.md) to assess existing results. Entering review does not require tests to run again; after autofix, invalidate only affected evidence.
+
 Before helper commands, resolve `aeEntry` using the [runtime entry contract](../../ae-help/references/runtime-entry.md).
 
 ## Findings Standard

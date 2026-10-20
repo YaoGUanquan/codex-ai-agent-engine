@@ -1,6 +1,6 @@
 ---
 name: ae-web-app
-description: Use for /ae-web-app or $ae-web-app, Web app behavior, API integration, auth, forms with state or persistence, route logic, and light full-stack implementation. Not the owner for visual-only styling or screenshot matching; use ae-frontend-design for those. Use ae-web-forge only when the frontend task needs lane selection.
+description: Use only when explicitly requested as $ae-web-app or its named AE capability. Scope includes /ae-web-app or $ae-web-app, Web app behavior, API integration, auth, forms with state or persistence, route logic, and light full-stack implementation. Not the owner for visual-only styling or screenshot matching; use ae-frontend-design for those. Use ae-web-forge only when the frontend task needs lane selection.
 ---
 
 # AE Web App

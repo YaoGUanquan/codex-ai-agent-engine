@@ -1,6 +1,6 @@
 ---
 name: ae-test-api
-description: Use when the user requests AE API testing, /ae-test-api, API/interface/bubble testing, endpoint verification or post-change backend acceptance.
+description: Use only when explicitly requested as $ae-test-api or its named AE capability. Scope includes the user requests AE API testing, /ae-test-api, API/interface/bubble testing, endpoint verification or post-change backend acceptance.
 ---
 
 # AE API Test

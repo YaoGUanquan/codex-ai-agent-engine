@@ -162,7 +162,8 @@ test('plan-declared immutable pages cannot become writable worker ownership', (t
   assert.deepEqual(result.worker_requests[0].read_only_files, [page])
   assert.ok(result.worker_requests[0].forbidden_files.includes(page))
   assert.equal(result.worker_requests[0].authorization, 'read-only-review')
-  assert.equal(result.write_parallel_eligibility.can_parallelize, false)
+  assert.equal(result.write_parallel_eligibility.can_parallelize, true)
+  assert.deepEqual(result.worker_requests[1].owned_files, ['src/current.js'])
   assert.ok(result.warnings.some((warning) => /immutable document pages/i.test(warning)))
 })
 

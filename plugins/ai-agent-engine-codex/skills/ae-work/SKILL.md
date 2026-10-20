@@ -14,16 +14,19 @@ Implement only the approved scope and preserve unrelated work.
    dependency boundary requires it.
 3. Choose the smallest behaviorally complete change. Add focused tests when
    behavior changes.
-4. Validate from the narrowest meaningful check upward and record the exact
-   result. Do not claim runtime or deployment proof from static checks.
-5. Stop at acceptance, a real blocker, or the declared budget.
+4. Apply the [validation contract](../ae-help/references/validation-contract.md)
+   for test scope, reuse and stopping. Record the actual proof boundary.
+5. Stop at acceptance, a real blocker, or a user-specified budget.
 
 Before helper commands, resolve `aeEntry` with
 [runtime-entry](../ae-help/references/runtime-entry.md).
 
 For a small task, inspect direct paths, implement, test, review the scoped diff,
 and report results inline. Do not create task scans or gate artifacts for
-ceremony. Delegation is serial by default and needs explicit user authorization.
+ceremony. For complex work, obtain approval for the requirements and architecture
+proposal before implementation; reuse an approved plan without phase-by-phase
+confirmation. For team work, load the
+[adaptive team contract](../ae-help/references/team-execution.md).
 Safety controls and explicit requirements are not simplification targets.
 
 ## Task References
@@ -33,7 +36,7 @@ Read only the row triggered by the task, not the whole table.
 | Trigger | Reference |
 | --- | --- |
 | Approved multi-unit plan or non-trivial implementation | [Execution](references/task-execution.md) |
-| Explicitly authorized delegation | [Ownership and worker gates](references/task-delegation.md) |
+| Independent work warrants native delegation | [Ownership and worker gates](references/task-delegation.md) |
 | Changed capability claims or explicit shipping gate | [Claim and shipping evidence](references/claim-and-shipping.md) |
 
 For data-backed queries/writes, use the [data-access contract](../ae-backend/references/data-access-contract.md).

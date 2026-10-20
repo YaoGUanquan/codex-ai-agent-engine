@@ -1,6 +1,6 @@
 ---
 name: ae-reverse-engineering
-description: Performs authorized reverse engineering and defensive artifact analysis. Use for /ae-reverse-engineering, $ae-reverse-engineering, 授权逆向、二进制或移动端分析、恶意软件取证、兼容性研究，或本地 CTF/训练工件；分析前必须确认授权、来源与证据边界。
+description: Use only when explicitly requested as $ae-reverse-engineering or its named AE capability. Performs authorized reverse engineering and defensive artifact analysis. Use for /ae-reverse-engineering, $ae-reverse-engineering, 授权逆向、二进制或移动端分析、恶意软件取证、兼容性研究，或本地 CTF/训练工件；分析前必须确认授权、来源与证据边界。
 ---
 
 # AE Authorized Reverse Engineering
