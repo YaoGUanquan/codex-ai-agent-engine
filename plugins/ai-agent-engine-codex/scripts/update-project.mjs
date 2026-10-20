@@ -5,6 +5,13 @@ import { resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { stripVTControlCharacters } from 'node:util'
+import {
+  DEFAULT_IMPLICIT_TIER,
+  displaySettingsPath,
+  readPersistedImplicitTier,
+  resolveImplicitTier,
+  supportedImplicitTiers,
+} from './skill-language-metadata.mjs'
 
 const args = process.argv.slice(2)
 const targetRoot = resolve(readArg('--target') || process.cwd())
@@ -12,9 +19,29 @@ const branch = readArg('--branch') || 'main'
 const repo = readArg('--repo') || readInstalledRepo(targetRoot)
 const lang = readArg('--lang') || readInstalledLang(targetRoot) || 'bilingual'
 const supportedLangs = new Set(['en', 'zh-CN', 'bilingual'])
+const implicitArg = readArg('--implicit')
+const installStatePath = resolve(targetRoot, '.agents', 'ai-agent-engine-codex', 'project-install.json')
+const installStateTier = (() => {
+  if (!existsSync(installStatePath)) return null
+  try {
+    const value = JSON.parse(readFileSync(installStatePath, 'utf8'))
+    return supportedImplicitTiers.has(value?.implicitTier) ? value.implicitTier : null
+  } catch { return null }
+})()
+const implicitTier = (() => {
+  try {
+    return resolveImplicitTier({
+      explicit: implicitArg,
+      settingsPath: displaySettingsPath(targetRoot),
+      installStateTier,
+    })
+  } catch {
+    return null
+  }
+})()
 
-if (!supportedLangs.has(lang)) {
-  fail('Usage: node scripts/update-ae-codex.mjs [--repo <url>] [--branch main] [--target <project>] [--lang en|zh-CN|bilingual]')
+if (!supportedLangs.has(lang) || (implicitArg && !supportedImplicitTiers.has(implicitArg)) || !implicitTier) {
+  fail('Usage: node scripts/update-ae-codex.mjs [--repo <url>] [--branch main] [--target <project>] [--lang en|zh-CN|bilingual] [--implicit core|all|none]')
 }
 
 if (!repo || isPlaceholderRepo(repo)) {
@@ -33,7 +60,7 @@ try {
   const installer = resolve(tempRoot, 'scripts', 'install-project.mjs')
   if (!existsSync(installer)) throw new Error(`Installer not found in cloned repository: ${installer}`)
   const installerFingerprint = createHash('sha256').update(readFileSync(installer)).digest('hex')
-  run(process.execPath, [installer, '--target', targetRoot, '--lang', lang, ...(args.includes('--replace-modified') ? ['--replace-modified'] : [])])
+  run(process.execPath, [installer, '--target', targetRoot, '--lang', lang, '--implicit', implicitTier, ...(args.includes('--replace-modified') ? ['--replace-modified'] : [])])
   const maintenance = args.includes('--no-tidy')
     ? { status: 'skipped', reason: 'maintenance disabled by --no-tidy' }
     : runPostUpdateMaintenance(targetRoot)
@@ -41,7 +68,7 @@ try {
   const state = existsSync(statePath) ? JSON.parse(readFileSync(statePath, 'utf8')) : null
   console.log(JSON.stringify({
     status: maintenance.status === 'failed' ? 'updated-maintenance-failed' : 'updated',
-    installation: 'updated', targetRoot, repo: redactRepository(repo), branch, lang,
+    installation: 'updated', targetRoot, repo: redactRepository(repo), branch, lang, implicitTier,
     source_revision: sourceRevision, installer_fingerprint: installerFingerprint,
     source_fingerprint: state?.sourceFingerprint || null, operationId: state?.operationId || null,
     maintenance, maintenance_complete: maintenance.status === 'applied',

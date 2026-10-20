@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { isAbsolute, relative, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
@@ -210,6 +210,14 @@ try {
     }
   }
 
+  const installState = JSON.parse(readFileSync(resolve(targetRoot, '.agents', 'ai-agent-engine-codex', 'project-install.json'), 'utf8'))
+  if (installState.implicitTier !== 'all') {
+    throw new Error(`Default install implicitTier must remain all, got ${installState.implicitTier}`)
+  }
+  if (countAllowImplicitTrue(resolve(targetRoot, '.agents', 'skills')) !== 40) {
+    throw new Error('Default install must keep allow_implicit_invocation true for all 40 skills')
+  }
+
   const profileTemplate = readFileSync(resolve(targetRoot, 'docs', 'ae', 'templates', 'ae-skill-profiles.example.yaml'), 'utf8')
   if (!profileTemplate.includes('multi_agent:')) {
     throw new Error('Installed profile template does not include multi_agent defaults')
@@ -325,8 +333,11 @@ try {
       throw new Error('Installed task analysis granted write ownership to an immutable page')
     }
 
+  const verifiedImplicitTiers = verifyImplicitInstallTiers()
+
   console.log(JSON.stringify({
     status: 'ok',
+
     targetRoot: relative(repoRoot, targetRoot),
     verifiedSkills: [
       'ae-prd',
@@ -347,6 +358,7 @@ try {
       'ae-static-server',
       'ae-imagegen-prompt',
     ],
+    verifiedImplicitTiers,
     verifiedLanguageModes: ['bilingual', 'en', 'zh-CN'],
     verifiedMultiAgentPolicy: 'multi_agent_auto_analysis_by_default',
     verifiedSkillGovernancePolicy: 'source_mirror_metadata_and_path_safety',
@@ -356,6 +368,70 @@ try {
 } finally {
   cleanupTarget()
 }
+
+function countAllowImplicitTrue(skillsRoot) {
+  if (!existsSync(skillsRoot)) return 0
+  let count = 0
+  for (const name of readdirSync(skillsRoot)) {
+    const yaml = resolve(skillsRoot, name, 'agents', 'openai.yaml')
+    if (!existsSync(yaml)) continue
+    if (/^ {2}allow_implicit_invocation:\s*true\s*$/m.test(readFileSync(yaml, 'utf8'))) count += 1
+  }
+  return count
+}
+
+function verifyImplicitInstallTiers() {
+  const installer = resolve(repoRoot, 'scripts', 'install-project.mjs')
+  const expected = { all: 40, core: 5, none: 0 }
+  const checked = []
+  for (const [tier, trueCount] of Object.entries(expected)) {
+    const tierRoot = resolve(repoRoot, '.tmp-install-smoke-checks', `implicit-${tier}-${randomUUID()}`)
+    ensureInsideRepo(tierRoot)
+    mkdirSync(tierRoot, { recursive: true })
+    try {
+      const installed = JSON.parse(run(process.execPath, [installer, '--target', tierRoot, '--lang', 'en', '--implicit', tier]).stdout.trim().split(/\r?\n(?=\{)/).pop())
+      if (installed.implicitTier !== tier) throw new Error(`install --implicit ${tier} summary mismatch`)
+      const state = JSON.parse(readFileSync(resolve(tierRoot, '.agents', 'ai-agent-engine-codex', 'project-install.json'), 'utf8'))
+      if (state.implicitTier !== tier) throw new Error(`project-install.json missing implicitTier ${tier}`)
+      const actual = countAllowImplicitTrue(resolve(tierRoot, '.agents', 'skills'))
+      if (actual !== trueCount) throw new Error(`install --implicit ${tier} true-count ${actual}, expected ${trueCount}`)
+      checked.push(tier)
+    } finally {
+      rmSync(tierRoot, { recursive: true, force: true })
+    }
+  }
+
+  const retainRoot = resolve(repoRoot, '.tmp-install-smoke-checks', `implicit-retain-${randomUUID()}`)
+  ensureInsideRepo(retainRoot)
+  mkdirSync(retainRoot, { recursive: true })
+  try {
+    run(process.execPath, [installer, '--target', retainRoot, '--lang', 'en', '--implicit', 'none'])
+    if (countAllowImplicitTrue(resolve(retainRoot, '.agents', 'skills')) !== 0) {
+      throw new Error('pre-update none install did not zero allow_implicit_invocation')
+    }
+    const updated = JSON.parse(run(process.execPath, [installer, '--target', retainRoot, '--lang', 'en']).stdout.trim().split(/\r?\n(?=\{)/).pop())
+    if (updated.implicitTier !== 'none') throw new Error('update without --implicit did not retain none')
+    if (countAllowImplicitTrue(resolve(retainRoot, '.agents', 'skills')) !== 0) {
+      throw new Error('after update, allow_implicit_invocation true count must stay 0')
+    }
+    checked.push('none-then-update')
+  } finally {
+    rmSync(retainRoot, { recursive: true, force: true })
+  }
+
+  mkdirSync(resolve(repoRoot, '.tmp-install-smoke-checks'), { recursive: true })
+  const badTarget = resolve(repoRoot, '.tmp-install-smoke-checks', `implicit-bad-${randomUUID()}`)
+  const bad = spawnSync(process.execPath, [installer, '--target', badTarget, '--implicit', 'partial'], {
+    cwd: repoRoot, encoding: 'utf8', stdio: 'pipe',
+  })
+  rmSync(badTarget, { recursive: true, force: true })
+  if (bad.status === 0 || !/--implicit core\|all\|none/.test(bad.stderr || '')) {
+    throw new Error('install-project must reject illegal --implicit with usage text')
+  }
+  checked.push('illegal-rejected')
+  return checked
+}
+
 
 function cleanupTarget() {
   if (!existsSync(targetRoot)) return

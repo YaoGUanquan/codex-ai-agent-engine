@@ -7,6 +7,14 @@ import { spawnSync } from 'node:child_process'
 import { withLocalOperationLock } from '../plugins/ai-agent-engine-codex/scripts/local-operation-lock.mjs'
 import { assertCanonicalContained, readBoundedText } from '../plugins/ai-agent-engine-codex/scripts/ae-tools/utils.mjs'
 import { fingerprintManagedPath } from '../plugins/ai-agent-engine-codex/scripts/path-fingerprint.mjs'
+import {
+  DEFAULT_IMPLICIT_TIER,
+  displaySettingsPath,
+  persistImplicitTier,
+  readPersistedImplicitTier,
+  resolveImplicitTier,
+  supportedImplicitTiers,
+} from '../plugins/ai-agent-engine-codex/scripts/skill-language-metadata.mjs'
 
 const __filename = fileURLToPath(import.meta.url)
 const repoRoot = realpathSync(resolve(dirname(__filename), '..'))
@@ -26,10 +34,18 @@ if (!existsSync(sourcePlugin)) fail(`source plugin not found: ${sourcePlugin}`)
 const targetRoot = prepareTargetRoot(targetArg)
 if (targetRoot === repoRoot || overlaps(targetRoot, sourcePlugin)) fail('refusing to install into the distribution source or an overlapping path; choose a consumer project target')
 const lang = readArg('--lang') || readInstalledLang(targetRoot) || 'bilingual'
-if (!supportedLangs.has(lang)) fail('Usage: node scripts/install-project.mjs --target <project> [--lang en|zh-CN|bilingual] [--replace-modified]')
+if (!supportedLangs.has(lang)) fail(usageText())
+const implicitArg = readArg('--implicit')
+if (implicitArg && !supportedImplicitTiers.has(implicitArg)) fail(usageText())
 
 const paths = targetPaths(targetRoot)
 const replaceModified = args.includes('--replace-modified')
+const priorInstallState = existsSync(paths.state) ? (() => { try { return JSON.parse(readFileSync(paths.state, 'utf8')) } catch { return null } })() : null
+const implicitTier = resolveImplicitTier({
+  explicit: implicitArg,
+  settingsPath: displaySettingsPath(targetRoot),
+  installStateTier: priorInstallState?.implicitTier ?? null,
+})
 let outcome
 try {
   assertManagedPath(paths.lock)
@@ -71,6 +87,8 @@ try {
   fail(error instanceof Error ? error.message : String(error))
 }
 
+persistImplicitTier(displaySettingsPath(targetRoot), implicitTier)
+
 console.log(JSON.stringify({
   ...outcome,
   targetRoot,
@@ -85,6 +103,7 @@ console.log(JSON.stringify({
   memoryKnowledgeChecker: 'scripts/check-memory-knowledge-contract.mjs',
   state: '.agents/ai-agent-engine-codex/project-install.json',
   lang,
+  implicitTier,
 }, null, 2))
 
 function targetPaths(root) {
@@ -198,7 +217,7 @@ function prepareOperation(operation, components, marketplace) {
     } else writeFileSync(target, component.text, { encoding: 'utf8', flag: 'wx' })
   }
   writeState(resolve(stagedRoot, marketplace.rel), marketplace.value)
-  runLanguageSetter(lang, stagedRoot)
+  runLanguageSetter(lang, stagedRoot, implicitTier)
   const validation = spawnSync(process.execPath, [resolve(stagedRoot, 'scripts', 'ae-tools.mjs'), 'help'], { cwd: stagedRoot, encoding: 'utf8', timeout: 30000, maxBuffer: 4 * 1024 * 1024, shell: false })
   if (validation.error || validation.status !== 0) throw new Error(`staged CLI validation failed: ${validation.error?.message || validation.stderr}`)
   for (const [source, expected] of sources) if (fingerprintPath(source) !== expected) throw new Error('source changed while staging; retry with a stable source')
@@ -207,6 +226,7 @@ function prepareOperation(operation, components, marketplace) {
   const state = {
     schemaVersion: 1, pluginVersion: readPluginVersion(), installedAt: new Date().toISOString(),
     operationId: operation.id, sourceRevision: operation.sourceRevision, sourceFingerprint: operation.sourceFingerprint,
+    implicitTier,
     components: Object.fromEntries(replacements.map((rel) => [rel, fingerprintPath(resolve(stagedRoot, rel))])),
   }
   const stateRel = toPosix(relative(targetRoot, paths.state))
@@ -342,7 +362,7 @@ function prepareTargetRoot(input) {
 
 function readRequiredArg(name) {
   const value = readArg(name)
-  if (!value) fail('Usage: node scripts/install-project.mjs --target <project> [--lang en|zh-CN|bilingual] [--replace-modified]')
+  if (!value) fail(usageText())
   return value
 }
 
@@ -388,11 +408,15 @@ function readInstalledLang(targetRoot) {
   if (content.includes('List AE workflow capabilities for Codex')) return 'en'
   return null
 }
-function runLanguageSetter(language, targetRoot) {
+function runLanguageSetter(language, targetRoot, tier = DEFAULT_IMPLICIT_TIER) {
   const script = resolve(targetRoot, 'plugins', pluginName, 'scripts', 'set-language.mjs')
-  const result = spawnSync(process.execPath, [script, '--target', targetRoot, '--lang', language], { stdio: 'pipe', encoding: 'utf8', timeout: 30000, maxBuffer: 1024 * 1024, shell: false })
+  const result = spawnSync(process.execPath, [script, '--target', targetRoot, '--lang', language, '--implicit', tier], { stdio: 'pipe', encoding: 'utf8', timeout: 30000, maxBuffer: 1024 * 1024, shell: false })
   if (result.error) throw result.error
   if (result.status !== 0) throw new Error(`language setter failed with status ${result.status ?? 1}`)
+}
+
+function usageText() {
+  return 'Usage: node scripts/install-project.mjs --target <project> [--lang en|zh-CN|bilingual] [--implicit core|all|none] [--replace-modified]'
 }
 function toPosix(path) { return path.replace(/\\/g, '/') }
 function fail(message) { console.error(message); process.exit(1) }

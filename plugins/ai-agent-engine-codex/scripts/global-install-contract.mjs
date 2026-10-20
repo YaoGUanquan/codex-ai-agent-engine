@@ -1,8 +1,13 @@
 import { createHash, randomUUID } from 'node:crypto'
-import { existsSync, lstatSync, readdirSync, readFileSync, readlinkSync, realpathSync, statSync } from 'node:fs'
-import { homedir } from 'node:os'
-import { basename, isAbsolute, relative, resolve, sep } from 'node:path'
+import { cpSync, existsSync, lstatSync, mkdtempSync, readdirSync, readFileSync, readlinkSync, realpathSync, rmSync, statSync, writeFileSync } from 'node:fs'
+import { homedir, tmpdir } from 'node:os'
+import { basename, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { fingerprintManagedPath } from './path-fingerprint.mjs'
+import {
+  DEFAULT_IMPLICIT_TIER,
+  applyCursorDisableModelInvocation,
+  cursorShouldDisableModelInvocation,
+} from './skill-language-metadata.mjs'
 
 export const pluginName = 'ai-agent-engine-codex'
 export const terminalOperationStates = new Set(['completed', 'rolled-back'])
@@ -119,10 +124,28 @@ export function inspectCursorSkillEntry(path) {
   return { kind: 'directory', fingerprint: fingerprintPath(path) }
 }
 
-export function isOwnedCursorSkillCopy(entry, sourceSkillPath) {
-  if (entry?.kind !== 'directory' || !entry.fingerprint || !existsSync(sourceSkillPath)) return false
-  return entry.fingerprint.sha256 === fingerprintPath(sourceSkillPath).sha256
+export function expectedCursorSkillCopyFingerprint(sourceSkillPath, skillName, implicitTier = DEFAULT_IMPLICIT_TIER) {
+  if (!cursorShouldDisableModelInvocation(skillName, implicitTier)) {
+    return fingerprintPath(sourceSkillPath)
+  }
+  const tempRoot = mkdtempSync(join(tmpdir(), 'ae-cursor-expected-'))
+  try {
+    const dest = join(tempRoot, skillName)
+    cpSync(sourceSkillPath, dest, { recursive: true })
+    applyCursorDisableModelInvocation(dest, skillName, implicitTier)
+    return fingerprintPath(dest)
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
 }
+
+export function isOwnedCursorSkillCopy(entry, sourceSkillPath, { skillName = null, implicitTier = DEFAULT_IMPLICIT_TIER } = {}) {
+  if (entry?.kind !== 'directory' || !entry.fingerprint || !existsSync(sourceSkillPath)) return false
+  const name = skillName || basename(sourceSkillPath)
+  return entry.fingerprint.sha256 === expectedCursorSkillCopyFingerprint(sourceSkillPath, name, implicitTier).sha256
+}
+
+export { applyCursorDisableModelInvocation, cursorShouldDisableModelInvocation, DEFAULT_IMPLICIT_TIER }
 
 export function isLegacyCursorSkillLink(entry, expectedTarget) {
   return entry?.kind === 'link' && resolve(entry.target) === resolve(expectedTarget)
@@ -135,22 +158,22 @@ export function assertCursorLinkTargetAllowed(personalPluginRoot, target) {
   }
 }
 
-export function classifyCursorSkills(paths, repoRoot) {
+export function classifyCursorSkills(paths, repoRoot, implicitTier = DEFAULT_IMPLICIT_TIER) {
   const names = currentSkillNames(repoRoot)
   const extras = aeSkillComponents(paths.cursorSkillsRoot)
     .map((path) => basename(path))
     .filter((name) => !names.includes(name))
-  return [...names, ...extras].map((name) => classifyCursorSkill(paths, repoRoot, name, names.includes(name)))
+  return [...names, ...extras].map((name) => classifyCursorSkill(paths, repoRoot, name, names.includes(name), implicitTier))
 }
 
-function classifyCursorSkill(paths, repoRoot, name, inRelease) {
+function classifyCursorSkill(paths, repoRoot, name, inRelease, implicitTier = DEFAULT_IMPLICIT_TIER) {
   const dest = resolve(paths.cursorSkillsRoot, name)
   const entry = inspectCursorSkillEntry(dest)
   if (!inRelease) return { name, status: 'modified', kind: entry.kind, target: entry.target || null }
   if (entry.kind === 'missing') return { name, status: 'missing', kind: 'missing' }
   const source = cursorSkillSource(paths, repoRoot, name)
   const expected = resolve(paths.personalPluginRoot, 'skills', name)
-  if (isOwnedCursorSkillCopy(entry, source)) return { name, status: 'current-release verified', kind: 'directory' }
+  if (isOwnedCursorSkillCopy(entry, source, { skillName: name, implicitTier })) return { name, status: 'current-release verified', kind: 'directory' }
   if (isLegacyCursorSkillLink(entry, expected)) return { name, status: 'historical-release verified', kind: 'link', target: entry.target }
   return { name, status: 'modified', kind: entry.kind, target: entry.target || null }
 }

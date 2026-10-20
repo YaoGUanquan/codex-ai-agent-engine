@@ -1,9 +1,12 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import {
   DEFAULT_IMPLICIT_TIER,
   coreImplicitSkills,
+  displaySettingsPath,
+  persistImplicitTier,
+  readPersistedImplicitTier,
   renderYaml,
   skillMetadata,
   supportedImplicitTiers,
@@ -28,7 +31,7 @@ const roots = [
   resolve('plugins', 'ai-agent-engine-codex', 'skills'),
 ]
 
-const settingsPath = resolve('.agents', 'ai-agent-engine-codex', 'display-settings.json')
+const settingsPath = displaySettingsPath(process.cwd())
 const implicitTier = implicitArg || readPersistedImplicitTier(settingsPath) || detectImplicitTier(roots) || DEFAULT_IMPLICIT_TIER
 
 let changed = 0
@@ -55,21 +58,6 @@ console.log(JSON.stringify({
 function readArg(name) {
   const idx = args.indexOf(name)
   return idx >= 0 ? args[idx + 1] || null : null
-}
-
-function readPersistedImplicitTier(path) {
-  if (!existsSync(path)) return null
-  try {
-    const value = JSON.parse(readFileSync(path, 'utf8'))
-    return supportedImplicitTiers.has(value?.implicitTier) ? value.implicitTier : null
-  } catch {
-    return null
-  }
-}
-
-function persistImplicitTier(path, tier) {
-  mkdirSync(dirname(path), { recursive: true })
-  writeFileSync(path, `${JSON.stringify({ schemaVersion: 1, implicitTier: tier }, null, 2)}\n`, 'utf8')
 }
 
 function detectImplicitTier(candidateRoots) {

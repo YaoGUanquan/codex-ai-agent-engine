@@ -8,6 +8,10 @@ import { fileURLToPath } from 'node:url'
 
 import { runGlobalInstall } from '../plugins/ai-agent-engine-codex/scripts/global-install.mjs'
 import { fingerprintPath, normalizeManifest, userPaths } from '../plugins/ai-agent-engine-codex/scripts/global-install-contract.mjs'
+import {
+  coreImplicitSkills,
+  injectDisableModelInvocationFrontmatter,
+} from '../plugins/ai-agent-engine-codex/scripts/skill-language-metadata.mjs'
 import { resolveProjectRoot } from '../plugins/ai-agent-engine-codex/scripts/project-root.mjs'
 import { makeTempDir, runNodeScript } from './helpers/skill-test-utils.mjs'
 
@@ -499,4 +503,136 @@ test('installed language switching updates active skills for all supported modes
   assert.equal(result.verifiedSkillGovernancePolicy, 'source_mirror_metadata_and_path_safety')
   const packageJson = JSON.parse(readFileSync(resolve(repoRoot, 'package.json'), 'utf8'))
   assert.equal(result.verifiedPluginVersion, packageJson.version)
+})
+
+function countAllowImplicitTrueUnder(skillsRoot) {
+  if (!existsSync(skillsRoot)) return 0
+  let count = 0
+  for (const name of readdirSync(skillsRoot)) {
+    const yaml = join(skillsRoot, name, 'agents', 'openai.yaml')
+    if (!existsSync(yaml)) continue
+    if (/^ {2}allow_implicit_invocation:\s*true\s*$/m.test(readFileSync(yaml, 'utf8'))) count += 1
+  }
+  return count
+}
+
+function countCursorDisable(skillsRoot) {
+  if (!existsSync(skillsRoot)) return { withDisable: 0, withoutDisable: 0, namesWith: [], namesWithout: [] }
+  const namesWith = []
+  const namesWithout = []
+  for (const name of readdirSync(skillsRoot)) {
+    if (!name.startsWith('ae-')) continue
+    const skillMd = join(skillsRoot, name, 'SKILL.md')
+    if (!existsSync(skillMd)) continue
+    const text = readFileSync(skillMd, 'utf8')
+    if (/^disable-model-invocation:\s*true\s*$/m.test(text)) namesWith.push(name)
+    else namesWithout.push(name)
+  }
+  return {
+    withDisable: namesWith.length,
+    withoutDisable: namesWithout.length,
+    namesWith: namesWith.sort(),
+    namesWithout: namesWithout.sort(),
+  }
+}
+
+test('global install rejects unsupported --implicit with usage', () => {
+  const tempRoot = makeTempDir('ae-global-implicit-bad-')
+  try {
+    const home = join(tempRoot, 'home')
+    mkdirSync(home, { recursive: true })
+    assert.throws(
+      () => runGlobalInstall(['preview', '--home', home, '--implicit', 'partial'], { repoRoot }),
+      /--implicit core\|all\|none/,
+    )
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('global preview exposes default implicitTier all', () => {
+  const tempRoot = makeTempDir('ae-global-implicit-preview-')
+  try {
+    const home = join(tempRoot, 'home')
+    mkdirSync(home, { recursive: true })
+    const preview = runGlobalInstall(['preview', '--home', home], { repoRoot })
+    assert.equal(preview.status, 'preview')
+    assert.equal(preview.implicitTier, 'all')
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('global install --implicit core|all|none renders openai.yaml and Cursor disable-model-invocation', () => {
+  const cases = [
+    { tier: 'all', trueCount: 40, cursorDisable: 0 },
+    { tier: 'core', trueCount: 5, cursorDisable: 35 },
+    { tier: 'none', trueCount: 0, cursorDisable: 35 },
+  ]
+  for (const { tier, trueCount, cursorDisable } of cases) {
+    const tempRoot = makeTempDir(`ae-global-implicit-${tier}-`)
+    try {
+      const home = join(tempRoot, 'home')
+      mkdirSync(home, { recursive: true })
+      const preview = runGlobalInstall(['preview', '--home', home, '--implicit', tier], { repoRoot })
+      assert.equal(preview.implicitTier, tier)
+      const applied = applyPreview(home, ['--implicit', tier])
+      assert.equal(applied.status, 'completed')
+      assert.equal(applied.implicitTier, tier)
+
+      const pluginSkills = join(home, 'plugins', 'ai-agent-engine-codex', 'skills')
+      assert.equal(countAllowImplicitTrueUnder(pluginSkills), trueCount, `${tier} openai.yaml true count`)
+
+      // Codex personal plugin SKILL.md must never receive disable-model-invocation.
+      for (const name of currentSkillNames) {
+        const skillMd = join(pluginSkills, name, 'SKILL.md')
+        assert.equal(
+          /disable-model-invocation\s*:/.test(readFileSync(skillMd, 'utf8')),
+          false,
+          `${tier} Codex plugin ${name}/SKILL.md`,
+        )
+      }
+
+      const cursor = countCursorDisable(join(home, '.cursor', 'skills'))
+      assert.equal(cursor.withDisable, cursorDisable, `${tier} cursor disable count`)
+      if (cursorDisable === 35) {
+        assert.deepEqual(cursor.namesWithout, [...coreImplicitSkills].sort())
+        assert.equal(cursor.withoutDisable, 5)
+      } else {
+        assert.equal(cursor.withoutDisable, currentSkillNames.length)
+      }
+
+      const settings = JSON.parse(readFileSync(join(home, '.agents', 'ai-agent-engine-codex', 'display-settings.json'), 'utf8'))
+      assert.equal(settings.implicitTier, tier)
+    } finally {
+      rmSync(tempRoot, { recursive: true, force: true })
+    }
+  }
+})
+
+test('global install retains --implicit none on subsequent apply without re-passing the flag', () => {
+  const tempRoot = makeTempDir('ae-global-implicit-retain-')
+  try {
+    const home = join(tempRoot, 'home')
+    mkdirSync(home, { recursive: true })
+    const first = applyPreview(home, ['--implicit', 'none'])
+    assert.equal(first.status, 'completed')
+    assert.equal(countAllowImplicitTrueUnder(join(home, 'plugins', 'ai-agent-engine-codex', 'skills')), 0)
+    const second = applyPreview(home)
+    assert.equal(second.status, 'completed')
+    assert.equal(second.implicitTier, 'none')
+    assert.equal(countAllowImplicitTrueUnder(join(home, 'plugins', 'ai-agent-engine-codex', 'skills')), 0)
+    const cursor = countCursorDisable(join(home, '.cursor', 'skills'))
+    assert.equal(cursor.withDisable, 35)
+    assert.deepEqual(cursor.namesWithout, [...coreImplicitSkills].sort())
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+})
+
+test('injectDisableModelInvocationFrontmatter is idempotent and preserves existing frontmatter', () => {
+  const sample = '---\nname: ae-demo\ndescription: demo\n---\n\n# Body\n'
+  const once = injectDisableModelInvocationFrontmatter(sample)
+  assert.match(once, /^---\nname: ae-demo\ndescription: demo\ndisable-model-invocation: true\n---\n/)
+  assert.equal(injectDisableModelInvocationFrontmatter(once), once)
 })
