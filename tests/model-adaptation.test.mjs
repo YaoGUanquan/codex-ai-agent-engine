@@ -18,10 +18,13 @@ test('every distributed skill and language regeneration requires explicit invoca
     for (const lang of supportedLanguages) {
       assert.equal(parseSimpleYaml(renderYaml(skillMetadata[name], lang)).policy.allow_implicit_invocation, true, `${name}: ${lang}`)
     }
-    assert.equal(parseSimpleYaml(read(`${skills}/${name}/agents/openai.yaml`)).policy.allow_implicit_invocation, true, name)
-    const entry = read(`${skills}/${name}/SKILL.md`)
-    const frontmatter = parseSimpleYaml(entry.split('---')[1])
-    assert.match(frontmatter.description, /explicit|明确/i, name)
+    for (const base of [skills]) {
+      assert.equal(parseSimpleYaml(read(`${base}/${name}/agents/openai.yaml`)).policy.allow_implicit_invocation, true, base + '/' + name)
+      const entry = read(`${base}/${name}/SKILL.md`)
+      const frontmatter = parseSimpleYaml(entry.split('---')[1])
+      assert.ok(frontmatter.description && frontmatter.description.length > 10, name)
+      assert.match(frontmatter.description, /explicit|明确/i, name)
+    }
   }
 })
 

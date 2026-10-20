@@ -13,6 +13,12 @@ Before helper commands, resolve `aeEntry` using the [runtime entry contract](../
 
 Follow `pipeline.md`.
 
+For complex or delegated work, apply the
+[adaptive team contract](../../ae-help/references/team-execution.md). The parent
+owns integration and acceptance; use the central role catalog without inventing
+a second registry or scheduler. Requirements and architecture produce one
+proposal for user approval before implementation; reuse an approved plan.
+
 Default chain:
 
 1. ae-brainstorm if requirements are unclear or durable decisions are needed. When durable data is created or materially changed, require the decisions in `../../ae-backend/references/persistence-contract.md` before implementation. When frontend component, style, form, query, mutation, or API-access work is in scope, require the reuse and ownership decisions in `../../ae-frontend-design/references/component-data-access-contract.md` before implementation.
@@ -34,6 +40,9 @@ Default chain:
 - Never start implementation while requirements or acceptance criteria are materially unclear.
 - Never treat a generated plan as ready until assumptions, alternatives, acceptance coverage, validation, and rollback signals have been checked.
 - Never treat "a file was generated" as consensus. The gate is only ready when the artifact content, review status, open decisions, and validation path are all known.
+- Candidate waves do not release dependencies. The parent accepts actual changes
+  and acceptance evidence before a unit passes; failures block affected work
+  while independent ready units may continue.
 - Do not repeatedly ask whether to continue between normal phases; ask only when a decision, credential, permission, or P0/P1 risk requires the user.
 - Use Codex approval/escalation rules for Git writes, destructive actions, network fetches, dependency installs, database writes, and browser setup.
 - If a worktree transfer is chosen, stop after writing the handoff and tell the user where to continue.
@@ -44,6 +53,8 @@ Before ae-work starts on S4 tasks, record or confirm:
 
 - requirements status: none needed, confirmed inline, or artifact path,
 - plan status: approved inline plan or artifact path and readiness result,
+- proposal approval: accepted requirements and architecture, reusing existing
+  approval when still applicable,
 - document review status: pass, findings accepted, or blocked,
 - open decisions: none, explicitly deferred, or user decision required,
 - validation contract: exact commands or checks expected before delivery.

@@ -34,7 +34,15 @@ For diff-like scopes:
 
 For scoped database-backed list/query/count or write behavior, review against the [data-access and scale contract](../../ae-backend/references/data-access-contract.md), including document/design reviews and unchanged-schema paths. Add performance for scale-sensitive access (pass `--has-performance` when using `review-contract`), reliability for async/chunk recovery, API-contract for total/acceptance changes and data-migrations for auxiliary structures/backfills. Check concrete query budgets, fan-out/count semantics, batch versus commit, derived-data maintenance and durable completion; do not turn missing runtime measurements into an invented speed claim or require every lane for bounded CRUD.
 
-Read `review-personas.md`. Use the smallest useful reviewer set. Quick selection: a code diff starts with correctness, testing, standards, and maintainability; add security, api-contract, reliability, data-migrations, or performance only when the matching trigger exists; a document starts with coherence and feasibility plus content-conditional lenses. For new tables, entity persistence changes, or migrations, read `../../ae-backend/references/persistence-contract.md` and add the data-migrations lens. For frontend component, style, form, query, mutation, or client-access changes, read `../../ae-frontend-design/references/component-data-access-contract.md` and apply the Frontend Components / Styles profile with the API-contract lens when data access changes. Do not spawn sub-agents unless the user explicitly requested/allowed parallel agent work. If sub-agents are allowed, each reviewer is read-only and must return evidence-backed findings.
+Read `review-personas.md`. Use the smallest useful reviewer set. Quick selection: a code diff starts with correctness, testing, standards, and maintainability; add security, api-contract, reliability, data-migrations, or performance only when the matching trigger exists; a document starts with coherence and feasibility plus content-conditional lenses. For new tables, entity persistence changes, or migrations, read `../../ae-backend/references/persistence-contract.md` and add the data-migrations lens. For frontend component, style, form, query, mutation, or client-access changes, read `../../ae-frontend-design/references/component-data-access-contract.md` and apply the Frontend Components / Styles profile with the API-contract lens when data access changes.
+
+For independent native review lanes, load the
+[adaptive team contract](../../ae-help/references/team-execution.md) and its
+central role catalog. Reuse reviewer/architect job contracts, with different
+instances for distinct lenses. Each reviewer is read-only and returns
+evidence-backed findings, actual checks and unfinished work. Shared reads are
+safe; do not review a file while another worker modifies it. Keep small reviews
+inline, honor off switches and runtime permissions, and report unavailable tools.
 
 When reviewer selection is non-trivial, generate a deterministic contract before dispatching lanes:
 
@@ -44,7 +52,7 @@ node "$aeEntry" review-contract --kind code --mode report-only --targets code,do
 
 Use the returned reviewers and target coverage as the review routing baseline. The command writes lightweight evidence under `docs/ae/evidence` only when `--write-evidence` is present.
 
-If `.codex/ae-skill-profiles.yaml` has `multi_agent.enabled: auto` or `multi_agent.enabled: true`, and `multi_agent.review_lanes_parallel: true`, read-only reviewer lanes may run in parallel when the scope is large enough and each lane has a distinct lens. When `task-analyze` is available, use `read_parallel_eligibility` and `parallel_waves` for read-only lane planning; do not treat write-worker blockers as blockers for read-only review. This does not authorize write workers. Keep reviewer outputs evidence-backed and merge them under the strictest verdict. `multi_agent.enabled: false` disables parallel reviewer lanes.
+If `.codex/ae-skill-profiles.yaml` has `multi_agent.enabled: auto` or `multi_agent.enabled: true`, and `multi_agent.review_lanes_parallel: true`, read-only reviewer lanes may run in parallel when the scope is large enough and each lane has a distinct lens. When `task-analyze` is available, use `read_parallel_eligibility` and `parallel_waves` as candidate planning evidence; inspect actual read/write conflicts and business readiness. A local write conflict does not block unrelated read-only lanes. This does not authorize write workers. The parent verifies findings against the actual diff and acceptance evidence and merges them under the strictest verdict. `multi_agent.enabled: false` disables parallel reviewer lanes.
 
 For S2/S3 code or plan reviews, or when the user explicitly requests layered review, apply two lanes even when you are not spawning sub-agents:
 

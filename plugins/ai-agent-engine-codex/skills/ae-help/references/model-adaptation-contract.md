@@ -7,6 +7,10 @@ Use this contract for AE orchestration and instruction design. It is model-neutr
 - Read the active tool schema and current repository state before choosing an execution path. Never infer that a tool, lifecycle hook, sub-agent mode, browser feature, or approval behavior exists from a model label or documentation for another host.
 - Treat provider model catalogs and supported reasoning levels as runtime metadata. When they disagree with the outgoing request or backend response, report a provider/catalog defect instead of compensating in skill text.
 - Scale analysis, artifacts, and validation to task class, risk, acceptance criteria, and evidence boundary. Do not make a workflow heavier or lighter only because the selected model is newer, larger, or described as more capable.
+- Use the [adaptive team contract](team-execution.md) for approved multi-unit work.
+  Keep authorization, privacy, user work, business invariants and evidence hard;
+  choose roles, concurrency, process depth and supported effort from the task.
+  Unrelated dirty work is not a blanket delegation blocker.
 
 ## Task-Size Gate
 

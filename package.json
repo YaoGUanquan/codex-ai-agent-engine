@@ -1,13 +1,10 @@
 {
   "name": "ai-agent-engine-codex",
-  "version": "0.3.56",
+  "version": "0.4.0-beta.1",
   "private": false,
   "type": "module",
   "description": "Codex-native AE-style workflow skills referencing https://gitee.com/jiangqiang1996/ai-agent-engine.",
   "license": "GPL-2.0-only",
-  "engines": {
-    "node": ">=20"
-  },
   "scripts": {
     "test": "node scripts/run-tests.mjs",
     "check": "npm run check:syntax && npm run check:contracts",
@@ -25,5 +22,8 @@
     "planning",
     "review"
   ],
-  "upstreamReference": "https://gitee.com/jiangqiang1996/ai-agent-engine"
+  "upstreamReference": "https://gitee.com/jiangqiang1996/ai-agent-engine",
+  "engines": {
+    "node": ">=20"
+  }
 }

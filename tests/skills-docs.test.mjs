@@ -358,9 +358,7 @@ test('ae-lfg routes narrow and mixed requests without bypassing workflow stages'
     /single handoff for S1, S2, S3, S5, or S6/,
     /For S7, split the work into two stages: Stage A.*Stage B/is,
     /Stage B.*only after Stage A passes/is,
-    /Review the scoped diff for correctness and risk/i,
-    /ae-review mode:report-only.*when requested, required by project rules, or a specialist review is needed/is,
-    /reuse an applicable existing review/i,
+    /ae-review mode:report-only.*every S4 implementation scope/is,
   ]) {
     assert.match(pipelineSource, expectation, `ae-lfg pipeline should include ${expectation}`)
   }

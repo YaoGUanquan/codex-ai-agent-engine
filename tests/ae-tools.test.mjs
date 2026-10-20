@@ -1586,7 +1586,7 @@ test('static-server rejects non-loopback hosts and canonical path escapes', asyn
   }
 })
 
-test('task-analyze reports multi-agent defaults as auto suggest', () => {
+test('task-analyze reports automatic defaults while keeping dispatch parent-gated', () => {
   const tempRoot = makeTempDir('ae-task-')
   try {
     mkdirSync(join(tempRoot, 'docs', 'ae', 'plans'), { recursive: true })
@@ -1608,8 +1608,8 @@ test('task-analyze reports multi-agent defaults as auto suggest', () => {
     const result = runNodeScriptJson(['scripts/ae-tools.mjs', 'task-analyze', '--mode', 'plan', '--plan', 'docs/ae/plans/plan.md'], tempRoot)
     assert.equal(result.multi_agent_config.source, 'default')
     assert.equal(result.multi_agent_config.effective.enabled, 'auto')
-    assert.equal(result.multi_agent_config.effective.mode, 'suggest')
-    assert.equal(result.execution_strategy, 'suggest_parallel')
+    assert.equal(result.multi_agent_config.effective.mode, 'auto')
+    assert.equal(result.execution_strategy, 'auto_parallel_ready')
     assert.equal(result.parallel_eligibility.can_parallelize, true)
     assert.equal(result.parallel_eligibility.can_spawn_write_agents, false)
     assert.deepEqual(result.parallel_eligibility.blockers, [])
@@ -2000,7 +2000,10 @@ test('task-analyze separates write config readiness from pre-edit spawn readines
     assert.equal(result.write_parallel_eligibility.can_parallelize, true)
     assert.equal(result.write_parallel_eligibility.config_allows_write_agents, true)
     assert.equal(result.write_parallel_eligibility.can_spawn_write_agents_now, false)
-    assert.deepEqual(result.write_parallel_eligibility.pre_spawn_requirements, ['ae-work pre-edit gate must confirm a clean Git state before write delegation'])
+    assert.deepEqual(result.write_parallel_eligibility.pre_spawn_requirements, [
+      'ae-work pre-edit gate must confirm a clean Git state before write delegation',
+      'parent must manually review missing business independence, acceptance and data budget declarations before write delegation',
+    ])
     assert.equal(result.parallel_eligibility.can_spawn_write_agents, false)
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
