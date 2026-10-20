@@ -1,3 +1,6 @@
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+
 export const supportedLanguages = new Set(['en', 'zh-CN', 'bilingual'])
 
 export const skillMetadata = {
@@ -355,4 +358,68 @@ export function renderYaml(item, selectedLang, options = {}) {
 
 function escapeYaml(value) {
   return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+}
+
+export const DISPLAY_SETTINGS_REL = '.agents/ai-agent-engine-codex/display-settings.json'
+
+export function displaySettingsPath(root) {
+  return resolve(root, DISPLAY_SETTINGS_REL)
+}
+
+export function readPersistedImplicitTier(settingsPath) {
+  if (!existsSync(settingsPath)) return null
+  try {
+    const value = JSON.parse(readFileSync(settingsPath, 'utf8'))
+    return supportedImplicitTiers.has(value?.implicitTier) ? value.implicitTier : null
+  } catch {
+    return null
+  }
+}
+
+export function persistImplicitTier(settingsPath, tier) {
+  if (!supportedImplicitTiers.has(tier)) throw new Error(`unsupported implicit tier: ${tier}`)
+  mkdirSync(dirname(settingsPath), { recursive: true })
+  writeFileSync(settingsPath, `${JSON.stringify({ schemaVersion: 1, implicitTier: tier }, null, 2)}\n`, 'utf8')
+}
+
+export function resolveImplicitTier({ explicit, settingsPath, installStateTier = null } = {}) {
+  if (explicit) {
+    if (!supportedImplicitTiers.has(explicit)) throw new Error(`unsupported implicit tier: ${explicit}`)
+    return explicit
+  }
+  const persisted = settingsPath ? readPersistedImplicitTier(settingsPath) : null
+  if (persisted) return persisted
+  if (supportedImplicitTiers.has(installStateTier)) return installStateTier
+  return DEFAULT_IMPLICIT_TIER
+}
+
+/** Cursor copies disable model invocation for non-core skills when tier is not `all`. */
+export function cursorShouldDisableModelInvocation(skillName, globalTier = DEFAULT_IMPLICIT_TIER) {
+  if (globalTier === 'all') return false
+  return !coreImplicitSkills.includes(skillName)
+}
+
+/**
+ * Insert or ensure `disable-model-invocation: true` in SKILL.md YAML frontmatter.
+ */
+export function injectDisableModelInvocationFrontmatter(content) {
+  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---(\r?\n|$)/)
+  if (!match) {
+    return `---\ndisable-model-invocation: true\n---\n${content}`
+  }
+  const body = match[1]
+  if (/^disable-model-invocation:\s*true\s*$/m.test(body)) return content
+  const cleaned = body.replace(/^disable-model-invocation:\s*.*\r?\n?/m, '')
+  const nextBody = `${cleaned.replace(/\s*$/, '')}\ndisable-model-invocation: true`
+  return content.slice(0, match.index) + `---\n${nextBody}\n---` + content.slice(match.index + match[0].length)
+}
+
+export function applyCursorDisableModelInvocation(skillDir, skillName, globalTier = DEFAULT_IMPLICIT_TIER) {
+  if (!cursorShouldDisableModelInvocation(skillName, globalTier)) return false
+  const file = resolve(skillDir, 'SKILL.md')
+  if (!existsSync(file)) throw new Error(`cursor skill SKILL.md missing: ${file}`)
+  const content = readFileSync(file, 'utf8')
+  const next = injectDisableModelInvocationFrontmatter(content)
+  if (next !== content) writeFileSync(file, next, 'utf8')
+  return true
 }

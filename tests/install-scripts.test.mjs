@@ -439,3 +439,146 @@ test('update-project rejects placeholder repository URLs', () => {
     rmSync(targetRoot, { recursive: true, force: true })
   }
 })
+
+function countAllowImplicitTrue(skillsRoot) {
+  if (!existsSync(skillsRoot)) return 0
+  let count = 0
+  for (const name of readdirSync(skillsRoot)) {
+    const yaml = join(skillsRoot, name, 'agents', 'openai.yaml')
+    if (!existsSync(yaml)) continue
+    if (/^ {2}allow_implicit_invocation:\s*true\s*$/m.test(readFileSync(yaml, 'utf8'))) count += 1
+  }
+  return count
+}
+
+function readProjectInstallState(targetRoot) {
+  return JSON.parse(readFileSync(join(targetRoot, '.agents', 'ai-agent-engine-codex', 'project-install.json'), 'utf8'))
+}
+
+test('install-project rejects unsupported --implicit values with usage', () => {
+  const targetRoot = makeTempDir('ae-install-implicit-bad-')
+  try {
+    const result = runScript('scripts/install-project.mjs', ['--target', targetRoot, '--implicit', 'partial'], repoRoot)
+    assert.equal(result.status, 1)
+    assert.match(result.stderr, /--implicit core\|all\|none/)
+  } finally {
+    rmSync(targetRoot, { recursive: true, force: true })
+  }
+})
+
+test('install-project --implicit core|all|none writes project-install.json and openai.yaml counts', () => {
+  const cases = [
+    ['all', 40],
+    ['core', 5],
+    ['none', 0],
+  ]
+  for (const [tier, expectedTrue] of cases) {
+    const targetRoot = makeTempDir(`ae-install-implicit-${tier}-`)
+    try {
+      const result = runScript('scripts/install-project.mjs', ['--target', targetRoot, '--lang', 'en', '--implicit', tier], repoRoot)
+      assert.equal(result.status, 0, `${tier}: ${result.stderr}`)
+      const summary = parseLastJson(result.stdout)
+      assert.equal(summary.implicitTier, tier)
+      const state = readProjectInstallState(targetRoot)
+      assert.equal(state.implicitTier, tier)
+      const settings = JSON.parse(readFileSync(join(targetRoot, '.agents', 'ai-agent-engine-codex', 'display-settings.json'), 'utf8'))
+      assert.equal(settings.implicitTier, tier)
+      assert.equal(countAllowImplicitTrue(join(targetRoot, '.agents', 'skills')), expectedTrue, tier)
+      assert.equal(countAllowImplicitTrue(join(targetRoot, 'plugins', 'ai-agent-engine-codex', 'skills')), expectedTrue, `${tier} plugin copy`)
+      // Codex plugin / project SKILL.md must never get Cursor-only disable-model-invocation.
+      for (const root of [join(targetRoot, '.agents', 'skills'), join(targetRoot, 'plugins', 'ai-agent-engine-codex', 'skills')]) {
+        for (const name of readdirSync(root)) {
+          const skillMd = join(root, name, 'SKILL.md')
+          if (!existsSync(skillMd)) continue
+          assert.equal(
+            /disable-model-invocation\s*:/.test(readFileSync(skillMd, 'utf8')),
+            false,
+            `${tier} ${root}/${name}/SKILL.md must not inject disable-model-invocation`,
+          )
+        }
+      }
+    } finally {
+      rmSync(targetRoot, { recursive: true, force: true })
+    }
+  }
+})
+
+test('install-project default implicit tier remains all', () => {
+  const targetRoot = makeTempDir('ae-install-implicit-default-')
+  try {
+    const result = runScript('scripts/install-project.mjs', ['--target', targetRoot, '--lang', 'bilingual'], repoRoot)
+    assert.equal(result.status, 0, result.stderr)
+    const summary = parseLastJson(result.stdout)
+    assert.equal(summary.implicitTier, 'all')
+    assert.equal(readProjectInstallState(targetRoot).implicitTier, 'all')
+    assert.equal(countAllowImplicitTrue(join(targetRoot, '.agents', 'skills')), 40)
+  } finally {
+    rmSync(targetRoot, { recursive: true, force: true })
+  }
+})
+
+test('install-project retains --implicit none across update without re-passing the flag', () => {
+  const targetRoot = makeTempDir('ae-install-implicit-retain-')
+  try {
+    const first = runScript('scripts/install-project.mjs', ['--target', targetRoot, '--lang', 'en', '--implicit', 'none'], repoRoot)
+    assert.equal(first.status, 0, first.stderr)
+    assert.equal(countAllowImplicitTrue(join(targetRoot, '.agents', 'skills')), 0)
+    const second = runScript('scripts/install-project.mjs', ['--target', targetRoot, '--lang', 'en'], repoRoot)
+    assert.equal(second.status, 0, second.stderr)
+    const summary = parseLastJson(second.stdout)
+    assert.equal(summary.implicitTier, 'none')
+    assert.equal(readProjectInstallState(targetRoot).implicitTier, 'none')
+    assert.equal(countAllowImplicitTrue(join(targetRoot, '.agents', 'skills')), 0)
+  } finally {
+    rmSync(targetRoot, { recursive: true, force: true })
+  }
+})
+
+test('update-project rejects unsupported --implicit and forwards retained tier', () => {
+  const targetRoot = makeTempDir('ae-update-implicit-')
+  const remoteRoot = makeTempDir('ae-update-implicit-remote-')
+  try {
+    const bad = runScript('scripts/update-project.mjs', ['--repo', remoteRoot, '--target', targetRoot, '--implicit', 'partial'], repoRoot)
+    assert.equal(bad.status, 1)
+    assert.match(bad.stderr, /--implicit core\|all\|none/)
+
+    mkdirSync(join(targetRoot, '.agents', 'ai-agent-engine-codex'), { recursive: true })
+    writeFileSync(join(targetRoot, '.agents', 'ai-agent-engine-codex', 'project-install.json'), `${JSON.stringify({
+      schemaVersion: 1,
+      implicitTier: 'none',
+    }, null, 2)}\n`, 'utf8')
+    writeFileSync(join(targetRoot, '.agents', 'ai-agent-engine-codex', 'display-settings.json'), `${JSON.stringify({
+      schemaVersion: 1,
+      implicitTier: 'none',
+    }, null, 2)}\n`, 'utf8')
+
+    runGit(['init'], remoteRoot)
+    runGit(['config', 'user.email', 'test@example.com'], remoteRoot)
+    runGit(['config', 'user.name', 'test'], remoteRoot)
+    mkdirSync(join(remoteRoot, 'scripts'), { recursive: true })
+    writeFileSync(join(remoteRoot, 'scripts', 'install-project.mjs'), [
+      '#!/usr/bin/env node',
+      "import { writeFileSync, mkdirSync } from 'node:fs'",
+      "import { resolve } from 'node:path'",
+      'const args = process.argv.slice(2)',
+      "const target = args[args.indexOf('--target') + 1]",
+      "const implicit = args.includes('--implicit') ? args[args.indexOf('--implicit') + 1] : null",
+      "const lang = args.includes('--lang') ? args[args.indexOf('--lang') + 1] : null",
+      "mkdirSync(resolve(target, '.agents', 'ai-agent-engine-codex'), { recursive: true })",
+      "writeFileSync(resolve(target, '.agents', 'ai-agent-engine-codex', 'project-install.json'), JSON.stringify({ schemaVersion: 1, operationId: 'stub', implicitTier: implicit, sourceFingerprint: { sha256: 'stub' } }, null, 2))",
+      "console.log(JSON.stringify({ status: 'installed', implicitTier: implicit, lang }, null, 2))",
+    ].join('\n'), 'utf8')
+    runGit(['add', '.'], remoteRoot)
+    runGit(['commit', '-m', 'stub'], remoteRoot)
+    try { runGit(['branch', '-M', 'main'], remoteRoot) } catch { /* already main */ }
+
+    const result = runScript('scripts/update-project.mjs', ['--repo', remoteRoot, '--target', targetRoot, '--no-tidy'], repoRoot)
+    assert.equal(result.status, 0, result.stderr)
+    const summary = parseLastJson(result.stdout)
+    assert.equal(summary.implicitTier, 'none')
+    assert.equal(readProjectInstallState(targetRoot).implicitTier, 'none')
+  } finally {
+    rmSync(remoteRoot, { recursive: true, force: true })
+    rmSync(targetRoot, { recursive: true, force: true })
+  }
+})
