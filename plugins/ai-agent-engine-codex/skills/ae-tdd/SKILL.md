@@ -1,6 +1,6 @@
 ---
 name: ae-tdd
-description: Use when the user asks for AE TDD, /ae-tdd, red-green-refactor, test-first implementation, or a regression-safe bug fix with a failing test first.
+description: Use only when explicitly requested as $ae-tdd or its named AE capability. Scope includes the user asks for AE TDD, /ae-tdd, red-green-refactor, test-first implementation, or a regression-safe bug fix with a failing test first.
 ---
 
 # AE TDD

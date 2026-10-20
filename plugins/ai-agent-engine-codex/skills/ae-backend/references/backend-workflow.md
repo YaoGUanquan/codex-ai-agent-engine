@@ -7,7 +7,7 @@ Use this sequence for backend implementation work:
 3. Inspect the service and data path end to end before changing anything.
 4. Limit edits to the narrowest set of files that owns the behavior.
 5. Add or update tests for the changed contract.
-6. Validate with the smallest meaningful command, then broader checks if the change touches shared behavior.
+6. Use the [validation contract](../../ae-help/references/validation-contract.md) to select affected checks and reuse valid evidence.
 
 Escalate attention when the change touches:
 

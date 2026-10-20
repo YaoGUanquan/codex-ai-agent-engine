@@ -1,6 +1,6 @@
 ---
 name: ae-skill-audit
-description: Use when the user requests an external agent, skill or AI workflow repository audit for possible AE adaptation.
+description: Use only when explicitly requested as $ae-skill-audit or its named AE capability. Scope includes the user requests an external agent, skill or AI workflow repository audit for possible AE adaptation.
 ---
 
 # AE Skill Audit

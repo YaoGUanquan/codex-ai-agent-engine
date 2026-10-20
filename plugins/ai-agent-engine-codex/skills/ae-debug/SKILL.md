@@ -1,6 +1,6 @@
 ---
 name: ae-debug
-description: Use when the user asks for AE debug, /ae-debug, investigate a failing build, broken UI, runtime error, failing test, API incident, or reproduce-and-fix troubleshooting workflow.
+description: Use only when explicitly requested as $ae-debug or its named AE capability. Scope includes the user asks for AE debug, /ae-debug, investigate a failing build, broken UI, runtime error, failing test, API incident, or reproduce-and-fix troubleshooting workflow.
 ---
 
 # AE Debug

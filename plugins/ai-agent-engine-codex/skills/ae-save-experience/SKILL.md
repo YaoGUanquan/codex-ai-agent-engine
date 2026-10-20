@@ -1,6 +1,6 @@
 ---
 name: ae-save-experience
-description: Use when the user asks for AE save experience, /ae-save-experience, capture lessons learned, save implementation experience, record debugging notes, or create reusable project memory from completed work.
+description: Use only when explicitly requested as $ae-save-experience or its named AE capability. Scope includes the user asks for AE save experience, /ae-save-experience, capture lessons learned, save implementation experience, record debugging notes, or create reusable project memory from completed work.
 ---
 
 # AE Save Experience

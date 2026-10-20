@@ -1,6 +1,6 @@
 ---
 name: ae-lfg
-description: Use when the user explicitly requests ae-lfg, /ae-lfg, $ae-lfg, or the full AE workflow for genuinely multi-step engineering work.
+description: Use only when explicitly requested as $ae-lfg or its named AE capability. Scope includes the user explicitly requests ae-lfg, /ae-lfg, $ae-lfg, or the full AE workflow for genuinely multi-step engineering work.
 ---
 
 # AE LFG

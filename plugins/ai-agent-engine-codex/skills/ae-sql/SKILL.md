@@ -1,6 +1,6 @@
 ---
 name: ae-sql
-description: Use when the user asks for AE SQL, /ae-sql, database query, schema inspection, SQL generation, SQL review, migration check, data fix plan, or controlled database operation.
+description: Use only when explicitly requested as $ae-sql or its named AE capability. Scope includes the user asks for AE SQL, /ae-sql, database query, schema inspection, SQL generation, SQL review, migration check, data fix plan, or controlled database operation.
 ---
 
 # AE SQL

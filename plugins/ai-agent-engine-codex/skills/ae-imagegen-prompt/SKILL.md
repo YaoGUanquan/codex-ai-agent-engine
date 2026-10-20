@@ -1,6 +1,6 @@
 ---
 name: ae-imagegen-prompt
-description: Use when the user asks to optimize an image-generation prompt, generate image prompt specs, create storyboard image prompts, edit images, use reference images, or prepare visual assets for video workflows.
+description: Use only when explicitly requested as $ae-imagegen-prompt or its named AE capability. Scope includes the user asks to optimize an image-generation prompt, generate image prompt specs, create storyboard image prompts, edit images, use reference images, or prepare visual assets for video workflows.
 ---
 
 # AE Imagegen Prompt

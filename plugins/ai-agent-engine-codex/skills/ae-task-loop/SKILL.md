@@ -1,6 +1,6 @@
 ---
 name: ae-task-loop
-description: Use when the user asks for AE task loop, /ae-task-loop, iterative repair, keep trying until verified, exploratory fix, environment setup loop, or legacy issue cleanup without a prewritten plan.
+description: Use only when explicitly requested as $ae-task-loop or its named AE capability. Scope includes the user asks for AE task loop, /ae-task-loop, iterative repair, keep trying until verified, exploratory fix, environment setup loop, or legacy issue cleanup without a prewritten plan.
 ---
 
 # AE Task Loop

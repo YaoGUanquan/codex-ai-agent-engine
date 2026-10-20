@@ -1,6 +1,6 @@
 ---
 name: ae-test-browser
-description: Use when the user asks for AE browser testing, /ae-test-browser, browser acceptance, UI verification, Playwright or DevTools checks, screenshots, console/network inspection, or end-to-end browser validation.
+description: Use only when explicitly requested as $ae-test-browser or its named AE capability. Scope includes the user asks for AE browser testing, /ae-test-browser, browser acceptance, UI verification, Playwright or DevTools checks, screenshots, console/network inspection, or end-to-end browser validation.
 ---
 
 # AE Test Browser

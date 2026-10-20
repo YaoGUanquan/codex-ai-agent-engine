@@ -1,6 +1,6 @@
 ---
 name: ae-backend
-description: Use when the user asks for AE backend, /ae-backend, API implementation, service-layer work, repository changes, backend bug fixes, auth or permission logic, or backend validation.
+description: Use only when explicitly requested as $ae-backend or its named AE capability. Scope includes the user asks for AE backend, /ae-backend, API implementation, service-layer work, repository changes, backend bug fixes, auth or permission logic, or backend validation.
 ---
 
 # AE Backend
@@ -21,7 +21,7 @@ Validation follows the [test side-effect boundary](../ae-help/references/test-si
 4. When durable data is created or materially changed, read `references/persistence-contract.md` before selecting identifiers, fields, indexes, deletion, concurrency, enum, migration, or exception behavior.
 5. Read the language guidance matching the repository stack: `references/java-guidance.md` for Java and JVM stacks, `references/go-guidance.md` for Go, `references/python-guidance.md` for Python services, `references/c-guidance.md` for C, `references/cpp-guidance.md` for C++, `references/csharp-guidance.md` for C#/.NET. For other backend languages, follow the repository's existing conventions without inventing a new structure.
 6. Implement the smallest backend path that satisfies the requested behavior.
-7. Update or add narrow tests around the changed contract, then expand validation when the change touches shared behavior.
+7. Update or add narrow tests around the changed contract; select checks and reuse passing evidence with the [validation contract](../ae-help/references/validation-contract.md).
 8. Before final signoff, read `references/api-contract-checklist.md`; when a frontend consumes the changed API, walk its Frontend-Backend Alignment section explicitly.
 9. Use `ae-sql` for SQL generation or migration review and `ae-swagger-parser` when an OpenAPI contract needs inspection.
 10. Report the changed behavior, validation evidence, and any rollout or migration considerations.

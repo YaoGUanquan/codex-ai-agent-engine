@@ -1,6 +1,6 @@
 ---
 name: ae-claude-code
-description: Use when the user explicitly requests local Claude Code CLI delegation, patch proposals or a controlled external worker.
+description: Use only when explicitly requested as $ae-claude-code or its named AE capability. Scope includes the user explicitly requests local Claude Code CLI delegation, patch proposals or a controlled external worker.
 ---
 
 # AE Claude Code

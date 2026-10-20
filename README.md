@@ -73,6 +73,11 @@ node scripts/ae-tools.mjs help
 - 强化从数据来源到输出的内存、查询与并发边界，补充隔离数据夹具及五类真实模型对照规范；首轮明确偏好 `gpt-6.1-sol`，不静默替换模型。
 - 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。静态与隔离安装仅证明辅助工具、规则和分发合同；真实模型对照尚未完成，不宣称质量、耗时或生产容量已提升。
 
+### 0.3.56（2026-10-15）
+- 统一测试范围、通过结果复用和失效规则：单点失败先聚焦验证，扩大到全量前说明依据，审查、交付和上下文恢复不自动重跑；移除固定执行次数及脏工作区一律确认。收紧技能入口触发文案，强调明确请求后再加载专项门禁（默认 `implicit` 档位仍为 `all`，与 I 中期约定一致）。
+- GPT-6.1 为首要行为验收目标，提供后续模型可复用的八类评测场景及三组对照、每组两次的执行规范；尚未完成真实模型行为评测，不宣称性能或质量提升已获证明。
+- 验证命令：`node --test tests/model-adaptation.test.mjs tests/instruction-audit.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。静态及隔离安装检查仅证明规则、元数据与分发合同，实际结果和未通过项以交付记录为准。
+
 ### 0.3.55（2026-10-13）
 - 移除 `.ae-source` 维护镜像：插件 `plugins/ai-agent-engine-codex/skills` 成为唯一技能源；删除 `check-skill-mirror` 并清理合同/语言/审计脚本中的镜像根。
 - 回归测试改为只断言插件 `SKILL_ROOT`；文档与发布清单去掉 ae-source 指引；版本升至 0.3.55。
@@ -87,11 +92,6 @@ node scripts/ae-tools.mjs help
 - 收紧 `ae-lfg`、`ae-review`、`ae-task-loop` 与 `ae-web-forge` 的快速路由、审查范围锁定和返工停止条件，减少无关扫描、重复仪式与无界返工；插件源和维护镜像保持同步并补充回归断言。
 - 新增测试副作用边界：默认禁止连接用户管理的 MySQL/其他数据源，`single-request-curl` 与项目 smoke carrier 必须证明 disposable/test-only 隔离；共享规模契约补充 token 计量、上下文/输出上限、渐进披露、停止原因及压缩后审查账本续接，缺少隔离时统一报告 `blocked`。
 - 验证命令：`node --test tests/skills-docs.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。
-
-### 0.3.52（2026-09-27）
-- 修复审查发现的安装恢复问题：缺失参数在加锁前拒绝，更新失败保留有界脱敏诊断、操作 ID 和 journal 路径，明确区分已回滚与恢复失败。
-- 普通正文中的 `ae-doc-pages:v1` 格式名不再误判为损坏路由；外部文档维护在改写前建立报告和持久化逐文件日志，报告失败保留已应用清单、待核验文件和恢复信息并停止后续写入。
-- 验证命令：`node --test tests/install-scripts.test.mjs tests/docs-lifecycle.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。证据限于本地回归、故障注入和隔离安装；全局更新须另核验安装 journal、Codex 注册和 Cursor 副本，不代表当前会话已重新加载或生产验收。
 
 完整历史见 [CHANGELOG.md](CHANGELOG.md)；本节仅保留最近 5 个版本，发布时超出窗口的条目迁移到 CHANGELOG。
 

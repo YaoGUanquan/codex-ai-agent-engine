@@ -1,6 +1,6 @@
 ---
 name: ae-design
-description: Use when the user requests AE design, /ae-design, a design contract, PRD-to-plan decisions or revision of an existing design.
+description: Use only when explicitly requested as $ae-design or its named AE capability. Scope includes the user requests AE design, /ae-design, a design contract, PRD-to-plan decisions or revision of an existing design.
 ---
 
 # AE Design

@@ -19,6 +19,10 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 - Analyze file and business-resource read/write conflicts per wave, with host slots, execution state and automatic concurrency. Preserve explicit off/read-only choices and allow unrelated dirty work.
 - Strengthen source-to-output memory, query and concurrency budgets with isolated data fixtures and a five-case real-model comparison specification. Explicitly prefer `gpt-6.1-sol` for the trial without silent model substitution.
 - Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, `git diff --check`. Static and isolated-install checks establish helper, instruction and distribution contracts only. Real-model comparison is pending; quality, speed and production capacity gains are unproven.
+### 0.3.56 (2026-10-15)
+- Share test selection, evidence reuse and invalidation rules: isolate single failures, explain full-suite escalation, and avoid reruns merely for review, shipping or context recovery. Remove fixed execution counts and blanket dirty-worktree confirmations. Narrow skill entry trigger copy to emphasize explicit requests before specialist gates (default `implicit` tier remains `all`, matching the mid-I series plan).
+- Make GPT-6.1 the primary behavior acceptance target with eight reusable scenarios and three comparison variants, each repeated twice. Real model evaluation is pending; performance and quality improvements are not yet proven.
+- Validation commands: `node --test tests/model-adaptation.test.mjs tests/instruction-audit.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, `git diff --check`. Static and isolated-install checks establish written rules, metadata and distribution contracts only; delivery records report actual outcomes and failures.
 
 ### 0.3.55 (2026-10-13)
 - Remove the `.ae-source` maintenance mirror: plugin `plugins/ai-agent-engine-codex/skills` is the only skill source; delete `check-skill-mirror` and drop mirror roots from contract/language/audit scripts.
@@ -34,11 +38,6 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 - Tighten `ae-lfg`, `ae-review`, `ae-task-loop`, and `ae-web-forge` with fast routing, scope-locked review, and bounded rework stops to avoid unrelated scans, repeated ceremony, and unbounded retries; keep the plugin source and maintenance mirror synchronized with regression coverage.
 - Add a test side-effect boundary: never connect to user-managed MySQL or other datastores by default; `single-request-curl` and project smoke carriers must prove disposable/test-only isolation. Extend the shared scale contract with token accounting, context/output caps, progressive disclosure, explicit stop reasons, and ledger-based audit resumption after compaction; missing isolation is reported as `blocked`.
 - Validation commands: `node --test tests/skills-docs.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`.
-
-### 0.3.52 (2026-09-27)
-- Fix reviewed installation recovery failures: reject missing arguments before locking and preserve bounded, redacted updater diagnostics, operation IDs and journal paths, distinguishing completed rollback from failed recovery.
-- Ordinary mentions of `ae-doc-pages:v1` no longer count as damaged routers. External document maintenance creates a durable report and per-file journal before mutation; reporting failures retain applied/pending recovery evidence and stop further writes.
-- Validation commands: `node --test tests/install-scripts.test.mjs tests/docs-lifecycle.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. Evidence covers local regressions, fault injection and isolated installation. Global updates require separate journal, Codex registration and Cursor-copy verification, not current-chat reload or production acceptance.
 
 ## When To Use It
 

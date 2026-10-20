@@ -1,6 +1,6 @@
 ---
 name: ae-work-report
-description: Use when the user asks for AE work report, /ae-work-report, daily report, weekly report, work summary, summarize Git history, or summarize current uncommitted work.
+description: Use only when explicitly requested as $ae-work-report or its named AE capability. Scope includes the user asks for AE work report, /ae-work-report, daily report, weekly report, work summary, summarize Git history, or summarize current uncommitted work.
 ---
 
 # AE Work Report

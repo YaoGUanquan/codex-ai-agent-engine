@@ -23,6 +23,7 @@ test('every distributed skill and language regeneration requires explicit invoca
       const entry = read(`${base}/${name}/SKILL.md`)
       const frontmatter = parseSimpleYaml(entry.split('---')[1])
       assert.ok(frontmatter.description && frontmatter.description.length > 10, name)
+      assert.match(frontmatter.description, /explicit|明确/i, name)
     }
   }
 })
@@ -70,6 +71,7 @@ test('autonomy rules do not stop safe work for dirty trees or invented iteration
   assert.match(contract, /user.*explicit.*budget/i)
   const loop = read(`${skills}/ae-task-loop/SKILL.md`)
   assert.doesNotMatch(loop, /three consecutive no-progress|Bound iterations|agreed iteration limit/)
+  assert.doesNotMatch(read(`${skills}/ae-web-forge/SKILL.md`), /at most three loops/)
 })
 
 test('behavior evaluation manifest preserves the requested comparison without claiming execution', () => {
