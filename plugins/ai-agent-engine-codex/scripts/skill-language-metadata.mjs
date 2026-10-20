@@ -300,7 +300,7 @@ export const coreImplicitSkills = Object.freeze([
 ])
 
 export const supportedImplicitTiers = new Set(['core', 'all', 'none'])
-export const DEFAULT_IMPLICIT_TIER = 'all'
+export const DEFAULT_IMPLICIT_TIER = 'core'
 
 /** Per-skill marker: core five are explicit; everything else is optional. */
 export function skillImplicitMarker(item) {

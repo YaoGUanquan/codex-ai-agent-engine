@@ -3,4 +3,4 @@ interface:
   short_description: "实现 Web 状态、API 与路由行为，不负责纯视觉调整 / Implement Web app flows selected by ae-web-forge or explicit API and route tasks"
   default_prompt: "使用 $ae-web-app 实现这个 Web 应用流程。 / Use $ae-web-app to implement this web app flow."
 policy:
-  allow_implicit_invocation: true
+  allow_implicit_invocation: false

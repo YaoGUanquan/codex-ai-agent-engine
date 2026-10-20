@@ -3,4 +3,4 @@ interface:
   short_description: "从指定仓库更新项目本地 AE for Codex 安装 / Update the project-local AE for Codex installation"
   default_prompt: "使用 $ae-update 更新当前项目的 AE for Codex 插件。 / Use $ae-update to update the local AE for Codex plugin."
 policy:
-  allow_implicit_invocation: true
+  allow_implicit_invocation: false

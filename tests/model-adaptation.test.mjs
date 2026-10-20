@@ -3,7 +3,12 @@ import assert from 'node:assert/strict'
 import { readFileSync, readdirSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { renderYaml, skillMetadata, supportedLanguages } from '../plugins/ai-agent-engine-codex/scripts/skill-language-metadata.mjs'
+import {
+  allowImplicitInvocation,
+  renderYaml,
+  skillMetadata,
+  supportedLanguages,
+} from '../plugins/ai-agent-engine-codex/scripts/skill-language-metadata.mjs'
 import { parseSimpleYaml } from '../plugins/ai-agent-engine-codex/scripts/ae-tools/yaml.mjs'
 
 const root = fileURLToPath(new URL('..', import.meta.url))
@@ -15,11 +20,25 @@ test('every distributed skill and language regeneration requires explicit invoca
     .filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort()
   assert.deepEqual(names, Object.keys(skillMetadata).sort())
   for (const name of names) {
+    const expectedImplicit = allowImplicitInvocation(skillMetadata[name])
     for (const lang of supportedLanguages) {
-      assert.equal(parseSimpleYaml(renderYaml(skillMetadata[name], lang)).policy.allow_implicit_invocation, true, `${name}: ${lang}`)
+      assert.equal(
+        parseSimpleYaml(renderYaml(skillMetadata[name], lang)).policy.allow_implicit_invocation,
+        expectedImplicit,
+        `${name}: ${lang}`,
+      )
+      assert.equal(
+        parseSimpleYaml(renderYaml(skillMetadata[name], lang, { implicitTier: 'all' })).policy.allow_implicit_invocation,
+        true,
+        `${name}: ${lang} under --implicit all`,
+      )
     }
     for (const base of [skills]) {
-      assert.equal(parseSimpleYaml(read(`${base}/${name}/agents/openai.yaml`)).policy.allow_implicit_invocation, true, base + '/' + name)
+      assert.equal(
+        parseSimpleYaml(read(`${base}/${name}/agents/openai.yaml`)).policy.allow_implicit_invocation,
+        expectedImplicit,
+        base + '/' + name,
+      )
       const entry = read(`${base}/${name}/SKILL.md`)
       const frontmatter = parseSimpleYaml(entry.split('---')[1])
       assert.ok(frontmatter.description && frontmatter.description.length > 10, name)

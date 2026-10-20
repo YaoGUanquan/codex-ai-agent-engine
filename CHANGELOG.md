@@ -4,6 +4,10 @@
 
 English: [CHANGELOG.en.md](CHANGELOG.en.md)
 
+### 0.4.0-beta.2（2026-10-20）
+- 安装器支持 `--implicit core|all|none`；**默认档位从 `all` 改为 `core`**（仅 ae-help / ae-plan / ae-work / ae-review / ae-debug 可自然语言隐式触发）。非 core 自然语言请走 ae-help 路由或显式 `$ae-*`；需要旧行为时传 `--implicit all`。
+- 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。这些静态和本地检查不能证明真实 Codex host/model 行为。
+
 ### 0.4.0-beta.1（2026-10-15）
 - 新增按任务选择角色的团队合同与角色模板：复杂任务先确认方案，主代理负责原生调度、集成和实际验收，小任务继续直接执行。
 - 团队执行写权限由「显式 opt-in」改为「父代理门禁」（`write_requires_explicit_opt_in: false` + `write_requires_parent_gate: true`）；写 worker 仍需父代理显式批准，`can_spawn_write_agents*` 保持 false。

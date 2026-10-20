@@ -13,6 +13,9 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 
 中文文档: [README.md](README.md)
 
+### 0.4.0-beta.2 (2026-10-20)
+- Install/update/language switch support `--implicit core|all|none`; **plugin default tier is now `core`** (only ae-help / ae-plan / ae-work / ae-review / ae-debug allow natural-language implicit invocation). Non-core skills go through ae-help routing or `$ae-*`; `--implicit all` restores the previous behavior.
+- Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These static and local checks do not prove live Codex host/model behavior.
 ### 0.4.0-beta.1 (2026-10-15)
 - Add reusable team roles and a task-sensitive execution contract: approve complex plans first, keep small tasks inline, and let the parent own native dispatch, integration and evidence-backed acceptance.
 - Team-execution write authorization moves from explicit opt-in to a parent-agent gate (`write_requires_explicit_opt_in: false` + `write_requires_parent_gate: true`); write workers still need explicit parent approval, and `can_spawn_write_agents*` stays false.
@@ -23,21 +26,14 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 - Share test selection, evidence reuse and invalidation rules: isolate single failures, explain full-suite escalation, and avoid reruns merely for review, shipping or context recovery. Remove fixed execution counts and blanket dirty-worktree confirmations. Narrow skill entry trigger copy to emphasize explicit requests before specialist gates (default `implicit` tier remains `all`, matching the mid-I series plan).
 - Make GPT-6.1 the primary behavior acceptance target with eight reusable scenarios and three comparison variants, each repeated twice. Real model evaluation is pending; performance and quality improvements are not yet proven.
 - Validation commands: `node --test tests/model-adaptation.test.mjs tests/instruction-audit.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, `git diff --check`. Static and isolated-install checks establish written rules, metadata and distribution contracts only; delivery records report actual outcomes and failures.
-
 ### 0.3.55 (2026-10-13)
 - Remove the `.ae-source` maintenance mirror: plugin `plugins/ai-agent-engine-codex/skills` is the only skill source; delete `check-skill-mirror` and drop mirror roots from contract/language/audit scripts.
 - Rewrite regression tests to assert only the plugin `SKILL_ROOT`; scrub ae-source guidance from docs and the release checklist; bump to 0.3.55.
-
+- Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These static and local checks do not prove live Codex host/model behavior.
 ### 0.3.54 (2026-09-30)
 - Compress 12 high-frequency AE skill entrypoints to under 4 KiB and move detailed procedures into conditionally loaded references, reducing default context and repeated workflow text.
 - Keep the plugin source and `.ae-source` maintenance mirror aligned, with regression coverage for entry size and route selection.
 - Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These static and local checks do not prove real Codex host/model token consumption or behavioral gains.
-
-### 0.3.53 (2026-09-28)
-- Add `micro`, `small`, `standard`, and `high-risk` task-size gates with bounded work budgets: small requests use the smallest applicable path by default, explicit scope wins, and work stops at acceptance, a real blocker, or budget exhaustion.
-- Tighten `ae-lfg`, `ae-review`, `ae-task-loop`, and `ae-web-forge` with fast routing, scope-locked review, and bounded rework stops to avoid unrelated scans, repeated ceremony, and unbounded retries; keep the plugin source and maintenance mirror synchronized with regression coverage.
-- Add a test side-effect boundary: never connect to user-managed MySQL or other datastores by default; `single-request-curl` and project smoke carriers must prove disposable/test-only isolation. Extend the shared scale contract with token accounting, context/output caps, progressive disclosure, explicit stop reasons, and ledger-based audit resumption after compaction; missing isolation is reported as `blocked`.
-- Validation commands: `node --test tests/skills-docs.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`.
 
 ## When To Use It
 
@@ -208,6 +204,25 @@ node scripts/install-project.mjs --target /path/to/your/codex-project --lang en
 ```
 
 The default metadata language is `bilingual`. Supported metadata languages are `en`, `zh-CN`, and `bilingual`.
+
+## Implicit Invocation Tier (`--implicit`)
+
+Install and update support three tiers: `core` | `all` | `none`.
+
+| Tier | Meaning |
+|---|---|
+| `core` (**plugin default**) | Only five core skills allow natural-language implicit invocation: `ae-help`, `ae-plan`, `ae-work`, `ae-review`, `ae-debug` |
+| `all` | Every skill allows implicit invocation (previous default) |
+| `none` | Disable all implicit invocation; use explicit `$ae-*` / `/ae-*` |
+
+Installing without `--implicit` writes `core` (exactly five `allow_implicit_invocation: true`). For non-core capabilities, route through natural-language `ae-help` or call `$ae-*` explicitly. To restore the previous behavior:
+
+```bash
+node scripts/install-project.mjs --target /path/to/your/codex-project --implicit all
+node scripts/set-ae-language.mjs --lang bilingual --implicit all
+```
+
+Global install accepts the same `--implicit core|all|none` (passed through `install-global` / `update-global`).
 
 The installer writes these paths inside the target project:
 

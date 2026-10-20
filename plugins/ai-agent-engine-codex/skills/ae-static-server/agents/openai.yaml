@@ -3,4 +3,4 @@ interface:
   short_description: "为本地静态文件提供浏览器预览服务 / Serve local static files for browser preview"
   default_prompt: "使用 $ae-static-server 预览这个本地静态文件或目录。 / Use $ae-static-server to preview this local static file or directory."
 policy:
-  allow_implicit_invocation: true
+  allow_implicit_invocation: false

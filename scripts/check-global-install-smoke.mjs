@@ -19,7 +19,7 @@ if (resolve(preview.cursorSkillsRoot) !== resolve(homedir(), '.cursor', 'skills'
 if (!Array.isArray(preview.cursorSkills) || preview.cursorSkills.length === 0) fail('global preview did not classify Cursor skills')
 if (!Array.isArray(preview.projects) || preview.projects.some((project) => project.role === 'consumer')) fail('default global preview must not infer consumer projects')
 if (preview.projects.filter((project) => project.role === 'distribution-source').length !== 1) fail('global preview did not retain the source exclusion')
-if (!['core', 'all', 'none'].includes(preview.implicitTier)) fail(`global preview missing valid implicitTier, got ${preview.implicitTier}`)
+if (preview.implicitTier !== 'core') fail(`global preview default implicitTier must be core, got ${preview.implicitTier}`)
 const corePreview = JSON.parse(spawnSync(process.execPath, [installer, 'preview', '--implicit', 'core'], { cwd: repoRoot, encoding: 'utf8' }).stdout || 'null')
 if (!corePreview || corePreview.implicitTier !== 'core') fail('global preview --implicit core did not report core')
 const nonePreview = JSON.parse(spawnSync(process.execPath, [installer, 'preview', '--implicit', 'none'], { cwd: repoRoot, encoding: 'utf8' }).stdout || 'null')

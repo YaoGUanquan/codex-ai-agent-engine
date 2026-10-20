@@ -64,6 +64,25 @@ node "$tmp/scripts/install-project.mjs" --target "$target" --lang en
 
 The default metadata language is `bilingual`. Supported metadata languages are `en`, `zh-CN`, and `bilingual`.
 
+## Implicit Invocation Tier (`--implicit`)
+
+Install and update support three tiers: `core` | `all` | `none`.
+
+| Tier | Meaning |
+|---|---|
+| `core` (**plugin default**) | Only five core skills allow natural-language implicit invocation: `ae-help`, `ae-plan`, `ae-work`, `ae-review`, `ae-debug` |
+| `all` | Every skill allows implicit invocation (previous default) |
+| `none` | Disable all implicit invocation; use explicit `$ae-*` / `/ae-*` |
+
+Installing without `--implicit` writes `core` (exactly five `allow_implicit_invocation: true`). For non-core capabilities, route through natural-language `ae-help` or call `$ae-*` explicitly. To restore the previous behavior:
+
+```bash
+node scripts/install-project.mjs --target /path/to/your/codex-project --implicit all
+node scripts/set-ae-language.mjs --lang bilingual --implicit all
+```
+
+Global install accepts the same `--implicit core|all|none` (passed through `install-global` / `update-global`).
+
 ## Initialize Project Docs and AI Memory
 
 After install, run this inside the target project:
@@ -213,7 +232,11 @@ For bilingual metadata, replace the final `zh-CN` or `en` with `bilingual`.
 node scripts\set-ae-language.mjs --lang zh-CN
 node scripts\set-ae-language.mjs --lang en
 node scripts\set-ae-language.mjs --lang bilingual
+node scripts\set-ae-language.mjs --lang bilingual --implicit all
+node scripts\set-ae-language.mjs --lang bilingual --implicit none
 ```
+
+The `--implicit core|all|none` flag updates the same three-tier policy as install/update (default remains `core` when omitted and no prior setting is stored).
 
 ## Verify
 

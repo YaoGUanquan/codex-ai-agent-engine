@@ -66,32 +66,27 @@ node scripts/ae-tools.mjs help
 
 ## 版本更新记录
 
+### 0.4.0-beta.2（2026-10-20）
+- 安装/更新/语言切换支持 `--implicit core|all|none`；**插件默认档位改为 `core`**（仅 ae-help / ae-plan / ae-work / ae-review / ae-debug 可自然语言隐式触发）。非 core 请走 ae-help 路由或 `$ae-*`；`--implicit all` 可恢复旧行为。
+- 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。这些静态和本地检查不能证明真实 Codex host/model 行为。
 ### 0.4.0-beta.1（2026-10-15）
 - 新增按任务选择角色的团队合同与角色模板：复杂任务先确认方案，主代理负责原生调度、集成和实际验收，小任务继续直接执行。
 - 团队执行写权限由「显式 opt-in」改为「父代理门禁」（`write_requires_explicit_opt_in: false` + `write_requires_parent_gate: true`）；写 worker 仍需父代理显式批准，`can_spawn_write_agents*` 保持 false。
 - 并行分析区分文件与业务资源的读写冲突，局部冲突按波次串行；新增宿主名额、执行状态和自动并发配置，保留显式关闭及只读选择，无关脏改动不再一律阻塞委派。
 - 强化从数据来源到输出的内存、查询与并发边界，补充隔离数据夹具及五类真实模型对照规范；首轮明确偏好 `gpt-6.1-sol`，不静默替换模型。
 - 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。静态与隔离安装仅证明辅助工具、规则和分发合同；真实模型对照尚未完成，不宣称质量、耗时或生产容量已提升。
-
 ### 0.3.56（2026-10-15）
 - 统一测试范围、通过结果复用和失效规则：单点失败先聚焦验证，扩大到全量前说明依据，审查、交付和上下文恢复不自动重跑；移除固定执行次数及脏工作区一律确认。收紧技能入口触发文案，强调明确请求后再加载专项门禁（默认 `implicit` 档位仍为 `all`，与 I 中期约定一致）。
 - GPT-6.1 为首要行为验收目标，提供后续模型可复用的八类评测场景及三组对照、每组两次的执行规范；尚未完成真实模型行为评测，不宣称性能或质量提升已获证明。
 - 验证命令：`node --test tests/model-adaptation.test.mjs tests/instruction-audit.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。静态及隔离安装检查仅证明规则、元数据与分发合同，实际结果和未通过项以交付记录为准。
-
 ### 0.3.55（2026-10-13）
 - 移除 `.ae-source` 维护镜像：插件 `plugins/ai-agent-engine-codex/skills` 成为唯一技能源；删除 `check-skill-mirror` 并清理合同/语言/审计脚本中的镜像根。
 - 回归测试改为只断言插件 `SKILL_ROOT`；文档与发布清单去掉 ae-source 指引；版本升至 0.3.55。
-
+- 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。这些静态和本地检查不能证明真实 Codex host/model 行为。
 ### 0.3.54（2026-09-30）
 - 精简 12 个高频 AE skill 入口至 4 KiB 以内，把详细流程拆为按触发条件加载的 references，减少默认上下文和重复流程。
 - 保留插件源与 `.ae-source` 镜像一致，并增加入口体积与路由回归测试。
 - 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。这些静态和本地检查不能证明真实 Codex host/model 的 token 消耗或行为收益。
-
-### 0.3.53（2026-09-28）
-- 新增 `micro`、`small`、`standard` 与 `high-risk` 任务规模门禁及有界工作预算：小任务默认走最小流程，显式范围优先，达到验收、真实阻塞或预算上限即停止。
-- 收紧 `ae-lfg`、`ae-review`、`ae-task-loop` 与 `ae-web-forge` 的快速路由、审查范围锁定和返工停止条件，减少无关扫描、重复仪式与无界返工；插件源和维护镜像保持同步并补充回归断言。
-- 新增测试副作用边界：默认禁止连接用户管理的 MySQL/其他数据源，`single-request-curl` 与项目 smoke carrier 必须证明 disposable/test-only 隔离；共享规模契约补充 token 计量、上下文/输出上限、渐进披露、停止原因及压缩后审查账本续接，缺少隔离时统一报告 `blocked`。
-- 验证命令：`node --test tests/skills-docs.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。
 
 完整历史见 [CHANGELOG.md](CHANGELOG.md)；本节仅保留最近 5 个版本，发布时超出窗口的条目迁移到 CHANGELOG。
 
@@ -213,6 +208,25 @@ node scripts/install-project.mjs --target /path/to/your/codex-project --lang en
 ```
 
 默认元数据语言为 `bilingual`。支持的元数据语言：`en`、`zh-CN`、`bilingual`。
+
+## 隐式调用档位（`--implicit`）
+
+安装与更新支持三档：`core` | `all` | `none`。
+
+| 档位 | 含义 |
+|---|---|
+| `core`（**插件默认**） | 仅 5 个核心技能允许自然语言隐式触发：`ae-help`、`ae-plan`、`ae-work`、`ae-review`、`ae-debug` |
+| `all` | 全部技能允许隐式触发（旧默认行为） |
+| `none` | 全部关闭隐式触发，需显式 `$ae-*` / `/ae-*` |
+
+不带 `--implicit` 安装时默认写入 `core`（安装后 `allow_implicit_invocation: true` 恰好 5 个）。非 core 能力请用自然语言走 `ae-help` 路由，或直接 `$ae-*` 显式调用。若需恢复旧行为：
+
+```bash
+node scripts/install-project.mjs --target /path/to/your/codex-project --implicit all
+node scripts/set-ae-language.mjs --lang bilingual --implicit all
+```
+
+全局安装同样支持 `--implicit core|all|none`（`install-global` / `update-global` 透传）。
 
 安装脚本只会写入目标项目内的这些路径：
 

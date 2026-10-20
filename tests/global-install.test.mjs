@@ -7,7 +7,7 @@ import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { runGlobalInstall } from '../plugins/ai-agent-engine-codex/scripts/global-install.mjs'
-import { fingerprintPath, normalizeManifest, userPaths } from '../plugins/ai-agent-engine-codex/scripts/global-install-contract.mjs'
+import { expectedCursorSkillCopyFingerprint, fingerprintPath, normalizeManifest, userPaths } from '../plugins/ai-agent-engine-codex/scripts/global-install-contract.mjs'
 import {
   coreImplicitSkills,
   injectDisableModelInvocationFrontmatter,
@@ -367,7 +367,7 @@ test('global install publishes Cursor skill copies for slash discovery', () => {
       assert.equal(existsSync(copyPath), true, name)
       assert.equal(lstatSync(copyPath).isSymbolicLink(), false, name)
       assert.equal(lstatSync(copyPath).isDirectory(), true, name)
-      assert.equal(fingerprintPath(copyPath).sha256, fingerprintPath(expected).sha256, name)
+      assert.equal(fingerprintPath(copyPath).sha256, expectedCursorSkillCopyFingerprint(expected, name).sha256, name)
     }
     assert.equal(readFileSync(join(foreign, 'SKILL.md'), 'utf8'), foreignBefore)
     assert.equal(readFileSync(join(reserved, 'SKILL.md'), 'utf8'), reservedBefore)
@@ -418,7 +418,7 @@ test('global install replaces legacy Cursor skill links with copies without reti
       const expected = join(home, 'plugins', 'ai-agent-engine-codex', 'skills', name)
       assert.equal(lstatSync(dest).isSymbolicLink(), false, name)
       assert.equal(lstatSync(dest).isDirectory(), true, name)
-      assert.equal(fingerprintPath(dest).sha256, fingerprintPath(expected).sha256, name)
+      assert.equal(fingerprintPath(dest).sha256, expectedCursorSkillCopyFingerprint(expected, name).sha256, name)
     }
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
@@ -550,14 +550,14 @@ test('global install rejects unsupported --implicit with usage', () => {
   }
 })
 
-test('global preview exposes default implicitTier all', () => {
+test('global preview exposes default implicitTier core', () => {
   const tempRoot = makeTempDir('ae-global-implicit-preview-')
   try {
     const home = join(tempRoot, 'home')
     mkdirSync(home, { recursive: true })
     const preview = runGlobalInstall(['preview', '--home', home], { repoRoot })
     assert.equal(preview.status, 'preview')
-    assert.equal(preview.implicitTier, 'all')
+    assert.equal(preview.implicitTier, 'core')
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }
