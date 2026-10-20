@@ -12,11 +12,11 @@ git log --oneline -1
 
 If the directory is not a Git repository, say so and use `worktree_decision: not_applicable`.
 
-Then decide with the user when needed:
+Then choose the safe path from the actual diff and applicable project rules:
 
-- default branch or dirty worktree: explain the risk and ask before continuing, creating a branch, or creating a worktree.
-- feature branch and clean worktree: continue unless the task is risky enough to need a worktree.
-- if the plan touches shared config, auth, public contracts, or a risky refactor, propose an isolated branch or worktree and a baseline validation pass before editing.
+- Preserve unrelated existing changes and continue authorized reversible edits, including on a default branch or dirty worktree.
+- Inspect overlapping edits and work with them. Ask only if safe coexistence is unresolved, authorization is missing, or a material product/security/data decision is required.
+- Use isolation when a concrete conflict or applicable project rule requires it; do not create a branch or worktree merely because a workflow phase began.
 - Git writes such as commit, reset, clean, rebase, push, or worktree add require explicit user approval and Codex escalation rules.
 
 ## Minimality Gate
@@ -40,16 +40,26 @@ Before editing behavior, choose the smallest correct implementation that satisfi
   - compare unit intent against any explicit `Global Constraints`,
   - flag plan instructions that would obviously fail later review gates.
 - If the plan references a constitution, checklist, or task artifact, read it before editing and treat unresolved blockers as pre-implementation blockers.
-- Execute one implementation unit or one small checkpoint at a time.
+- Keep small work inline. For independent multi-unit work, follow the
+  [adaptive team contract](../../ae-help/references/team-execution.md);
+  the parent senior project manager/technical lead owns integration and acceptance.
+- For complex implementation, obtain approval of the requirements and architecture
+  proposal first. Reuse an approved plan without repeated phase confirmations.
+- Dispatch only ready units with exclusive writable ownership and compatible
+  shared-resource access. Shared reads are safe; readers cannot overlap a writer.
 - Keep changes scoped to the assigned unit or task.
 - Do not overwrite user-owned unrelated changes.
 - Establish a baseline when the task is a bug fix or behavior-sensitive refactor.
 - Add tests or update existing tests when behavior changes.
-- Stop and report blockers when the failure mode invalidates the current step or assumptions.
-- Run the narrowest meaningful validation, then broader validation when practical.
+- Stop affected work and report blockers when the failure invalidates its
+  assumptions, ownership or business contract; independent ready units may continue.
+- Apply the [validation contract](../../ae-help/references/validation-contract.md); reuse valid results and run only missing or invalid checks.
 - When a changed local API or UI surface has an explicit runtime smoke request, read [the local runtime smoke gate](local-runtime-smoke-gate.md) after focused validation. It defines the trigger synonyms, restart and request classification checks, safe secret-reference boundary, and evidence needed before a local call is claimed.
 - Track validation commands exactly for final reporting.
-- When using a task artifact, mark or report task completion only after the corresponding file change or validation evidence exists.
+- When using a task artifact, the parent marks a unit passed only after inspecting
+  its actual diff and acceptance evidence. Worker messages, changed files and
+  candidate waves alone do not release dependents; running ownership persists,
+  and failed/blocked/cancelled units cannot release them.
 - Prefer ae-debug for investigation-heavy failures and ae-tdd when the user wants or the change benefits from red-green-refactor discipline.
 - Do not bundle opportunistic refactors, formatting churn, dependency upgrades, or unrelated test rewrites into the task.
 - If verification cannot be run, name the exact blocker and the residual risk.

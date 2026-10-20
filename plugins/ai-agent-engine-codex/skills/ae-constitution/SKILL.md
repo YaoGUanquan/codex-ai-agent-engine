@@ -1,6 +1,6 @@
 ---
 name: ae-constitution
-description: Use when the user asks for AE constitution, project governance, durable engineering principles, workflow rules, amendment notes, or wants plans and reviews checked against project-level principles before implementation.
+description: Use only when explicitly requested as $ae-constitution or its named AE capability. Scope includes the user asks for AE constitution, project governance, durable engineering principles, workflow rules, amendment notes, or wants plans and reviews checked against project-level principles before implementation.
 ---
 
 # AE Constitution

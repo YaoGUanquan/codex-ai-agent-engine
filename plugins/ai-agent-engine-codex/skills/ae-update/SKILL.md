@@ -1,6 +1,6 @@
 ---
 name: ae-update
-description: Use when the user asks for AE update, /ae-update, update the current user's global AI Agent Engine for Codex installation, pull from a configured repository, or refresh Codex and Cursor AE skills.
+description: Use only when explicitly requested as $ae-update or its named AE capability. Scope includes the user asks for AE update, /ae-update, update the current user's global AI Agent Engine for Codex installation, pull from a configured repository, or refresh Codex and Cursor AE skills.
 ---
 
 # AE Update

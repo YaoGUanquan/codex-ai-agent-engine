@@ -1,6 +1,6 @@
 ---
 name: ae-frontend-design
-description: Use for /ae-frontend-design or $ae-frontend-design, focused visual-only UI implementation, screenshot or Figma matching, layout, typography, responsive styling, and visual refinement. Not the owner for API, auth, persistence, or route behavior; use ae-web-app for those. Use ae-web-forge only when the frontend task needs lane selection.
+description: Use only when explicitly requested as $ae-frontend-design or its named AE capability. Scope includes /ae-frontend-design or $ae-frontend-design, focused visual-only UI implementation, screenshot or Figma matching, layout, typography, responsive styling, and visual refinement. Not the owner for API, auth, persistence, or route behavior; use ae-web-app for those. Use ae-web-forge only when the frontend task needs lane selection.
 ---
 
 # AE Frontend Design And UI Implementation

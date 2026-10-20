@@ -1,11 +1,11 @@
 ---
 name: ae-agent-creator
-description: Use when the user asks for AE agent creator, /ae-agent-creator, create an agent prompt, subagent template, reviewer persona, delegated worker profile, or Codex-compatible agent guidance.
+description: Use only when explicitly requested as $ae-agent-creator or its named AE capability. Scope includes the user asks for AE agent creator, /ae-agent-creator, create an agent prompt, subagent template, reviewer persona, delegated worker profile, or Codex-compatible agent guidance.
 ---
 
 # AE Agent Creator
 
-For concurrent worker profiles, use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Specify bounded inputs/outputs, ownership, deadlines, cancellation, retry policy and conflict escalation; a prompt does not implement distributed coordination.
+For team role prompts, load the [adaptive team contract](../ae-help/references/team-execution.md) and use [team-role-template](references/team-role-template.md). Reuse its central role/model catalog; role instances may share a job contract while owning different files. For distributed profiles, also use the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md).
 
 Create Codex-compatible agent prompts and delegation templates.
 
@@ -33,3 +33,6 @@ Do not describe a prompt/template as an auto-registered Claude, OpenCode, or Cod
 - Do not imply automatic agent registration unless a real registry exists.
 - Keep delegated coding templates disjoint in file ownership.
 - Include read-only constraints for reviewer agents.
+- The parent owns integration and acceptance. Role prompts grant no registry,
+  tools, filesystem isolation or action authorization; verify active native
+  dispatch capabilities and report unavailable preferences.

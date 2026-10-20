@@ -1,6 +1,6 @@
 ---
 name: ae-web-forge
-description: Use for /ae-web-forge or $ae-web-forge, or explicitly requested AE routing of broad or mixed frontend/Web work.
+description: Use only when explicitly requested as $ae-web-forge or its named AE capability. Scope includes /ae-web-forge or $ae-web-forge, or explicitly requested AE routing of broad or mixed frontend/Web work.
 ---
 
 # AE Web Forge
@@ -15,8 +15,8 @@ baselines unless replacement is requested.
 3. For mixed or ambiguous work, use Q1 existing target, Q2 design input,
    Q3 backend/API and Q4 preserve/replace baseline. Reuse established answers.
 4. Verify UI changes in a real browser when a runnable preview exists.
-   Fix -> regression check counts as one loop; stop at the first applicable
-   acceptance or after at most three loops with remaining risks reported.
+   Use the [validation contract](../ae-help/references/validation-contract.md);
+   stop at acceptance, a real blocker, or a user-specified budget.
 
 ## Task References
 

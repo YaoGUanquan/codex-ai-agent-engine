@@ -1,18 +1,21 @@
 # Optional AE skill profile configuration.
 # Copy to .codex/ae-skill-profiles.yaml to customize local behavior.
-# Missing, invalid, unknown, or unsafe values are ignored or clamped.
+# Invalid multi_agent values disable parallel analysis with visible diagnostics.
+# Existing .codex/ae-skill-profiles.yaml is never overwritten by installation.
 
 user_mode: beginner # beginner | standard | expert
 
 multi_agent:
   enabled: auto # auto analyzes safe parallelism; false hard-disables; true explicitly enables analysis
-  mode: suggest # suggest | review_only | auto
-  max_workers: 3 # hard-clamped by ae-tools; do not force unused workers
+  mode: auto # suggest | review_only | auto; implementation still needs an approved scope
+  max_workers: auto # use observed host slots, bounded by the current task width
+  fallback_max_workers: 3 # disclosed conservative limit when host slots are unavailable
+  preferred_model: gpt-6.1-sol # explicit trial preference, not a permanent "latest"; or inherit
   min_parallel_units: 2
-  require_clean_git: true
+  require_clean_git: false # inspect overlap and preserve user changes instead of requiring cleanliness
   require_plan_dependencies: true
   require_disjoint_files: true
-  allow_write_agents: false # write workers require explicit opt-in beyond enabled=auto/true
+  allow_write_agents: true # parent authorization, ownership and acceptance gates still apply
   review_lanes_parallel: true
 
 skill_governance:

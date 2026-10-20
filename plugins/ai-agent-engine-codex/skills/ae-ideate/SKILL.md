@@ -1,6 +1,6 @@
 ---
 name: ae-ideate
-description: Use when the user asks for AE ideation, /ae-ideate, idea generation, solution options, product or technical direction exploration, or wants several feasible approaches before requirements are fixed.
+description: Use only when explicitly requested as $ae-ideate or its named AE capability. Scope includes the user asks for AE ideation, /ae-ideate, idea generation, solution options, product or technical direction exploration, or wants several feasible approaches before requirements are fixed.
 ---
 
 # AE Ideate

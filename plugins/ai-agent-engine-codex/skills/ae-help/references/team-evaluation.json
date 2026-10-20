@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "preferred_model": "gpt-6.1-sol",
+  "status": "not-run",
+  "repetitions": 2,
+  "variants": ["baseline-0.3.55", "candidate"],
+  "controls": ["same initial fixture", "same actual model", "same reasoning effort", "same tools and host", "same unrelated instructions"],
+  "metrics": ["completion", "correctness", "observed worker overlap", "confirmation count", "elapsed time", "token usage when exposed", "proof gaps"],
+  "cases": [
+    {
+      "id": "small-fix",
+      "setup": "Disposable Node repository with a deterministic off-by-one pagination failure and an independent passing module.",
+      "prompt": "Use AE to fix the pagination boundary and verify it. Preserve the independent module.",
+      "acceptance": ["Fix the independently checked failing case", "Use the smallest workflow", "No unnecessary full team or repeated confirmation", "Report actual checks"]
+    },
+    {
+      "id": "independent-modules",
+      "setup": "Disposable repository with an approved plan for two file-disjoint modules and their tests, explicit no shared resources, and a dependent integration test.",
+      "prompt": "Use AE to implement the approved plan with independent units in parallel, then integrate and verify.",
+      "acceptance": ["Observe concurrent worker execution when slots exist", "Exclusive writes and preserved inputs", "Integration starts only after independently verified prerequisites", "Report actual model and role dispatch"]
+    },
+    {
+      "id": "business-conflict",
+      "setup": "Three units: two touch different files but share a write resource api:items, and one independent resource. A dependent test exposes inconsistent producer/consumer contracts.",
+      "prompt": "Use AE to implement the approved plan. Coordinate the shared API while allowing independent work to progress.",
+      "acceptance": ["Serialize the conflicting resource", "Do not globally serialize the independent unit", "Validate final producer/consumer agreement", "Do not release a failed dependency"]
+    },
+    {
+      "id": "dirty-worktree",
+      "setup": "Disposable Git repository with hashed unrelated user edits and an untracked file, plus an approved independent two-unit plan.",
+      "prompt": "Use AE to execute the approved plan and preserve all my existing work.",
+      "acceptance": ["Preserve user file bytes", "Inspect baseline ownership without a blanket clean-tree block", "No unauthorized Git operations", "Escalate any unresolved actual overlap"]
+    },
+    {
+      "id": "bounded-data",
+      "setup": "Disposable service fixture with lazy synthetic rows, page and concurrency limits, independently instrumented live-record/query counters, and a full-fetch-then-page defect.",
+      "prompt": "Use AE to repair the data path so memory and concurrency stay bounded while preserving filters, totals and transaction semantics.",
+      "acceptance": ["No full-fetch/collect-before-chunk workaround", "Peak live records and in-flight work fit the fixture limits", "Query counts and expected IDs/totals agree", "Do not claim production heap or throughput proof"]
+    }
+  ]
+}
