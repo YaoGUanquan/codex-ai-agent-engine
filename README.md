@@ -68,10 +68,13 @@ node scripts/ae-tools.mjs help
 
 完整历史见 [CHANGELOG.md](CHANGELOG.md)；本节仅保留最近 5 个版本，发布时超出窗口的条目迁移到 CHANGELOG。
 
+### 0.3.57（2026-10-20）
+- 安装/更新/语言切换支持 `--implicit core|all|none`；**插件默认档位改为 `core`**（仅 ae-help / ae-plan / ae-work / ae-review / ae-debug 可自然语言隐式触发）。非 core 请走 ae-help 路由或 `$ae-*`；`--implicit all` 可恢复旧行为。
+- 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。这些静态和本地检查不能证明真实 Codex host/model 行为。
+
 ### 0.3.55（2026-10-13）
 - 移除 `.ae-source` 维护镜像：插件 `plugins/ai-agent-engine-codex/skills` 成为唯一技能源；删除 `check-skill-mirror` 并清理合同/语言/审计脚本中的镜像根。
 - 回归测试改为只断言插件 `SKILL_ROOT`；文档与发布清单去掉 ae-source 指引；版本升至 0.3.55。
-- 安装/更新/语言切换支持 `--implicit core|all|none`；**插件默认档位改为 `core`**（仅 ae-help / ae-plan / ae-work / ae-review / ae-debug 可自然语言隐式触发）。非 core 请走 ae-help 路由或 `$ae-*`；`--implicit all` 可恢复旧行为。
 - 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。这些静态和本地检查不能证明真实 Codex host/model 行为。
 
 ### 0.3.54（2026-09-30）
@@ -89,12 +92,6 @@ node scripts/ae-tools.mjs help
 - 修复审查发现的安装恢复问题：缺失参数在加锁前拒绝，更新失败保留有界脱敏诊断、操作 ID 和 journal 路径，明确区分已回滚与恢复失败。
 - 普通正文中的 `ae-doc-pages:v1` 格式名不再误判为损坏路由；外部文档维护在改写前建立报告和持久化逐文件日志，报告失败保留已应用清单、待核验文件和恢复信息并停止后续写入。
 - 验证命令：`node --test tests/install-scripts.test.mjs tests/docs-lifecycle.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。证据限于本地回归、故障注入和隔离安装；全局更新须另核验安装 journal、Codex 注册和 Cursor 副本，不代表当前会话已重新加载或生产验收。
-
-### 0.3.51（2026-09-27）
-- 打通规模化扫描与记忆分页：图、任务和审查影响分析默认排除不可变分片，显式纳入后仍只授予只读证据权限；计划模式也不能把分片变为 worker 写入所有权，审查改动清单始终保留真实变更。
-- recovery 支持单一绝对外部文档根与类型筛选，明确路径基准、范围和不完整性；错误根/参数不回退到仓库 docs，目录选择不等于已验证项目/分支登记。同步 LFG、工作委派、共享契约和 help 指引。
-- 联合记忆任务修复 Windows 文档大小写别名的身份与本地锁一致性，保留旧路由/分片兼容性；POSIX 不以统一小写合并不同文件。
-- 验证命令：`node --test tests/scale-memory-integration.test.mjs tests/docs-lifecycle.test.mjs tests/memory-navigation.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。证据限于本地隔离集成、双进程互斥、字节恢复和安装分发；不代表外部原文已迁移、当前用户安装已升级、跨主机一致性或生产吞吐验收，环境相关跳过以验证记录为准。
 
 ## 能力清单
 

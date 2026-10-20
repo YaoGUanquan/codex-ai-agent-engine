@@ -4,10 +4,13 @@
 
 English: [CHANGELOG.en.md](CHANGELOG.en.md)
 
+### 0.3.57（2026-10-20）
+- 安装器支持 `--implicit core|all|none`；**默认档位从 `all` 改为 `core`**（仅 ae-help / ae-plan / ae-work / ae-review / ae-debug 可自然语言隐式触发）。非 core 自然语言请走 ae-help 路由或显式 `$ae-*`；需要旧行为时传 `--implicit all`。
+- 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。这些静态和本地检查不能证明真实 Codex host/model 行为。
+
 ### 0.3.55（2026-10-13）
 - 移除 `.ae-source` 维护镜像：插件 `plugins/ai-agent-engine-codex/skills` 成为唯一技能源；删除 `check-skill-mirror` 并清理合同/语言/审计脚本中的镜像根。
 - 回归测试改为只断言插件 `SKILL_ROOT`；文档与发布清单去掉 ae-source 指引；版本升至 0.3.55。
-- 安装器支持 `--implicit core|all|none`；**默认档位从 `all` 改为 `core`**（仅 ae-help / ae-plan / ae-work / ae-review / ae-debug 可自然语言隐式触发）。非 core 自然语言请走 ae-help 路由或显式 `$ae-*`；需要旧行为时传 `--implicit all`。
 - 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。这些静态和本地检查不能证明真实 Codex host/model 行为。
 
 ### 0.3.54（2026-09-30）
