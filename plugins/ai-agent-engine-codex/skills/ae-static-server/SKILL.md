@@ -1,6 +1,6 @@
 ---
 name: ae-static-server
-description: Use when the user asks to preview, serve, or open a local static HTML file or static asset directory from the workspace. Provides a lightweight local HTTP server entrypoint and dry-run URL planning.
+description: Use only when explicitly requested as $ae-static-server or its named AE capability. Scope includes the user asks to preview, serve, or open a local static HTML file or static asset directory from the workspace. Provides a lightweight local HTTP server entrypoint and dry-run URL planning.
 ---
 
 # AE Static Server

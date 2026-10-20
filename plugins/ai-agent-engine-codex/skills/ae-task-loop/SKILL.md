@@ -1,13 +1,15 @@
 ---
 name: ae-task-loop
-description: Use when the user asks for AE task loop, /ae-task-loop, iterative repair, keep trying until verified, exploratory fix, environment setup loop, or legacy issue cleanup without a prewritten plan.
+description: Use only when explicitly requested as $ae-task-loop or its named AE capability. Scope includes the user asks for AE task loop, /ae-task-loop, iterative repair, keep trying until verified, exploratory fix, environment setup loop, or legacy issue cleanup without a prewritten plan.
 ---
 
 # AE Task Loop
 
-For long-running or distributed repair loops, apply the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Bound iterations, elapsed time and retries, checkpoint actual progress, and stop on non-idempotent or authorization failures instead of resubmitting work.
+For long-running or distributed repair loops, apply the [scale and distributed engineering contract](../ae-help/references/scale-and-distributed-engineering.md). Respect user-specified budgets, checkpoint actual progress, and stop on non-idempotent or authorization failures instead of resubmitting work.
 
 Iterate on an exploratory task until fixed, verified, or clearly blocked.
+
+Apply the [validation contract](../ae-help/references/validation-contract.md) for test scope, result reuse and stopping.
 
 ## Operating Principles
 
@@ -16,7 +18,7 @@ Iterate on an exploratory task until fixed, verified, or clearly blocked.
 - Each loop runs: verify, decide, fix or rebuild, verify again.
 - Each fix hypothesis should be the smallest plausible change that can satisfy the current failing criterion; broaden only after evidence rules out smaller fixes.
 - Do not ask new scope questions during the loop unless the original goal is invalid or unsafe.
-- Stop after a clear pass, three consecutive no-progress rounds, or an agreed iteration limit.
+- Stop after acceptance, a real blocker, or a user-specified budget. If progress stalls, use new evidence to change the hypothesis; do not keep retrying an unchanged failing path.
 
 ## Workflow
 
@@ -32,7 +34,7 @@ Iterate on an exploratory task until fixed, verified, or clearly blocked.
 6. Re-run verification and update loop state.
 7. Broaden scope only when the latest evidence invalidates the smaller fix.
 8. When all success criteria pass after file changes, run the Candidate Success Review Gate only for non-trivial, contract-sensitive, or explicitly reviewed work. A one-file low-risk fix that passes its objective check is complete without a second full review; mark the review gate `not-applicable` for this path.
-9. Continue until all applicable completion gates pass, the task is blocked, or the iteration limit is reached. When review applies, objective verification and review must both pass independently.
+9. Continue until all applicable completion gates pass, the task is blocked, or the user's explicit budget is reached. Review and objective verification must both pass when required, using valid existing results.
 
 When a loop changes a local API or UI surface and the user explicitly requests runtime smoke, read [the local runtime smoke gate](../ae-work/references/local-runtime-smoke-gate.md) before treating the loop as complete. A missing gate precondition is an explicit runtime-validation blocker, not a reason to silently omit the smoke.
 

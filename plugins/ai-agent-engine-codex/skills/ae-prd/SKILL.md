@@ -1,6 +1,6 @@
 ---
 name: ae-prd
-description: Use when the user requests ae-prd, /ae-prd, $ae-prd, AE PRD or a durable WHAT-before-HOW requirements artifact.
+description: Use only when explicitly requested as $ae-prd or its named AE capability. Scope includes the user requests ae-prd, /ae-prd, $ae-prd, AE PRD or a durable WHAT-before-HOW requirements artifact.
 ---
 
 # AE PRD

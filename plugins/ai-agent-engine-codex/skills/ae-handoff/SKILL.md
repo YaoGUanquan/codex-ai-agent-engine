@@ -1,6 +1,6 @@
 ---
 name: ae-handoff
-description: Use when the user asks for AE handoff, /ae-handoff, session handoff, continue later, summarize work state, transfer context, or create a durable next-session handoff artifact.
+description: Use only when explicitly requested as $ae-handoff or its named AE capability. Scope includes the user asks for AE handoff, /ae-handoff, session handoff, continue later, summarize work state, transfer context, or create a durable next-session handoff artifact.
 ---
 
 # AE Handoff

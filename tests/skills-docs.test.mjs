@@ -358,7 +358,9 @@ test('ae-lfg routes narrow and mixed requests without bypassing workflow stages'
     /single handoff for S1, S2, S3, S5, or S6/,
     /For S7, split the work into two stages: Stage A.*Stage B/is,
     /Stage B.*only after Stage A passes/is,
-    /ae-review mode:report-only.*every S4 implementation scope/is,
+    /Review the scoped diff for correctness and risk/i,
+    /ae-review mode:report-only.*when requested, required by project rules, or a specialist review is needed/is,
+    /reuse an applicable existing review/i,
   ]) {
     assert.match(pipelineSource, expectation, `ae-lfg pipeline should include ${expectation}`)
   }
@@ -399,15 +401,16 @@ test('ae-web-forge fast route and acceptance boundaries remain explicit', () => 
     /### Fast Route/,
     /run only the target existence check and route directly/i,
     /Do not repeat Q1-Q4 intake, load every frontend skill, or produce a full routing summary/i,
-    /stop at the first applicable\s+acceptance/i,
-    /after at most three loops/i,
+    /stop at acceptance, a real blocker, or a user-specified budget/i,
+    /user-specified budget/i,
     /For a fast route, report only the selected owner, target check, acceptance boundary, and any residual risk/i,
   ]) {
     assert.match(source, expectation, `ae-web-forge should include ${expectation}`)
   }
   assert.doesNotMatch(source, /^If the request names one existing target and one concrete change, run the full four-question intake\.$/m)
   assert.doesNotMatch(source, /Run max 3 rework loops\./)
-  assert.match(source, /Fix -> regression check counts as one loop/i)
+  assert.doesNotMatch(source, /Fix -> regression check counts as one loop/i)
+  assert.doesNotMatch(source, /at most three loops/i)
 })
 
 test('task loop dual completion gate requires verification and non-blocking review', () => {
@@ -422,7 +425,7 @@ test('task loop dual completion gate requires verification and non-blocking revi
     /review status/,
     /one-file low-risk fix.*review gate `not-applicable`/is,
     /all applicable completion gates pass/i,
-    /When review applies, objective verification and review must both pass independently/i,
+    /Review and objective verification must both pass when required, using valid existing results/i,
     /Apply this gate only when the loop changed files.*non-trivial, contract-sensitive, or explicitly reviewed/is,
   ]) {
     assert.match(source, expectation, `ae-task-loop should include ${expectation}`)
@@ -1062,8 +1065,8 @@ test('design and web forge skill contracts are present in plugin skills, metadat
     /### Fast Route/,
     /one existing target and one concrete change.*route directly/is,
     /Do not repeat Q1-Q4 intake.*produce a full routing summary/is,
-    /stop at the first applicable\s+acceptance/i,
-    /after at most three loops/i,
+    /stop at acceptance, a real blocker, or a user-specified budget/i,
+    /user-specified budget/i,
     /For a fast route, report only the selected owner, target check, acceptance boundary, and any residual risk/i,
     /Do not claim OpenCode sub-agent registry/i,
     /dynamic Chrome MCP/i,
@@ -1136,7 +1139,7 @@ test('core AE workflow metadata carries stable skill trigger signals', () => {
     assert.match(bilingualYaml, new RegExp(`default_prompt: ".*\\$${skillName}`))
     assert.match(sourceSkill, new RegExp(`/${skillName}`))
     assert.match(sourceSkill, new RegExp(`\\$${skillName}`))
-    assert.match(sourceSkill, new RegExp(`^description: Use when the user (explicitly )?requests ${skillName}, /${skillName}, \\$${skillName}\\b`, 'm'))
+    assert.match(sourceSkill, new RegExp(`^description: Use only when explicitly requested as \\$${skillName}\\b`, 'm'))
   }
 })
 
@@ -1456,10 +1459,10 @@ test('model adaptation contract gates task size, scope, budget, and stopping', (
     /smallest applicable path by default/,
     /Do not create a PRD\/plan\/design\/review package/,
     /scope is a hard boundary/,
-    /bounded work budget/,
-    /one inspection pass/,
-    /one focused validation command/,
-    /Stop on acceptance, a real blocker, or budget exhaustion/,
+    /user's explicit budget/,
+    /do not invent fixed inspection/,
+    /Continue authorized work until acceptance, a real blocker/,
+    /validation-contract\.md/,
   ]) {
     assert.match(source, expectation, `model adaptation contract should include ${expectation}`)
   }

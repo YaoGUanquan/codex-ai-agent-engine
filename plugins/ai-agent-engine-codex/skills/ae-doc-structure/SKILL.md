@@ -1,6 +1,6 @@
 ---
 name: ae-doc-structure
-description: Use when the user asks for AE doc structure, /ae-doc-structure, structure notes, turn messy text into requirements, plans, decisions, checklists, handoff docs, or extract organized sections from unstructured content.
+description: Use only when explicitly requested as $ae-doc-structure or its named AE capability. Scope includes the user asks for AE doc structure, /ae-doc-structure, structure notes, turn messy text into requirements, plans, decisions, checklists, handoff docs, or extract organized sections from unstructured content.
 ---
 
 # AE Doc Structure
