@@ -1,74 +1,55 @@
 # Release Checklist
 
-Use this before publishing a GitHub release.
+Use this before publishing a GitHub release of the skill collection.
 
-1. Run syntax checks:
+1. Install dependencies and run the full local gate:
 
 ```bash
+npm install
+npm test
 npm run check
-node scripts/check-release-notes.mjs
-node scripts/check-design-contract.mjs
-node scripts/ae-tools.mjs help
-node scripts/ae-tools.mjs ae-graph-build --root scripts
-node scripts/ae-tools.mjs ae-graph-query --root scripts --path ae-tools.mjs
+npm run check:smoke
+git diff --check
 ```
 
-2. Validate skills if your local Codex skill validator is available:
+`npm run check` already runs `tools/validate.mjs`, `tools/check-repository.mjs`, `tools/check-release-notes.mjs`, and `tools/check-public-content.mjs`.
 
-```powershell
-Get-ChildItem -Directory plugins\ai-agent-engine-codex\skills | ForEach-Object { python "C:\Users\<user>\.codex\skills\.system\skill-creator\scripts\quick_validate.py" $_.FullName }
-```
+2. Confirm package contract:
 
-3. Run install smoke test in a temporary project:
+- `package.json` `version` matches the new changelog heading (SemVer).
+- `files` whitelist is only `skills/`, `LICENSE`, `NOTICE.md`.
+- `skills/` contains exactly: `ae-grill`, `ae-frontend`, `ae-backend`, `ae-unit-test`, `ae-integration-test`, `ae-e2e-test`, `ae-e2e-suite`.
+- No retired roots: `plugins/`, `scripts/` installers, `.ae-source`, `.agents/skills` as a distribute source.
 
-```powershell
-$tmp = Join-Path (Get-Location) '.tmp-install-smoke'
-New-Item -ItemType Directory -Force -Path $tmp | Out-Null
-node scripts\install-project.mjs --target $tmp
-node (Join-Path $tmp 'scripts\ae-tools.mjs') help
-node (Join-Path $tmp 'scripts\check-design-contract.mjs')
-Get-Content (Join-Path $tmp '.agents\skills\ae-help\agents\openai.yaml') -Encoding UTF8
-node (Join-Path $tmp 'scripts\set-ae-language.mjs') --lang zh-CN
-node (Join-Path $tmp 'scripts\set-ae-language.mjs') --lang en
-node (Join-Path $tmp 'scripts\set-ae-language.mjs') --lang bilingual
-Remove-Item -Recurse -Force $tmp
-```
+3. Confirm docs:
 
-The default install should produce bilingual skill-list metadata, for example `AE 帮助 / AE Help`.
+- `README.md` / `README.en.md` each have a level-three `### <version>（date）` / `### <version> (date)` entry and link to their changelog.
+- Each README keeps at most five version entries; older entries live only in `CHANGELOG.md` / `CHANGELOG.en.md`.
+- `INSTALL.md` / `INSTALL.zh-CN.md`, `AGENTS.md`, `NOTICE.md`, `.cursorrules` describe the skills CLI install path (not legacy installers).
+- No personal machine paths in tracked files (`npm run check` / public-content).
 
-Before committing the release, confirm `README.md`, `README.en.md`, `CHANGELOG.md`, and `CHANGELOG.en.md` each contain the current version's level-three heading, ISO date, and change-summary bullets. Keep at most the latest five version entries in each README, move older entries to the matching changelog, and keep the README link to its changelog. `node scripts/check-release-notes.mjs` enforces this mapping but does not prove runtime or deployment acceptance.
-
-4. Verify the multi-agent profile template and default policy:
+4. Optional isolated layout check (also covered by `check:smoke` when implemented):
 
 ```bash
-node scripts/check-install-smoke.mjs
-node --test tests/skill-scripts.test.mjs --test-name-pattern "multi-agent|auto|review_only"
+# Copy each skills/<name> into a temp dir and confirm SKILL.md + references resolve
+# Then install via: npx skills add <path-or-repo> -l
+npx skills add YaoGUanquan/codex-ai-agent-engine -l
 ```
 
-The installed template should include `multi_agent.enabled: auto`, `mode: suggest`, `max_workers: 3`, and `allow_write_agents: false`. `enabled: auto` must report analysis and suggested waves only; write-agent auto parallelism requires explicit `mode: auto` and `allow_write_agents: true`.
+5. CI matrix:
 
-5. Verify skill governance and Spec Kit-inspired workflow entries:
+- Keep Windows / Linux / macOS and Node 20 / 22 jobs.
+- Keep a stable CI result gate name; do not rename checks casually.
 
-```bash
-node scripts/check-skill-language-metadata.mjs
-node scripts/check-design-contract.mjs
-node scripts/ae-tools.mjs help constitution
-node scripts/ae-tools.mjs help tasks
-```
-
-The active catalog should include `ae-constitution` and `ae-tasks`, and should not include removed OfficeCLI skills.
-
-6. Manually verify Codex skill discoverability in a fresh Codex App thread:
+6. Manually spot-check host discovery in a fresh thread (optional, not a CI substitute):
 
 ```text
-Open a fresh Codex thread in a project where AE is installed.
-Type `/` and search for `ae-plan` and `ae-prd`.
-Verify explicit `$ae-plan` and `$ae-prd` skill invocation guidance remains available.
+After installing with the skills CLI, open a fresh host thread.
+Confirm the seven ae-* skills are listed and that retired plugin skills are absent.
+Explicitly invoke one skill (for example $ae-grill) and confirm it loads.
 ```
 
-This confirms the active Codex App behavior only. Do not record this as OpenCode `config.command`-style slash command registration.
-
-7. Confirm no reference clone is present:
+7. Confirm no upstream clone directory is tracked:
 
 ```bash
 ls upstream-ai-agent-engine
@@ -76,11 +57,4 @@ ls upstream-ai-agent-engine
 
 This should fail or show no directory.
 
-8. Commit and tag:
-
-```bash
-git add .
-git commit -m "feat: add Codex AI Agent Engine plugin"
-git tag v0.1.0
-git push origin main --tags
-```
+8. Commit, tag, and publish only with explicit human authorization. This checklist is not authorization to push, merge, or release.

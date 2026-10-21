@@ -1,8 +1,14 @@
 # Changelog
 
-This file is the complete release history of AI Agent Engine for Codex (since 0.3.7; earlier versions shipped without release notes). The `README.en.md` version section keeps only the latest five versions; every release appends the current entry to both files, README entries beyond the window move here, and `node scripts/check-release-notes.mjs` enforces the mapping.
+This file is the complete release history of AI Agent Engine for Codex (since 0.3.7; earlier versions shipped without release notes). The `README.en.md` version section keeps only the latest five versions; every release appends the current entry to both files, README entries beyond the window move here, and `node tools/check-release-notes.mjs` enforces the mapping.
 
 中文版本: [CHANGELOG.md](CHANGELOG.md)
+
+### 0.5.0 (2026-10-21)
+- Rebuild as a standalone engineering skill set: sole distribute source `skills/` (exactly seven: `ae-grill`, `ae-frontend`, `ae-backend`, `ae-unit-test`, `ae-integration-test`, `ae-e2e-test`, `ae-e2e-suite`); validators move to `tools/`, regressions stay in `tests/`.
+- Remove the old plugin manifest, MCP shell, project/global installers and updaters, language switchers, and orchestration/gate/issue/graph/memory/archive runtime; no `none|core|all` implicit tiers or compatibility shims.
+- Docs and install use the standard skills CLI; sync README/INSTALL/AGENTS/NOTICE/.cursorrules/release checklist. Legacy installs get documentation-only migration guidance; real personal installs are not auto-scanned or cleaned.
+- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `git diff --check`. Static checks and isolated skill copies prove closure and repository contracts only; real host-model, browser, and production acceptance need separate evidence and are not claimed here.
 
 ### 0.4.0-beta.3 (2026-10-21)
 - Fresh-install default implicit tier is now `none` (explicit AE only). `core`/`all` remain; update and language switching preserve existing install settings without forced migration. Fix Cursor metadata treating `none` like `core` in `cursorShouldDisableModelInvocation`.

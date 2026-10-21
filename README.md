@@ -1,118 +1,120 @@
 # AI Agent Engine for Codex
 
-面向 Codex 的项目级工程工作流插件：把需求澄清、设计契约、计划、执行、审查、验证、交接与经验沉淀，以 `ae-*` skills 和本地脚本落到当前项目。
+七个可独立复制的工程技能：需求追问、前后端实现与分层测试。唯一可分发技能源为 `skills/<name>/`；仓库校验与回归工具在 `tools/`，测试在 `tests/`。
 
-> 参考：[Gitee AI Agent Engine](https://gitee.com/jiangqiang1996/ai-agent-engine)、[OpenAI plugins](https://github.com/openai/plugins)、[Superpowers](https://github.com/obra/superpowers)、[everything-claude-code](https://github.com/affaan-m/everything-claude-code)、[Spec Kit](https://github.com/github/spec-kit)、[aicoding-cookbook](https://github.com/lili-luo/aicoding-cookbook) 等方法论；本仓库是 Codex 原生 skill/插件实现，不是 OpenCode runtime 移植。
+灵感与能力划分参考 [AI Agent Engine](https://gitee.com/jiangqiang1996/ai-agent-engine)（本仓库独立实现，不复制上游正文）。许可证保持 `GPL-2.0-only`。
 
-English: [README.en.md](README.en.md) · 安装步骤：[INSTALL.md](INSTALL.md) / [INSTALL.zh-CN.md](INSTALL.zh-CN.md) · 仓规：[AGENTS.md](AGENTS.md)
+English: [README.en.md](README.en.md) · 安装：[INSTALL.zh-CN.md](INSTALL.zh-CN.md) / [INSTALL.md](INSTALL.md)
 
 ## 当前主线事实
 
-- 当前发布线 **`0.4.0-beta.3`**；根 `package.json` 与插件 manifest 版本一致。
-- 可分发技能**唯一源**：`plugins/ai-agent-engine-codex/skills`。`.agents/skills` 只属于 consumer 安装布局，不是本仓库第二份技能树；无 `.ae-source`。
-- 安装 / 更新 / 语言切换支持 `--implicit none|core|all`；**默认 `none`**（新安装仅显式调用 AE）。`core` 仅五核心可自然语言隐式；`all` 为旧全量隐式。已有安装设置会被保留，不强制迁移。
-- 项目级安装写入目标项目；全局安装发布当前用户 personal plugin 与 dispatcher。两种方式都保留各项目自己的 `AGENTS.md`、`docs/**`、AI 记忆与归档。
-- `task-analyze` 只产出候选 worker request / 就绪状态 / 并行波次，不自行启动后台代理；父代理负责授权、集成与最终验收。
-- `npm test` / `npm run check` / `npm run check:smoke` 等**本地检查证明脚本、契约与隔离安装**，不等于真实 Codex host/model、目标项目运行时、部署或生产容量。
-
-完整发布说明见 [CHANGELOG.md](CHANGELOG.md) / [CHANGELOG.en.md](CHANGELOG.en.md)。
+- 版本：`0.5.0`
+- 技能源：`skills/`（恰好 7 个；每个技能资源自闭合，可单独复制使用）
+- 安装：标准 [skills](https://www.npmjs.com/package/skills) CLI；**不再**提供项目/全局安装器、`none|core|all` 隐式档位或 MCP 壳
+- 调用：须明确点名技能（如 `$ae-frontend` / `ae-grill`）；不默认全流程或多代理
+- 校验：`npm test`、`npm run check`、`npm run check:smoke`（入口均在 `tools/`）
 
 ## 快速开始
 
-```bash
-node scripts/install-project.mjs --target /path/to/your-codex-project
-```
-
-Windows PowerShell：
-
-```powershell
-node scripts\install-project.mjs --target D:\codes\your-project
-```
-
-在目标项目根目录初始化文档骨架，并重启/重开 Codex 对话：
+前置：Node.js ≥ 20，以及宿主已支持 Agent Skills。
 
 ```bash
-node scripts/ae-tools.mjs init
-node scripts/ae-tools.mjs help
+# 列出本仓库可安装技能
+npx skills add YaoGUanquan/codex-ai-agent-engine -l
+
+# 安装全部 7 个技能到当前项目（跳过确认）
+npx skills add YaoGUanquan/codex-ai-agent-engine -y -s '*'
+
+# 只装其中一个
+npx skills add YaoGUanquan/codex-ai-agent-engine -y -s ae-grill
+
+# 装到用户级（全局）
+npx skills add YaoGUanquan/codex-ai-agent-engine -g -y -s '*'
 ```
 
-默认元数据语言为 `bilingual`；可用 `--lang zh-CN|en|bilingual`。默认隐式档为 `none`；需要五核心隐式时加 `--implicit core`。
+也可以把单个 `skills/<name>/` 目录复制到宿主的 skills 目录；目录内须带齐 `SKILL.md` 与 `references/`。
 
-代理可按 [INSTALL.md](INSTALL.md) / [INSTALL.zh-CN.md](INSTALL.zh-CN.md) 拉取执行安装。
+调用示例（以 Codex / 支持 `$skill` 的宿主为准）：
 
-## 隐式调用档位（`--implicit`）
+```text
+$ae-grill 收敛登录改造的验收边界
+$ae-frontend mode=dev 实现订单列表筛选
+$ae-backend mode=fix 排查重复扣款
+$ae-unit-test 为 OrderService 补边界用例并执行
+$ae-integration-test 验证下单到支付的租户隔离
+$ae-e2e-test mode=test-only 跑已有结账冒烟
+$ae-e2e-suite 整理项目 E2E 套件与 CI 门禁
+```
 
-| 档位 | 含义 |
-|---|---|
-| `none`（**插件默认**） | 全部技能不允许自然语言隐式触发；请显式 `$ae-*` / 指名 AE |
-| `core` | 仅 `ae-help`、`ae-plan`、`ae-work`、`ae-review`、`ae-debug` 可自然语言隐式 |
-| `all` | 全部技能允许隐式（旧默认） |
+更细的安装、迁移与卸载说明见 [INSTALL.zh-CN.md](INSTALL.zh-CN.md)。
+
+## 七个技能
+
+| 技能 | 用途 |
+| --- | --- |
+| `ae-grill` | 需求与方案追问：先查仓库，每次一个关键决策，给推荐与理由；默认只输出会话共识 |
+| `ae-frontend` | 前端设计、页面与交互；`mode=dev\|fix` |
+| `ae-backend` | 后端实现与根因修复；`mode=dev\|fix`；保留权限、契约、事务与数据规模约束 |
+| `ae-unit-test` | 按现有框架生成/执行单元测试并分析失败 |
+| `ae-integration-test` | 跨模块、接口、认证与持久化交互；须证明隔离环境 |
+| `ae-e2e-test` | 用例级浏览器验证；支持只跑已有脚本，或编写后执行 |
+| `ae-e2e-suite` | 项目级 E2E 基建、套件组织与 CI |
+
+不包含 PPT、TTS、SSH 运维、独立代码审查入口、配置中心或通用运行平台。技能正文不引用其他技能名、兄弟目录、中央 dispatcher 或仓库 `tools/`。
+
+## 从旧插件迁移
+
+旧版是 Codex 插件（`plugins/ai-agent-engine-codex`）+ 安装/更新脚本 + 可选隐式档位。`0.5.0` 起改为独立技能集合：
+
+1. 识别旧安装：项目或用户目录下仍有 `ai-agent-engine-codex` 插件、`.codex-plugin`、旧 `install-*/update-*` 脚本，或 skills 列表里大量已退役的 `ae-*`（如 `ae-help`、`ae-plan`、`ae-lfg`）。
+2. 在宿主中停用/移除旧插件或旧技能，避免与新七技能重复加载。
+3. 用上一节的 `npx skills add ...` 安装新技能；**不要**再跑旧 `install-project` / `update-ae-codex`。
+4. 保留个人文档、记忆、配置、备份与 journal；本版本**不会**自动扫描或清理真实个人安装。
+
+能力去向（摘要）：需求澄清 → `ae-grill`；前端实现/设计 → `ae-frontend`；后端/SQL/调试中的服务根因 → `ae-backend`；单测/TDD → `ae-unit-test`；接口与业务流集成 → `ae-integration-test`；浏览器单用例 → `ae-e2e-test`；E2E 基建与 CI → `ae-e2e-suite`。编排、gate、图谱、记忆、归档、安装器、语言切换、多代理 runtime 等机制已退役，详见 [CHANGELOG.md](CHANGELOG.md) 的 `0.5.0` 条目。
+
+## 仓库结构
+
+```text
+skills/           # 唯一可分发技能源（7 个）
+tools/            # 校验、语法、发布说明、公开内容、烟测与测试入口
+tests/            # 回归测试
+docs/             # 仅公开模板/参考与发布清单（过程记录不入库）
+LICENSE
+NOTICE.md
+package.json      # files 白名单：skills/、LICENSE、NOTICE.md
+```
+
+npm 包分发**不包含** `tools/` 与 `tests/`；它们只服务本仓库开发与 CI。
+
+## 开发检查
 
 ```bash
-node scripts/install-project.mjs --target /path/to/project --implicit core
-node scripts/set-ae-language.mjs --lang bilingual --implicit all
+npm install
+npm test
+npm run check
+npm run check:smoke
 ```
 
-未显式调用 AE 时，使用普通 Codex 能力与非 AE skill，不要自动启动 AE 流程。
-
-## 能力清单
-
-按类一览（完整触发与流程见各 skill）：
-
-| 类别 | Skills |
-|---|---|
-| 入口 / 编排 | `ae-help`、`ae-lfg`、`ae-init` |
-| 需求与设计 | `ae-ideate`、`ae-brainstorm`、`ae-design`、`ae-constitution`、`ae-plan`、`ae-tasks` |
-| 执行与重构 | `ae-work`、`ae-refactor`、`ae-tdd`、`ae-debug` |
-| 审查与验证 | `ae-review`、`ae-test-browser`、`ae-test-api` |
-| 前端 / Web | `ae-frontend-design`、`ae-web-forge`、`ae-web-app` |
-| 后端 / 数据 | `ae-backend`、`ae-sql`、`ae-swagger-parser` |
-| 文档与交接 | `ae-doc-humanize`、`ae-doc-structure`、`ae-handoff`、`ae-save-experience`、`ae-prompt-optimize`、`ae-imagegen-prompt` |
-| 元能力 / 维护 | `ae-skill-creator`、`ae-skill-audit`、`ae-agent-creator`、`ae-language`、`ae-update`、`ae-reverse-engineering` |
-
-契约摘要（与能力表并存，供发现与回归断言）：
-
-- `ae-design`：在 PRD 和计划之间沉淀架构、接口、数据、UI/UX、测试与非功能设计契约。
-- `ae-frontend-design`：前端设计与界面实现。
-- `ae-web-forge`：统一前端/Web 路由入口，选择现有 AE skill 并以浏览器验收收尾。
-- `ae-web-app`：实现由 `ae-web-forge` 路由后的 Web 应用、交互、API 和轻量全栈流程。
-- `ae-test-api`：在后端改动后执行接口冒泡测试，验证契约、风险路径和分级证据。
-- `ae-reverse-engineering`：对已授权工件执行防御性逆向分析，先确认范围、工件来源和可复现证据边界。
-
-本地辅助：`node scripts/ae-tools.mjs help`（含 init、memory/knowledge 查询、浅层依赖图、`task-analyze`、report、issue 等）。`ae-graph-build` / `ae-graph-query` 不会写入 `docs/ae/graphs/graph.json`。细节见 `AGENTS.md` 与 `ae-tools.mjs help`。
-
-## 项目级安装与更新
-
-推荐项目级安装（只写目标项目，不改全局 Codex 配置）：
-
-```bash
-node scripts/install-project.mjs --target /path/to/your-codex-project
-node scripts/install-project.mjs --target /path/to/your-codex-project --lang zh-CN --implicit none
-```
-
-已安装项目中更新：
-
-```bash
-node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-agent-engine.git --branch main
-```
-
-技能列表语言（需重启对话后生效）：
-
-```bash
-node scripts/set-ae-language.mjs --lang zh-CN   # 或 en / bilingual
-```
-
-安装写入目标项目的主要路径：`plugins/ai-agent-engine-codex/`、`.agents/plugins/marketplace.json`、`.agents/skills/ae-*`、`scripts/ae-tools.mjs`、`scripts/update-ae-codex.mjs`、`scripts/set-ae-language.mjs`。
-
-全局安装、从项目级迁移、手动复制步骤见 [INSTALL.md](INSTALL.md)。多 agent / `task-analyze` 配置模板见 `docs/ae/templates/ae-skill-profiles.example.yaml`（更新不会覆盖已有 `.codex/ae-skill-profiles.yaml`）。
+`check` 覆盖语法、技能 frontmatter/闭包、仓库残留、发布说明窗口与公开内容边界。过程记录与项目记忆遵守私有文档边界，不写回本公开仓库。
 
 ## 版本更新记录
 
+完整历史见 [CHANGELOG.md](CHANGELOG.md)。此处仅保留最近 5 条。
+
+### 0.5.0（2026-10-21）
+- 全面改为独立工程技能集合：唯一分发源 `skills/`（7 个），仓库工具迁入 `tools/`；移除旧插件 manifest、MCP 壳、安装更新器与编排/gate/图谱/记忆 runtime。
+- 文档与安装改为标准 skills CLI；废弃 `none|core|all` 隐式档位与旧插件更新流程；版本升至 `0.5.0`。
+- 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。静态与隔离复制仅证明技能闭包与仓库合同；真实宿主模型与生产验收未在本环境宣称通过。
+
 ### 0.4.0-beta.3（2026-10-21）
-- 默认隐式档位改为 `none`；修复 Cursor `none` 档元数据兼容；收紧 `ae-debug` 假设规则；补充离线模型评测校验与 worker 验收反例。真实 GPT 对照未跑。
+- 新安装默认隐式档位改为 `none`（仅显式调用 AE）；保留 `core`/`all`，更新与语言切换保留已有安装设置，不强制迁移。修复 Cursor 元数据在 `none` 档把核心技能当作仍可模型调用的问题（`cursorShouldDisableModelInvocation`）。
+- 调整 `ae-debug`：删除固定「列 3–5 个假设」；仅证据歧义时提出必要可证伪假设；缺环境只阻塞依赖修复/验收，证据不足不得宣称根因确认。
+- 补充可离线的模型评测准备/结果校验入口（`scripts/model-evaluation-check.mjs`）与 worker 验收反例；规范与运行结果分离，不因一次运行改写历史规范。
+- 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。真实 GPT-6.1 Sol / GPT-6 Astra 对照未在本环境执行（not-run/blocked）；Grok Bot 自运行不能替代模型行为证据。
 
 ### 0.4.0-beta.2（2026-10-20）
-- 安装/更新/语言切换支持 `--implicit core|all|none`；**插件默认档位改为 `core`**（仅 ae-help / ae-plan / ae-work / ae-review / ae-debug 可自然语言隐式触发）。非 core 请走 ae-help 路由或 `$ae-*`；`--implicit all` 可恢复旧行为。
+- 安装器支持 `--implicit core|all|none`；**默认档位从 `all` 改为 `core`**（仅 ae-help / ae-plan / ae-work / ae-review / ae-debug 可自然语言隐式触发）。非 core 自然语言请走 ae-help 路由或显式 `$ae-*`；需要旧行为时传 `--implicit all`。
 - 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。这些静态和本地检查不能证明真实 Codex host/model 行为。
 
 ### 0.4.0-beta.1（2026-10-15）
@@ -127,47 +129,13 @@ node scripts/set-ae-language.mjs --lang zh-CN   # 或 en / bilingual
 - GPT-6.1 为首要行为验收目标，提供后续模型可复用的八类评测场景及三组对照、每组两次的执行规范；尚未完成真实模型行为评测，不宣称性能或质量提升已获证明。
 - 验证命令：`node --test tests/model-adaptation.test.mjs tests/instruction-audit.test.mjs`、`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。静态及隔离安装检查仅证明规则、元数据与分发合同，实际结果和未通过项以交付记录为准。
 
-### 0.3.55（2026-10-13）
-- 移除 `.ae-source` 维护镜像：插件 `plugins/ai-agent-engine-codex/skills` 成为唯一技能源；删除 `check-skill-mirror` 并清理合同/语言/审计脚本中的镜像根。
-- 回归测试改为只断言插件 `SKILL_ROOT`；文档与发布清单去掉 ae-source 指引；版本升至 0.3.55。
-- 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。这些静态和本地检查不能证明真实 Codex host/model 行为。
-
-README 仅保留最近 5 条；完整历史见 [CHANGELOG.md](CHANGELOG.md)。
-
-## 仓库结构
-
-```text
-plugins/ai-agent-engine-codex/   # 可分发插件；skills 唯一源
-scripts/                         # install / update / ae-tools / 检查脚本
-tests/                           # 回归与安装烟测
-docs/ae/templates|references     # 入库模板与参考（公开仓）
-CHANGELOG.md / INSTALL*.md       # 完整发布说明与安装指引
-AGENTS.md                        # 仓规与验证入口
-```
-
-`.agents/` 是 consumer 安装布局，不是本分发源仓库的技能源。
-
 ## 重要边界
 
-- 可靠触发：明确点名 AE / `ae-*` / `$ae-*`，或继续已启动的 AE 流程；默认 `none` 下自然语言不会隐式拉起 AE。
-- Codex 通过 skills 暴露入口（`$ae-*`、自然语言点名，或在支持的 App 里用 `/` / skill 搜索已启用 skills）；这是 skill-backed discoverability，不是 OpenCode `config.command` 式动态 slash 注册。`/ae-*` 只是兼容标签。
-- 当前无真实 MCP server；`.mcp.json` 有意保持为空。
-- `ae-graph-*` 为浅层只读脚本，不会写入 `docs/ae/graphs/graph.json`，也不是完整图谱工具。
-- Git 写操作、破坏性文件操作、网络、依赖安装、数据库写入、浏览器 setup 均需 Codex 显式授权。
-- 本公开仓 `docs/` 只入库模板/参考与发布清单；过程产物与长期 AI 记忆写入私有 docs 仓（见 `AGENTS.md` External Docs Context）。
-
-## 开发检查
-
-```bash
-npm test
-npm run check
-npm run check:smoke
-node scripts/check-release-notes.mjs
-git diff --check
-```
-
-发布前可参考 [docs/release-checklist.md](docs/release-checklist.md)。只改文档、不改可分发插件内容时不单独 bump 版本。
+- 公开仓库过程记录、交接与长期 AI 记忆不入库；仅保留公开模板/参考与发布清单。
+- 失败须区分产品、测试、规格与环境原因；禁止放宽断言、无理由跳过或静默降级。
+- Git 写入、推送、合并、发布、真实数据库写入或修改真实个人安装需单独授权；本说明不构成上述授权。
 
 ## 许可和致谢
 
-见 [LICENSE](LICENSE) 与 [NOTICE.md](NOTICE.md)。本项目参考 AI Agent Engine，插件与仓库授权为 `GPL-2.0-only`。
+- 本仓库：`GPL-2.0-only`（见 [LICENSE](LICENSE)、[NOTICE.md](NOTICE.md)）
+- 上游参考声明见 NOTICE；上游版本若为 `GPL-3.0-or-later`，本仓库不擅自改许可证

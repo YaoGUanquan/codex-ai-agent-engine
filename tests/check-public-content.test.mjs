@@ -5,10 +5,10 @@ import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { makeTempDir } from './helpers/skill-test-utils.mjs'
+import { makeTempDir } from './helpers.mjs'
 
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)))
-const script = resolve(repoRoot, 'scripts/check-public-content.mjs')
+const script = resolve(repoRoot, 'tools/check-public-content.mjs')
 
 function runChecker(root) {
   return spawnSync(process.execPath, [script, '--root', root, '--json'], {
