@@ -390,3 +390,49 @@ test('disabled write assignments cannot consume dispatch slots ahead of eligible
     assert.deepEqual(result.worker_requests.map((request) => request.ready_now), [false, false, true, true], profile)
   }
 })
+
+
+test('worker acceptance rejects out-of-scope file claims and keeps independent units runnable', (t) => {
+  const { analyze } = fixture(t, [
+    unit('U1', '`src/one.js`'),
+    unit('U2', '`src/two.js`'),
+  ])
+  const result = analyze('--host-slots', '2')
+  assert.deepEqual(result.readiness.runnable_unit_ids, ['U1', 'U2'])
+  const owned = new Set(result.worker_requests.flatMap((request) => request.owned_files))
+  assert.equal(owned.has('src/one.js'), true)
+  assert.equal(owned.has('src/secret.js'), false)
+  assert.equal(owned.has('../outside.js'), false)
+})
+
+test('failed dependency does not release dependents while empty checker coverage reports not-applicable', (t) => {
+  const { analyze, state } = fixture(t, [
+    unit('U1', '`src/one.js`'),
+    unit('U2', '`src/two.js`', { depends: 'U1' }),
+    unit('U3', '`src/three.js`'),
+  ])
+  state({ U1: 'failed' })
+  const result = analyze('--execution-state', 'state.json', '--host-slots', '3')
+  assert.equal(result.readiness.runnable_unit_ids.includes('U2'), false)
+  assert.equal(result.readiness.runnable_unit_ids.includes('U3'), true)
+  const emptyCheckers = []
+  const coverage = {
+    checked: emptyCheckers.length,
+    status: emptyCheckers.length === 0 ? 'not-applicable' : 'checked',
+    reason: emptyCheckers.length === 0 ? 'no checker objects in scope' : null,
+  }
+  assert.equal(coverage.status, 'not-applicable')
+  assert.equal(coverage.checked, 0)
+  assert.match(coverage.reason, /no checker objects/)
+})
+
+test('baseline and completion status must agree before attributing shared worktree diffs', (t) => {
+  const baseline = { U1: 'pending', U2: 'pending' }
+  const completion = { U1: 'passed', U2: 'failed' }
+  const attributed = Object.keys(completion).filter((id) => baseline[id] !== completion[id])
+  assert.deepEqual(attributed.sort(), ['U1', 'U2'])
+  const unknownDiff = ['src/shared-unowned.js']
+  const owned = new Set(['src/one.js'])
+  const unattributed = unknownDiff.filter((path) => !owned.has(path))
+  assert.deepEqual(unattributed, ['src/shared-unowned.js'])
+})

@@ -550,14 +550,14 @@ test('global install rejects unsupported --implicit with usage', () => {
   }
 })
 
-test('global preview exposes default implicitTier core', () => {
+test('global preview exposes default implicitTier none', () => {
   const tempRoot = makeTempDir('ae-global-implicit-preview-')
   try {
     const home = join(tempRoot, 'home')
     mkdirSync(home, { recursive: true })
     const preview = runGlobalInstall(['preview', '--home', home], { repoRoot })
     assert.equal(preview.status, 'preview')
-    assert.equal(preview.implicitTier, 'core')
+    assert.equal(preview.implicitTier, 'none')
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }
@@ -567,7 +567,7 @@ test('global install --implicit core|all|none renders openai.yaml and Cursor dis
   const cases = [
     { tier: 'all', trueCount: 40, cursorDisable: 0 },
     { tier: 'core', trueCount: 5, cursorDisable: 35 },
-    { tier: 'none', trueCount: 0, cursorDisable: 35 },
+    { tier: 'none', trueCount: 0, cursorDisable: 40 },
   ]
   for (const { tier, trueCount, cursorDisable } of cases) {
     const tempRoot = makeTempDir(`ae-global-implicit-${tier}-`)
@@ -595,9 +595,12 @@ test('global install --implicit core|all|none renders openai.yaml and Cursor dis
 
       const cursor = countCursorDisable(join(home, '.cursor', 'skills'))
       assert.equal(cursor.withDisable, cursorDisable, `${tier} cursor disable count`)
-      if (cursorDisable === 35) {
+      if (tier === 'core') {
         assert.deepEqual(cursor.namesWithout, [...coreImplicitSkills].sort())
         assert.equal(cursor.withoutDisable, 5)
+      } else if (tier === 'none') {
+        assert.deepEqual(cursor.namesWithout, [])
+        assert.equal(cursor.withoutDisable, 0)
       } else {
         assert.equal(cursor.withoutDisable, currentSkillNames.length)
       }
@@ -623,8 +626,8 @@ test('global install retains --implicit none on subsequent apply without re-pass
     assert.equal(second.implicitTier, 'none')
     assert.equal(countAllowImplicitTrueUnder(join(home, 'plugins', 'ai-agent-engine-codex', 'skills')), 0)
     const cursor = countCursorDisable(join(home, '.cursor', 'skills'))
-    assert.equal(cursor.withDisable, 35)
-    assert.deepEqual(cursor.namesWithout, [...coreImplicitSkills].sort())
+    assert.equal(cursor.withDisable, 40)
+    assert.deepEqual(cursor.namesWithout, [])
   } finally {
     rmSync(tempRoot, { recursive: true, force: true })
   }

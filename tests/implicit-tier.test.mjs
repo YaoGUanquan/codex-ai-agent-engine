@@ -17,6 +17,7 @@ import {
   DEFAULT_IMPLICIT_TIER,
   allowImplicitInvocation,
   coreImplicitSkills,
+  cursorShouldDisableModelInvocation,
   renderYaml,
   skillMetadata,
   supportedImplicitTiers,
@@ -69,7 +70,7 @@ test('skillMetadata has exactly 40 entries and core five implicit markers', () =
     if (coreImplicitSkills.includes(name)) continue
     assert.notEqual(skillMetadata[name].implicitTier, 'core', name)
   }
-  assert.equal(DEFAULT_IMPLICIT_TIER, 'core')
+  assert.equal(DEFAULT_IMPLICIT_TIER, 'none')
   assert.deepEqual([...supportedImplicitTiers].sort(), ['all', 'core', 'none'])
 })
 
@@ -88,18 +89,17 @@ test('renderYaml implicit tiers yield true-counts 5/40/0 with exact core names',
   assert.equal(Object.keys(skillMetadata).filter((name) => allowImplicitInvocation(skillMetadata[name], 'none')).length, 0)
 })
 
-test('default renderYaml tier is core (matches committed allow_implicit true for core five only)', () => {
-  const expectedTrue = new Set(coreImplicitSkills)
+test('default renderYaml tier is none (matches committed allow_implicit false for all skills)', () => {
   let trueCount = 0
   for (const name of Object.keys(skillMetadata)) {
     const yaml = renderYaml(skillMetadata[name], 'bilingual')
     const allow = /^ {2}allow_implicit_invocation: true$/m.test(yaml)
     if (allow) trueCount += 1
-    assert.equal(allow, expectedTrue.has(name), `${name} default allow_implicit should be ${expectedTrue.has(name)}`)
+    assert.equal(allow, false, `${name} default allow_implicit should be false`)
     const committed = readFileSync(join(skillsSource, name, 'agents', 'openai.yaml'), 'utf8')
     assert.equal(yaml, committed, `${name} default bilingual render must match committed yaml`)
   }
-  assert.equal(trueCount, 5)
+  assert.equal(trueCount, 0)
 })
 
 test('default set-language regenerate keeps empty diff vs committed yaml', () => {
@@ -113,7 +113,7 @@ test('default set-language regenerate keeps empty diff vs committed yaml', () =>
     })
     assert.equal(result.status, 0, result.stderr || result.stdout)
     const payload = JSON.parse(result.stdout)
-    assert.equal(payload.implicitTier, 'core')
+    assert.equal(payload.implicitTier, 'none')
     for (const name of Object.keys(skillMetadata)) {
       const rendered = readFileSync(join(pluginRoot, 'skills', name, 'agents', 'openai.yaml'), 'utf8')
       const committed = readFileSync(join(skillsSource, name, 'agents', 'openai.yaml'), 'utf8')
@@ -178,4 +178,18 @@ test('root set-language.mjs accepts --implicit and keeps existing language tests
   assert.match(helpCore, /allow_implicit_invocation: false/)
   assert.ok(existsSync(rootSetLanguage))
   assert.ok(existsSync(pluginSetLanguage))
+})
+
+test('cursorShouldDisableModelInvocation: none disables all, core keeps five, all disables none', () => {
+  for (const name of Object.keys(skillMetadata)) {
+    assert.equal(cursorShouldDisableModelInvocation(name, 'none'), true, name)
+    assert.equal(cursorShouldDisableModelInvocation(name, 'all'), false, name)
+    assert.equal(
+      cursorShouldDisableModelInvocation(name, 'core'),
+      !coreImplicitSkills.includes(name),
+      name,
+    )
+  }
+  assert.equal(cursorShouldDisableModelInvocation('ae-help', 'none'), true)
+  assert.equal(cursorShouldDisableModelInvocation('ae-help', 'core'), false)
 })

@@ -13,6 +13,9 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 
 中文文档: [README.md](README.md)
 
+### 0.4.0-beta.3 (2026-10-21)
+- Default implicit tier is now `none`; fix Cursor `none` metadata handling; tighten `ae-debug` hypothesis rules; add offline model-evaluation validation and worker-acceptance counterexamples. Live GPT comparison not run.
+
 ### 0.4.0-beta.2 (2026-10-20)
 - Install/update/language switch support `--implicit core|all|none`; **plugin default tier is now `core`** (only ae-help / ae-plan / ae-work / ae-review / ae-debug allow natural-language implicit invocation). Non-core skills go through ae-help routing or `$ae-*`; `--implicit all` restores the previous behavior.
 - Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These static and local checks do not prove live Codex host/model behavior.
@@ -30,33 +33,6 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 - Remove the `.ae-source` maintenance mirror: plugin `plugins/ai-agent-engine-codex/skills` is the only skill source; delete `check-skill-mirror` and drop mirror roots from contract/language/audit scripts.
 - Rewrite regression tests to assert only the plugin `SKILL_ROOT`; scrub ae-source guidance from docs and the release checklist; bump to 0.3.55.
 - Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These static and local checks do not prove live Codex host/model behavior.
-### 0.3.54 (2026-09-30)
-- Compress 12 high-frequency AE skill entrypoints to under 4 KiB and move detailed procedures into conditionally loaded references, reducing default context and repeated workflow text.
-- Keep high-frequency entrypoints and detailed references separate, with regression coverage for entry size and route selection.
-- Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These static and local checks do not prove real Codex host/model token consumption or behavioral gains.
-
-## Current Mainline Facts
-
-- The current release line is `0.4.0-beta.2`; the root `package.json` and plugin manifest stay on the same version.
-- The only distributable skill source is `plugins/ai-agent-engine-codex/skills`. `.agents/skills` is a consumer-project installation layout, not a second source tree in this repository.
-- Project-level installation writes into the target project. Global installation publishes the current user's personal plugin and dispatcher. Both modes keep each project's `AGENTS.md`, `docs/**`, AI memory, graph, and archive in the project root.
-- Install, update, and language switching support `--implicit core|all|none`. The default is `core`: only `ae-help`, `ae-plan`, `ae-work`, `ae-review`, and `ae-debug` allow natural-language implicit invocation.
-- `task-analyze` emits candidate worker requests, readiness, and parallel waves. It does not start background agents or treat candidate waves as completion evidence; the parent agent owns authorization, integration, and final acceptance.
-- Repository checks prove scripts, contracts, installation distribution, and isolated fixtures. They do not prove live Codex host/model behavior, target-project runtime behavior, deployment, or production capacity.
-
-Mainline changes are recorded in [CHANGELOG.en.md](CHANGELOG.en.md) and [CHANGELOG.md](CHANGELOG.md); the README keeps only the current release window.
-
-## When To Use It
-
-Use this plugin when you want a Codex project to keep repeatable engineering workflows close to the repository:
-
-- clarify fuzzy requirements before implementation;
-- turn requirements into executable plans;
-- run implementation with Git/worktree safety checks;
-- review code or documents with findings first;
-- keep validation evidence, handoffs, and reusable experience in project docs;
-- initialize project guidance, archive rules, and durable AI memory.
-
 ### AE Invocation Boundary
 
 AE skills are **opt-in by default**. They activate only when the user explicitly names `AE`, an `ae-*` skill, `/ae-*`, `$ae-*`, or asks to continue an active AE workflow. A semantic match, repository name, file content, or historical context mentioning “AE” does not activate AE automatically.
@@ -218,15 +194,13 @@ The default metadata language is `bilingual`. Supported metadata languages are `
 
 ## Implicit Invocation Tier (`--implicit`)
 
-Install and update support three tiers: `core` | `all` | `none`.
-
-| Tier | Meaning |
+Install and update support three tiers: `core` | Tier | Meaning |
 |---|---|
-| `core` (**plugin default**) | Only five core skills allow natural-language implicit invocation: `ae-help`, `ae-plan`, `ae-work`, `ae-review`, `ae-debug` |
+| `none` (**plugin default**) | No skill allows natural-language implicit invocation; use explicit `$ae-*` / named AE entrypoints |
+| `core` | Only five core skills allow natural-language implicit invocation: `ae-help`, `ae-plan`, `ae-work`, `ae-review`, `ae-debug` |
 | `all` | Every skill allows implicit invocation (previous default) |
-| `none` | Disable all implicit invocation; use explicit `$ae-*` / `/ae-*` |
 
-Installing without `--implicit` writes `core` (exactly five `allow_implicit_invocation: true`). For non-core capabilities, route through natural-language `ae-help` or call `$ae-*` explicitly. To restore the previous behavior:
+Installing without `--implicit` writes `none` (zero `allow_implicit_invocation: true`). Pass `--implicit core` for the five-skill set, or `--implicit all` to restore the previous full implicit behavior:
 
 ```bash
 node scripts/install-project.mjs --target /path/to/your/codex-project --implicit all

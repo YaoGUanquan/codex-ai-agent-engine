@@ -300,7 +300,7 @@ export const coreImplicitSkills = Object.freeze([
 ])
 
 export const supportedImplicitTiers = new Set(['core', 'all', 'none'])
-export const DEFAULT_IMPLICIT_TIER = 'core'
+export const DEFAULT_IMPLICIT_TIER = 'none'
 
 /** Per-skill marker: core five are explicit; everything else is optional. */
 export function skillImplicitMarker(item) {
@@ -393,10 +393,17 @@ export function resolveImplicitTier({ explicit, settingsPath, installStateTier =
   return DEFAULT_IMPLICIT_TIER
 }
 
-/** Cursor copies disable model invocation for non-core skills when tier is not `all`. */
+/**
+ * Cursor copies: disable model invocation so only explicit slash/name invocation remains.
+ * - all: disable none
+ * - core: disable non-core only (core five stay model-invocable)
+ * - none: disable all skills (including core five)
+ */
 export function cursorShouldDisableModelInvocation(skillName, globalTier = DEFAULT_IMPLICIT_TIER) {
   if (globalTier === 'all') return false
-  return !coreImplicitSkills.includes(skillName)
+  if (globalTier === 'none') return true
+  if (globalTier === 'core') return !coreImplicitSkills.includes(skillName)
+  throw new Error(`unsupported implicit tier: ${globalTier}`)
 }
 
 /**

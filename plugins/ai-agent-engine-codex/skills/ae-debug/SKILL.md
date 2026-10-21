@@ -18,20 +18,23 @@ For slow lists/counts, N+1, bulk persistence or async-job failures, use the [dat
 ## Operating Principles
 
 - Reproduce or capture the failure before explaining it.
-- Build and run one tight, deterministic, red-capable feedback loop before moving to hypotheses; rank 3-5 falsifiable hypotheses to avoid anchoring.
+- Prefer one tight, deterministic, red-capable feedback loop when it can be built. When it cannot, continue read-only analysis of logs, call chains, configuration, and existing evidence, and state the reproduction gap.
+- Form falsifiable hypotheses only when evidence is ambiguous; never pad to a fixed count such as 3-5.
+- Missing environment blocks only dependent repair/acceptance, not independent investigation. Insufficient evidence is not a confirmed root cause or a proven fix.
 - Minimise the reproduction, redact secrets from evidence, tag temporary diagnostics, and remove them before completion.
 - Fix the nearest proven cause, then widen only if evidence requires it.
 - Preserve the failure evidence and validation command in the final report.
+- Keep isolation tests, authorization boundaries, and the ban on unauthorized user-database connections.
 
 ## Workflow
 
 1. Read `references/debugging-workflow.md`.
 2. Reproduce the failure or capture the best available evidence: exact error text, command, route, request, screenshot, or log excerpt.
 3. Identify the nearest failing path in the repository instead of starting with a broad redesign.
-4. Form 3-5 ranked concrete hypotheses and test one falsifiable prediction at a time.
-5. Apply the smallest fix that matches the observed evidence.
+4. When evidence is ambiguous, form only the necessary falsifiable hypotheses and test one prediction at a time. When the cause is already clear, skip speculative hypothesis lists.
+5. Apply the smallest fix that matches the observed evidence when the required environment exists and the fix is authorized.
 6. Add a regression test or equivalent validation when practical.
-7. Report the observed failure, root-cause evidence, fix, validation, and any remaining unknowns.
+7. Report the observed failure, root-cause evidence (or explicit gap), fix (if any), validation, and any remaining unknowns.
 
 When the user explicitly requests a local runtime smoke for a changed API or UI surface, read [the local runtime smoke gate](../ae-work/references/local-runtime-smoke-gate.md). Use it after the failing path is understood; do not treat an authentication or transport failure as proof of the business behavior.
 
@@ -44,4 +47,4 @@ When the user explicitly requests a local runtime smoke for a changed API or UI 
 - Prefer [ae-backend](../ae-backend/SKILL.md) when the failure is in service, API, auth, or repository behavior.
 - Avoid speculative rewrites when the failing path is narrow.
 - If the symptom disappears during investigation, report the last known evidence and what remains unproven.
-- If no red-capable loop can be built, stop and report the missing environment or artifact instead of guessing.
+- If no red-capable loop can be built, continue with read-only evidence analysis and report the missing environment or artifact instead of guessing.

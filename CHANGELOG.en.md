@@ -4,6 +4,12 @@ This file is the complete release history of AI Agent Engine for Codex (since 0.
 
 中文版本: [CHANGELOG.md](CHANGELOG.md)
 
+### 0.4.0-beta.3 (2026-10-21)
+- Fresh-install default implicit tier is now `none` (explicit AE only). `core`/`all` remain; update and language switching preserve existing install settings without forced migration. Fix Cursor metadata treating `none` like `core` in `cursorShouldDisableModelInvocation`.
+- Update `ae-debug`: remove the fixed "list 3-5 hypotheses" rule; propose falsifiable hypotheses only when evidence is ambiguous; missing environment blocks only dependent fix/acceptance; insufficient evidence is not a confirmed root cause.
+- Add offline model-evaluation prepare/result validation (`scripts/model-evaluation-check.mjs`) and worker-acceptance counterexamples; keep specs separate from run records.
+- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `git diff --check`. Live GPT-6.1 Sol / GPT-6 Astra comparisons were not run here (not-run/blocked); a Grok Bot self-run is not GPT behavioral proof.
+
 ### 0.4.0-beta.2 (2026-10-20)
 - Installers accept `--implicit core|all|none`; **default tier changes from `all` to `core`** (only ae-help / ae-plan / ae-work / ae-review / ae-debug allow natural-language implicit invocation). Non-core natural language should go through ae-help routing or explicit `$ae-*`; pass `--implicit all` to restore the previous behavior.
 - Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These static and local checks do not prove live Codex host/model behavior.

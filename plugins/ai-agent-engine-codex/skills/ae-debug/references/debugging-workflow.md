@@ -4,17 +4,34 @@ Use the [validation contract](../../ae-help/references/validation-contract.md) t
 
 ## Feedback Loop Gate
 
-Do not move from exploration to a root-cause story until one red-capable loop has been run. Record one command or harness that reaches the user's exact symptom, is deterministic, and completes quickly enough to repeat. If no such loop can be built, stop and report the missing environment or artifact instead of guessing.
+Do not move from exploration to a root-cause story until one red-capable loop has been run, **or** you have recorded why such a loop cannot be built yet. A usable loop reaches the user's exact symptom, is deterministic, and completes quickly enough to repeat. If no such loop can be built locally, continue with read-only analysis of logs, call chains, configuration, and already captured evidence; do not invent a root cause.
 
 Debug in this order:
 
-1. Reproduce or capture evidence.
+1. Reproduce or capture the best available evidence.
 2. Narrow the failing path.
 3. Minimise the reproduction one input, caller, config, or step at a time; keep only load-bearing elements.
-4. Form 3-5 ranked, falsifiable hypotheses and state the prediction for each before probing.
+4. Form hypotheses **only when evidence is ambiguous**. Propose the minimum number of falsifiable hypotheses needed to decide between competing explanations; state the prediction for each before probing. Do **not** invent a fixed quota such as "list 3-5 hypotheses" when the cause is already clear.
 5. Test one prediction at a time with commands, code inspection, or browser tools.
-6. Change the smallest thing that explains the failure.
+6. Change the smallest thing that explains the failure (only when a fix is authorized and the dependent environment exists).
 7. Run the repaired case and any directly affected checks selected by the validation contract.
+
+### Environment And Evidence Boundaries
+
+- Missing local environment blocks only the fix or acceptance steps that depend on it; independent investigation may continue.
+- Insufficient evidence must never be reported as a confirmed root cause or as proof that a fix worked.
+- Keep isolation tests, authorization boundaries, and the ban on connecting to user-managed databases without explicit authorization.
+- Prefer captured evidence, static inspection, fixtures, or a proven isolated profile when live reproduction is unavailable.
+
+### Positive And Negative Cases
+
+| Situation | Expected behavior |
+| --- | --- |
+| Reproducible local failure with a red-capable loop | Reproduce, minimise, fix the nearest proven cause, validate the repaired case. |
+| Only logs / call chain / config available | Read-only analysis is allowed; mark reproduction gap; do not claim root-cause confirmation. |
+| Environment missing for the failing path | Block only dependent repair/acceptance; continue independent investigation; report the gap. |
+| Small fault with a clear single cause | Skip speculative hypothesis lists; apply the smallest matching fix and validate. |
+| Evidence ambiguous between two paths | State only the necessary falsifiable hypotheses and test one prediction at a time. |
 
 Useful evidence to capture (redact secrets before recording):
 

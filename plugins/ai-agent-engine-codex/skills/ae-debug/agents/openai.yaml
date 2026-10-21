@@ -3,4 +3,4 @@ interface:
   short_description: "在修改代码前系统化定位故障原因 / Investigate failures systematically before changing code"
   default_prompt: "使用 $ae-debug 排查这个故障。 / Use $ae-debug to investigate this failure."
 policy:
-  allow_implicit_invocation: true
+  allow_implicit_invocation: false

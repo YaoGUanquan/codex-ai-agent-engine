@@ -66,15 +66,13 @@ node "$tmp/scripts/install-project.mjs" --target "$target" --lang en
 
 ## 隐式调用档位（`--implicit`）
 
-安装与更新支持三档：`core` | `all` | `none`。
-
-| 档位 | 含义 |
+安装与更新支持三档：`core` | 档位 | 含义 |
 |---|---|
-| `core`（**插件默认**） | 仅 5 个核心技能允许自然语言隐式触发：`ae-help`、`ae-plan`、`ae-work`、`ae-review`、`ae-debug` |
-| `all` | 全部技能允许隐式触发（旧默认行为） |
-| `none` | 全部关闭隐式触发，需显式 `$ae-*` / `/ae-*` |
+| `none`（**插件默认**） | 全部技能均不允许自然语言隐式触发；请显式 `$ae-*` / 指名 AE |
+| `core` | 仅五个核心技能允许自然语言隐式触发：`ae-help`、`ae-plan`、`ae-work`、`ae-review`、`ae-debug` |
+| `all` | 全部技能允许隐式调用（旧默认） |
 
-不带 `--implicit` 安装时默认写入 `core`（安装后 `allow_implicit_invocation: true` 恰好 5 个）。非 core 能力请用自然语言走 `ae-help` 路由，或直接 `$ae-*` 显式调用。若需恢复旧行为：
+不带 `--implicit` 安装时默认写入 `none`（安装后 `allow_implicit_invocation: true` 为 0）。需要五核心隐式时传 `--implicit core`；需要旧全量隐式时传 `--implicit all`：
 
 ```bash
 node scripts/install-project.mjs --target /path/to/your/codex-project --implicit all
@@ -230,7 +228,7 @@ node scripts\set-ae-language.mjs --lang bilingual --implicit all
 node scripts\set-ae-language.mjs --lang bilingual --implicit none
 ```
 
-`--implicit core|all|none` 与安装/更新使用同一套三档策略（省略且无已存档位时默认为 `core`）。
+`--implicit none|core|all` 与安装/更新使用同一套三档策略（省略且无已存档位时默认为 `none`）。
 
 ## 验证
 
