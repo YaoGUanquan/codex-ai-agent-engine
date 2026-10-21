@@ -87,7 +87,7 @@ See [escape](../secret.md).
   }
 })
 
-test('validateSkill rejects linked resources when the platform allows symlinks', () => {
+test('validateSkill rejects linked resources when the platform allows symlinks', (t) => {
   const temp = makeTempDir('ae-validate-link-')
   try {
     const skillRoot = writeSkill(temp, 'ae-grill', bilingualFrontmatter('ae-grill'), {
@@ -98,7 +98,7 @@ test('validateSkill rejects linked resources when the platform allows symlinks',
       symlinkSync(join(skillRoot, 'references', 'real.md'), linkPath)
     } catch (error) {
       if (error && (error.code === 'EPERM' || error.code === 'EACCES' || error.code === 'ENOTSUP')) {
-        // Windows without symlink privilege: skip without false failure.
+        t.skip(`symlink unavailable: ${error.code}`)
         return
       }
       throw error
@@ -134,7 +134,7 @@ test('validateCollection rejects an incomplete or extra skill set', () => {
     rmSync(temp, { recursive: true, force: true })
   }
 })
-test('validateSkill accepts a skill under a symlinked temp parent', () => {
+test('validateSkill accepts a skill under a symlinked temp parent', (t) => {
   const base = makeTempDir('ae-validate-symtmp-')
   try {
     const realRoot = join(base, 'real')
@@ -144,6 +144,7 @@ test('validateSkill accepts a skill under a symlinked temp parent', () => {
       symlinkSync(realRoot, linkRoot, 'dir')
     } catch (error) {
       if (error && (error.code === 'EPERM' || error.code === 'EACCES' || error.code === 'ENOTSUP')) {
+        t.skip(`symlink unavailable: ${error.code}`)
         return
       }
       throw error
@@ -158,7 +159,7 @@ test('validateSkill accepts a skill under a symlinked temp parent', () => {
   }
 })
 
-test('validateSkill rejects when the skill root itself is a symlink', () => {
+test('validateSkill rejects when the skill root itself is a symlink', (t) => {
   const base = makeTempDir('ae-validate-rootlink-')
   try {
     const realSkill = writeSkill(base, 'ae-grill', bilingualFrontmatter('ae-grill'))
@@ -167,6 +168,7 @@ test('validateSkill rejects when the skill root itself is a symlink', () => {
       symlinkSync(realSkill, linkedSkill, 'dir')
     } catch (error) {
       if (error && (error.code === 'EPERM' || error.code === 'EACCES' || error.code === 'ENOTSUP')) {
+        t.skip(`symlink unavailable: ${error.code}`)
         return
       }
       throw error
@@ -175,5 +177,50 @@ test('validateSkill rejects when the skill root itself is a symlink', () => {
     assert.ok(result.errors.some((error) => /Linked root is not allowed/i.test(error)), result.errors.join('\n'))
   } finally {
     rmSync(base, { recursive: true, force: true })
+  }
+})
+
+test('validateSkill rejects a reference-definition path escape', () => {
+  const temp = makeTempDir('ae-validate-refdef-escape-')
+  try {
+    writeFileSync(join(temp, 'outside.md'), 'secret\n', 'utf8')
+    const skillRoot = writeSkill(temp, 'ae-grill', `${bilingualFrontmatter('ae-grill')}
+[escape]: ../outside.md
+`)
+    const result = validateSkill(skillRoot)
+    assert.ok(result.errors.some((error) => /escapes skill|Absolute resource|Missing resource/i.test(error)), result.errors.join('\n'))
+  } finally {
+    rmSync(temp, { recursive: true, force: true })
+  }
+})
+
+test('validateSkill rejects a dangling reference-style markdown link', () => {
+  const temp = makeTempDir('ae-validate-refstyle-dangling-')
+  try {
+    const skillRoot = writeSkill(temp, 'ae-grill', `${bilingualFrontmatter('ae-grill')}
+See [missing doc][missing].
+
+[missing]: references/missing.md
+`)
+    const result = validateSkill(skillRoot)
+    assert.ok(result.errors.some((error) => /Missing resource|dangling|missing\.md/i.test(error)), result.errors.join('\n'))
+  } finally {
+    rmSync(temp, { recursive: true, force: true })
+  }
+})
+
+test('validateSkill rejects a reference-style link that escapes the skill root', () => {
+  const temp = makeTempDir('ae-validate-refstyle-escape-')
+  try {
+    writeFileSync(join(temp, 'secret.md'), 'secret\n', 'utf8')
+    const skillRoot = writeSkill(temp, 'ae-grill', `${bilingualFrontmatter('ae-grill')}
+See [escape][out].
+
+[out]: ../secret.md
+`)
+    const result = validateSkill(skillRoot)
+    assert.ok(result.errors.some((error) => /escapes skill|Absolute resource/i.test(error)), result.errors.join('\n'))
+  } finally {
+    rmSync(temp, { recursive: true, force: true })
   }
 })

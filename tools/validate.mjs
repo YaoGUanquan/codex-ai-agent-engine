@@ -82,11 +82,28 @@ export function validateSkill(root) {
       if (otherNames.length) errors.push(`${label}: cross-skill reference: ${[...new Set(otherNames)].join(', ')}`)
       try {
         if (extname(file) === '.md') {
-          for (const match of text.matchAll(/!?\[[^\]\n]*\]\(\s*(<[^>\n]+>|[^\s)]+)(?:\s+["'][^)\n]*)?\s*\)/g)) {
-            const target = match[1].replace(/^<|>$/g, '')
-            if (/^(?:https?:|mailto:|#)/i.test(target)) continue
+          const checkMarkdownTarget = (target) => {
+            if (/^(?:https?:|mailto:|#)/i.test(target)) return
             if (/^[a-z][a-z0-9+.-]*:/i.test(target)) throw new Error(`Unsupported resource URL: ${target}`)
             localTarget(skillRoot, file, target)
+          }
+          // Inline links / images: [text](url) or ![alt](url)
+          for (const match of text.matchAll(/!?\[[^\]\n]*\]\(\s*(<[^>\n]+>|[^\s)]+)(?:\s+["'][^)\n]*)?\s*\)/g)) {
+            checkMarkdownTarget(match[1].replace(/^<|>$/g, ''))
+          }
+          // Reference definitions: [label]: destination (optional title ignored)
+          const refs = new Map()
+          for (const match of text.matchAll(/^[ \t]{0,3}\[([^\]\n]+)\]:[ \t]+(<[^>\n]+>|\S+)/gm)) {
+            const label = match[1].trim().toLowerCase().replace(/\s+/g, ' ')
+            const target = match[2].replace(/^<|>$/g, '')
+            refs.set(label, target)
+            checkMarkdownTarget(target)
+          }
+          // Reference-style links: [text][label] or [text][]
+          for (const match of text.matchAll(/!?\[([^\]\n]*)\]\[([^\]]*)\]/g)) {
+            const label = (match[2] || match[1]).trim().toLowerCase().replace(/\s+/g, ' ')
+            if (!label || !refs.has(label)) continue
+            checkMarkdownTarget(refs.get(label))
           }
           for (const match of text.matchAll(/`((?:\.\.?[\\/]|references[\\/]|scripts[\\/]|assets[\\/])[^\s`]+)`/g)) {
             localTarget(skillRoot, file, match[1])
