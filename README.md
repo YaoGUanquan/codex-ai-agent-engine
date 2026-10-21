@@ -66,6 +66,9 @@ node scripts/ae-tools.mjs help
 
 ## 版本更新记录
 
+### 0.4.0-beta.3（2026-10-21）
+- 默认隐式档位改为 `none`；修复 Cursor `none` 档元数据兼容；收紧 `ae-debug` 假设规则；补充离线模型评测校验与 worker 验收反例。真实 GPT 对照未跑。
+
 ### 0.4.0-beta.2（2026-10-20）
 - 安装/更新/语言切换支持 `--implicit core|all|none`；**插件默认档位改为 `core`**（仅 ae-help / ae-plan / ae-work / ae-review / ae-debug 可自然语言隐式触发）。非 core 请走 ae-help 路由或 `$ae-*`；`--implicit all` 可恢复旧行为。
 - 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。这些静态和本地检查不能证明真实 Codex host/model 行为。
@@ -83,19 +86,12 @@ node scripts/ae-tools.mjs help
 - 移除 `.ae-source` 维护镜像：插件 `plugins/ai-agent-engine-codex/skills` 成为唯一技能源；删除 `check-skill-mirror` 并清理合同/语言/审计脚本中的镜像根。
 - 回归测试改为只断言插件 `SKILL_ROOT`；文档与发布清单去掉 ae-source 指引；版本升至 0.3.55。
 - 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。这些静态和本地检查不能证明真实 Codex host/model 行为。
-### 0.3.54（2026-09-30）
-- 精简 12 个高频 AE skill 入口至 4 KiB 以内，把详细流程拆为按触发条件加载的 references，减少默认上下文和重复流程。
-- 将高频入口与详细 references 分离，并增加入口体积与路由回归测试。
-- 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。这些静态和本地检查不能证明真实 Codex host/model 的 token 消耗或行为收益。
-
-完整历史见 [CHANGELOG.md](CHANGELOG.md)；本节仅保留最近 5 个版本，发布时超出窗口的条目迁移到 CHANGELOG。
-
 ## 当前主线事实
 
-- 当前发布线是 `0.4.0-beta.2`；根 `package.json` 与插件 manifest 的版本保持一致。
+- 当前发布线是 `0.4.0-beta.3`；根 `package.json` 与插件 manifest 的版本保持一致。
 - 可分发技能的唯一源是 `plugins/ai-agent-engine-codex/skills`。`.agents/skills` 只属于 consumer 项目的安装布局，不是本仓库的第二份技能树。
 - 项目级安装写入目标项目；全局安装发布当前用户的 personal plugin 和 dispatcher。两种安装都保留项目自己的 `AGENTS.md`、`docs/**`、AI memory、图谱和归档。
-- 安装、更新和语言切换支持 `--implicit core|all|none`，默认是 `core`：只有 `ae-help`、`ae-plan`、`ae-work`、`ae-review`、`ae-debug` 允许自然语言隐式触发。
+- 安装、更新和语言切换支持 `--implicit none|core|all`，默认是 `none`：新安装仅显式调用；`core` 仅五核心可自然语言隐式触发；`all` 恢复旧的全量隐式。
 - `task-analyze` 只生成候选 worker request、就绪状态和并行波次；它不会自行启动后台代理，也不把候选波次当作完成证据。父代理负责授权、集成和最终验收。
 - 本仓库的检查证明脚本、契约、安装分发和隔离 fixture；它们不等同于真实 Codex host/model 行为、目标项目运行时、部署或生产容量验收。
 
@@ -226,11 +222,11 @@ node scripts/install-project.mjs --target /path/to/your/codex-project --lang en
 
 | 档位 | 含义 |
 |---|---|
-| `core`（**插件默认**） | 仅 5 个核心技能允许自然语言隐式触发：`ae-help`、`ae-plan`、`ae-work`、`ae-review`、`ae-debug` |
-| `all` | 全部技能允许隐式触发（旧默认行为） |
-| `none` | 全部关闭隐式触发，需显式 `$ae-*` / `/ae-*` |
+| `none`（**插件默认**） | 全部技能均不允许自然语言隐式触发；请显式 `$ae-*` / 指名 AE |
+| `core` | 仅五个核心技能允许自然语言隐式触发：`ae-help`、`ae-plan`、`ae-work`、`ae-review`、`ae-debug` |
+| `all` | 全部技能允许隐式调用（旧默认） |
 
-不带 `--implicit` 安装时默认写入 `core`（安装后 `allow_implicit_invocation: true` 恰好 5 个）。非 core 能力请用自然语言走 `ae-help` 路由，或直接 `$ae-*` 显式调用。若需恢复旧行为：
+不带 `--implicit` 安装时默认写入 `none`（安装后 `allow_implicit_invocation: true` 为 0）。需要五核心隐式时传 `--implicit core`；需要旧全量隐式时传 `--implicit all`：
 
 ```bash
 node scripts/install-project.mjs --target /path/to/your/codex-project --implicit all

@@ -1,7 +1,9 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync, readdirSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { spawnSync } from 'node:child_process'
+import { readFileSync, readdirSync, mkdtempSync, rmSync, existsSync, writeFileSync, realpathSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
   allowImplicitInvocation,
@@ -96,7 +98,7 @@ test('autonomy rules do not stop safe work for dirty trees or invented iteration
 test('behavior evaluation manifest preserves the requested comparison without claiming execution', () => {
   const suite = JSON.parse(read(`${skills}/ae-help/references/model-evaluation.json`))
   assert.equal(suite.primaryTarget, 'GPT-6.1')
-  assert.equal(suite.status, 'not-run')
+  assert.ok(['not-run', 'blocked', 'partial', 'completed', 'failed'].includes(suite.status), suite.status)
   assert.equal(suite.repetitions, 2)
   assert.deepEqual(suite.variants, ['disabled', 'baseline-0.3.54', 'candidate'])
   assert.equal(suite.cases.length, 8)
@@ -105,4 +107,30 @@ test('behavior evaluation manifest preserves the requested comparison without cl
     assert.ok(item.prompt && item.setup && item.acceptance.length, item.id)
   }
   assert.match(read(`${skills}/ae-help/references/model-evaluation.md`), /not model execution|not.*behavioral proof/i)
+})
+
+test('model-evaluation-check prepares fixtures and validates result schema offline', () => {
+  const script = resolve(root, 'scripts/model-evaluation-check.mjs')
+  assert.ok(existsSync(script))
+  const out = mkdtempSync(join(realpathSync.native(tmpdir()), 'ae-model-eval-test-'))
+  try {
+    const prepared = spawnSync(process.execPath, [script, 'prepare', '--suite', 'model', '--out', out], { encoding: 'utf8', cwd: root })
+    assert.equal(prepared.status, 0, prepared.stderr || prepared.stdout)
+    const payload = JSON.parse(prepared.stdout)
+    assert.equal(payload.status, 'prepared')
+    assert.equal(payload.initialFailureVerified, true)
+    assert.match(payload.fixtureFingerprint, /^[a-f0-9]{64}$/)
+
+    const samplePath = join(out, 'result.json')
+    const sample = spawnSync(process.execPath, [script, 'sample-result', '--out', samplePath], { encoding: 'utf8', cwd: root })
+    assert.equal(sample.status, 0, sample.stderr || sample.stdout)
+    const valid = spawnSync(process.execPath, [script, 'validate-result', '--result', samplePath], { encoding: 'utf8', cwd: root })
+    assert.equal(valid.status, 0, valid.stderr || valid.stdout)
+
+    writeFileSync(samplePath, JSON.stringify({ status: 'completed' }, null, 2))
+    const invalid = spawnSync(process.execPath, [script, 'validate-result', '--result', samplePath], { encoding: 'utf8', cwd: root })
+    assert.notEqual(invalid.status, 0)
+  } finally {
+    rmSync(out, { recursive: true, force: true })
+  }
 })

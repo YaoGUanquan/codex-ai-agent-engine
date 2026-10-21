@@ -4,6 +4,12 @@
 
 English: [CHANGELOG.en.md](CHANGELOG.en.md)
 
+### 0.4.0-beta.3（2026-10-21）
+- 新安装默认隐式档位改为 `none`（仅显式调用 AE）；保留 `core`/`all`，更新与语言切换保留已有安装设置，不强制迁移。修复 Cursor 元数据在 `none` 档把核心技能当作仍可模型调用的问题（`cursorShouldDisableModelInvocation`）。
+- 调整 `ae-debug`：删除固定「列 3–5 个假设」；仅证据歧义时提出必要可证伪假设；缺环境只阻塞依赖修复/验收，证据不足不得宣称根因确认。
+- 补充可离线的模型评测准备/结果校验入口（`scripts/model-evaluation-check.mjs`）与 worker 验收反例；规范与运行结果分离，不因一次运行改写历史规范。
+- 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。真实 GPT-6.1 Sol / GPT-6 Astra 对照未在本环境执行（not-run/blocked）；Grok Bot 自运行不能替代模型行为证据。
+
 ### 0.4.0-beta.2（2026-10-20）
 - 安装器支持 `--implicit core|all|none`；**默认档位从 `all` 改为 `core`**（仅 ae-help / ae-plan / ae-work / ae-review / ae-debug 可自然语言隐式触发）。非 core 自然语言请走 ae-help 路由或显式 `$ae-*`；需要旧行为时传 `--implicit all`。
 - 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。这些静态和本地检查不能证明真实 Codex host/model 行为。

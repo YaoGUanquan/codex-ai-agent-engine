@@ -211,7 +211,7 @@ test('mattpocock-adapted guidance is present in plugin skills', () => {
   const expectedBySkill = {
     'ae-debug': [
       /red-capable feedback loop/,
-      /3-5 ranked concrete hypotheses/,
+      /falsifiable hypotheses only when evidence is ambiguous|Form falsifiable hypotheses only when evidence is ambiguous/i,
       /If no red-capable loop can be built/,
     ],
     'ae-tdd': [
@@ -245,7 +245,9 @@ test('mattpocock-adapted guidance is present in plugin skills', () => {
     if (skillName === 'ae-debug') {
       const sourceWorkflow = readFileSync(resolve(repoRoot, 'plugins/ai-agent-engine-codex/skills/ae-debug/references/debugging-workflow.md'), 'utf8')
       assert.match(sourceWorkflow, /red-capable loop/)
-      assert.match(sourceWorkflow, /3-5 ranked, falsifiable hypotheses/)
+      assert.match(sourceWorkflow, /Form hypotheses \*\*only when evidence is ambiguous\*\*/)
+      assert.doesNotMatch(sourceWorkflow, /Form 3-5 ranked/)
+      assert.match(sourceWorkflow, /Positive And Negative Cases/)
       assert.match(sourceWorkflow, /\[DEBUG-<id>\]/)
     }
     if (skillName === 'ae-tdd') {

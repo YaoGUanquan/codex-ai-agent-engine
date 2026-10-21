@@ -211,11 +211,11 @@ try {
   }
 
   const installState = JSON.parse(readFileSync(resolve(targetRoot, '.agents', 'ai-agent-engine-codex', 'project-install.json'), 'utf8'))
-  if (installState.implicitTier !== 'core') {
-    throw new Error(`Default install implicitTier must be core, got ${installState.implicitTier}`)
+  if (installState.implicitTier !== 'none') {
+    throw new Error(`Default install implicitTier must be none, got ${installState.implicitTier}`)
   }
-  if (countAllowImplicitTrue(resolve(targetRoot, '.agents', 'skills')) !== 5) {
-    throw new Error('Default install must keep allow_implicit_invocation true for exactly 5 core skills')
+  if (countAllowImplicitTrue(resolve(targetRoot, '.agents', 'skills')) !== 0) {
+    throw new Error('Default install must keep allow_implicit_invocation true for exactly 0 skills (implicit=none)')
   }
 
   const profileTemplate = readFileSync(resolve(targetRoot, 'docs', 'ae', 'templates', 'ae-skill-profiles.example.yaml'), 'utf8')

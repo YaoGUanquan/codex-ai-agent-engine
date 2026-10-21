@@ -37,7 +37,7 @@
 - 本仓库的技能修改以 `plugins/ai-agent-engine-codex/skills` 为唯一源；不要再维护第二份技能树。
 - `.agents/skills` 是 consumer 项目安装布局，不是本分发源仓库的技能源；不要把空的 `.agents` 骨架当成安装失败。
 - 当前能力盘点只扫描插件源；默认排除 `dist/`、`build/`、`coverage/`、`node_modules/` 和临时安装目录。生成物不得用于推断当前技能，不在审计任务中自动删除。
-- **插件默认隐式调用档位为 `core`**：仅 `ae-help`、`ae-plan`、`ae-work`、`ae-review`、`ae-debug` 允许自然语言隐式触发；非 core 走 ae-help / `$ae-*`。安装与 `set-language` 可用 `--implicit core|all|none` 切换（`all` 恢复旧行为）。
+- **插件默认隐式调用档位为 `none`**：新安装仅显式调用 AE（自然语言不隐式触发）。保留 `core`（五核心）与 `all`；安装/更新/`set-language` 可用 `--implicit none|core|all`，已有安装设置会被保留、不强制迁移。
 
 ## AE 显式调用边界
 

@@ -3,4 +3,4 @@ interface:
   short_description: "ae-review 分层审查代码和文档，优先输出问题 / ae-review performs layered code and document review with findings first"
   default_prompt: "使用 $ae-review 审查我当前的变更并优先报告风险。 / Use $ae-review to review my current changes and report risks first."
 policy:
-  allow_implicit_invocation: true
+  allow_implicit_invocation: false
