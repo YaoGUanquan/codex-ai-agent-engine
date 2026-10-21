@@ -31,7 +31,7 @@ function localTarget(root, source, specifier) {
   const target = resolve(dirname(source), pathPart)
   if (!isWithin(root, target)) throw new Error(`Resource escapes skill: ${specifier}`)
   if (!existsSync(target)) throw new Error(`Missing resource: ${specifier}`)
-  if (lstatSync(target).isSymbolicLink() || !isWithin(root, realpathSync(target))) {
+  if (lstatSync(target).isSymbolicLink() || !isWithin(realpathSync(root), realpathSync(target))) {
     throw new Error(`Linked resource: ${specifier}`)
   }
 }

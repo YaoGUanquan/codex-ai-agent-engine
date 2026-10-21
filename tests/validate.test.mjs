@@ -134,3 +134,47 @@ test('validateCollection rejects an incomplete or extra skill set', () => {
     rmSync(temp, { recursive: true, force: true })
   }
 })
+test('validateSkill accepts a skill under a symlinked temp parent', () => {
+  const base = makeTempDir('ae-validate-symtmp-')
+  try {
+    const realRoot = join(base, 'real')
+    const linkRoot = join(base, 'via-link')
+    mkdirSync(realRoot, { recursive: true })
+    try {
+      symlinkSync(realRoot, linkRoot, 'dir')
+    } catch (error) {
+      if (error && (error.code === 'EPERM' || error.code === 'EACCES' || error.code === 'ENOTSUP')) {
+        return
+      }
+      throw error
+    }
+    const skillRoot = writeSkill(linkRoot, 'ae-grill', bilingualFrontmatter('ae-grill'), {
+      'references/note.md': '# note\n',
+    })
+    const result = validateSkill(skillRoot)
+    assert.equal(result.errors.length, 0, result.errors.join('\n'))
+  } finally {
+    rmSync(base, { recursive: true, force: true })
+  }
+})
+
+test('validateSkill rejects when the skill root itself is a symlink', () => {
+  const base = makeTempDir('ae-validate-rootlink-')
+  try {
+    const realSkill = writeSkill(base, 'ae-grill', bilingualFrontmatter('ae-grill'))
+    const linkedSkill = join(base, 'ae-grill-link')
+    try {
+      symlinkSync(realSkill, linkedSkill, 'dir')
+    } catch (error) {
+      if (error && (error.code === 'EPERM' || error.code === 'EACCES' || error.code === 'ENOTSUP')) {
+        return
+      }
+      throw error
+    }
+    const result = validateSkill(linkedSkill)
+    assert.ok(result.errors.some((error) => /Linked root is not allowed/i.test(error)), result.errors.join('\n'))
+  } finally {
+    rmSync(base, { recursive: true, force: true })
+  }
+})
+
