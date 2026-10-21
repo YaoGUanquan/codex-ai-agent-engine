@@ -34,6 +34,8 @@ npx skills add YaoGUanquan/codex-ai-agent-engine -g -y -s '*'
 
 You can also copy a single `skills/<name>/` folder into the host skills directory; keep `SKILL.md` and any `references/` together.
 
+Optional npm path (package [`ai-agent-engine-codex`](https://www.npmjs.com/package/ai-agent-engine-codex)): `npm install ai-agent-engine-codex@0.5.0`, then `npx skills experimental_sync -y`. Do not `skills add` the npm package name. See [INSTALL.md](INSTALL.md).
+
 Invocation examples (Codex / hosts that support `$skill`):
 
 ```text

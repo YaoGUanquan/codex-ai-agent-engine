@@ -6,7 +6,7 @@
 
 - Node.js ≥ 20
 - A host that supports [Agent Skills](https://www.npmjs.com/package/skills)
-- Network access to `YaoGUanquan/codex-ai-agent-engine`
+- Network access to `YaoGUanquan/codex-ai-agent-engine` (or to npm for the optional package path below)
 
 This repository **no longer** ships `install-project.mjs` / `install-global.mjs` / `update-ae-codex.mjs` or language-switch scripts.
 
@@ -47,6 +47,17 @@ npx skills add YaoGUanquan/codex-ai-agent-engine -y -s ae-backend
 ```bash
 npx skills add YaoGUanquan/codex-ai-agent-engine -g -y -s '*'
 ```
+
+### Optional: install from npm
+
+Primary install is still GitHub via `skills add` above. If you prefer the published package [`ai-agent-engine-codex`](https://www.npmjs.com/package/ai-agent-engine-codex) (`0.5.0+`):
+
+```bash
+npm install ai-agent-engine-codex@0.5.0
+npx skills experimental_sync -y
+```
+
+`npx skills add ai-agent-engine-codex` is **not** supported (the CLI treats that string as a git clone source). The npm tarball ships `skills/` only (no `tools/` / `tests/`).
 
 ### Manual copy
 

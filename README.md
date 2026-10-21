@@ -34,6 +34,8 @@ npx skills add YaoGUanquan/codex-ai-agent-engine -g -y -s '*'
 
 也可以把单个 `skills/<name>/` 目录复制到宿主的 skills 目录；目录内须带齐 `SKILL.md` 与 `references/`。
 
+可选 npm 路径（包名 [`ai-agent-engine-codex`](https://www.npmjs.com/package/ai-agent-engine-codex)）：`npm install ai-agent-engine-codex@0.5.0` 后执行 `npx skills experimental_sync -y`。不要用 `skills add` 直接加 npm 包名。细节见 [INSTALL.zh-CN.md](INSTALL.zh-CN.md)。
+
 调用示例（以 Codex / 支持 `$skill` 的宿主为准）：
 
 ```text
