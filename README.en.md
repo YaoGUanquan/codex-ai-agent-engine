@@ -1,70 +1,26 @@
 # AI Agent Engine for Codex
 
-AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style engineering workflows into a Codex workspace. It packages Codex skills and local helper scripts for requirement clarification, design contracts, planning, implementation, review, validation, frontend/web routing, Swagger/OpenAPI inspection, handoff, and experience capture.
+A project-local Codex engineering-workflow plugin: requirement clarification, design contracts, planning, implementation, review, validation, frontend/web routing, OpenAPI summaries, handoff, and experience capture—packaged as installable `ae-*` skills and local scripts.
 
-> Reference project: https://gitee.com/jiangqiang1996/ai-agent-engine<br>
-> This repository references the workflow design and capability model of the Gitee AI Agent Engine project above.<br>
-> It also draws on selected development-skill ideas from https://github.com/openai/plugins and https://github.com/obra/superpowers.<br>
-> It also draws on external skill repository governance, continuous learning, verification-loop, and Codex adaptation boundary ideas from https://github.com/affaan-m/everything-claude-code.<br>
-> It also adapts selected Spec Kit workflow ideas from https://github.com/github/spec-kit without vendoring its runtime.<br>
-> It also references fail-visible debugging, structural-fix, layered-validation, and stop-condition methods from https://github.com/lili-luo/aicoding-cookbook; only portable methods are rewritten, and text without a repository-wide declared license is not copied.<br>
-> It also adapts selected minimality and over-engineering review ideas from https://github.com/DietrichGebert/ponytail without importing its runtime, hooks, or persona mode.<br>
-> It is not a direct OpenCode runtime port. It uses Codex skills, project-local plugin files, and local scripts.
+> References: [Gitee AI Agent Engine](https://gitee.com/jiangqiang1996/ai-agent-engine), [openai/plugins](https://github.com/openai/plugins), [obra/superpowers](https://github.com/obra/superpowers), [everything-claude-code](https://github.com/affaan-m/everything-claude-code), [spec-kit](https://github.com/github/spec-kit), [aicoding-cookbook](https://github.com/lili-luo/aicoding-cookbook). This is not an OpenCode runtime port; it uses native Codex skills, project-local plugin files, and local scripts. See [NOTICE.md](NOTICE.md) and [LICENSE](LICENSE).
 
 中文文档: [README.md](README.md)
 
-### 0.4.0-beta.3 (2026-10-21)
-- Default implicit tier is now `none`; fix Cursor `none` metadata handling; tighten `ae-debug` hypothesis rules; add offline model-evaluation validation and worker-acceptance counterexamples. Live GPT comparison not run.
-
-### 0.4.0-beta.2 (2026-10-20)
-- Install/update/language switch support `--implicit core|all|none`; **plugin default tier is now `core`** (only ae-help / ae-plan / ae-work / ae-review / ae-debug allow natural-language implicit invocation). Non-core skills go through ae-help routing or `$ae-*`; `--implicit all` restores the previous behavior.
-- Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These static and local checks do not prove live Codex host/model behavior.
-### 0.4.0-beta.1 (2026-10-15)
-- Add reusable team roles and a task-sensitive execution contract: approve complex plans first, keep small tasks inline, and let the parent own native dispatch, integration and evidence-backed acceptance.
-- Team-execution write authorization moves from explicit opt-in to a parent-agent gate (`write_requires_explicit_opt_in: false` + `write_requires_parent_gate: true`); write workers still need explicit parent approval, and `can_spawn_write_agents*` stays false.
-- Analyze file and business-resource read/write conflicts per wave, with host slots, execution state and automatic concurrency. Preserve explicit off/read-only choices and allow unrelated dirty work.
-- Strengthen source-to-output memory, query and concurrency budgets with isolated data fixtures and a five-case real-model comparison specification. Explicitly prefer `gpt-6.1-sol` for the trial without silent model substitution.
-- Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, `git diff --check`. Static and isolated-install checks establish helper, instruction and distribution contracts only. Real-model comparison is pending; quality, speed and production capacity gains are unproven.
-### 0.3.56 (2026-10-15)
-- Share test selection, evidence reuse and invalidation rules: isolate single failures, explain full-suite escalation, and avoid reruns merely for review, shipping or context recovery. Remove fixed execution counts and blanket dirty-worktree confirmations. Narrow skill entry trigger copy to emphasize explicit requests before specialist gates (default `implicit` tier remains `all`, matching the mid-I series plan).
-- Make GPT-6.1 the primary behavior acceptance target with eight reusable scenarios and three comparison variants, each repeated twice. Real model evaluation is pending; performance and quality improvements are not yet proven.
-- Validation commands: `node --test tests/model-adaptation.test.mjs tests/instruction-audit.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, `git diff --check`. Static and isolated-install checks establish written rules, metadata and distribution contracts only; delivery records report actual outcomes and failures.
-### 0.3.55 (2026-10-13)
-- Remove the `.ae-source` maintenance mirror: plugin `plugins/ai-agent-engine-codex/skills` is the only skill source; delete `check-skill-mirror` and drop mirror roots from contract/language/audit scripts.
-- Rewrite regression tests to assert only the plugin `SKILL_ROOT`; scrub ae-source guidance from docs and the release checklist; bump to 0.3.55.
-- Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These static and local checks do not prove live Codex host/model behavior.
-## Current Mainline Facts
-
-- The current release line is `0.4.0-beta.3`; the root `package.json` and plugin manifest stay on the same version.
-- The only distributable skill source is `plugins/ai-agent-engine-codex/skills`. `.agents/skills` is a consumer-project installation layout, not a second source tree in this repository.
-- Project-level installation writes into the target project. Global installation publishes the current user's personal plugin and dispatcher. Both modes keep each project's `AGENTS.md`, `docs/**`, AI memory, graph, and archive in the project root.
-- Install, update, and language switching support `--implicit none|core|all`. The default is `none`: fresh installs are explicit-only; `core` allows natural-language implicit invocation for five core skills; `all` restores the previous full implicit set.
-- `task-analyze` emits candidate worker requests, readiness, and parallel waves. It does not start background agents or treat candidate waves as completion evidence; the parent agent owns authorization, integration, and final acceptance.
-- Repository checks prove scripts, contracts, installation distribution, and isolated fixtures. They do not prove live Codex host/model behavior, target-project runtime behavior, deployment, or production capacity.
-
-Mainline changes are recorded in [CHANGELOG.en.md](CHANGELOG.en.md) and [CHANGELOG.md](CHANGELOG.md); the README keeps only the current release window.
-
 ## When To Use It
 
-Use this plugin when you want a Codex project to keep repeatable engineering workflows close to the repository:
-
-- clarify fuzzy requirements before implementation;
-- turn requirements into executable plans;
-- run implementation with Git/worktree safety checks;
-- review code or documents with findings first;
-- keep validation evidence, handoffs, and reusable experience in project docs;
-- initialize project guidance, archive rules, and durable AI memory.
+- Clarify fuzzy requirements before implementation and turn them into executable plans;
+- Implement after Git/worktree safety checks, then review by severity;
+- Keep verification evidence, handoff notes, and reusable lessons in project docs;
+- Bootstrap `AGENTS.md`, process archives, and a long-lived AI memory skeleton.
 
 ### AE Invocation Boundary
 
-AE skills are **opt-in by default**. They activate only when the user explicitly names `AE`, an `ae-*` skill, `/ae-*`, `$ae-*`, or asks to continue an active AE workflow. A semantic match, repository name, file content, or historical context mentioning “AE” does not activate AE automatically.
+AE skills are **off by default** (implicit tier defaults to `none`). They turn on only for explicit `AE`, `ae-*`, `/ae-*`, `$ae-*`, or a request to continue an existing AE flow. Ordinary semantic matches, repo names, file contents, or the word “AE” in context do not auto-start AE.
 
 ## Quick Start
 
-Install the plugin into a target Codex project:
-
 ```bash
-node scripts/install-project.mjs --target /path/to/your/codex-project
+node scripts/install-project.mjs --target /path/to/your-codex-project
 ```
 
 Windows PowerShell:
@@ -73,534 +29,200 @@ Windows PowerShell:
 node scripts\install-project.mjs --target D:\codes\your-project
 ```
 
-Restart or reopen the Codex conversation for that target project, then initialize its AE docs, process archive, UTF-8 rules, and AI memory scaffold from the target project root:
+Restart or reopen the target project's Codex session, then initialize docs and memory at the project root:
 
 ```bash
 node scripts/ae-tools.mjs init
-```
-
-Useful init variants:
-
-```bash
-node scripts/ae-tools.mjs init --lang zh-CN
-node scripts/ae-tools.mjs init --lang bilingual
-node scripts/ae-tools.mjs init --profile minimal
-node scripts/ae-tools.mjs init --profile full
-node scripts/ae-tools.mjs init --dry-run --nested preview --explain-instructions
-node scripts/ae-tools.mjs init --dry-run
-```
-
-Verify the installed helper:
-
-```bash
+# Common flags: --lang zh-CN|en|bilingual  --profile minimal|full  --dry-run
 node scripts/ae-tools.mjs help
 ```
 
-## Capabilities
+Default skill-list metadata language is `bilingual`. Implicit tier defaults to `none` (explicit-only). Pass `--implicit core` for the five-core natural-language set, or `--implicit all` for the old full implicit set.
 
-- `ae-help`: list installed AE capabilities and boundaries.
-- `ae-init`: initialize project docs, archive rules, UTF-8 rules, and durable AI memory.
-- `ae-ideate`: generate solution directions, tradeoffs, risks, and next questions.
-- `ae-brainstorm`: clarify requirements with multi-perspective collision insights and capture acceptance criteria.
-- `ae-design`: create a design contract between PRD and plan for architecture, API, data, UI/UX, tests, and non-functional constraints.
-- `ae-lfg`: run the full flow from requirements to verified delivery.
-- `ae-plan`: create implementation plans without editing product code, including simplest-viable-route checks for implementation-heavy work.
-- `ae-constitution`: create or update durable project governance for plans and reviews.
-- `ae-tasks`: turn approved plans into dependency-ordered implementation task artifacts.
-- `ae-work`: execute plans after Git/worktree safety checks, using a Minimality Gate before behavior edits.
-- `ae-refactor`: plan behavior-preserving refactors.
-- `ae-review`: review code or documents with severity-ordered findings first; complexity reviews can use delete, stdlib, native, yagni, and shrink tags.
-- `ae-doc-humanize`: rewrite structured or stiff notes into readable documents.
-- `ae-doc-structure`: turn messy notes into requirements, plans, handoffs, or checklists.
-- `ae-frontend-design`: design and implement frontend UI.
-- `ae-web-forge`: unified frontend/web routing entrypoint that selects existing AE skills and closes with browser acceptance.
-- `ae-web-app`: implement Web app interaction, API, and light full-stack flows after `ae-web-forge` routing.
-- `ae-backend`: implement API, service, data, and permission behavior from repository contracts.
-- `ae-debug`: investigate build failures, runtime errors, UI issues, and API incidents systematically.
-- `ae-reverse-engineering`: analyze authorized artifacts defensively with scope, provenance, and reproducible evidence boundaries.
-- `ae-tdd`: run a red-green-refactor loop when behavior is precise enough for test-first work.
-- `ae-task-loop`: iterate on exploratory fixes with smallest plausible fix hypotheses before broadening scope.
-- `ae-test-browser`: validate UI flows in a real browser.
-- `ae-test-api`: verify post-change backend API contracts, risk paths, and tiered evidence while recording a sanitized API Verification Record. When an authenticated smoke lacks a local secret reference, create a non-empty UTF-8 fillable request-config template with `REPLACE_WITH_LOCAL_TOKEN` for the user to edit locally.
-- `ae-imagegen-prompt`: turn visual ideas into image-generation prompts with reference roles, generation budgets, and storyboard assets; prompt-only work does not require hooks.
-- `ae-sql`: generate, review, or execute SQL with explicit safety boundaries.
-- `ae-swagger-parser`: summarize or filter Swagger/OpenAPI specs.
-- `ae-handoff`: capture task state, evidence, blockers, and next steps.
-- `ae-prompt-optimize`: turn vague requests into executable Codex prompts.
-- `ae-save-experience`: capture reusable project experience.
-- `ae-skill-creator`: create or update Codex skills.
-- `ae-skill-audit`: audit external agent/skill repositories and extract AE-fit improvements.
-- `ae-agent-creator`: create Codex-compatible agent prompts and delegation templates.
-- `ae-update`: update the current user's global AE for Codex runtime, personal plugin, and Cursor skill copies.
-- `ae-language`: advanced entrypoint for switching project-local AE skill display language.
+Full install, update, and language-switch steps: [INSTALL.md](INSTALL.md) / [INSTALL.zh-CN.md](INSTALL.zh-CN.md).
 
-The helper CLI is available through:
+## Version Updates
+
+### 0.4.0-beta.3 (2026-10-21)
+- Default implicit tier is now `none`; fix Cursor `none` metadata handling; tighten `ae-debug` hypothesis rules; add offline model-evaluation validation and worker-acceptance counterexamples. Live GPT comparison not run.
+
+### 0.4.0-beta.2 (2026-10-20)
+- Install/update/language switch support `--implicit core|all|none`; **plugin default tier is now `core`** (only ae-help / ae-plan / ae-work / ae-review / ae-debug allow natural-language implicit invocation). Non-core skills go through ae-help routing or `$ae-*`; `--implicit all` restores the previous behavior.
+- Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These static and local checks do not prove live Codex host/model behavior.
+
+### 0.4.0-beta.1 (2026-10-15)
+- Add reusable team roles and a task-sensitive execution contract: approve complex plans first, keep small tasks inline, and let the parent own native dispatch, integration and evidence-backed acceptance.
+- Team-execution write authorization moves from explicit opt-in to a parent-agent gate (`write_requires_explicit_opt_in: false` + `write_requires_parent_gate: true`); write workers still need explicit parent approval, and `can_spawn_write_agents*` stays false.
+- Analyze file and business-resource read/write conflicts per wave, with host slots, execution state and automatic concurrency. Preserve explicit off/read-only choices and allow unrelated dirty work.
+- Strengthen source-to-output memory, query and concurrency budgets with isolated data fixtures and a five-case real-model comparison specification. Explicitly prefer `gpt-6.1-sol` for the trial without silent model substitution.
+- Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, `git diff --check`. Static and isolated-install checks establish helper, instruction and distribution contracts only. Real-model comparison is pending; quality, speed and production capacity gains are unproven.
+
+### 0.3.56 (2026-10-15)
+- Share test selection, evidence reuse and invalidation rules: isolate single failures, explain full-suite escalation, and avoid reruns merely for review, shipping or context recovery. Remove fixed execution counts and blanket dirty-worktree confirmations. Narrow skill entry trigger copy to emphasize explicit requests before specialist gates (default `implicit` tier remains `all`, matching the mid-I series plan).
+- Make GPT-6.1 the primary behavior acceptance target with eight reusable scenarios and three comparison variants, each repeated twice. Real model evaluation is pending; performance and quality improvements are not yet proven.
+- Validation commands: `node --test tests/model-adaptation.test.mjs tests/instruction-audit.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, `git diff --check`. Static and isolated-install checks establish written rules, metadata and distribution contracts only; delivery records report actual outcomes and failures.
+
+### 0.3.55 (2026-10-13)
+- Remove the `.ae-source` maintenance mirror: plugin `plugins/ai-agent-engine-codex/skills` is the only skill source; delete `check-skill-mirror` and drop mirror roots from contract/language/audit scripts.
+- Rewrite regression tests to assert only the plugin `SKILL_ROOT`; scrub ae-source guidance from docs and the release checklist; bump to 0.3.55.
+- Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These static and local checks do not prove live Codex host/model behavior.
+
+## Current Mainline Facts
+
+- The current release line is `0.4.0-beta.3`; the root `package.json` and plugin manifest stay on the same version.
+- The only distributable skill source is `plugins/ai-agent-engine-codex/skills`. `.agents/skills` is a consumer-project installation layout, not a second source tree in this repository.
+- Project-level installation writes into the target project. Global installation publishes the current user's personal plugin and dispatcher. Both modes keep each project's `AGENTS.md`, `docs/**`, AI memory, graph, and archive in the project root.
+- Install, update, and language switching support `--implicit none|core|all`. The default is `none`: fresh installs are explicit-only; `core` allows natural-language implicit invocation for five core skills; `all` restores the previous full implicit set.
+- `task-analyze` emits candidate worker requests, readiness, and parallel waves. It does not start background agents; the parent owns authorization, integration, and final acceptance.
+- Repository checks prove scripts, contracts, installation distribution, and isolated fixtures. They do not prove live Codex host/model behavior or production acceptance.
+
+Full history: [CHANGELOG.en.md](CHANGELOG.en.md) / [CHANGELOG.md](CHANGELOG.md). The README keeps only the latest five release-window entries.
+
+## Capabilities Overview
+
+Use `$ae-help` or “use ae-help” in Codex for the installed capability list. Common groups:
+
+| Group | Skills |
+|---|---|
+| Entry & governance | `ae-help`, `ae-init`, `ae-constitution`, `ae-update`, `ae-language` |
+| Clarify & design | `ae-ideate`, `ae-brainstorm`, `ae-design`, `ae-plan`, `ae-tasks`, `ae-prompt-optimize` |
+| Execute & quality | `ae-lfg`, `ae-work`, `ae-refactor`, `ae-tdd`, `ae-review`, `ae-debug` |
+| Frontend / backend / web | `ae-frontend-design`, `ae-web-forge`, `ae-web-app`, `ae-backend`, `ae-test-browser`, `ae-test-api` |
+| Docs & data | `ae-doc-humanize`, `ae-doc-structure`, `ae-sql`, `ae-swagger-parser`, `ae-imagegen-prompt` |
+| Handoff & extension | `ae-handoff`, `ae-save-experience`, `ae-skill-creator`, `ae-skill-audit`, `ae-agent-creator`, `ae-reverse-engineering` |
+
+Local helpers:
 
 ```bash
 node scripts/ae-tools.mjs help
-```
-
-Codex-native orchestration, reporting, and issue helpers:
-
-```bash
-node scripts/ae-tools.mjs task-analyze --mode plan --plan docs/ae/plans/example.md
-node scripts/ae-tools.mjs report --input docs/ae/reports/audit.json --out docs/ae/reports/audit.html
-node scripts/ae-tools.mjs issue create --title "Tracking item"
-node scripts/ae-tools.mjs issue list
-node scripts/ae-tools.mjs skill-audit --out docs/ae/reports/skill-audit.json
-```
-
-`task-analyze` emits worker requests, readiness and candidate waves for the Codex parent to evaluate; it does not start background agents. Write workers require authorization, safe coexistence with user changes, accepted dependencies and exclusive write ownership. `report` emits escaped, dependency-free HTML by default; CDN use requires both `--cdn` and `--cdn-url https://...`. Issues track state, priority, dependencies, and artifact references without replacing PRDs, plans, tasks, reviews, gates, or evidence.
-
-Validate design contracts:
-
-```bash
 node scripts/check-design-contract.mjs
+node scripts/ae-tools.mjs task-analyze --mode plan --plan docs/ae/plans/example.md
 ```
 
-Validate declared memory and documentation relations:
-
-```bash
-node scripts/check-memory-knowledge-contract.mjs
-node scripts/ae-tools.mjs ae-memory-query --topic graph
-node scripts/ae-tools.mjs ae-knowledge-map --limit 20
-node scripts/ae-tools.mjs ae-knowledge-query --path docs/08-ai-memory/08-phase-two-tooling.md --direction outgoing
-```
-
-Memory queries only read registered Markdown and relations from `docs/08-ai-memory/00-registry.json`. A no-match returns only `no declared match`; unregistered documents are not searched. `ae-knowledge-map` and `ae-knowledge-query` return only `declared` relationships with their evidence. None of these commands creates a cache, database, graph file, or CodeGraph state.
-
-Router budgets and literal retrieval use separate commands:
-
-```powershell
-node scripts/ae-tools.mjs ae-memory-index --check
-node scripts/ae-tools.mjs ae-memory-search --query "crop" --limit 5
-node scripts/ae-tools.mjs ae-memory-search --query "timeout" --path 03-key-workflows.md
-node scripts/ae-tools.mjs ae-memory-index --compact
-```
-
-Keep `00-index.md` within 4096 bytes/80 lines and each topic within 15KiB. Search returns at most five 240-character excerpts by default, scanning top-level Markdown within 128 files/8MiB and a 512KiB per-file cap; use `--path` for nested topics. `--history` searches old-index fragments only. An incomplete scan is not proof of absence. Resolve the current project/branch before passing `--docs-root <absolute-docs-directory>`; roots are never merged. Compaction previews by default; authorized apply also requires `--apply --expect-sha256 <preview-hash>`. Verify adjacent pages before replacing the router; ordered concatenation and the source hash support recovery. Cross-page anchors/reference definitions are not rewritten, and historical validity is not inferred.
-
-Additional helper commands:
-
-```bash
-node scripts/ae-tools.mjs ae-graph-build --root scripts
-node scripts/ae-tools.mjs ae-graph-query --root scripts --path ae-tools.mjs
-```
-
-`ae-graph-build` and `ae-graph-query` are shallow, read-only dependency graph helpers. Their additive `limits` object reports requested/effective file and edge limits, returned counts, and truncation. The default remains a 500-file scan with uncapped edges; only `--edge-limit` truncates edges. They do not write `docs/ae/graphs/graph.json` or `.ae/graph.db`, maintain graph freshness, shard a graph schema, or render a preview page.
-
-## Project-Level Installation
-
-Project-level installation is the recommended path. It writes only inside the target project and avoids changing global Codex configuration.
-
-After this repository is published, you can ask a Codex agent inside the target project to install it:
-
-```text
-Fetch and follow the project-level install instructions from https://raw.githubusercontent.com/YaoGUanquan/codex-ai-agent-engine/main/INSTALL.md
-```
-
-From this repository, install directly with:
-
-```bash
-node scripts/install-project.mjs --target /path/to/your/codex-project
-```
-
-The default install uses bilingual skill-list metadata. You can explicitly switch to Chinese or English:
-
-```bash
-node scripts/install-project.mjs --target /path/to/your/codex-project --lang zh-CN
-node scripts/install-project.mjs --target /path/to/your/codex-project --lang en
-```
-
-The default metadata language is `bilingual`. Supported metadata languages are `en`, `zh-CN`, and `bilingual`.
+Memory search, shallow dependency graphs, report/issue helpers: see `ae-tools.mjs help` and project docs. They are read-oriented with explicit limits and do not replace PRD/plan/gate evidence.
 
 ## Implicit Invocation Tier (`--implicit`)
 
-Install and update support three tiers: `core` | `all` | `none`.
-
 | Tier | Meaning |
 |---|---|
-| `none` (**plugin default**) | No skill allows natural-language implicit invocation; use explicit `$ae-*` / named AE entrypoints |
-| `core` | Only five core skills allow natural-language implicit invocation: `ae-help`, `ae-plan`, `ae-work`, `ae-review`, `ae-debug` |
-| `all` | Every skill allows implicit invocation (previous default) |
-
-Installing without `--implicit` writes `none` (zero `allow_implicit_invocation: true`). Pass `--implicit core` for the five-skill set, or `--implicit all` to restore the previous full implicit behavior:
+| `none` (**plugin default**) | No skill allows natural-language implicit invocation; use `$ae-*` / name AE explicitly |
+| `core` | Only five core skills allow natural-language implicit: `ae-help`, `ae-plan`, `ae-work`, `ae-review`, `ae-debug` |
+| `all` | All skills allow implicit invocation (legacy default) |
 
 ```bash
-node scripts/install-project.mjs --target /path/to/your/codex-project --implicit all
+node scripts/install-project.mjs --target /path/to/project --implicit core
 node scripts/set-ae-language.mjs --lang bilingual --implicit all
 ```
 
-Global install accepts the same `--implicit core|all|none` (passed through `install-global` / `update-global`).
+Global `install-global` / `update-global` also forward `--implicit`.
 
-The installer writes these paths inside the target project:
+## Install And Update
 
-- `plugins/ai-agent-engine-codex/`
-- `.agents/plugins/marketplace.json`
-- `.agents/skills/ae-*`
-- `scripts/ae-tools.mjs`
-- `scripts/update-ae-codex.mjs`
-- `scripts/set-ae-language.mjs`
-
-The distribution source itself is not an installation target. It uses the user-level personal plugin; the only skill source is `plugins/ai-agent-engine-codex/skills`.
-
-## Migrate From Project-Level To Per-User Global Installation
-
-Global installation publishes the AE skills as one current-user personal Codex plugin while retaining a private dispatcher. Each project's `AGENTS.md`, `docs/**`, AI memory, graph, and archive remain in that project root.
-
-Generate a read-only preview from the distribution repository. It does not write, delete, or move files:
-
-```powershell
-Set-Location '<path-to-cloned-repository>'
-$preview = node scripts\install-global.mjs preview | ConvertFrom-Json
-$preview.projects | Format-Table root, role, components
-```
-
-To install or update only the current user's global plugin, apply that default preview directly:
-
-```powershell
-node scripts\install-global.mjs apply --apply --operation $preview.operationId --confirm $preview.confirmation
-```
-
-The default preview/apply installs the global plugin for the current user and never scans project roots. To switch a project-level install to the global install, create an explicit manifest. Manifest roots are caller-supplied paths for the current user; the installer does not infer `D:\\codes` or fixed project names. Inspect the preview, then use that same manifest for apply:
-
-```json
-{
-  "projects": [
-    { "root": "D:\\codes\\your-project", "role": "consumer" }
-  ]
-}
-```
-
-```powershell
-$manifest = 'C:\temp\ae-consumers.json'
-$preview = node scripts\install-global.mjs preview --manifest $manifest --retire-modified | ConvertFrom-Json
-$preview.projects | Format-Table root, role, components
-node scripts\install-global.mjs apply --manifest $manifest --retire-modified --apply --operation $preview.operationId --confirm $preview.confirmation
-```
-
-By default, an `owned: false`, `deferred`, or unknown component blocks apply. Do not manually delete project-level files. Pass `--retire-modified` to both preview and apply only when you explicitly accept complete backup before retiring modified or unknown historical AE components. Migration only touches declared `consumer` roots; project `docs/**`, `AGENTS.md`, AI memory, graph, and archive stay in place. Backups and journals remain until an explicit `purge --operation <id> --apply`. The distribution source and deferred roots are always excluded. After a successful migration, invoke the per-user dispatcher from any project root, then reopen Codex and Cursor chats:
-
-```powershell
-node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" help
-node "$HOME\.agents\ai-agent-engine-codex\bin\ae.mjs" init --project-root (Get-Location).Path
-codex plugin list
-```
-
-Each operating-system user has an independent `$HOME`, dispatcher, backup area, and personal marketplace. Codex discovers AE skills through the personal plugin; Cursor discovers the same skills through real `~/.cursor/skills/ae-*` copies (Cursor does not track skill-directory symlinks). The distribution source uses only `plugins/ai-agent-engine-codex/skills` as the skill source; migrated consumer projects should use only the user-level distribution. The installer never edits `.codex/plugins/cache`. Already-open chats keep their startup skill catalog.
-
-## Initialize Project Docs And Memory
-
-After installation, run init from the target project root:
+**Recommended: project-level install** (writes only the target project):
 
 ```bash
-node scripts/ae-tools.mjs init
+node scripts/install-project.mjs --target /path/to/your-codex-project
+node scripts/install-project.mjs --target /path/to/your-codex-project --lang zh-CN
 ```
 
-The default `ae-core` profile creates:
+Paths written: `plugins/ai-agent-engine-codex/`, `.agents/plugins/marketplace.json`, `.agents/skills/ae-*`, plus `scripts/ae-tools.mjs`, `scripts/update-ae-codex.mjs`, `scripts/set-ae-language.mjs`. Do not use this distribution repository as an install target.
 
-- `AGENTS.md`: project-facing Codex guidance;
-- `docs/ae`: AE workflow artifacts such as plans, reviews, handoffs, and experience notes;
-- `docs/00-process`: active process notes, archive rules, and reusable process templates;
-- `docs/08-ai-memory`: durable project AI memory;
-
-The canonical requirements directory is `docs/ae/prds`. Starting in 0.3.22, init no longer creates the legacy `docs/ai-memory` compatibility directory; existing projects keep that directory if it is already present.
-
-`--profile minimal` creates only `AGENTS.md`; `--profile full` also retains the legacy complete numbered documentation-directory set. Generated guidance lists commands actually discovered from `package.json` and does not invent missing commands.
-
-Use `--dry-run --nested preview --explain-instructions` to inspect bounded subproject candidates, existing `AGENTS.md` / `AGENTS.override.md` files, and Codex-specific precedence. Nested candidates are advisory and never written automatically; other clients may use different loading semantics.
-
-Existing files are skipped by default. Newly generated files contain an explicit AE managed start/end region; `--force` replaces only that region and preserves surrounding content. Legacy marker-only files cannot distinguish user edits reliably, so they are returned in `conflicted_files` and left unchanged.
-
-Generated text files are written as UTF-8. On Windows, PowerShell can render valid UTF-8 Chinese text as garbled output, so verify with explicit UTF-8 reads or Git diff before rewriting files.
-
-## External References
-
-This repository keeps a clear Codex-native boundary:
-
-- `https://agents.md/` and `https://github.com/agentsmd/agents.md` provide the open-format and nested-guidance reference. Codex override and merge ordering comes from official OpenAI documentation and is not presented as universal client behavior.
-
-- `https://gitee.com/jiangqiang1996/ai-agent-engine` is the main AE workflow reference.
-- `https://github.com/obra/superpowers` informs parts of the planning, debugging, TDD, verification, and delivery-gate workflow design.
-- `https://github.com/openai/plugins` informs parts of the frontend, backend, web-app, and skill-packaging design.
-- `https://github.com/github/spec-kit` informs constitution, requirement checklist, task breakdown, and cross-artifact analysis patterns.
-- `https://github.com/DietrichGebert/ponytail` informs minimality gates, complexity review tags, and deliberate simplification tracking. AE adapts the method only; it does not vendor Ponytail runtime hooks, mode persistence, statusline behavior, MCP, or benchmark display.
-
-Those repositories are reference inputs. This project rewrites the relevant parts into local `ae-*` skills and helper scripts instead of reusing their runtimes.
-
-## Daily Usage
-
-Codex does not provide OpenCode `config.command`-style dynamic slash command registration. This project exposes AE entrypoints as Codex skills: you can invoke names such as `$ae-plan` and `$ae-review` explicitly, or use natural-language requests; in supported Codex App versions, enabled skills may also appear in the `/` command or skill search list. Treat that as skill-backed discoverability, not as OpenCode-style command injection implemented by this repository.
-
-```text
-Use ae-help to show the current AE capabilities.
-Use ae-init to initialize AGENTS.md, docs/ae, docs/00-process, and docs/08-ai-memory.
-Use ae-plan to create an implementation plan for adding permission-checked file upload.
-Use ae-work to execute docs/ae/plans/2026-05-11-001-file-upload-plan.md.
-Use ae-review mode:report-only to review my current changes.
-```
-
-Inspect OpenAPI:
-
-```bash
-node scripts/ae-tools.mjs swagger openapi.json method:POST keyword:login mode:detail
-```
-
-Inspect a shallow dependency graph:
-
-```bash
-node scripts/ae-tools.mjs ae-graph-build --root scripts
-node scripts/ae-tools.mjs ae-graph-query --root scripts --path ae-tools.mjs
-```
-
-Initialize a project memory and archive scaffold:
-
-```bash
-node scripts/ae-tools.mjs init --lang zh-CN
-```
-
-Recover likely continuation artifacts:
-
-```bash
-node scripts/ae-tools.mjs recovery
-```
-
-## Skill List Language
-
-The skill list descriptions shown by Codex come from static metadata. The default install uses bilingual metadata. They cannot switch live inside an already-open Codex conversation, but you can rewrite the project-local metadata and then restart or reopen the project conversation.
-
-You can also ask a Codex agent in the target project to switch the language for you.
-
-Switch to Chinese:
-
-```text
-Fetch and follow the AE skill language switch instructions from https://raw.githubusercontent.com/YaoGUanquan/codex-ai-agent-engine/main/INSTALL.md and switch this project to zh-CN.
-```
-
-Switch to English:
-
-```text
-Fetch and follow the AE skill language switch instructions from https://raw.githubusercontent.com/YaoGUanquan/codex-ai-agent-engine/main/INSTALL.md and switch this project to en.
-```
-
-For bilingual metadata, replace the final `zh-CN` or `en` with `bilingual`.
-
-From an installed target project:
-
-```bash
-node scripts/set-ae-language.mjs --lang en
-node scripts/set-ae-language.mjs --lang zh-CN
-node scripts/set-ae-language.mjs --lang bilingual
-```
-
-From this repository, use an explicit target:
-
-```bash
-node scripts/set-language.mjs --target /path/to/your/codex-project --lang zh-CN
-```
-
-## Update
-
-From an installed target project:
+**Update an installed project:**
 
 ```bash
 node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-agent-engine.git --branch main
 ```
 
-The updater preserves the installed language metadata when possible; if it cannot detect one, it defaults to bilingual metadata. To override it:
+Language is preserved when possible; a conservative `tidy --apply` runs by default (`--no-tidy` to skip).
+
+**Switch skill-list language** (restart the session after rewriting metadata):
 
 ```bash
-node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-agent-engine.git --branch main --lang bilingual
+node scripts/set-ae-language.mjs --lang en|zh-CN|bilingual
 ```
 
-After the files are updated, the updater automatically runs a conservative maintenance pass (`tidy --apply`: archive done process notes, remove empty task directories, move expired gate/evidence files, report oversized memory files; never stale archiving). Add `--no-tidy` to skip it; the result appears in the update output as `maintenance`.
+**Per-user global install / migrate from project-level**: run `install-global.mjs preview`, then `apply` only after confirmation. Project data (`AGENTS.md`, `docs/**`, memory, archives) always stays in each project root. Steps and safety gates: [INSTALL.md](INSTALL.md).
 
-Or ask a Codex agent:
+**Manual install**: only when scripts cannot run—copy the plugin tree, entry scripts, and `.agents/skills`, then write `marketplace.json`. Details in INSTALL.
+
+## Initialize Project Docs
+
+```bash
+node scripts/ae-tools.mjs init
+```
+
+Default `ae-core` profile creates:
+
+- `AGENTS.md` — Codex-oriented project notes (commands discovered from `package.json`, never guessed);
+- `docs/ae` — AE workflow artifacts (canonical PRDs under `docs/ae/prds`);
+- `docs/00-process` — process notes, archive rules, templates;
+- `docs/08-ai-memory` — long-lived AI memory library.
+
+`--profile minimal` creates only `AGENTS.md`; `--profile full` keeps the older full numbered doc set. Existing files are not overwritten by default; `--force` replaces only AE-managed blocks. Since 0.3.22, init no longer creates a `docs/ai-memory` compatibility directory.
+
+## Daily Usage
+
+Codex exposes AE via skills (`$ae-plan`, etc.), not OpenCode-style dynamic slash registration. With default `none`, name skills explicitly:
 
 ```text
-Fetch and follow the update instructions from https://raw.githubusercontent.com/YaoGUanquan/codex-ai-agent-engine/main/INSTALL.md
+Use ae-help to list current AE capabilities.
+Use ae-plan to create an implementation plan for “file upload with permission checks”.
+Use ae-work to execute docs/ae/plans/<plan>.md.
+Use ae-review mode:report-only to review the current changes.
 ```
 
-## Multi-Agent Auto Configuration
-
-`multi_agent.enabled` supports three values:
-
-- `auto`: the default. `task-analyze` analyzes safe parallelism and reports `execution_strategy`, `read_parallel_eligibility`, `write_parallel_eligibility`, and `parallel_waves`, but it does not authorize write-worker agents by itself.
-- `true`: explicitly enables multi-agent analysis. Safety gates still apply.
-- `false`: hard off switch that forces serial execution.
-
-New-install team defaults (only after explicit AE invocation; approve complex plans before implementation):
-
-```yaml
-multi_agent:
-  enabled: auto
-  mode: auto
-  max_workers: auto
-  fallback_max_workers: 3
-  preferred_model: gpt-6.1-sol
-  min_parallel_units: 2
-  require_clean_git: false
-  require_plan_dependencies: true
-  require_disjoint_files: true
-  allow_write_agents: true
-  review_lanes_parallel: true
-```
-
-The updater copies the latest template to `docs/ae/templates/ae-skill-profiles.example.yaml`, but it does not overwrite the local runtime profile. To enable or adjust the profile in a target project:
+OpenAPI parse / recovery examples:
 
 ```bash
-mkdir -p .codex
-cp docs/ae/templates/ae-skill-profiles.example.yaml .codex/ae-skill-profiles.yaml
+node scripts/ae-tools.mjs swagger openapi.json method:POST keyword:login mode:detail
+node scripts/ae-tools.mjs recovery
 ```
 
-Windows PowerShell:
+## Multi-Agent Config (Optional)
 
-```powershell
-New-Item -ItemType Directory -Force -Path .codex | Out-Null
-Copy-Item docs\ae\templates\ae-skill-profiles.example.yaml .codex\ae-skill-profiles.yaml
-```
+`multi_agent.enabled` accepts `auto` (default) | `true` | `false`. `auto`/`true` only analyze parallelism and candidate waves—they do **not** authorize write workers by themselves; `false` forces serial work.
 
-Explicit `false`, `suggest`, `review_only` and `allow_write_agents: false` remain effective. Updates preserve existing local profiles; edit selected fields rather than copying over custom settings. The parent uses available native tools and reusable role templates. Without those tools, report serial execution rather than claiming a team ran.
-
-Read-only lanes and write workers have separate eligibility. Candidate waves account for file/resource conflicts and dependencies; only independently checked acceptance releases dependents. `--host-slots 3` supplies observed free worker slots excluding the parent. Without host metadata the analyzer discloses `fallback_max_workers`. `--execution-state <relative.json>` accepts states such as `{"units":{"U1":"passed","U2":"failed"}}`; candidate waves are not completion evidence. Validate a real plan:
+New-install templates prefer `preferred_model: gpt-6.1-sol`. Copy `docs/ae/templates/ae-skill-profiles.example.yaml` to `.codex/ae-skill-profiles.yaml` and edit fields as needed; updates never overwrite an existing local file. Verify with:
 
 ```bash
 node scripts/ae-tools.mjs task-analyze --mode plan --plan docs/ae/plans/<your-plan>.md
 ```
 
-## Manual Installation
-
-Use manual installation only when you do not want to run the installer.
-
-1. Copy `plugins/ai-agent-engine-codex/` into the target project under `plugins/`.
-2. Copy the root helper into the target project:
-
-```bash
-mkdir -p scripts
-cp scripts/ae-tools.mjs /path/to/project/scripts/ae-tools.mjs
-```
-
-Windows PowerShell:
-
-```powershell
-New-Item -ItemType Directory -Force -Path D:\codes\your-project\scripts | Out-Null
-Copy-Item scripts\ae-tools.mjs D:\codes\your-project\scripts\ae-tools.mjs
-```
-
-3. Copy `scripts/set-language.mjs` as `/path/to/project/scripts/set-ae-language.mjs` if you want metadata language switching after manual install.
-4. Copy `plugins/ai-agent-engine-codex/skills/*` into `/path/to/project/.agents/skills/`.
-5. Add this project-level marketplace entry to `/path/to/project/.agents/plugins/marketplace.json`:
-
-```json
-{
-  "name": "ai-agent-engine-codex",
-  "source": {
-    "source": "local",
-    "path": "./plugins/ai-agent-engine-codex"
-  },
-  "policy": {
-    "installation": "INSTALLED_BY_DEFAULT",
-    "authentication": "ON_INSTALL"
-  },
-  "category": "Coding"
-}
-```
-
 ## Repository Layout
 
 ```text
-.agents/                         # Consumer installation layout, not this repository's skill source
-plugins/ai-agent-engine-codex/   # Codex plugin package
-scripts/ae-tools.mjs             # Root helper wrapper
-scripts/install-project.mjs      # Project-level installer
-scripts/update-ae-codex.mjs      # Target-project updater
-CHANGELOG.md                     # Full release history (Chinese; English in CHANGELOG.en.md)
-docs/codex-port-analysis.md      # Migration analysis from OpenCode to Codex
-docs/ae/                         # AE workflow artifacts after init
-docs/00-process/                 # Active process notes, templates, and archive rules after init
-docs/08-ai-memory/               # Durable project AI memory after init
+plugins/ai-agent-engine-codex/   # plugin body; only skill source
+scripts/                         # install, update, ae-tools, …
+CHANGELOG.md / CHANGELOG.en.md   # full version history
+docs/                            # this repo’s docs; consumers also get docs/ae after init
+.agents/                         # consumer install layout only; not a skill source here
 ```
-
-Starting in 0.3.22, init no longer creates `docs/ai-memory/`; older projects may still retain that compatibility entry.
 
 ## Important Boundaries
 
-- `/ae-*` names are compatibility labels, not Codex commands registered by this repository.
-- Reliable trigger style is: `Use ae-work ...`, `Use ae-review ...`, `Use ae-plan ...`, or selecting an enabled AE skill through `/` / skill search in Codex App versions that surface enabled skills there.
-- Slash-list visibility is Codex skill discoverability and must be verified in the active Codex App; this repository does not claim OpenCode `config.command` parity.
-- This MVP does not provide a real MCP server yet. `.mcp.json` is intentionally empty.
-- Local JSON/YAML OpenAPI parsing works without extra dependencies for common spec structures; complex YAML remains bounded by the lightweight parser.
-- `ae-graph-build` and `ae-graph-query` are shallow read-only scripts; they do not persist `docs/ae/graphs/graph.json` and are not the full OpenCode graph tool.
-- `ae-merge-branch` is intentionally deferred until `ae-work` has stronger Git evidence and authorization boundaries.
-- Chrome DevTools behavior is routed through existing Browser, Playwright, or available DevTools tools in `ae-test-browser`; this project does not dynamically register OpenCode MCP tools.
-- Git writes, destructive filesystem actions, network fetches, dependency installs, database writes, and browser setup must use Codex's explicit approval model.
+- `/ae-*` is a compatibility label, not a Codex command registered by this repo; name the skill explicitly, or pick it from the skill list in supported Apps.
+- Local checks ≠ live Codex host/model behavior, deployment, or production capacity.
+- No real MCP server yet; `.mcp.json` is intentionally empty.
+- `ae-graph-*` is a shallow read-only preview, not a persisted full graph.
+- `ae-merge-branch` is deferred; browser verification goes through `ae-test-browser` (Codex Browser / Playwright / available DevTools).
+- Git writes, destructive file ops, network, dependency installs, and database writes require Codex explicit authorization.
 
-## Development Checks
-
-From this repo:
+## Development Checks And Publishing
 
 ```bash
 npm run check
-node --check scripts/ae-tools.mjs
-node --check plugins/ai-agent-engine-codex/scripts/ae-tools.mjs
+npm test
+npm run check:smoke
 node scripts/check-release-notes.mjs
-node scripts/check-design-contract.mjs
-node scripts/ae-tools.mjs help
-node scripts/ae-tools.mjs ae-graph-build --root scripts
+git diff --check
 ```
 
-Validate skills with your local Codex skill validator if available.
+Before release, see [docs/release-checklist.md](docs/release-checklist.md).
 
-See [docs/release-checklist.md](docs/release-checklist.md) before publishing a GitHub release.
+- Distributable changes under `plugins/ai-agent-engine-codex/` must sync the root `package.json`, plugin manifest, README, and CHANGELOG, and pass release checks.
+- Fixes only in root `scripts/`, `tests/`, or public docs do not auto-bump the version, but still need the affected tests and checks above.
+- Read repository `AGENTS.md` before contributing.
 
-## Ongoing Optimization Roadmap
+## License
 
-A repository-wide scan on 2026-08-11 already removed the duplicated root/plugin `update-project.mjs` copy, added `.tmp-install-smoke-checks/` to `.gitignore`, wired `scripts/check-claims.mjs --dry-run` into `npm run check`, and archived the three stale OPTIMIZATION planning documents to `docs/99-archive/2026-08/skill-optimization-roadmap/`. The remaining structural debt, in priority order:
-
-1. ~~**Split the `ae-tools.mjs` monolith**~~ (**done in 0.3.20**, `315db38`): 15 command modules + external init templates; see `docs/ae/experience/2026-08-11-structural-debt-refactor.md`.
-2. ~~**Reorganize the `package.json` `check` chain**~~ (**done in 0.3.20**): layered `check:syntax` / `check:contracts` / `check:smoke` / `check:all`; tests assert step presence instead of full-string regex.
-3. ~~**Split the giant test file by domain**~~ (**done in 0.3.20**): `tests/global-install.test.mjs`, `contracts.test.mjs`, `ae-tools.test.mjs`, `skills-docs.test.mjs`, `install-scripts.test.mjs`.
-4. ~~**Extract shared path-guard helpers**~~ (**done in 0.3.20**): `artifact-check-utils.mjs`; install-smoke cross-drive rejection hardened.
-5. ~~**Cover weakly tested scripts**~~ (**done in 0.3.20**): `tests/install-scripts.test.mjs` (6 cases covering set-repository / install-project / update-project).
-6. ~~**Keep the default check fast**~~ (**done in 0.3.20**): install-smoke moved to `check:smoke`; daily `npm run check` stays light.
-
-The **2026-08-11 fullstack skill symmetry release (0.3.21)** landed backend language guidance, FE/BE contract checklist, debug boundary maps, and SQL safety checklist; see `docs/ae/experience/2026-08-11-fullstack-skill-optimization.md`. The **2026-08-11 frontend skill releases (0.3.18 / 0.3.19)** are documented in `docs/ae/experience/2026-08-11-frontend-skill-optimization.md`. Items 7 and 10 below were on-demand dormant items; after the 2026-08-11 re-check showed no trigger had fired, the user chose to close them early, and both shipped with **0.3.26**:
-
-7. ~~**Older frontend stack adaptation**~~ (**done, 0.3.26**): `svelte-guidance.md`, `angular-guidance.md`, and `vue-guidance.md` each gained a minimal legacy counterpart section (Svelte 4 stores, the NgModule era, the Options API) beside the modern baseline; the stack-conditional first line and the "match existing repository style" fallback are unchanged, and a regression test locks the sections and mirrors. The on-demand policy was executed early at the user's direction on 2026-08-11 (triggers had not fired); see `docs/08-ai-memory/05-decision-log.md`. Residual risk: the counterpart entries were pre-written without a real defect driving them, so whether the granularity suffices awaits the first real legacy-stack project; any gap is extended for the affected framework only, per the decision log.
-8. ~~**Release-notes extraction**~~ (**done in the 2026-08-11 batch**): historical entries moved to `CHANGELOG.md` / `CHANGELOG.en.md` (the complete history); each README keeps only the latest five entries, and `scripts/check-release-notes.mjs` enforces the window limit, the changelog link, and the subset relation; see `docs/ae/plans/2026-08-11-006-governance-batch-four-plan.md`.
-9. ~~**Process-document archiving discipline**~~ (**done in the 2026-08-11 batch**): the four finished or pointer task directories were merged into `docs/00-process/archive/2026-08/`, so the active directory only reflects genuinely in-flight work; the conservative archived-pointer retention in `tidy` is unchanged, and this repository's closeout was a one-time manual archive pass.
-10. ~~**Cross-consistency of frontend quality contracts**~~ (**done with the 0.3.26 batch, repository-side**): the lightweight map landed as `docs/ae/references/frontend-quality-contract-map.md`, recording the five correspondence groups, two coverage gaps, and existing test locks across `web-ui-quality.md`, the `ae-review` Frontend Components / Styles lens, and `browser-acceptance.md`; the map is descriptive, is not a fourth contract surface, and still adds no checker. The evaluation and early closeout are recorded in `docs/08-ai-memory/05-decision-log.md`. Residual risk: the map relies on manual upkeep — editors of the three contract files walk the correspondence groups by hand, the accepted cost of the no-checker decision.
-11. ~~**Knowledge-base governance (next batch 0.3.22)**~~ (**completed in 0.3.22**): see `docs/ae/prds/2026-08-11-knowledge-base-governance-prd.md` and `docs/ae/experience/` (maintainer knowledge graph at `docs/ae/graphs/maintainer-artifact-graph.md`).
-
-The **2026-08-11 full skill-portfolio audit (all 40 skills read one by one)** is complete: the five-layer structure (workflow spine 10 / implementation lanes 9 / verification lanes 2 / standalone tools 8 / meta-governance 11) is healthy overall, routing boundaries, evidence-tier wording, and handoff routing re-checked consistent, with no regression in prior governance items; full evidence, findings, and batch trade-offs live in `docs/ae/solutions/2026-08-11-skill-portfolio-optimization-audit.md`. New items below (12 first, 13-14 as one version-bump batch, 15 on-demand):
-
-12. **Extend cross-skill reference link checking** (repository-side, no version bump, do first): `scripts/check-skill-contract.mjs` currently validates only links that target `SKILL.md`; references consumed across skill directories by 8+ skills (`local-runtime-smoke-gate.md`, `api-contract-checklist.md`, `validation-evidence-profile.md`, and others) have no link guard, so a rename or move breaks them silently. Extend validation to every relative `.md` link in SKILL.md and references (optionally backtick-quoted paths), and add a name-set assertion across the README capability list, the capability catalog, and the skill directories, with TDD-covered positive and negative cases.
-13. ~~**Unify the runtime entry story**~~ (implemented, 0.3.46): active examples use `node "$aeEntry"` with the [shared resolution contract](plugins/ai-agent-engine-codex/skills/ae-help/references/runtime-entry.md) and read-only resolver. Prefer the project wrapper; use the current-user global dispatcher only when absent, never after a broken installation or command failure. Focused tests cover both shells, consumer and isolated global installs. Installed-version capabilities still require inspecting actual help; identical behavior across all versions is not claimed.
-14. **Complete the ae-help artifact contract table** (distributable content, same batch as 13): the path table in `artifact-contract.md` is missing rows for seven artifact families in active use - `docs/ae/designs`, `docs/ae/tasks`, `docs/ae/evidence`, `docs/ae/integrity`, `docs/ae/experience`, `docs/ae/work-reports`, and `docs/ae/constitution.md`; complete the table, document the boundary between `solutions` (external audits / solution research) and `experience` (retrospectives of completed work), and fold the rows into the directory-declaration regression assertions established in 0.3.25.
-15. **On-demand items** (policy set, no active to-do until a trigger fires): move the seven lane-level sections of `ae-review` into references (trigger: another lane is added, or one real defect traces to a skipped lane); add a refactoring-methodology reference to `ae-refactor` - behavior baseline, characterization tests, seam analysis, incremental strategy (trigger: one attributable methodology miss in a real refactor task; a distributable change that bumps the version at that time); add one minimal "scenario card" replay checklist per workflow-spine skill under `docs/ae/templates/` (trigger: before a 0.4.x major version, or one delivery defect caused by skipped skill guidance).
-
-Working rule: any change that touches distributable plugin content (`plugins/ai-agent-engine-codex/`) must bump both SemVer versions and add the release entry to both the README and the CHANGELOG (each README keeps only the latest five entries; older entries move to the changelog); repository-side refactors (root `scripts/`, `tests/`, docs) do not bump the version but must ship with `npm run check` and `npm test` fully green.
-
-## Version Updates
-
-Full history lives in [CHANGELOG.en.md](CHANGELOG.en.md); this section keeps only the latest five versions, and entries beyond that window move to the changelog on each release.
-
-## Publishing To GitHub
-
-Create an empty GitHub repository, then from this directory:
-
-```bash
-node scripts/set-repository.mjs --repo https://github.com/YaoGUanquan/codex-ai-agent-engine
-git init
-git add .
-git commit -m "feat: add Codex AI Agent Engine plugin"
-git branch -M main
-git remote add origin https://github.com/YaoGUanquan/codex-ai-agent-engine.git
-git push -u origin main
-```
-
-## License And Attribution
-
-See [LICENSE](LICENSE) and [NOTICE.md](NOTICE.md).
-
-This project is inspired by AI Agent Engine and keeps `GPL-2.0-only` metadata for the adaptation.
+See [LICENSE](LICENSE) and [NOTICE.md](NOTICE.md). Plugin metadata retains `GPL-2.0-only`.
