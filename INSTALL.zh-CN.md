@@ -66,7 +66,9 @@ node "$tmp/scripts/install-project.mjs" --target "$target" --lang en
 
 ## 隐式调用档位（`--implicit`）
 
-安装与更新支持三档：`core` | 档位 | 含义 |
+安装与更新支持三档：`core` | `all` | `none`。
+
+| 档位 | 含义 |
 |---|---|
 | `none`（**插件默认**） | 全部技能均不允许自然语言隐式触发；请显式 `$ae-*` / 指名 AE |
 | `core` | 仅五个核心技能允许自然语言隐式触发：`ae-help`、`ae-plan`、`ae-work`、`ae-review`、`ae-debug` |

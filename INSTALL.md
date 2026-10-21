@@ -66,7 +66,9 @@ The default metadata language is `bilingual`. Supported metadata languages are `
 
 ## Implicit Invocation Tier (`--implicit`)
 
-Install and update support three tiers: `core` | Tier | Meaning |
+Install and update support three tiers: `core` | `all` | `none`.
+
+| Tier | Meaning |
 |---|---|
 | `none` (**plugin default**) | No skill allows natural-language implicit invocation; use explicit `$ae-*` / named AE entrypoints |
 | `core` | Only five core skills allow natural-language implicit invocation: `ae-help`, `ae-plan`, `ae-work`, `ae-review`, `ae-debug` |

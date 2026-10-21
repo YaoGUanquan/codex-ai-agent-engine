@@ -88,7 +88,7 @@ node scripts/ae-tools.mjs help
 - 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。这些静态和本地检查不能证明真实 Codex host/model 行为。
 ## 当前主线事实
 
-- 当前发布线是 `0.4.0-beta.2`；根 `package.json` 与插件 manifest 的版本保持一致。
+- 当前发布线是 `0.4.0-beta.3`；根 `package.json` 与插件 manifest 的版本保持一致。
 - 可分发技能的唯一源是 `plugins/ai-agent-engine-codex/skills`。`.agents/skills` 只属于 consumer 项目的安装布局，不是本仓库的第二份技能树。
 - 项目级安装写入目标项目；全局安装发布当前用户的 personal plugin 和 dispatcher。两种安装都保留项目自己的 `AGENTS.md`、`docs/**`、AI memory、图谱和归档。
 - 安装、更新和语言切换支持 `--implicit none|core|all`，默认是 `none`：新安装仅显式调用；`core` 仅五核心可自然语言隐式触发；`all` 恢复旧的全量隐式。
@@ -218,7 +218,9 @@ node scripts/install-project.mjs --target /path/to/your/codex-project --lang en
 
 ## 隐式调用档位（`--implicit`）
 
-安装与更新支持三档：`core` | 档位 | 含义 |
+安装与更新支持三档：`core` | `all` | `none`。
+
+| 档位 | 含义 |
 |---|---|
 | `none`（**插件默认**） | 全部技能均不允许自然语言隐式触发；请显式 `$ae-*` / 指名 AE |
 | `core` | 仅五个核心技能允许自然语言隐式触发：`ae-help`、`ae-plan`、`ae-work`、`ae-review`、`ae-debug` |

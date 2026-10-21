@@ -33,6 +33,28 @@ AI Agent Engine for Codex is a project-local Codex plugin that brings AE-style e
 - Remove the `.ae-source` maintenance mirror: plugin `plugins/ai-agent-engine-codex/skills` is the only skill source; delete `check-skill-mirror` and drop mirror roots from contract/language/audit scripts.
 - Rewrite regression tests to assert only the plugin `SKILL_ROOT`; scrub ae-source guidance from docs and the release checklist; bump to 0.3.55.
 - Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These static and local checks do not prove live Codex host/model behavior.
+## Current Mainline Facts
+
+- The current release line is `0.4.0-beta.3`; the root `package.json` and plugin manifest stay on the same version.
+- The only distributable skill source is `plugins/ai-agent-engine-codex/skills`. `.agents/skills` is a consumer-project installation layout, not a second source tree in this repository.
+- Project-level installation writes into the target project. Global installation publishes the current user's personal plugin and dispatcher. Both modes keep each project's `AGENTS.md`, `docs/**`, AI memory, graph, and archive in the project root.
+- Install, update, and language switching support `--implicit none|core|all`. The default is `none`: fresh installs are explicit-only; `core` allows natural-language implicit invocation for five core skills; `all` restores the previous full implicit set.
+- `task-analyze` emits candidate worker requests, readiness, and parallel waves. It does not start background agents or treat candidate waves as completion evidence; the parent agent owns authorization, integration, and final acceptance.
+- Repository checks prove scripts, contracts, installation distribution, and isolated fixtures. They do not prove live Codex host/model behavior, target-project runtime behavior, deployment, or production capacity.
+
+Mainline changes are recorded in [CHANGELOG.en.md](CHANGELOG.en.md) and [CHANGELOG.md](CHANGELOG.md); the README keeps only the current release window.
+
+## When To Use It
+
+Use this plugin when you want a Codex project to keep repeatable engineering workflows close to the repository:
+
+- clarify fuzzy requirements before implementation;
+- turn requirements into executable plans;
+- run implementation with Git/worktree safety checks;
+- review code or documents with findings first;
+- keep validation evidence, handoffs, and reusable experience in project docs;
+- initialize project guidance, archive rules, and durable AI memory.
+
 ### AE Invocation Boundary
 
 AE skills are **opt-in by default**. They activate only when the user explicitly names `AE`, an `ae-*` skill, `/ae-*`, `$ae-*`, or asks to continue an active AE workflow. A semantic match, repository name, file content, or historical context mentioning “AE” does not activate AE automatically.
@@ -194,7 +216,9 @@ The default metadata language is `bilingual`. Supported metadata languages are `
 
 ## Implicit Invocation Tier (`--implicit`)
 
-Install and update support three tiers: `core` | Tier | Meaning |
+Install and update support three tiers: `core` | `all` | `none`.
+
+| Tier | Meaning |
 |---|---|
 | `none` (**plugin default**) | No skill allows natural-language implicit invocation; use explicit `$ae-*` / named AE entrypoints |
 | `core` | Only five core skills allow natural-language implicit invocation: `ae-help`, `ae-plan`, `ae-work`, `ae-review`, `ae-debug` |
