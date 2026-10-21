@@ -6,7 +6,7 @@ English: [INSTALL.md](INSTALL.md)
 
 - Node.js ≥ 20
 - 支持 [Agent Skills](https://www.npmjs.com/package/skills) 的宿主（例如 Codex / Cursor 等已对接 skills 目录的环境）
-- 网络可访问本仓库（GitHub：`YaoGUanquan/codex-ai-agent-engine`）
+- 网络可访问本仓库（GitHub：`YaoGUanquan/codex-ai-agent-engine`；若走下方 npm 路径则需可访问 npm registry）
 
 本仓库**不再**提供 `install-project.mjs` / `install-global.mjs` / `update-ae-codex.mjs` 或语言切换脚本。
 
@@ -47,6 +47,17 @@ npx skills add YaoGUanquan/codex-ai-agent-engine -y -s ae-backend
 ```bash
 npx skills add YaoGUanquan/codex-ai-agent-engine -g -y -s '*'
 ```
+
+### 可选：从 npm 安装
+
+首选仍是上面的 GitHub `skills add`。若要用已发布的 npm 包 [`ai-agent-engine-codex`](https://www.npmjs.com/package/ai-agent-engine-codex)（`0.5.0` 起）：
+
+```bash
+npm install ai-agent-engine-codex@0.5.0
+npx skills experimental_sync -y
+```
+
+**不要**写 `npx skills add ai-agent-engine-codex`（CLI 会把它当成 Git 仓库去 clone）。npm 包只分发 `skills/`（不含 `tools/` / `tests/`）。
 
 ### 手动复制
 
