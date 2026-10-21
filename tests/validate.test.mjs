@@ -23,7 +23,7 @@ function writeSkill(root, name, skillBody, extraFiles = {}) {
 
 const bilingualFrontmatter = (name) => `---
 name: ${name}
-description: 鐢ㄦ埛鏄庣‘瑕佹眰 ${name} 鎴?AE sample 鏃舵墽琛岃鎶€鑳姐€俇se when explicitly asked for ${name} or AE sample workflow.
+description: 用户明确要求 ${name} 或 AE sample 时执行该技能。Use when explicitly asked for ${name} or AE sample workflow.
 license: GPL-2.0-only
 compatibility: Markdown only; no bundled runtime.
 ---
