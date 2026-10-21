@@ -1,8 +1,14 @@
 # 版本更新记录
 
-本文件是 AI Agent Engine for Codex 的完整发布说明（自 0.3.7 起；更早版本未维护发布说明）。`README.md` 的版本节仅保留最近 5 个版本；每次发布须同时在 README 与本文件追加当前版本条目，超出窗口的 README 条目迁移到这里，由 `node scripts/check-release-notes.mjs` 校验。
+本文件是 AI Agent Engine for Codex 的完整发布说明（自 0.3.7 起；更早版本未维护发布说明）。`README.md` 的版本节仅保留最近 5 个版本；每次发布须同时在 README 与本文件追加当前版本条目，超出窗口的 README 条目迁移到这里，由 `node tools/check-release-notes.mjs` 校验。
 
 English: [CHANGELOG.en.md](CHANGELOG.en.md)
+
+### 0.5.0（2026-10-21）
+- 全面改为独立工程技能集合：唯一分发源 `skills/`（恰好 7 个：`ae-grill`、`ae-frontend`、`ae-backend`、`ae-unit-test`、`ae-integration-test`、`ae-e2e-test`、`ae-e2e-suite`）；仓库校验迁入 `tools/`，回归在 `tests/`。
+- 移除旧插件 manifest、MCP 壳、项目/全局安装更新器、语言切换，以及编排、gate、issue、图谱、记忆与归档 runtime；不再提供 `none|core|all` 隐式档位或兼容壳。
+- 文档与安装改为标准 skills CLI；同步 README/INSTALL/AGENTS/NOTICE/.cursorrules/发布清单；旧版仅文档迁移说明，不自动清理真实个人安装。
+- 验证命令：`npm test`、`npm run check`、`npm run check:smoke`、`git diff --check`。静态检查与隔离技能复制仅证明闭包与仓库合同；真实宿主模型、浏览器与生产验收需另取证，不在本条目宣称通过。
 
 ### 0.4.0-beta.3（2026-10-21）
 - 新安装默认隐式档位改为 `none`（仅显式调用 AE）；保留 `core`/`all`，更新与语言切换保留已有安装设置，不强制迁移。修复 Cursor 元数据在 `none` 档把核心技能当作仍可模型调用的问题（`cursorShouldDisableModelInvocation`）。

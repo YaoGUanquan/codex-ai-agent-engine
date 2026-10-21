@@ -1,173 +1,141 @@
 # AI Agent Engine for Codex
 
-A Codex-native, project-local engineering workflow plugin: requirements clarification, design contracts, planning, execution, review, validation, handoff, and experience capture via `ae-*` skills and local scripts.
+Seven self-contained engineering skills for decision grilling, frontend/backend work, and layered testing. The only distributable skill source is `skills/<name>/`. Repository validators live in `tools/`; regression tests live in `tests/`.
 
-> References: [Gitee AI Agent Engine](https://gitee.com/jiangqiang1996/ai-agent-engine), [OpenAI plugins](https://github.com/openai/plugins), [Superpowers](https://github.com/obra/superpowers), [everything-claude-code](https://github.com/affaan-m/everything-claude-code), [Spec Kit](https://github.com/github/spec-kit), [aicoding-cookbook](https://github.com/lili-luo/aicoding-cookbook). This repo is a Codex skill/plugin implementation, not an OpenCode runtime port.
+Design inspiration: [AI Agent Engine](https://gitee.com/jiangqiang1996/ai-agent-engine) (independent implementation; upstream prose is not copied). License stays `GPL-2.0-only`.
 
-中文: [README.md](README.md) · Install: [INSTALL.md](INSTALL.md) / [INSTALL.zh-CN.md](INSTALL.zh-CN.md) · Repo rules: [AGENTS.md](AGENTS.md)
+中文：[README.md](README.md) · Install: [INSTALL.md](INSTALL.md) / [INSTALL.zh-CN.md](INSTALL.zh-CN.md)
 
 ## Current Mainline Facts
 
-- Current release line: **`0.4.0-beta.3`**; root `package.json` and plugin manifest stay in sync.
-- Sole distributable skill source: `plugins/ai-agent-engine-codex/skills`. `.agents/skills` is a consumer install layout only—not a second skill tree here; no `.ae-source`.
-- Install / update / language switching support `--implicit none|core|all`; **default is `none`** (fresh installs are explicit-only). `core` allows natural-language implicit for five core skills; `all` restores the previous full implicit set. Existing install settings are preserved (no forced migration).
-- Project-level install writes into the target project; global install publishes the current user's personal plugin and dispatcher. Both keep each project's `AGENTS.md`, `docs/**`, AI memory, and archives in the project root.
-- `task-analyze` emits candidate worker requests, readiness, and parallel waves; it does not start background agents. The parent owns authorization, integration, and final acceptance.
-- `npm test` / `npm run check` / `npm run check:smoke` prove **scripts, contracts, and isolated installs**—not live Codex host/model behavior, target-project runtime, deployment, or production capacity.
-
-Full history: [CHANGELOG.en.md](CHANGELOG.en.md) / [CHANGELOG.md](CHANGELOG.md).
+- Version: `0.5.0`
+- Skill source: `skills/` (exactly seven; each skill is a closed resource tree and can be copied alone)
+- Install: standard [skills](https://www.npmjs.com/package/skills) CLI; **no** project/global installers, `none|core|all` implicit tiers, or MCP shell
+- Invocation: name the skill explicitly (for example `$ae-frontend` / `ae-grill`); no default full workflow or multi-agent orchestration
+- Checks: `npm test`, `npm run check`, `npm run check:smoke` (all under `tools/`)
 
 ## Quick Start
 
-```bash
-node scripts/install-project.mjs --target /path/to/your-codex-project
-```
-
-Windows PowerShell:
-
-```powershell
-node scripts\install-project.mjs --target D:\codes\your-project
-```
-
-Initialize docs in the target project root, then restart/reopen the Codex conversation:
+Requires Node.js ≥ 20 and a host that supports Agent Skills.
 
 ```bash
-node scripts/ae-tools.mjs init
-node scripts/ae-tools.mjs help
+# List skills in this repository
+npx skills add YaoGUanquan/codex-ai-agent-engine -l
+
+# Install all seven into the current project
+npx skills add YaoGUanquan/codex-ai-agent-engine -y -s '*'
+
+# Install one skill
+npx skills add YaoGUanquan/codex-ai-agent-engine -y -s ae-grill
+
+# Install globally (user scope)
+npx skills add YaoGUanquan/codex-ai-agent-engine -g -y -s '*'
 ```
 
-Default metadata language is `bilingual` (`--lang zh-CN|en|bilingual`). Default implicit tier is `none`; pass `--implicit core` for the five-skill set.
+You can also copy a single `skills/<name>/` folder into the host skills directory; keep `SKILL.md` and any `references/` together.
 
-Agents can follow [INSTALL.md](INSTALL.md).
+Invocation examples (Codex / hosts that support `$skill`):
 
-## Implicit Invocation Tier (`--implicit`)
-
-| Tier | Meaning |
-|---|---|
-| `none` (**plugin default**) | No skill allows natural-language implicit invocation; use explicit `$ae-*` / named AE |
-| `core` | Only `ae-help`, `ae-plan`, `ae-work`, `ae-review`, `ae-debug` allow natural-language implicit |
-| `all` | Every skill allows implicit (previous default) |
-
-```bash
-node scripts/install-project.mjs --target /path/to/project --implicit core
-node scripts/set-ae-language.mjs --lang bilingual --implicit all
+```text
+$ae-grill converge acceptance for the login change
+$ae-frontend mode=dev implement order-list filters
+$ae-backend mode=fix investigate double charge
+$ae-unit-test add boundary cases for OrderService and run them
+$ae-integration-test verify tenant isolation from order to payment
+$ae-e2e-test mode=test-only run the existing checkout smoke
+$ae-e2e-suite organize the project E2E suite and CI gate
 ```
 
-Without an explicit AE invocation, use ordinary Codex capabilities and non-AE skills; do not auto-start AE workflows.
+See [INSTALL.md](INSTALL.md) for install, migration, and removal detail.
 
-## Capabilities
+## The Seven Skills
 
-One line per category (see each skill for triggers and flow):
+| Skill | Purpose |
+| --- | --- |
+| `ae-grill` | Requirements and design questioning: inspect the repo first, one key decision at a time, with a recommendation and rationale; default output is session consensus only |
+| `ae-frontend` | Frontend design, pages, and interaction; `mode=dev\|fix` |
+| `ae-backend` | Backend implementation and root-cause fixes; `mode=dev\|fix`; keeps auth, contracts, transactions, and data-scale constraints |
+| `ae-unit-test` | Generate and run unit tests with the project's existing framework; triage failures |
+| `ae-integration-test` | Cross-module, API, auth, and persistence flows; requires a proven isolated environment |
+| `ae-e2e-test` | Case-level browser verification; run existing scripts only, or author then run |
+| `ae-e2e-suite` | Project-level E2E infrastructure, suite layout, and CI |
 
-| Category | Skills |
-|---|---|
-| Entry / orchestration | `ae-help`, `ae-lfg`, `ae-init` |
-| Requirements & design | `ae-ideate`, `ae-brainstorm`, `ae-design`, `ae-constitution`, `ae-plan`, `ae-tasks` |
-| Execution & refactor | `ae-work`, `ae-refactor`, `ae-tdd`, `ae-debug` |
-| Review & validation | `ae-review`, `ae-test-browser`, `ae-test-api` |
-| Frontend / Web | `ae-frontend-design`, `ae-web-forge`, `ae-web-app` |
-| Backend / data | `ae-backend`, `ae-sql`, `ae-swagger-parser` |
-| Docs & handoff | `ae-doc-humanize`, `ae-doc-structure`, `ae-handoff`, `ae-save-experience`, `ae-prompt-optimize`, `ae-imagegen-prompt` |
-| Meta / maintenance | `ae-skill-creator`, `ae-skill-audit`, `ae-agent-creator`, `ae-language`, `ae-update`, `ae-reverse-engineering` |
+No PPT, TTS, SSH ops, standalone code-review entry, config center, or generic runtime platform. Skill text must not reference other skill names, sibling directories, a central dispatcher, or repository `tools/`.
 
-Contract blurbs (kept beside the table for discovery and regression asserts):
+## Migrating From The Old Plugin
 
-- `ae-design`: capture architecture, API, data, UI/UX, test, and non-functional design contracts between PRD and plan.
-- `ae-frontend-design`: frontend design and UI implementation.
-- `ae-web-forge`: unified frontend/web routing entry that selects existing AE skills and closes with browser acceptance.
-- `ae-web-app`: implement the Web app, interaction, API, and light full-stack flow after `ae-web-forge` routing.
-- `ae-test-api`: verify post-change backend API contracts with risk-path and tiered evidence.
-- `ae-reverse-engineering`: analyze authorized artifacts defensively after confirming scope, provenance, and reproducible evidence bounds.
+Earlier releases shipped a Codex plugin (`plugins/ai-agent-engine-codex`) plus install/update scripts and optional implicit tiers. From `0.5.0` this is a standalone skill set:
 
-Helpers: `node scripts/ae-tools.mjs help` (init, memory/knowledge queries, shallow dependency graph, `task-analyze`, report, issue, …). `ae-graph-build` / `ae-graph-query` do not write `docs/ae/graphs/graph.json`. Details live in `AGENTS.md` and `ae-tools.mjs help`.
+1. Identify old installs: leftover `ai-agent-engine-codex` plugin trees, `.codex-plugin`, old `install-*` / `update-*` scripts, or a long list of retired `ae-*` skills (`ae-help`, `ae-plan`, `ae-lfg`, and similar).
+2. Disable or remove the old plugin/skills in the host so they do not load beside the new seven.
+3. Install with `npx skills add ...` above; **do not** run legacy `install-project` / `update-ae-codex`.
+4. Keep personal docs, memory, config, backups, and journals; this release does **not** auto-scan or clean real personal installs.
 
-## Project-Level Install And Update
-
-Prefer project-level install (writes only into the target project):
-
-```bash
-node scripts/install-project.mjs --target /path/to/your-codex-project
-node scripts/install-project.mjs --target /path/to/your-codex-project --lang en --implicit none
-```
-
-Update an installed project:
-
-```bash
-node scripts/update-ae-codex.mjs --repo https://github.com/YaoGUanquan/codex-ai-agent-engine.git --branch main
-```
-
-Skill-list language (restart the conversation afterward):
-
-```bash
-node scripts/set-ae-language.mjs --lang en   # or zh-CN / bilingual
-```
-
-Paths written into the target: `plugins/ai-agent-engine-codex/`, `.agents/plugins/marketplace.json`, `.agents/skills/ae-*`, `scripts/ae-tools.mjs`, `scripts/update-ae-codex.mjs`, `scripts/set-ae-language.mjs`.
-
-Global install, migration from project-level, and manual copy steps: [INSTALL.md](INSTALL.md). Multi-agent / `task-analyze` template: `docs/ae/templates/ae-skill-profiles.example.yaml` (updates do not overwrite an existing `.codex/ae-skill-profiles.yaml`).
-
-## Version Updates
-
-### 0.4.0-beta.3 (2026-10-21)
-- Default implicit tier is now `none`; fix Cursor `none` metadata handling; tighten `ae-debug` hypothesis rules; add offline model-evaluation validation and worker-acceptance counterexamples. Live GPT comparison not run.
-
-### 0.4.0-beta.2 (2026-10-20)
-- Install/update/language switch support `--implicit core|all|none`; **plugin default tier is now `core`** (only ae-help / ae-plan / ae-work / ae-review / ae-debug allow natural-language implicit invocation). Non-core skills go through ae-help routing or `$ae-*`; `--implicit all` restores the previous behavior.
-- Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These static and local checks do not prove live Codex host/model behavior.
-
-### 0.4.0-beta.1 (2026-10-15)
-- Add reusable team roles and a task-sensitive execution contract: approve complex plans first, keep small tasks inline, and let the parent own native dispatch, integration and evidence-backed acceptance.
-- Team-execution write authorization moves from explicit opt-in to a parent-agent gate (`write_requires_explicit_opt_in: false` + `write_requires_parent_gate: true`); write workers still need explicit parent approval, and `can_spawn_write_agents*` stays false.
-- Analyze file and business-resource read/write conflicts per wave, with host slots, execution state and automatic concurrency. Preserve explicit off/read-only choices and allow unrelated dirty work.
-- Strengthen source-to-output memory, query and concurrency budgets with isolated data fixtures and a five-case real-model comparison specification. Explicitly prefer `gpt-6.1-sol` for the trial without silent model substitution.
-- Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, `git diff --check`. Static and isolated-install checks establish helper, instruction and distribution contracts only. Real-model comparison is pending; quality, speed and production capacity gains are unproven.
-
-### 0.3.56 (2026-10-15)
-- Share test selection, evidence reuse and invalidation rules: isolate single failures, explain full-suite escalation, and avoid reruns merely for review, shipping or context recovery. Remove fixed execution counts and blanket dirty-worktree confirmations. Narrow skill entry trigger copy to emphasize explicit requests before specialist gates (default `implicit` tier remains `all`, matching the mid-I series plan).
-- Make GPT-6.1 the primary behavior acceptance target with eight reusable scenarios and three comparison variants, each repeated twice. Real model evaluation is pending; performance and quality improvements are not yet proven.
-- Validation commands: `node --test tests/model-adaptation.test.mjs tests/instruction-audit.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, `git diff --check`. Static and isolated-install checks establish written rules, metadata and distribution contracts only; delivery records report actual outcomes and failures.
-
-### 0.3.55 (2026-10-13)
-- Remove the `.ae-source` maintenance mirror: plugin `plugins/ai-agent-engine-codex/skills` is the only skill source; delete `check-skill-mirror` and drop mirror roots from contract/language/audit scripts.
-- Rewrite regression tests to assert only the plugin `SKILL_ROOT`; scrub ae-source guidance from docs and the release checklist; bump to 0.3.55.
-- Validation commands: `npm test`, `npm run check`, `npm run check:smoke`, and `git diff --check`. These static and local checks do not prove live Codex host/model behavior.
-
-README keeps the latest five entries; full history: [CHANGELOG.en.md](CHANGELOG.en.md).
+Capability mapping (summary): clarification → `ae-grill`; frontend/design → `ae-frontend`; backend/SQL/service root cause → `ae-backend`; unit/TDD → `ae-unit-test`; API/business integration → `ae-integration-test`; browser cases → `ae-e2e-test`; E2E infra/CI → `ae-e2e-suite`. Orchestration, gates, graph, memory, archive, installers, language switchers, and multi-agent runtime are retired; see the `0.5.0` entry in [CHANGELOG.en.md](CHANGELOG.en.md).
 
 ## Repository Layout
 
 ```text
-plugins/ai-agent-engine-codex/   # distributable plugin; sole skills source
-scripts/                         # install / update / ae-tools / checks
-tests/                           # regression and install smoke
-docs/ae/templates|references     # public templates and references
-CHANGELOG*.md / INSTALL*.md      # full release notes and install guides
-AGENTS.md                        # repo rules and verification entrypoints
+skills/           # Sole distributable skill source (7)
+tools/            # Validators, syntax, release notes, public-content, smoke, test runner
+tests/            # Regression tests
+docs/             # Public templates/references and release checklist only
+LICENSE
+NOTICE.md
+package.json      # files whitelist: skills/, LICENSE, NOTICE.md
 ```
 
-`.agents/` is the consumer install layout, not this distribution repo's skill source.
-
-## Important Boundaries
-
-- Reliable triggers: explicitly name AE / `ae-*` / `$ae-*`, or continue an already-started AE workflow; under default `none`, natural language does not implicitly start AE.
-- Codex exposes AE via skills (`$ae-*`, named natural language, or `/` / skill search for enabled skills in supported Apps). That is skill-backed discoverability, not OpenCode `config.command` slash registration. `/ae-*` is only a compatibility label.
-- No live MCP server yet; `.mcp.json` is intentionally empty.
-- `ae-graph-*` are shallow read-only helpers; they do not write `docs/ae/graphs/graph.json` and are not a full graph tool.
-- Git writes, destructive file ops, network, dependency installs, DB writes, and browser setup require explicit Codex authorization.
-- This public repo's `docs/` only keeps templates/references and the release checklist; process artifacts and long-term AI memory go to the private docs repo (see `AGENTS.md` External Docs Context).
+The npm package does **not** ship `tools/` or `tests/`; those exist for this repository's development and CI.
 
 ## Development Checks
 
 ```bash
+npm install
 npm test
 npm run check
 npm run check:smoke
-node scripts/check-release-notes.mjs
-git diff --check
 ```
 
-See [docs/release-checklist.md](docs/release-checklist.md) before publishing. Docs-only changes that do not alter distributable plugin content do not bump the plugin version by themselves.
+`check` covers syntax, skill frontmatter/closure, retired-path residue, release-note window, and public-content boundaries. Process notes and project memory stay outside this public repository.
+
+## Version Updates
+
+Full history: [CHANGELOG.en.md](CHANGELOG.en.md). This section keeps at most five entries.
+
+### 0.5.0 (2026-10-21)
+- Rebuild as a standalone engineering skill set: sole distribute source `skills/` (seven skills), validators under `tools/`; remove the old plugin manifest, MCP shell, installers/updaters, and orchestration/gate/graph/memory runtime.
+- Docs and install use the standard skills CLI; retire `none|core|all` implicit tiers and the old plugin update path; version `0.5.0`.
+- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `git diff --check`. Static checks and isolated skill copies prove closure and repository contracts only; real host-model and production acceptance are not claimed here.
+
+### 0.4.0-beta.3 (2026-10-21)
+- New installs default the implicit tier to `none` (explicit AE only); keep `core`/`all`. Updates and language switches preserve existing install settings and do not force migration. Fix Cursor metadata treating core skills as model-invocable under `none` (`cursorShouldDisableModelInvocation`).
+- Adjust `ae-debug`: drop the fixed “list 3–5 hypotheses”; propose falsifiable hypotheses only when evidence is ambiguous; missing environment blocks only dependent fix/acceptance work; insufficient evidence must not claim a confirmed root cause.
+- Add offline model-evaluation prep/result check entry (`scripts/model-evaluation-check.mjs`) and worker acceptance counterexamples; keep specs separate from run results so one run cannot rewrite historical norms.
+- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `git diff --check`. Real GPT-6.1 Sol / GPT-6 Astra contrasts were not run in this environment (not-run/blocked); Grok Bot self-runs do not substitute for model-behavior evidence.
+
+### 0.4.0-beta.2 (2026-10-20)
+- Installer supports `--implicit core|all|none`; **default tier changes from `all` to `core`** (only ae-help / ae-plan / ae-work / ae-review / ae-debug may trigger from natural language). Non-core natural language should go through ae-help routing or explicit `$ae-*`; pass `--implicit all` for the old behavior.
+- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `git diff --check`. These static and local checks do not prove real Codex host/model behavior.
+
+### 0.4.0-beta.1 (2026-10-15)
+- Add team contracts and role templates that choose roles by task: complex work confirms a plan first; the main agent owns native scheduling, integration, and real acceptance; small tasks still run directly.
+- Team write permission moves from explicit opt-in to a parent gate (`write_requires_explicit_opt_in: false` + `write_requires_parent_gate: true`); write workers still need explicit parent approval; `can_spawn_write_agents*` stays false.
+- Parallel analysis separates file vs business-resource read/write conflicts and serializes local conflicts by wave; add host quotas, execution state, and auto concurrency config; keep explicit off switches and read-only selection; unrelated dirty changes no longer block delegation by default.
+- Strengthen memory, query, and concurrency bounds from data source to output; add isolated data fixtures and five real-model contrast norms; prefer `gpt-6.1-sol` for the first round and do not silently swap models.
+- Verification: `npm test`, `npm run check`, `npm run check:smoke`, `git diff --check`. Static and isolated install checks prove helper tools, rules, and distribution contracts only; real model contrasts are incomplete; do not claim quality, latency, or production capacity gains.
+
+### 0.3.56 (2026-10-15)
+- Unify test scope, reuse of passing results, and invalidation rules: focus after a single failure, explain before widening to full runs; review, delivery, and context recovery do not auto-rerun; remove fixed execution counts and “dirty workspace always confirm”. Tighten skill-entry trigger wording so specialized gates load only after an explicit ask (default `implicit` tier remains `all`, matching the mid-I agreement).
+- GPT-6.1 is the primary behavior-acceptance target, with eight reusable evaluation scenes and a three-pair / two-runs-each protocol for later models; real model-behavior evaluation is not done, so do not claim proven performance or quality gains.
+- Verification: `node --test tests/model-adaptation.test.mjs tests/instruction-audit.test.mjs`, `npm test`, `npm run check`, `npm run check:smoke`, `git diff --check`. Static and isolated install checks prove rules, metadata, and distribution contracts; recorded delivery results remain authoritative for outcomes and misses.
+
+## Important Boundaries
+
+- Process notes, handoffs, and long-term AI memory stay out of this public repository; only public templates/references and the release checklist remain.
+- Failures must be classified as product, test, spec, or environment; do not weaken assertions, skip without cause, or silently degrade.
+- Git write, push, merge, publish, real database writes, and changes to real personal installs need separate authorization; this document is not that authorization.
 
 ## License And Attribution
 
-See [LICENSE](LICENSE) and [NOTICE.md](NOTICE.md). This project references AI Agent Engine and ships under `GPL-2.0-only`.
+- This repository: `GPL-2.0-only` (see [LICENSE](LICENSE), [NOTICE.md](NOTICE.md))
+- Upstream attribution is in NOTICE; if upstream states `GPL-3.0-or-later`, this repository does not change its own license unilaterally

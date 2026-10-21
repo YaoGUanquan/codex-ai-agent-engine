@@ -4,107 +4,49 @@
 ## 项目画像
 
 - 项目：ai-agent-engine-codex
-- 描述：Codex-native AE-style workflow skills referencing https://gitee.com/jiangqiang1996/ai-agent-engine.
+- 描述：七个可独立复制的 Codex / Agent Skills 工程技能，参考 https://gitee.com/jiangqiang1996/ai-agent-engine（独立实现）。
 - 检测信号：
-- Node.js package.json
-- package type: module
-- README.md
-- README.en.md
-- project-local Codex agents
-- plugin directory
-- scripts directory
-- docs directory
+- Node.js package.json（`type: module`）
+- `skills/` 下恰好 7 个 `ae-*` 技能
+- `tools/` 校验入口
+- README.md / README.en.md
 - 重要路径：
 - README.md
 - README.en.md
-- plugins/ai-agent-engine-codex（可分发插件唯一源）
-- plugins
-- scripts
-- docs
+- skills/（唯一可分发技能源）
+- tools/
+- tests/
+- docs/release-checklist.md
 
 ## 项目命令
 
-- `npm run test` - node --test tests/*.test.mjs
-- `npm run check` - npm run check:syntax && npm run check:contracts
-- `npm run check:syntax` - node scripts/check-syntax.mjs
-- `npm run check:contracts` - node scripts/check-skill-language-metadata.mjs && node scripts/check-skill-contract.mjs && node scripts/check-ae-artifacts.mjs && node scripts/check-design-contract.mjs && node scripts/check-memory-knowledge-contract.mjs --root tests/fixtures/memory-project && node scripts/check-release-notes.mjs && node scripts/check-claims.mjs --dry-run && node scripts/ae-tools.mjs ae-memory-query --root tests/fixtures/memory-project --topic graph && node scripts/ae-tools.mjs ae-knowledge-map --root tests/fixtures/memory-project --limit 20 && node scripts/ae-tools.mjs ae-graph-build --root scripts --no-write && node scripts/ae-tools.mjs ae-graph-query --root scripts --path ae-tools.mjs --no-write
-- `npm run check:smoke` - node scripts/check-install-smoke.mjs && node scripts/check-global-install-smoke.mjs
-- `npm run check:all` - npm run check && npm run check:smoke
-- `npm run help` - node scripts/ae-tools.mjs help
+- `npm test` — `node tools/run-tests.mjs`
+- `npm run check` — `npm run check:syntax && npm run check:contracts`
+- `npm run check:syntax` — `node tools/check-syntax.mjs`
+- `npm run check:contracts` — `node tools/validate.mjs && node tools/check-repository.mjs && node tools/check-release-notes.mjs && node tools/check-public-content.mjs`
+- `npm run check:smoke` — `node tools/check-smoke.mjs`
+- `npm run check:all` — `npm test && npm run check && npm run check:smoke`
 
 ## 项目规则
 
-- 本仓库的技能修改以 `plugins/ai-agent-engine-codex/skills` 为唯一源；不要再维护第二份技能树。
-- `.agents/skills` 是 consumer 项目安装布局，不是本分发源仓库的技能源；不要把空的 `.agents` 骨架当成安装失败。
-- 当前能力盘点只扫描插件源；默认排除 `dist/`、`build/`、`coverage/`、`node_modules/` 和临时安装目录。生成物不得用于推断当前技能，不在审计任务中自动删除。
-- **插件默认隐式调用档位为 `none`**：新安装仅显式调用 AE（自然语言不隐式触发）。保留 `core`（五核心）与 `all`；安装/更新/`set-language` 可用 `--implicit none|core|all`，已有安装设置会被保留、不强制迁移。
+- 技能修改以根目录 `skills/<name>/` 为唯一源；不要再创建 `plugins/`、`.ae-source` 或第二份技能树。
+- 每个技能资源自闭合：正文不得引用其他技能名、兄弟目录、中央 dispatcher 或仓库 `tools/`。
+- 使用标准 skills CLI 安装；不维护项目/全局安装器，不承诺 `none|core|all` 隐式档位。
+- 须用户明确点名 `ae-*` / `$ae-*` 后才执行对应技能；不默认全流程或多代理。
+- npm `files` 白名单仅为 `skills/`、`LICENSE`、`NOTICE.md`。
 
 ## AE 显式调用边界
 
-- 默认不要加载、调用、委派或套用 `ai-agent-engine-codex` 的 AE skill、agent、command 或 workflow。
-- 只有用户明确点名 AE、具体 `ae-*` skill、`/ae-*` 或 `$ae-*`，或明确要求继续一个已启动的 AE workflow 时，才启用 AE。
-- 普通语义匹配、仓库名称/文件内容中的 AE 字样、历史上下文或任务主题，不构成 AE 显式调用。
-- 未显式调用 AE 时，使用普通 Codex 能力和非 AE skill；不要自动宣布或启动 AE 流程。
-- 显式调用 AE 后，仍按用户指定的 skill 和当前任务范围执行，不因“使用 AE”自动扩展为全流程。
-
-- 修改行为前先阅读已有文档。
-- 变更范围保持在当前任务内。
-- 优先沿用项目已有模式，不轻易新增抽象。
-- 不覆盖用户已有工作，不回退无关变更。
-- 本仓库是公开仓库，`docs/` 下只入库 `docs/ae/templates`、`docs/ae/references` 和 `docs/release-checklist.md`。
-- AE 工作流产物（plans、prds、evidence、reviews 等）、过程记录、交接和长期 AI 记忆都写入私有仓库 `YaoGUanquan/codex-ai-agent-engine-docs`，不要在本仓库重新创建 `docs/00-process`、`docs/08-ai-memory`、`docs/99-archive`、`docs/ai-memory`、`docs/superpowers` 或 `docs/ae` 下的其他目录。
-- 私有仓库的本地位置以下方 External Docs Context 解析出的 `docsRoot` 为准；拿不到 `docsRoot` 时停止写入并报告，不要退回写进本仓库，也不要在仓库文件里写个人绝对路径。
-- 私有仓库内沿用原目录布局：AE 产物在 `docs/ae`，执行中的过程记录在 `docs/00-process/active`，完成后归档到 `docs/00-process/archive/YYYY-MM/<task-name>` 或 `docs/99-archive/YYYY-MM/<topic>`，长期 AI 记忆在 `docs/08-ai-memory`。
-- 文档增长治理：导航最多 4096 UTF-8 字节/80 行，记忆专题、开发历史和滚动台账最多 15KiB；托管文档用 `ae-docs-append` 自动分页。相关写入后运行 `ae-docs-maintain --check`，外部文档显式传已解析的 `--docs-root`；不自动拆改正式合同、SQL 或证据链。
+- 默认不要加载或套用本仓库的 AE 技能。
+- 只有用户明确点名 AE、具体 `ae-*`、`/ae-*` 或 `$ae-*`，或明确要求继续已启动的 AE 任务时，才启用。
+- 普通语义匹配、仓库名/文件内容中的 AE 字样、历史上下文或任务主题，不构成显式调用。
+- 显式调用后仍按用户指定的单个技能与当前任务范围执行，不因「使用 AE」自动扩展为全流程。
 
 ## 工程执行
 
-- 让失败明确暴露；不要伪造成功、吞掉错误，或仅为通过任务增加静默降级。
-- 根据仓库证据和任务风险推进；只有缺失信息会改变行为、架构、安全或验证边界时才提问。
-- 修复问题时先追踪根因，不要只消除表面症状。
-- 当变更涉及重复业务逻辑、共享校验或权限、API/数据契约、状态同步或数据完整性时，按结构性变更处理：先明确不变量和唯一真源，再移除过时路径。
-- 只加载当前任务触发的参考资料，不重复已经生效的上级规则；达到请求的验收标准和证据边界后停止。
-
-## 中文与编码规则
-
-- 文档、JSON、YAML、SQL、脚本和生成文本统一使用 UTF-8，优先 UTF-8 无 BOM。
-- PowerShell 或终端输出中文乱码时，先用显式 UTF-8 读取验证，不要直接改写文件。
-- 不要仅因控制台显示乱码就重写文件，必须先确认文件字节本身确实错误。
-
-## 验证
-
-- 按适用范围运行下列仓库已定义命令；从聚焦行为检查开始，再执行静态/类型检查、受影响构建和 smoke。不要把不相关命令当成强制清单。
-- `npm run test`
-- `npm run check`
-- `npm run check:smoke`
-- 交付前复查当前任务 diff，检查重复逻辑、隐藏降级、第二真源、未说明的行为变化、薄弱测试和安全回归。
-- 如果无法验证，说明原因、未验证边界和剩余风险；低层检查不能证明更高层运行时、浏览器或部署结果。
-<!-- /ae-codex:init managed -->
-
-## 插件分发版本
-
-- 每次可分发的 AE 插件更新都必须同步递增根 `package.json` 与 `plugins/ai-agent-engine-codex/.codex-plugin/plugin.json` 的 SemVer `version`。
-- 两处版本必须完全一致；更新脚本复制完整插件目录，因此目标项目更新后以插件 manifest 的版本作为已安装版本。
-- 只调整文档而不改变可分发插件内容时，不单独升级插件版本；版本升级必须由回归测试和安装烟测验证。
-- 每次递增可分发版本时，必须在 `README.md`、`README.en.md` 与 `CHANGELOG.md`、`CHANGELOG.en.md` 追加对应的 `### <version>（YYYY-MM-DD）` 或 `### <version> (YYYY-MM-DD)` 条目，至少说明修改摘要、验证命令及其证明边界；README 版本节仅保留最近 5 条，超出窗口的条目迁移到对应 CHANGELOG（CHANGELOG 为完整历史），README 须保留 CHANGELOG 链接；运行 `node scripts/check-release-notes.mjs` 验证版本、日期、摘要与 README/CHANGELOG 映射。
-
-
-<!-- ae-external-context:start -->
-## External Docs Context
-
-- External local documentation is rooted at `<AE_DOCS_HOME>`; tracked formal documentation and runtime inputs remain in this repository.
-- Before reading or writing local process documentation, run `node <AE_DOCS_HOME>/tools/docs-context.mjs --project "<current-worktree-root>"` and use only a successful `docsRoot` result.
-- The registry contract is `schemaVersion: 2`: keyed `registry.projects`, project `identity` plus `contexts`, and context manifests with `contextType/contextName/contextKey/docsRoot`.
-- A missing registration or context is a hard stop for writes. Initialize an empty context explicitly with `node <AE_DOCS_HOME>/tools/docs-context-init.mjs --project "<current-worktree-root>"`; unregistered workspaces additionally require `--project-id <stable-id>`.
-- Git projects resolve by Git common directory and current branch. Non-Git projects resolve only through an explicit `workspace-directory` identity; no Git branch is inferred.
-- Never fall back to another branch or workspace, copy historical documents wholesale, or recreate an external document inside the repository to hide a missing context.
-- External documents are not backed up by repository Git. Git delivery and external-doc reconciliation are separate operations with separate evidence.
-<!-- ae-external-context:end -->
-
-<!-- ae-git-request:start -->
-## Git 请求执行入口
-
-- Git 任务（提交、推送、建分支、切换、合并/MR、cherry-pick、revert、分支删除）先读 `<AE_DOCS_HOME>/GIT-WORKFLOW.md`：授权语义、检查、验证、docs 归并、IDEA 交接以它为准；文件不可读时报告，不猜测规则。
-- “提交 Git 并推送”= 同时授权本次本地提交与普通推送（不含合并/强推/发布/删除）；“我自己用 IDEA 推送”= 只做本地提交，不尝试 CLI push，也不虚报推送成功。
-- 数据库结构、索引、初始化数据、修复或迁移先读 `<AE_DOCS_HOME>/SQL-VERSIONING.md`：版本必要 SQL/迁移代码留仓库纳入 Git，只有临时查询、草稿、执行证据放外部 docs；提交、推送、合并不授权数据库写入。
-<!-- ae-git-request:end -->
+- 修改行为前先阅读已有文档与邻近测试。
+- 变更范围保持在当前任务内；优先沿用项目已有模式。
+- 不覆盖用户已有工作，不回退无关变更。
+- 失败区分产品、测试、规格、环境；禁止放宽断言、无理由跳过或静默降级。
+- 本仓库是公开仓库：`docs/` 下只入库公开模板/参考与 `docs/release-checklist.md`。
+- AE 过程记录、交接和长期 AI 记忆写入私有外部文档根（由 External Docs Context 解析 `docsRoot`）；拿不到 `docsRoot` 时停止写入并报告，不要退回写进本仓库，也不要在仓库文件里写个人绝对路径。
