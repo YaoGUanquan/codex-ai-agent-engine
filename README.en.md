@@ -70,7 +70,16 @@ One line per category (see each skill for triggers and flow):
 | Docs & handoff | `ae-doc-humanize`, `ae-doc-structure`, `ae-handoff`, `ae-save-experience`, `ae-prompt-optimize`, `ae-imagegen-prompt` |
 | Meta / maintenance | `ae-skill-creator`, `ae-skill-audit`, `ae-agent-creator`, `ae-language`, `ae-update`, `ae-reverse-engineering` |
 
-Helpers: `node scripts/ae-tools.mjs help` (init, memory/knowledge queries, shallow dependency graph, `task-analyze`, report, issue, …). Details live in `AGENTS.md` and `ae-tools.mjs help`.
+Contract blurbs (kept beside the table for discovery and regression asserts):
+
+- `ae-design`: capture architecture, API, data, UI/UX, test, and non-functional design contracts between PRD and plan.
+- `ae-frontend-design`: frontend design and UI implementation.
+- `ae-web-forge`: unified frontend/web routing entry that selects existing AE skills and closes with browser acceptance.
+- `ae-web-app`: implement the Web app, interaction, API, and light full-stack flow after `ae-web-forge` routing.
+- `ae-test-api`: verify post-change backend API contracts with risk-path and tiered evidence.
+- `ae-reverse-engineering`: analyze authorized artifacts defensively after confirming scope, provenance, and reproducible evidence bounds.
+
+Helpers: `node scripts/ae-tools.mjs help` (init, memory/knowledge queries, shallow dependency graph, `task-analyze`, report, issue, …). `ae-graph-build` / `ae-graph-query` do not write `docs/ae/graphs/graph.json`. Details live in `AGENTS.md` and `ae-tools.mjs help`.
 
 ## Project-Level Install And Update
 
@@ -141,9 +150,9 @@ AGENTS.md                        # repo rules and verification entrypoints
 ## Important Boundaries
 
 - Reliable triggers: explicitly name AE / `ae-*` / `$ae-*`, or continue an already-started AE workflow; under default `none`, natural language does not implicitly start AE.
-- `/ae-*` is a compatibility label, not a Codex slash command registered by this repo.
+- Codex exposes AE via skills (`$ae-*`, named natural language, or `/` / skill search for enabled skills in supported Apps). That is skill-backed discoverability, not OpenCode `config.command` slash registration. `/ae-*` is only a compatibility label.
 - No live MCP server yet; `.mcp.json` is intentionally empty.
-- `ae-graph-*` are shallow read-only helpers; they do not persist a full graph.
+- `ae-graph-*` are shallow read-only helpers; they do not write `docs/ae/graphs/graph.json` and are not a full graph tool.
 - Git writes, destructive file ops, network, dependency installs, DB writes, and browser setup require explicit Codex authorization.
 - This public repo's `docs/` only keeps templates/references and the release checklist; process artifacts and long-term AI memory go to the private docs repo (see `AGENTS.md` External Docs Context).
 

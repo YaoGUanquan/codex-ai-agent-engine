@@ -70,7 +70,16 @@ node scripts/set-ae-language.mjs --lang bilingual --implicit all
 | 文档与交接 | `ae-doc-humanize`、`ae-doc-structure`、`ae-handoff`、`ae-save-experience`、`ae-prompt-optimize`、`ae-imagegen-prompt` |
 | 元能力 / 维护 | `ae-skill-creator`、`ae-skill-audit`、`ae-agent-creator`、`ae-language`、`ae-update`、`ae-reverse-engineering` |
 
-本地辅助：`node scripts/ae-tools.mjs help`（含 init、memory/knowledge 查询、浅层依赖图、`task-analyze`、report、issue 等）。细节与参数边界见 `AGENTS.md` 与 `ae-tools.mjs help`。
+契约摘要（与能力表并存，供发现与回归断言）：
+
+- `ae-design`：在 PRD 和计划之间沉淀架构、接口、数据、UI/UX、测试与非功能设计契约。
+- `ae-frontend-design`：前端设计与界面实现。
+- `ae-web-forge`：统一前端/Web 路由入口，选择现有 AE skill 并以浏览器验收收尾。
+- `ae-web-app`：实现由 `ae-web-forge` 路由后的 Web 应用、交互、API 和轻量全栈流程。
+- `ae-test-api`：在后端改动后执行接口冒泡测试，验证契约、风险路径和分级证据。
+- `ae-reverse-engineering`：对已授权工件执行防御性逆向分析，先确认范围、工件来源和可复现证据边界。
+
+本地辅助：`node scripts/ae-tools.mjs help`（含 init、memory/knowledge 查询、浅层依赖图、`task-analyze`、report、issue 等）。`ae-graph-build` / `ae-graph-query` 不会写入 `docs/ae/graphs/graph.json`。细节见 `AGENTS.md` 与 `ae-tools.mjs help`。
 
 ## 项目级安装与更新
 
@@ -141,9 +150,9 @@ AGENTS.md                        # 仓规与验证入口
 ## 重要边界
 
 - 可靠触发：明确点名 AE / `ae-*` / `$ae-*`，或继续已启动的 AE 流程；默认 `none` 下自然语言不会隐式拉起 AE。
-- `/ae-*` 是兼容标签，不是本仓库注册出的 Codex slash command。
+- Codex 通过 skills 暴露入口（`$ae-*`、自然语言点名，或在支持的 App 里用 `/` / skill 搜索已启用 skills）；这是 skill-backed discoverability，不是 OpenCode `config.command` 式动态 slash 注册。`/ae-*` 只是兼容标签。
 - 当前无真实 MCP server；`.mcp.json` 有意保持为空。
-- `ae-graph-*` 为浅层只读脚本，不持久化完整图谱。
+- `ae-graph-*` 为浅层只读脚本，不会写入 `docs/ae/graphs/graph.json`，也不是完整图谱工具。
 - Git 写操作、破坏性文件操作、网络、依赖安装、数据库写入、浏览器 setup 均需 Codex 显式授权。
 - 本公开仓 `docs/` 只入库模板/参考与发布清单；过程产物与长期 AI 记忆写入私有 docs 仓（见 `AGENTS.md` External Docs Context）。
 
